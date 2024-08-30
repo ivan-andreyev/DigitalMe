@@ -1,0 +1,44 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Runtime artifacts
+*.db
+logs/
+digitalme.db
+
+# Environment files
+.env
+
+# SSL certificates (generated)
+certs/
+*.pfx
+*.crt
+*.key
+
+# Backup files
+backups/
+*.bak
+
+# IDE files
+.vs/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

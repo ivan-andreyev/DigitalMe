@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# 
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe", "DigitalMe\DigitalMe.csproj", "{846EB05A-BB86-483C-BF42-1941425B409C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27C22BEA-CB91-454A-81A5-C3209C0F540E}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8840FDF0-5E8C-4B02-8749-66B6EC4CF45B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.Tests.Unit", "tests\DigitalMe.Tests.Unit\DigitalMe.Tests.Unit.csproj", "{9BE49FF3-F491-4325-816B-5546CBD69D91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.Tests.Integration", "tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj", "{1CDB98CF-7934-4FB3-9D85-0306C99E4649}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C11D01C5-E254-4F9A-9DF4-07912760E4AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.Web", "src\DigitalMe.Web\DigitalMe.Web.csproj", "{080F2043-9509-463E-9B75-70F39620DA9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.MAUI", "src\DigitalMe.MAUI\DigitalMe.MAUI.csproj", "{DD783952-A136-4B84-BC91-FC4E906B36FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{846EB05A-BB86-483C-BF42-1941425B409C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{846EB05A-BB86-483C-BF42-1941425B409C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{846EB05A-BB86-483C-BF42-1941425B409C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{846EB05A-BB86-483C-BF42-1941425B409C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BE49FF3-F491-4325-816B-5546CBD69D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BE49FF3-F491-4325-816B-5546CBD69D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BE49FF3-F491-4325-816B-5546CBD69D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BE49FF3-F491-4325-816B-5546CBD69D91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CDB98CF-7934-4FB3-9D85-0306C99E4649}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CDB98CF-7934-4FB3-9D85-0306C99E4649}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CDB98CF-7934-4FB3-9D85-0306C99E4649}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CDB98CF-7934-4FB3-9D85-0306C99E4649}.Release|Any CPU.Build.0 = Release|Any CPU
+		{080F2043-9509-463E-9B75-70F39620DA9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{080F2043-9509-463E-9B75-70F39620DA9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{080F2043-9509-463E-9B75-70F39620DA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{080F2043-9509-463E-9B75-70F39620DA9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD783952-A136-4B84-BC91-FC4E906B36FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD783952-A136-4B84-BC91-FC4E906B36FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD783952-A136-4B84-BC91-FC4E906B36FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD783952-A136-4B84-BC91-FC4E906B36FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9BE49FF3-F491-4325-816B-5546CBD69D91} = {8840FDF0-5E8C-4B02-8749-66B6EC4CF45B}
+		{1CDB98CF-7934-4FB3-9D85-0306C99E4649} = {8840FDF0-5E8C-4B02-8749-66B6EC4CF45B}
+		{080F2043-9509-463E-9B75-70F39620DA9A} = {C11D01C5-E254-4F9A-9DF4-07912760E4AE}
+		{DD783952-A136-4B84-BC91-FC4E906B36FD} = {C11D01C5-E254-4F9A-9DF4-07912760E4AE}
+	EndGlobalSection
+EndGlobal
