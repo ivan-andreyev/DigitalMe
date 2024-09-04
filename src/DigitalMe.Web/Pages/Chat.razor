@@ -1,0 +1,32 @@
+@page "/chat"
+@using DigitalMe.Web.Components.Chat
+@using DigitalMe.Web.Components.Shared
+
+<PageTitle>Чат с Иваном - DigitalMe</PageTitle>
+
+<div class="chat-page">
+    <ChatContainer PersonalityState="@currentPersonalityState" />
+</div>
+
+<style>
+.chat-page {
+    height: 100vh;
+    background: #fafafa;
+}
+</style>
+
+@code {
+    private PersonalityState currentPersonalityState = new()
+    {
+        IsOnline = true,
+        CurrentMood = "Focused",
+        CurrentActivity = "Available for technical discussions",
+        MoodEmoji = "🎯"
+    };
+
+    protected override void OnInitialized()
+    {
+        // Initialize with default state
+        // This will be updated by real-time data in production
+    }
+}

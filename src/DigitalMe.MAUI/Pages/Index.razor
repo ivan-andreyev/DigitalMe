@@ -1,0 +1,19 @@
+﻿@page "/"
+@using DigitalMe.MAUI.Components
+@using DigitalMe.MAUI.Components.Auth
+
+<PageTitle>Чат - DigitalMe</PageTitle>
+
+<AuthWrapper>
+    <div class="maui-chat-page">
+        <MauiChatComponent />
+    </div>
+</AuthWrapper>
+
+<style>
+.maui-chat-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+</style>

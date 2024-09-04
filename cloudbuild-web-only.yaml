@@ -1,0 +1,40 @@
+# Build only web frontend with fixed regex
+steps:
+  # Build Web Frontend (Cloud Run optimized)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/digitalme-web:$COMMIT_SHA'
+      - '-f'
+      - 'src/DigitalMe.Web/Dockerfile.cloudrun'
+      - '.'
+    id: 'build-web'
+
+  # Push Web image to Container Registry  
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/digitalme-web:$COMMIT_SHA'
+    id: 'push-web'
+
+  # Deploy Web Frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'digitalme-web'
+      - '--image=gcr.io/$PROJECT_ID/digitalme-web:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=256Mi'
+      - '--cpu=1'
+      - '--max-instances=5'
+      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DigitalMe__ApiBaseUrl=https://digitalme-api-v2-223874653849.us-central1.run.app,DigitalMe__Features__UseRealAuthentication=true'
+    id: 'deploy-web'
+
+images:
+  - 'gcr.io/$PROJECT_ID/digitalme-web:$COMMIT_SHA'

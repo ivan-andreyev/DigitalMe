@@ -1,0 +1,160 @@
+<div class="code-block">
+    <div class="code-header">
+        <span class="language-label">@GetLanguageLabel()</span>
+        <button type="button" @onclick="CopyCode" class="copy-button" title="Копировать код">
+            @if (copySuccess)
+            {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
+                </svg>
+            }
+            else
+            {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                </svg>
+            }
+        </button>
+    </div>
+    <pre class="code-content"><code class="language-@Language">@Code</code></pre>
+</div>
+
+<style>
+.code-block {
+    background: #263238;
+    border-radius: 8px;
+    margin: 8px 0;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', 'Cascadia Code', 'Roboto Mono', monospace;
+}
+
+.code-header {
+    background: #37474f;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #90a4ae;
+    border-bottom: 1px solid #455a64;
+}
+
+.language-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.copy-button {
+    background: none;
+    border: none;
+    color: #90a4ae;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-button:hover {
+    background: #546e7a;
+    color: white;
+}
+
+.code-content {
+    padding: 16px;
+    margin: 0;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #eeffff;
+    background: #263238;
+}
+
+/* Syntax highlighting for different languages */
+.language-csharp .keyword { color: #c792ea; }
+.language-csharp .string { color: #c3e88d; }
+.language-csharp .number { color: #f78c6c; }
+.language-csharp .comment { color: #546e7a; font-style: italic; }
+
+.language-javascript .keyword { color: #c792ea; }
+.language-javascript .string { color: #c3e88d; }
+.language-javascript .number { color: #f78c6c; }
+.language-javascript .function { color: #82b1ff; }
+
+.language-json .property { color: #82b1ff; }
+.language-json .string { color: #c3e88d; }
+.language-json .number { color: #f78c6c; }
+.language-json .boolean { color: #ff9cac; }
+
+.language-sql .keyword { color: #c792ea; text-transform: uppercase; }
+.language-sql .string { color: #c3e88d; }
+.language-sql .function { color: #82b1ff; }
+
+/* Scrollbar styling */
+.code-content::-webkit-scrollbar {
+    height: 8px;
+}
+
+.code-content::-webkit-scrollbar-track {
+    background: #37474f;
+}
+
+.code-content::-webkit-scrollbar-thumb {
+    background: #546e7a;
+    border-radius: 4px;
+}
+
+.code-content::-webkit-scrollbar-thumb:hover {
+    background: #607d8b;
+}
+</style>
+
+@inject IJSRuntime JS
+
+@code {
+    [Parameter, EditorRequired] public string Code { get; set; } = string.Empty;
+    [Parameter] public string Language { get; set; } = "text";
+    
+    private bool copySuccess = false;
+
+    private string GetLanguageLabel()
+    {
+        return Language switch
+        {
+            "csharp" => "C#",
+            "javascript" => "JavaScript", 
+            "typescript" => "TypeScript",
+            "json" => "JSON",
+            "sql" => "SQL",
+            "html" => "HTML",
+            "css" => "CSS",
+            "python" => "Python",
+            "bash" => "Bash",
+            _ => "Code"
+        };
+    }
+
+    private async Task CopyCode()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("copyToClipboard", Code);
+            copySuccess = true;
+            StateHasChanged();
+            
+            // Reset copy indicator after 2 seconds
+            _ = Task.Delay(2000).ContinueWith(_ =>
+            {
+                copySuccess = false;
+                InvokeAsync(StateHasChanged);
+            });
+        }
+        catch (Exception)
+        {
+            // Copy failed - ignore silently
+        }
+    }
+}

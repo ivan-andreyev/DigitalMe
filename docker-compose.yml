@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # Backend API (Core DigitalMe service)
+  digitalme-api:
+    build:
+      context: .
+      dockerfile: DigitalMe/Dockerfile
+    ports:
+      - "5000:5000"  # HTTP
+      - "5001:5001"  # HTTPS
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ASPNETCORE_HTTPS_PORT=5001
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=DigitalMe2024!
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      # Database
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/digitalme.db
+      # External APIs (configure via environment variables)
+      - Anthropic__ApiKey=${ANTHROPIC_API_KEY}
+      - Anthropic__ApiKeyEnvironmentVariable=ANTHROPIC_API_KEY
+      - GitHub__PersonalAccessToken=${GITHUB_TOKEN}
+      - Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+      - Telegram__BotToken=${TELEGRAM_BOT_TOKEN}
+    volumes:
+      - digitalme-data:/app/data
+      - ./certs:/https:ro
+    networks:
+      - digitalme-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Blazor Web App
+  digitalme-web:
+    build:
+      context: .
+      dockerfile: src/DigitalMe.Web/Dockerfile
+    ports:
+      - "8080:8080"  # HTTP
+      - "8081:8081"  # HTTPS  
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ASPNETCORE_HTTPS_PORT=8081
+      - DigitalMe__BaseApiUrl=http://digitalme-api:5000
+      - DigitalMe__SignalRUrl=http://digitalme-api:5000/chatHub
+    volumes:
+      - ./certs:/https:ro
+    depends_on:
+      - digitalme-api
+    networks:
+      - digitalme-network
+    restart: unless-stopped
+
+  # Reverse Proxy (Nginx)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/ssl/certs:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - digitalme-api
+      - digitalme-web
+    networks:
+      - digitalme-network
+    restart: unless-stopped
+
+volumes:
+  digitalme-data:
+    driver: local
+
+networks:
+  digitalme-network:
+    driver: bridge

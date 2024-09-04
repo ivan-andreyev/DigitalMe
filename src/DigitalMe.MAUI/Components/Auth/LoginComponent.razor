@@ -1,0 +1,302 @@
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Logging
+@using DigitalMe.MAUI.Services
+@inject IAuthService AuthService
+@inject ILogger<LoginComponent> Logger
+
+<div class="login-container">
+    <div class="login-form">
+        <div class="login-header">
+            <div class="logo">🤖</div>
+            <h2>Вход в DigitalMe</h2>
+            <p>Войдите, чтобы пообщаться с цифровой копией Ивана</p>
+        </div>
+
+        <EditForm Model="@_loginRequest" OnValidSubmit="@HandleLogin" class="form">
+            <DataAnnotationsValidator />
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <InputText id="email" 
+                          @bind-Value="_loginRequest.Email" 
+                          class="form-input" 
+                          placeholder="ivan@example.com"
+                          disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _loginRequest.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <div class="password-input">
+                    <InputText id="password" 
+                              type="@(_showPassword ? "text" : "password")"
+                              @bind-Value="_loginRequest.Password" 
+                              class="form-input" 
+                              placeholder="Введите пароль"
+                              disabled="@_isLoading" />
+                    <button type="button" 
+                            class="password-toggle"
+                            @onclick="@(() => _showPassword = !_showPassword)">
+                        @(_showPassword ? "👁️" : "👁️‍🗨️")
+                    </button>
+                </div>
+                <ValidationMessage For="@(() => _loginRequest.Password)" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-message">
+                    ⚠️ @_errorMessage
+                </div>
+            }
+
+            <div class="form-actions">
+                <button type="submit" 
+                        class="login-button" 
+                        disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <span>Вход...</span>
+                    }
+                    else
+                    {
+                        <span>Войти</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+
+        <div class="demo-credentials">
+            <h4>🧪 Demo доступ:</h4>
+            <p><strong>Email:</strong> demo@digitalme.ai</p>
+            <p><strong>Password:</strong> Ivan2024!</p>
+            <button @onclick="FillDemoCredentials" class="demo-button">
+                Использовать demo данные
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 50%, #ff6f00 100%);
+    padding: 20px;
+}
+
+.login-form {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.login-header h2 {
+    color: #1a237e;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.login-header p {
+    color: #757575;
+    font-size: 14px;
+    margin: 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #212121;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #1a237e;
+}
+
+.form-input:disabled {
+    opacity: 0.6;
+    background: #f5f5f5;
+}
+
+.password-input {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #757575;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 4px solid #c62828;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.login-button {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.demo-credentials {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 1px dashed #bdbdbd;
+}
+
+.demo-credentials h4 {
+    color: #1a237e;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.demo-credentials p {
+    font-size: 12px;
+    margin: 4px 0;
+    color: #424242;
+}
+
+.demo-button {
+    background: #ff6f00;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+</style>
+
+@code {
+    [Parameter] public EventCallback<string> OnLoginSuccess { get; set; }
+
+    private LoginRequest _loginRequest = new();
+    private bool _isLoading = false;
+    private bool _showPassword = false;
+    private string _errorMessage = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        if (_isLoading) 
+        {
+            return;
+        }
+
+        _isLoading = true;
+        _errorMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var result = await AuthService.LoginAsync(_loginRequest.Email, _loginRequest.Password);
+            
+            if (result.Success)
+            {
+                Logger.LogInformation("Login successful for user: {Email}", _loginRequest.Email);
+                
+                // Notify parent component
+                await OnLoginSuccess.InvokeAsync(result.Token ?? string.Empty);
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage ?? "Ошибка входа. Попробуйте позже.";
+                Logger.LogWarning("Login failed for user {Email}: {Error}", _loginRequest.Email, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error during login");
+            _errorMessage = "Произошла непредвиденная ошибка. Попробуйте позже.";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void FillDemoCredentials()
+    {
+        _loginRequest.Email = "demo@digitalme.ai";
+        _loginRequest.Password = "Ivan2024!";
+        StateHasChanged();
+    }
+
+    private class LoginRequest
+    {
+        [Required(ErrorMessage = "Email обязателен")]
+        [EmailAddress(ErrorMessage = "Введите корректный email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Пароль обязателен")]
+        [MinLength(6, ErrorMessage = "Пароль должен содержать минимум 6 символов")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

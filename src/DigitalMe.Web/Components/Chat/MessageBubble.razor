@@ -1,0 +1,229 @@
+
+<div class="message-bubble @GetMessageClass()">
+    <div class="message-header">
+        <span class="message-sender">@GetSenderName()</span>
+        <span class="message-timestamp">@GetFormattedTime()</span>
+    </div>
+    
+    <div class="message-content">
+        @if (HasCodeContent())
+        {
+            <div class="message-text">@((MarkupString)GetTextBeforeCode())</div>
+            <CodeBlock Code="@ExtractCode()" Language="@DetectLanguage()" />
+            <div class="message-text">@((MarkupString)GetTextAfterCode())</div>
+        }
+        else
+        {
+            <div class="message-text">@((MarkupString)FormatMessage())</div>
+        }
+    </div>
+</div>
+
+<style>
+.message-bubble {
+    max-width: 70%;
+    margin-bottom: 12px;
+    border-radius: 18px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+}
+
+.message-user {
+    background: linear-gradient(135deg, #ff6f00 0%, #ff9800 100%);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message-ivan {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    color: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message-system {
+    background: #f5f5f5;
+    color: #757575;
+    align-self: center;
+    font-style: italic;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.message-sender {
+    font-weight: 600;
+}
+
+.message-timestamp {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+}
+
+.message-content {
+    line-height: 1.4;
+}
+
+.message-text {
+    margin-bottom: 8px;
+}
+
+.message-text:last-child {
+    margin-bottom: 0;
+}
+
+.message-text strong {
+    font-weight: 600;
+}
+
+.message-text em {
+    font-style: italic;
+}
+</style>
+
+@code {
+    [Parameter, EditorRequired] public ChatMessage Message { get; set; } = default!;
+    
+    private string GetMessageClass()
+    {
+        return Message.Role switch
+        {
+            MessageRole.User => "message-user",
+            MessageRole.Assistant => "message-ivan", 
+            MessageRole.System => "message-system",
+            _ => "message-unknown"
+        };
+    }
+    
+    private string GetSenderName()
+    {
+        return Message.Role switch
+        {
+            MessageRole.User => "You",
+            MessageRole.Assistant => "Ivan",
+            MessageRole.System => "System",
+            _ => "Unknown"
+        };
+    }
+    
+    private string GetFormattedTime()
+    {
+        return Message.Timestamp.ToString("HH:mm");
+    }
+    
+    private bool HasCodeContent()
+    {
+        return Message.Content.Contains("```") || 
+               Message.Content.Contains("<code>");
+    }
+    
+    private string ExtractCode()
+    {
+        if (!Message.Content.Contains("```")) 
+            return "";
+
+        var start = Message.Content.IndexOf("```");
+        var end = Message.Content.LastIndexOf("```");
+        
+        if (end <= start) 
+            return "";
+
+        var codeBlock = Message.Content.Substring(start + 3, end - start - 3);
+        
+        // Remove language identifier if present
+        var newlineIndex = codeBlock.IndexOf('\n');
+        if (newlineIndex > 0 && newlineIndex < 20) // Language identifier is usually short
+        {
+            return codeBlock.Substring(newlineIndex + 1);
+        }
+        
+        return codeBlock;
+    }
+    
+    private string DetectLanguage()
+    {
+        if (!Message.Content.Contains("```")) 
+            return "text";
+
+        var start = Message.Content.IndexOf("```") + 3;
+        var newlineIndex = Message.Content.IndexOf('\n', start);
+        
+        if (newlineIndex > start && newlineIndex - start < 20)
+        {
+            var lang = Message.Content.Substring(start, newlineIndex - start).Trim().ToLower();
+            return lang switch
+            {
+                "csharp" or "c#" => "csharp",
+                "javascript" or "js" => "javascript", 
+                "typescript" or "ts" => "typescript",
+                "json" => "json",
+                "sql" => "sql",
+                "html" => "html",
+                "css" => "css",
+                "python" or "py" => "python",
+                _ => "text"
+            };
+        }
+        
+        return "text";
+    }
+    
+    private string GetTextBeforeCode()
+    {
+        if (!HasCodeContent()) 
+            return "";
+
+        var codeStart = Message.Content.IndexOf("```");
+        return codeStart > 0 ? FormatText(Message.Content.Substring(0, codeStart)) : "";
+    }
+    
+    private string GetTextAfterCode()
+    {
+        if (!HasCodeContent()) 
+            return "";
+
+        var codeEnd = Message.Content.LastIndexOf("```") + 3;
+        return codeEnd < Message.Content.Length ? 
+            FormatText(Message.Content.Substring(codeEnd)) : "";
+    }
+    
+    private string FormatMessage()
+    {
+        return FormatText(Message.Content);
+    }
+    
+    private string FormatText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) 
+            return "";
+
+        // Remove code blocks for text formatting
+        if (text.Contains("```"))
+        {
+            var codeStart = text.IndexOf("```");
+            var codeEnd = text.LastIndexOf("```") + 3;
+            if (codeEnd > codeStart)
+            {
+                text = text.Remove(codeStart, codeEnd - codeStart);
+            }
+        }
+        
+        // Apply basic markdown formatting
+        text = text
+            .Replace("**", "<strong>", StringComparison.Ordinal)
+            .Replace("**", "</strong>", StringComparison.Ordinal)
+            .Replace("*", "<em>", StringComparison.Ordinal) 
+            .Replace("*", "</em>", StringComparison.Ordinal)
+            .Replace("\n", "<br>", StringComparison.Ordinal);
+        
+        return text.Trim();
+    }
+}

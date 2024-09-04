@@ -1,0 +1,391 @@
+@using DigitalMe.Web.Services
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject ILogger<ChatContainer> Logger
+@inject ISignalRChatService SignalRChatService
+
+<div class="chat-container @CssClass">
+    <div class="chat-header">
+        <StatusWidget State="@PersonalityState" />
+        <div class="connection-status">
+            <span class="status-indicator @GetConnectionStatusClass()"></span>
+            @GetConnectionStatusText()
+        </div>
+    </div>
+    
+    <div class="chat-messages" @ref="messagesContainer">
+        @if (messages.Any())
+        {
+            @foreach (var message in messages)
+            {
+                <MessageBubble Message="@message" />
+            }
+        }
+        else
+        {
+            <div class="welcome-message">
+                <h3>👋 Привет! Я - цифровая копия Ивана</h3>
+                <p>Задавай технические вопросы, обсуждай архитектуру или просто пообщайся!</p>
+                <p class="connection-info">
+                    Статус: <strong>@GetConnectionStatusText()</strong>
+                </p>
+            </div>
+        }
+        
+        @if (isIvanTyping)
+        {
+            <TypingIndicator />
+        }
+    </div>
+    
+    <div class="chat-input">
+        <MessageInput OnMessageSent="@HandleMessageSent" 
+                     IsLoading="@isLoading" 
+                     Placeholder="@GetInputPlaceholder()" />
+    </div>
+</div>
+
+<style>
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fafafa;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-connected { background-color: #4caf50; }
+.status-disconnected { background-color: #f44336; }
+.status-connecting { background-color: #ff9800; animation: pulse 1s infinite; }
+
+@@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    gap: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #757575;
+}
+
+.welcome-message h3 {
+    color: #1a237e;
+    margin-bottom: 12px;
+    font-family: 'Inter', sans-serif;
+}
+
+.connection-info {
+    margin-top: 16px;
+    font-size: 14px;
+    padding: 8px 16px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.chat-input {
+    border-top: 1px solid #e0e0e0;
+    padding: 16px 20px;
+    background: white;
+}
+</style>
+
+@code {
+    [Parameter] public string CssClass { get; set; } = string.Empty;
+    [Parameter] public PersonalityState PersonalityState { get; set; } = new();
+    
+    private ElementReference messagesContainer;
+    private List<ChatMessage> messages = new();
+    private bool isIvanTyping = false;
+    private bool isLoading = false;
+    private string currentConversationId = Guid.NewGuid().ToString();
+    private string currentUserId = "demo-user";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Subscribe to SignalR events
+        SignalRChatService.MessageReceived += OnMessageReceived;
+        SignalRChatService.TypingIndicator += OnTypingIndicator;
+        SignalRChatService.ConnectionStateChanged += OnConnectionStateChanged;
+
+        // Initialize SignalR connection
+        await SignalRChatService.InitializeAsync();
+
+        // Join chat room
+        try
+        {
+            if (SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
+            {
+                await SignalRChatService.JoinChatAsync(currentUserId, "Web");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to join chat room");
+        }
+
+        // Load conversation history if available
+        await LoadConversationHistory();
+    }
+
+    private async Task HandleMessageSent(string messageContent)
+    {
+        if (string.IsNullOrWhiteSpace(messageContent))
+            return;
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Add user message immediately (optimistic UI)
+            var userMessage = new ChatMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = messageContent,
+                Role = MessageRole.User,
+                Timestamp = DateTime.Now,
+                ConversationId = currentConversationId
+            };
+            
+            messages.Add(userMessage);
+            StateHasChanged();
+            await ScrollToBottom();
+
+            // Send via SignalR
+            if (SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
+            {
+                await SignalRChatService.SendMessageAsync(messageContent, currentUserId, currentConversationId);
+            }
+            else
+            {
+                // Fallback to HTTP if SignalR is not available
+                await SendMessageViaHttp(messageContent);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send message");
+            
+            // Show error message to user
+            var errorMessage = new ChatMessage
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = "❌ Не удалось отправить сообщение. Проверьте подключение к серверу.",
+                Role = MessageRole.System,
+                Timestamp = DateTime.Now,
+                ConversationId = currentConversationId
+            };
+            messages.Add(errorMessage);
+            StateHasChanged();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendMessageViaHttp(string messageContent)
+    {
+        // HTTP fallback implementation
+        using var httpClient = new HttpClient();
+        
+        var request = new
+        {
+            conversationId = currentConversationId,
+            message = messageContent,
+            platform = "Web",
+            userId = currentUserId,
+            timestamp = DateTime.UtcNow
+        };
+
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("https://localhost:7064/api/chat/send", request);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var chatResponse = await response.Content.ReadFromJsonAsync<ChatResponseDto>();
+                if (chatResponse != null)
+                {
+                    var ivanMessage = new ChatMessage
+                    {
+                        Id = chatResponse.MessageId ?? Guid.NewGuid().ToString(),
+                        Content = chatResponse.Content,
+                        Role = MessageRole.Assistant,
+                        Timestamp = chatResponse.Timestamp,
+                        ConversationId = currentConversationId
+                    };
+
+                    messages.Add(ivanMessage);
+                    StateHasChanged();
+                    await ScrollToBottom();
+                }
+            }
+            else
+            {
+                Logger.LogError("HTTP chat API returned error: {StatusCode}", response.StatusCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "HTTP chat API request failed");
+        }
+    }
+
+    private void OnMessageReceived(object? sender, MessageReceivedEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            var message = new ChatMessage
+            {
+                Id = e.Message.Id.ToString(),
+                Content = e.Message.Content,
+                Role = e.Message.Role == "user" ? MessageRole.User : MessageRole.Assistant,
+                Timestamp = e.Message.Timestamp,
+                ConversationId = e.Message.ConversationId.ToString(),
+                Metadata = e.Message.Metadata
+            };
+
+            messages.Add(message);
+            StateHasChanged();
+            await ScrollToBottom();
+        });
+    }
+
+    private void OnTypingIndicator(object? sender, TypingIndicatorEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            isIvanTyping = e.Indicator.IsTyping;
+            StateHasChanged();
+        });
+    }
+
+    private void OnConnectionStateChanged(object? sender, ConnectionStateChangedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            StateHasChanged(); // Update connection status indicator
+            
+            if (e.IsConnected && !string.IsNullOrEmpty(currentUserId))
+            {
+                // Re-join chat room after reconnection
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await SignalRChatService.JoinChatAsync(currentUserId, "Web");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "Failed to re-join chat room after reconnection");
+                    }
+                });
+            }
+        });
+    }
+
+    private Task LoadConversationHistory()
+    {
+        // TODO: Load conversation history from API
+        Logger.LogInformation("Loading conversation history for conversation: {ConversationId}", currentConversationId);
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ScrollToBottom()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("scrollToBottom", messagesContainer);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "Failed to scroll to bottom");
+        }
+    }
+
+    private string GetConnectionStatusClass()
+    {
+        return SignalRChatService.ConnectionState switch
+        {
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected => "status-connected",
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connecting => "status-connecting",
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Reconnecting => "status-connecting",
+            _ => "status-disconnected"
+        };
+    }
+
+    private string GetConnectionStatusText()
+    {
+        return SignalRChatService.ConnectionState switch
+        {
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected => "Подключено",
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connecting => "Подключение...",
+            Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Reconnecting => "Переподключение...",
+            _ => "Не подключено"
+        };
+    }
+
+    private string GetInputPlaceholder()
+    {
+        return SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected
+            ? "Напиши Ивану..."
+            : "Подключение к серверу...";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Unsubscribe from events
+        SignalRChatService.MessageReceived -= OnMessageReceived;
+        SignalRChatService.TypingIndicator -= OnTypingIndicator;
+        SignalRChatService.ConnectionStateChanged -= OnConnectionStateChanged;
+
+        // Leave chat room
+        try
+        {
+            await SignalRChatService.LeaveChatAsync(currentUserId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to leave chat room during disposal");
+        }
+    }
+}

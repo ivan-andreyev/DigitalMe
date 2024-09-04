@@ -1,0 +1,76 @@
+@using Microsoft.Extensions.Logging
+@using DigitalMe.MAUI.Services
+@inject IAuthService AuthService
+@inject ILogger<AuthWrapper> Logger
+@implements IDisposable
+
+@if (!_isLoading && _isAuthenticated)
+{
+    @ChildContent
+}
+else if (!_isLoading)
+{
+    <LoginComponent OnLoginSuccess="HandleLoginSuccess" />
+}
+else
+{
+    <div>Loading...</div>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _isAuthenticated = false;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Subscribe to auth state changes
+            AuthService.AuthStateChanged += OnAuthStateChanged;
+
+            // Check current auth state
+            _isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error checking authentication state");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private Task HandleLoginSuccess(string token)
+    {
+        try
+        {
+            Logger.LogInformation("Login successful, token received");
+            _isAuthenticated = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling login success");
+        }
+        
+        return Task.CompletedTask;
+    }
+
+    private void OnAuthStateChanged(bool authenticated)
+    {
+        _isAuthenticated = authenticated;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        if (AuthService != null)
+        {
+            AuthService.AuthStateChanged -= OnAuthStateChanged;
+        }
+    }
+}

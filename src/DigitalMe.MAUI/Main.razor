@@ -1,0 +1,15 @@
+﻿<Router AppAssembly="@typeof(Main).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MauiLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MauiLayout)">
+            <div class="not-found">
+                <h1>🤖 Упс!</h1>
+                <p>Страница не найдена. Возвращайтесь в чат с Иваном!</p>
+                <a href="/" class="back-link">← Вернуться к чату</a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

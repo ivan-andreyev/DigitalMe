@@ -1,0 +1,56 @@
+version: '3.8'
+
+# Development Docker Compose - Simplified setup for local development
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  # Backend API (Development mode)
+  digitalme-api:
+    build:
+      context: .
+      dockerfile: DigitalMe/Dockerfile
+    ports:
+      - "5000:5000"  # HTTP only for development
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      # Database
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/digitalme.db
+      # External APIs (using dev defaults)
+      - Anthropic__ApiKey=${ANTHROPIC_API_KEY:-}
+      - GitHub__PersonalAccessToken=${GITHUB_TOKEN:-}
+      - Google__ClientId=${GOOGLE_CLIENT_ID:-}
+      - Google__ClientSecret=${GOOGLE_CLIENT_SECRET:-}
+      - Telegram__BotToken=${TELEGRAM_BOT_TOKEN:-}
+    volumes:
+      - digitalme-dev-data:/app/data
+      - ./DigitalMe/logs:/app/logs  # Mount logs for development
+    networks:
+      - digitalme-dev
+    restart: unless-stopped
+
+  # Blazor Web App (Development mode)
+  digitalme-web:
+    build:
+      context: .
+      dockerfile: src/DigitalMe.Web/Dockerfile
+    ports:
+      - "8080:8080"  # HTTP only for development
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DigitalMe__BaseApiUrl=http://digitalme-api:5000
+      - DigitalMe__SignalRUrl=http://digitalme-api:5000/chatHub
+    depends_on:
+      - digitalme-api
+    networks:
+      - digitalme-dev
+    restart: unless-stopped
+
+volumes:
+  digitalme-dev-data:
+    driver: local
+
+networks:
+  digitalme-dev:
+    driver: bridge

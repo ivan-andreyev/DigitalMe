@@ -1,0 +1,351 @@
+@using DigitalMe.MAUI.Models
+@using DigitalMe.MAUI.Services
+@inject IPlatformService PlatformService
+@inject INotificationService NotificationService
+
+<div class="maui-chat">
+    <div class="chat-messages">
+        @if (_messages.Any())
+        {
+            @foreach (var message in _messages)
+            {
+                <div class="message-bubble @GetMessageClass(message.Role)">
+                    <div class="message-content">
+                        <div class="message-sender">@GetSenderName(message.Role)</div>
+                        <div class="message-text">@message.Content</div>
+                        <div class="message-time">@message.Timestamp.ToString("HH:mm")</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="welcome-message">
+                <h3>👋 Привет! Я - Иван</h3>
+                <p>Цифровая копия готова обсудить технические вопросы!</p>
+                <div class="platform-badge">
+                    📱 @_platformInfo
+                </div>
+            </div>
+        }
+        
+        @if (_isTyping)
+        {
+            <div class="typing-indicator">
+                <span>Иван набирает</span>
+                <div class="dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="chat-input">
+        <div class="input-container">
+            <input @bind="_currentMessage" 
+                   @onkeypress="@HandleKeyPress"
+                   placeholder="Напиши Ивану..."
+                   disabled="@_isLoading" 
+                   class="message-input" />
+            <button @onclick="SendMessage" 
+                    disabled="@(_isLoading || string.IsNullOrWhiteSpace(_currentMessage))"
+                    class="send-button">
+                @if (_isLoading)
+                {
+                    <span>⏳</span>
+                }
+                else
+                {
+                    <span>📤</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.maui-chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fafafa;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message-bubble {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin-bottom: 8px;
+}
+
+.message-user {
+    background: linear-gradient(135deg, #ff6f00 0%, #ff9800 100%);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message-assistant {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    color: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.message-sender {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.message-text {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    align-self: flex-end;
+}
+
+.welcome-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #757575;
+}
+
+.welcome-message h3 {
+    color: #1a237e;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.welcome-message p {
+    margin-bottom: 16px;
+}
+
+.platform-badge {
+    background: rgba(26, 35, 126, 0.1);
+    color: #1a237e;
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    max-width: 150px;
+}
+
+.typing-indicator span {
+    font-size: 14px;
+    color: #757575;
+    font-style: italic;
+}
+
+.dots span {
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.dots span:nth-child(1) { animation-delay: 0ms; }
+.dots span:nth-child(2) { animation-delay: 200ms; }
+.dots span:nth-child(3) { animation-delay: 400ms; }
+
+/* typing animation moved to app.css */
+
+.chat-input {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+.input-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.message-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 24px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.message-input:focus {
+    border-color: #1a237e;
+}
+
+.message-input:disabled {
+    opacity: 0.6;
+    background: #f5f5f5;
+}
+
+.send-button {
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6f00 0%, #ff9800 100%);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.send-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.4);
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+</style>
+
+@code {
+    private List<ChatMessage> _messages = new();
+    private string _currentMessage = string.Empty;
+    private bool _isLoading = false;
+    private bool _isTyping = false;
+    private string _platformInfo = string.Empty;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _platformInfo = PlatformService.GetPlatformName();
+        
+        // Add welcome message
+        _messages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = "Привет! 👋 Я цифровой клон Ивана. Готов обсудить архитектуру, .NET, или любые технические вопросы!",
+            Role = MessageRole.Assistant,
+            Timestamp = DateTime.Now,
+            ConversationId = "demo"
+        });
+        
+        await Task.CompletedTask;
+    }
+    
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !_isLoading)
+        {
+            await SendMessage();
+        }
+    }
+    
+    private async Task SendMessage()
+    {
+        if (_isLoading || string.IsNullOrWhiteSpace(_currentMessage))
+            return;
+            
+        var userMessage = _currentMessage.Trim();
+        _currentMessage = string.Empty;
+        _isLoading = true;
+        
+        // Add user message
+        _messages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = userMessage,
+            Role = MessageRole.User,
+            Timestamp = DateTime.Now,
+            ConversationId = "demo"
+        });
+        
+        StateHasChanged();
+        
+        // Show typing indicator
+        _isTyping = true;
+        StateHasChanged();
+        
+        // Simulate API call
+        await Task.Delay(2000);
+        
+        // Generate mock response
+        var responses = new[]
+        {
+            "Отличный вопрос! 🤔 В архитектуре .NET я обычно предпочитаю четкое разделение слоев и dependency injection.",
+            "Интересная задача! 💡 Давай разберем это с точки зрения производительности и maintainability.",
+            "Хороший подход! ✅ Я бы дополнил его еще несколькими проверками для надежности.",
+            "Согласен с направлением мысли! 🎯 Важно также учесть масштабируемость решения.",
+            "Классическая проблема! 📚 У меня есть опыт с подобными задачами в production."
+        };
+        
+        var randomResponse = responses[new Random().Next(responses.Length)];
+        
+        _isTyping = false;
+        
+        // Add Ivan's response
+        _messages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = randomResponse,
+            Role = MessageRole.Assistant,
+            Timestamp = DateTime.Now,
+            ConversationId = "demo"
+        });
+        
+        _isLoading = false;
+        StateHasChanged();
+        
+        // Show notification on mobile
+        await NotificationService.ShowNotificationAsync(
+            "Новое сообщение от Ивана",
+            randomResponse.Substring(0, Math.Min(50, randomResponse.Length)) + "..."
+        );
+    }
+    
+    private string GetMessageClass(MessageRole role)
+    {
+        return role switch
+        {
+            MessageRole.User => "message-user",
+            MessageRole.Assistant => "message-assistant",
+            _ => "message-system"
+        };
+    }
+    
+    private string GetSenderName(MessageRole role)
+    {
+        return role switch
+        {
+            MessageRole.User => "Вы",
+            MessageRole.Assistant => "Иван",
+            _ => "Система"
+        };
+    }
+}

@@ -1,0 +1,337 @@
+@page "/settings"
+@using DigitalMe.MAUI.Services
+@inject IPlatformService PlatformService
+@inject INotificationService NotificationService
+
+<PageTitle>Настройки - DigitalMe</PageTitle>
+
+<div class="settings-page">
+    <div class="settings-header">
+        <h1>⚙️ Настройки</h1>
+        <p>Управление приложением и системой</p>
+    </div>
+    
+    <div class="settings-sections">
+        <!-- Device Information -->
+        <div class="settings-section">
+            <h2>📱 Информация об устройстве</h2>
+            <div class="setting-items">
+                <div class="setting-item">
+                    <span class="setting-label">Платформа:</span>
+                    <span class="setting-value">@_deviceInfo.Platform</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Модель:</span>
+                    <span class="setting-value">@_deviceInfo.Model</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">ОС:</span>
+                    <span class="setting-value">@_deviceInfo.Os</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Версия приложения:</span>
+                    <span class="setting-value">@_deviceInfo.AppVersion</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Интернет:</span>
+                    <span class="setting-value status @(_deviceInfo.HasInternet ? "online" : "offline")">
+                        @(_deviceInfo.HasInternet ? "🟢 Подключен" : "🔴 Отключен")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="settings-section">
+            <h2>🔔 Уведомления</h2>
+            <div class="setting-items">
+                <div class="setting-item interactive" @onclick="TestNotification">
+                    <span class="setting-label">Тестовое уведомление</span>
+                    <button class="action-btn">Отправить</button>
+                </div>
+                <div class="setting-item interactive" @onclick="ScheduleNotification">
+                    <span class="setting-label">Отложенное уведомление</span>
+                    <button class="action-btn">Запланировать</button>
+                </div>
+                <div class="setting-item interactive" @onclick="ClearNotifications">
+                    <span class="setting-label">Очистить уведомления</span>
+                    <button class="action-btn danger">Очистить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Native Features -->
+        <div class="settings-section">
+            <h2>🎯 Нативные функции</h2>
+            <div class="setting-items">
+                <div class="setting-item interactive" @onclick="ShareApp">
+                    <span class="setting-label">Поделиться приложением</span>
+                    <button class="action-btn">Поделиться</button>
+                </div>
+                <div class="setting-item interactive" @onclick="OpenBrowser">
+                    <span class="setting-label">Открыть веб-версию</span>
+                    <button class="action-btn">Открыть</button>
+                </div>
+                <div class="setting-item interactive" @onclick="CheckPermissions">
+                    <span class="setting-label">Проверить разрешения</span>
+                    <button class="action-btn">Проверить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Information -->
+        <div class="settings-section">
+            <h2>🔧 Отладочная информация</h2>
+            <div class="debug-info">
+                <div class="debug-item">
+                    <strong>Device ID:</strong> @_deviceInfo.DeviceId
+                </div>
+                <div class="debug-item">
+                    <strong>Physical Device:</strong> @(_deviceInfo.IsPhysical ? "Да" : "Нет")
+                </div>
+                <div class="debug-item">
+                    <strong>Last Updated:</strong> @DateTime.Now.ToString("HH:mm:ss")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.settings-page {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.settings-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.settings-header h1 {
+    color: #1a237e;
+    font-size: 28px;
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+}
+
+.settings-header p {
+    color: #757575;
+    margin: 0;
+}
+
+.settings-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.settings-section h2 {
+    color: #1a237e;
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.setting-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item.interactive {
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: background 0.2s ease;
+}
+
+.setting-item.interactive:hover {
+    background: #f5f5f5;
+}
+
+.setting-label {
+    font-size: 14px;
+    color: #212121;
+    font-weight: 500;
+}
+
+.setting-value {
+    font-size: 14px;
+    color: #757575;
+    font-family: 'RobotoMono', monospace;
+}
+
+.setting-value.status.online {
+    color: #4caf50;
+}
+
+.setting-value.status.offline {
+    color: #f44336;
+}
+
+.action-btn {
+    background: #1a237e;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #3f51b5;
+}
+
+.action-btn.danger {
+    background: #f44336;
+}
+
+.action-btn.danger:hover {
+    background: #d32f2f;
+}
+
+.debug-info {
+    background: #f5f5f5;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px dashed #bdbdbd;
+}
+
+.debug-item {
+    font-family: 'RobotoMono', monospace;
+    font-size: 12px;
+    color: #424242;
+    margin-bottom: 8px;
+}
+
+.debug-item:last-child {
+    margin-bottom: 0;
+}
+
+.debug-item strong {
+    color: #1a237e;
+}
+</style>
+
+@code {
+    private DeviceInfo _deviceInfo = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDeviceInfo();
+    }
+    
+    private async Task LoadDeviceInfo()
+    {
+        try
+        {
+            _deviceInfo.Platform = PlatformService.GetPlatformName();
+            _deviceInfo.Model = PlatformService.GetDeviceModel();
+            _deviceInfo.Os = PlatformService.GetOperatingSystem();
+            _deviceInfo.AppVersion = await PlatformService.GetAppVersionAsync();
+            _deviceInfo.DeviceId = await PlatformService.GetDeviceIdAsync();
+            _deviceInfo.IsPhysical = PlatformService.IsPhysicalDevice();
+            _deviceInfo.HasInternet = await PlatformService.HasInternetConnectionAsync();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading device info: {ex.Message}");
+        }
+    }
+    
+    private async Task TestNotification()
+    {
+        await NotificationService.ShowNotificationAsync(
+            "Тест уведомлений",
+            "Уведомления работают корректно! 🎉",
+            "test_notification"
+        );
+    }
+    
+    private async Task ScheduleNotification()
+    {
+        var scheduledTime = DateTime.Now.AddSeconds(5);
+        await NotificationService.ScheduleNotificationAsync(
+            "Отложенное уведомление",
+            "Это сообщение было запланировано заранее ⏰",
+            scheduledTime,
+            "scheduled_notification"
+        );
+    }
+    
+    private async Task ClearNotifications()
+    {
+        await NotificationService.CancelAllNotificationsAsync();
+        await NotificationService.ShowNotificationAsync(
+            "Готово",
+            "Все уведомления очищены 🗑️"
+        );
+    }
+    
+    private async Task ShareApp()
+    {
+        await PlatformService.ShareTextAsync(
+            "Попробуй DigitalMe - цифровой клон Ивана! 🤖 Интересные технические обсуждения и помощь в разработке.",
+            "DigitalMe App"
+        );
+    }
+    
+    private async Task OpenBrowser()
+    {
+        await PlatformService.OpenUrlAsync("https://localhost:7264");
+    }
+    
+    private async Task CheckPermissions()
+    {
+        var permissions = new[] { "Camera", "Photos", "Location", "Microphone", "Storage" };
+        var results = new List<string>();
+        
+        foreach (var permission in permissions)
+        {
+            var granted = await PlatformService.RequestPermissionAsync(permission);
+            results.Add($"{permission}: {(granted ? "✅" : "❌")}");
+        }
+        
+        await NotificationService.ShowNotificationAsync(
+            "Разрешения проверены",
+            string.Join(", ", results)
+        );
+    }
+    
+    private class DeviceInfo
+    {
+        public string Platform { get; set; } = "";
+        public string Model { get; set; } = "";
+        public string Os { get; set; } = "";
+        public string AppVersion { get; set; } = "";
+        public string DeviceId { get; set; } = "";
+        public bool IsPhysical { get; set; }
+        public bool HasInternet { get; set; }
+    }
+}

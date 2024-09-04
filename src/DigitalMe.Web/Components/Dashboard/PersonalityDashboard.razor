@@ -1,0 +1,532 @@
+@using DigitalMe.Web.Components.Shared
+@inject HttpClient Http
+@inject ILogger<PersonalityDashboard> Logger
+
+<div class="personality-dashboard">
+    <div class="dashboard-header">
+        <h2>🧠 Ivan's Digital Personality</h2>
+        <div class="last-updated">
+            @if (lastUpdated.HasValue)
+            {
+                <span>Обновлено: @lastUpdated.Value.ToString("HH:mm:ss")</span>
+            }
+            <button @onclick="RefreshData" class="refresh-button" disabled="@isLoading">
+                <svg class="@(isLoading ? "spinning" : "")" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    @if (isLoading && personalityData == null)
+    {
+        <div class="loading-state">
+            <div class="loading-spinner large"></div>
+            <p>Загружаем данные о личности Ивана...</p>
+        </div>
+    }
+    else if (personalityData == null)
+    {
+        <div class="error-state">
+            <p>⚠️ Не удалось загрузить данные о личности</p>
+            <button @onclick="RefreshData" class="retry-button">Попробовать снова</button>
+        </div>
+    }
+    else
+    {
+        <div class="dashboard-content">
+            <!-- Current Status Section -->
+            <div class="status-section">
+                <h3>📊 Текущее состояние</h3>
+                <div class="status-cards">
+                    <div class="status-card primary">
+                        <div class="card-icon">@GetMoodEmoji()</div>
+                        <div class="card-content">
+                            <div class="card-title">@GetCurrentMood()</div>
+                            <div class="card-subtitle">Основное настроение</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-card secondary">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-content">
+                            <div class="card-title">@GetEnergyLevel()%</div>
+                            <div class="card-subtitle">Энергия</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-card accent">
+                        <div class="card-icon">🧠</div>
+                        <div class="card-content">
+                            <div class="card-title">@GetCognitiveLoad()%</div>
+                            <div class="card-subtitle">Когнитивная нагрузка</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personality Traits Section -->
+            <div class="traits-section">
+                <h3>🎯 Личностные черты</h3>
+                <div class="traits-grid">
+                    @foreach (var trait in GetTopTraits())
+                    {
+                        <TraitVisualization 
+                            TraitName="@trait.Name"
+                            TraitValue="@trait.Value"
+                            Description="@trait.Description"
+                            Icon="@trait.Icon" />
+                    }
+                </div>
+            </div>
+
+            <!-- Current Context Section -->
+            <div class="context-section">
+                <h3>🔄 Текущий контекст</h3>
+                <div class="context-cards">
+                    <div class="context-card">
+                        <h4>💼 Работа</h4>
+                        <div class="context-item">
+                            <span class="label">Текущая задача:</span>
+                            <span class="value">@(personalityData.CurrentActivity ?? "Доступен для общения")</span>
+                        </div>
+                        <div class="context-item">
+                            <span class="label">Статус:</span>
+                            <span class="value">@(personalityData.IsOnline ? "🟢 Online" : "🔴 Offline")</span>
+                        </div>
+                    </div>
+                    
+                    <div class="context-card">
+                        <h4>🏠 Личное</h4>
+                        <div class="context-item">
+                            <span class="label">Местоположение:</span>
+                            <span class="value">🇬🇪 Batumi, Georgia</span>
+                        </div>
+                        <div class="context-item">
+                            <span class="label">Время:</span>
+                            <span class="value">@DateTime.Now.ToString("HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="activity-section">
+                <h3>📈 Недавняя активность</h3>
+                <div class="activity-timeline">
+                    @foreach (var activity in GetRecentActivities())
+                    {
+                        <div class="activity-item">
+                            <div class="activity-time">@activity.Time</div>
+                            <div class="activity-icon">@activity.Icon</div>
+                            <div class="activity-description">@activity.Description</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.personality-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #fafafa;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.dashboard-header h2 {
+    color: #1a237e;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.last-updated {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #757575;
+    font-size: 14px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.refresh-button {
+    background: none;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    color: #757575;
+    transition: all 0.2s ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+    background: #f5f5f5;
+    border-color: #1a237e;
+    color: #1a237e;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* spin animation moved to components.css */
+
+.loading-state, .error-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #757575;
+}
+
+.loading-spinner.large {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e0e0e0;
+    border-top: 4px solid #1a237e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 24px;
+}
+
+.retry-button {
+    background: #1a237e;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+.dashboard-content {
+    display: grid;
+    gap: 32px;
+}
+
+.status-section, .traits-section, .context-section, .activity-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.status-section h3, .traits-section h3, .context-section h3, .activity-section h3 {
+    color: #1a237e;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.status-card {
+    background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-card.primary {
+    --card-color-1: #1a237e;
+    --card-color-2: #3f51b5;
+}
+
+.status-card.secondary {
+    --card-color-1: #ff6f00;
+    --card-color-2: #ff9800;
+}
+
+.status-card.accent {
+    --card-color-1: #4caf50;
+    --card-color-2: #66bb6a;
+}
+
+.card-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.card-title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.card-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.2;
+}
+
+.traits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.context-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.context-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    background: #fafafa;
+}
+
+.context-card h4 {
+    color: #1a237e;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+}
+
+.context-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.context-item .label {
+    color: #757575;
+}
+
+.context-item .value {
+    color: #212121;
+    font-weight: 500;
+}
+
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f5f5;
+}
+
+.activity-time {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    color: #757575;
+    min-width: 60px;
+}
+
+.activity-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.activity-description {
+    color: #212121;
+    font-size: 14px;
+}
+</style>
+
+@code {
+    private PersonalityStateDto? personalityData;
+    private bool isLoading = false;
+    private DateTime? lastUpdated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Try to get personality data from API
+            personalityData = await Http.GetFromJsonAsync<PersonalityStateDto>("http://localhost:5000/api/personality/Ivan");
+            lastUpdated = DateTime.Now;
+            
+            Logger.LogInformation("Personality data loaded successfully");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load personality data");
+            
+            // Use mock data as fallback
+            personalityData = GetMockPersonalityData();
+            lastUpdated = DateTime.Now;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private PersonalityStateDto GetMockPersonalityData()
+    {
+        return new PersonalityStateDto
+        {
+            IsOnline = true,
+            CurrentMood = "Focused",
+            CurrentActivity = "Code Review",
+            EnergyLevel = 87,
+            CognitiveLoad = 64,
+            MoodEmoji = "🎯",
+            Traits = new Dictionary<string, int>
+            {
+                ["Analytical"] = 95,
+                ["Problem-Solving"] = 93,
+                ["Direct Communication"] = 87,
+                ["Learning"] = 82,
+                ["Pragmatic"] = 78
+            },
+            LastUpdated = DateTime.Now
+        };
+    }
+
+    private string GetMoodEmoji()
+    {
+        return personalityData?.MoodEmoji ?? "🤔";
+    }
+
+    private string GetCurrentMood()
+    {
+        return personalityData?.CurrentMood ?? "Думает";
+    }
+
+    private int GetEnergyLevel()
+    {
+        return personalityData?.EnergyLevel ?? 75;
+    }
+
+    private int GetCognitiveLoad()
+    {
+        return personalityData?.CognitiveLoad ?? 50;
+    }
+
+    private List<TraitInfo> GetTopTraits()
+    {
+        var traits = personalityData?.Traits ?? new Dictionary<string, int>();
+        
+        return traits.OrderByDescending(t => t.Value)
+                    .Take(6)
+                    .Select(t => new TraitInfo
+                    {
+                        Name = GetTraitDisplayName(t.Key),
+                        Value = t.Value,
+                        Description = GetTraitDescription(t.Key),
+                        Icon = GetTraitIcon(t.Key)
+                    })
+                    .ToList();
+    }
+
+    private string GetTraitDisplayName(string key)
+    {
+        return key switch
+        {
+            "Analytical" => "Аналитическое мышление",
+            "Problem-Solving" => "Решение проблем", 
+            "Direct Communication" => "Прямое общение",
+            "Learning" => "Обучаемость",
+            "Pragmatic" => "Прагматизм",
+            _ => key
+        };
+    }
+
+    private string GetTraitDescription(string key)
+    {
+        return key switch
+        {
+            "Analytical" => "Системный подход к разбору сложных задач",
+            "Problem-Solving" => "Поиск решений и преодоление препятствий",
+            "Direct Communication" => "Открытое и честное общение",
+            "Learning" => "Постоянное изучение новых технологий",
+            "Pragmatic" => "Практический подход к решениям",
+            _ => "Личностная характеристика"
+        };
+    }
+
+    private string GetTraitIcon(string key)
+    {
+        return key switch
+        {
+            "Analytical" => "🔍",
+            "Problem-Solving" => "🎯",
+            "Direct Communication" => "💬",
+            "Learning" => "📚",
+            "Pragmatic" => "🤝",
+            _ => "⭐"
+        };
+    }
+
+    private List<ActivityInfo> GetRecentActivities()
+    {
+        return new List<ActivityInfo>
+        {
+            new() { Time = "14:15", Icon = "✅", Description = "Завершил code review для API интеграции" },
+            new() { Time = "14:02", Icon = "💬", Description = "Обсудил архитектуру с тимлидом" },
+            new() { Time = "13:45", Icon = "👨‍🏫", Description = "Провел менторинг джуниора по DI patterns" },
+            new() { Time = "13:20", Icon = "📞", Description = "Участвовал в team standup" },
+            new() { Time = "12:50", Icon = "🔧", Description = "Исправил баги в PersonalityService" }
+        };
+    }
+
+    private class TraitInfo
+    {
+        public string Name { get; set; } = "";
+        public int Value { get; set; }
+        public string Description { get; set; } = "";
+        public string Icon { get; set; } = "";
+    }
+
+    private class ActivityInfo
+    {
+        public string Time { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    private class PersonalityStateDto
+    {
+        public bool IsOnline { get; set; }
+        public string? CurrentMood { get; set; }
+        public string? CurrentActivity { get; set; }
+        public int EnergyLevel { get; set; }
+        public int CognitiveLoad { get; set; }
+        public string? MoodEmoji { get; set; }
+        public Dictionary<string, int> Traits { get; set; } = new();
+        public DateTime LastUpdated { get; set; }
+    }
+}

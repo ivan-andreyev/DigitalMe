@@ -1,0 +1,116 @@
+﻿@inherits LayoutComponentBase
+@using DigitalMe.Web.Components.Auth
+@using DigitalMe.Web.Components.Shared
+
+<PageTitle>DigitalMe - Цифровой клон Ивана</PageTitle>
+
+<AuthWrapper>
+    <div class="authenticated-layout">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="app-logo">
+                    <span class="logo-icon">🤖</span>
+                    <h1>DigitalMe</h1>
+                </div>
+                
+                <nav class="header-nav">
+                    <a href="/" class="nav-link">💬 Чат</a>
+                    <a href="/dashboard" class="nav-link">📊 Дашборд</a>
+                    <a href="/analytics" class="nav-link">📈 Аналитика</a>
+                </nav>
+                
+                <div class="header-actions">
+                    <UserMenu />
+                </div>
+            </div>
+        </header>
+        
+        <main class="app-main">
+            @Body
+        </main>
+    </div>
+</AuthWrapper>
+
+<style>
+.authenticated-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #fafafa;
+}
+
+.app-header {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    box-shadow: 0 2px 12px rgba(26, 35, 126, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 64px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    font-size: 28px;
+}
+
+.app-logo h1 {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive styles moved to components.css */
+</style>

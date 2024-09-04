@@ -1,0 +1,275 @@
+@page "/dashboard"
+@using DigitalMe.MAUI.Models
+@using DigitalMe.MAUI.Services
+@inject IPlatformService PlatformService
+
+<PageTitle>Дашборд - DigitalMe</PageTitle>
+
+<div class="maui-dashboard-page">
+    <div class="dashboard-header">
+        <h1>🧠 Ivan's Digital Personality</h1>
+        <div class="platform-info">Платформа: @_platformName</div>
+    </div>
+    
+    <div class="dashboard-content">
+        <div class="status-section">
+            <h2>📊 Текущий статус</h2>
+            <div class="status-cards">
+                <div class="status-card primary">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-content">
+                        <div class="card-title">Focused</div>
+                        <div class="card-subtitle">Настроение</div>
+                    </div>
+                </div>
+                
+                <div class="status-card secondary">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-content">
+                        <div class="card-title">87%</div>
+                        <div class="card-subtitle">Энергия</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="traits-section">
+            <h2>🎯 Топ черты личности</h2>
+            <div class="traits-list">
+                <div class="trait-item">
+                    <div class="trait-icon">🔍</div>
+                    <div class="trait-info">
+                        <div class="trait-name">Аналитическое мышление</div>
+                        <div class="trait-value">95%</div>
+                    </div>
+                </div>
+                
+                <div class="trait-item">
+                    <div class="trait-icon">🎯</div>
+                    <div class="trait-info">
+                        <div class="trait-name">Решение проблем</div>
+                        <div class="trait-value">93%</div>
+                    </div>
+                </div>
+                
+                <div class="trait-item">
+                    <div class="trait-icon">💬</div>
+                    <div class="trait-info">
+                        <div class="trait-name">Прямое общение</div>
+                        <div class="trait-value">87%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="activity-section">
+            <h2>📱 Активность на устройстве</h2>
+            <div class="activity-info">
+                <div class="activity-item">
+                    <span class="label">Модель устройства:</span>
+                    <span class="value">@_deviceModel</span>
+                </div>
+                <div class="activity-item">
+                    <span class="label">Операционная система:</span>
+                    <span class="value">@_operatingSystem</span>
+                </div>
+                <div class="activity-item">
+                    <span class="label">Статус интернета:</span>
+                    <span class="value status @(_hasInternet ? "online" : "offline")">
+                        @(_hasInternet ? "🟢 Подключен" : "🔴 Отключен")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.maui-dashboard-page {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fafafa;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+    color: #1a237e;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.platform-info {
+    color: #757575;
+    font-size: 12px;
+    background: rgba(26, 35, 126, 0.1);
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.status-section, .traits-section, .activity-section {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-section h2, .traits-section h2, .activity-section h2 {
+    color: #1a237e;
+    font-size: 18px;
+    margin: 0 0 16px 0;
+}
+
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.status-card {
+    background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-card.primary {
+    --card-color-1: #1a237e;
+    --card-color-2: #3f51b5;
+}
+
+.status-card.secondary {
+    --card-color-1: #ff6f00;
+    --card-color-2: #ff9800;
+}
+
+.card-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.2;
+}
+
+.traits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.trait-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.trait-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.trait-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trait-name {
+    font-size: 14px;
+    color: #212121;
+}
+
+.trait-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a237e;
+}
+
+.activity-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-size: 14px;
+    color: #757575;
+}
+
+.value {
+    font-size: 14px;
+    color: #212121;
+    font-weight: 500;
+}
+
+.value.status.online {
+    color: #4caf50;
+}
+
+.value.status.offline {
+    color: #f44336;
+}
+</style>
+
+@code {
+    private string _platformName = string.Empty;
+    private string _deviceModel = string.Empty;
+    private string _operatingSystem = string.Empty;
+    private bool _hasInternet = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _platformName = PlatformService.GetPlatformName();
+            _deviceModel = PlatformService.GetDeviceModel();
+            _operatingSystem = PlatformService.GetOperatingSystem();
+            _hasInternet = await PlatformService.HasInternetConnectionAsync();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+    }
+}

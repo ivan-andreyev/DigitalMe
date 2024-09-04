@@ -1,0 +1,176 @@
+<div class="status-widget">
+    <div class="status-primary">
+        <div class="status-indicator @GetStatusClass()"></div>
+        <div class="status-info">
+            <span class="status-name">Ivan</span>
+            <span class="status-state">@GetStatusText()</span>
+        </div>
+        <div class="status-time">@DateTime.Now.ToString("HH:mm")</div>
+    </div>
+    
+    @if (State != null && !string.IsNullOrEmpty(State.CurrentActivity))
+    {
+        <div class="status-secondary">
+            <span class="activity-label">@GetActivityIcon()</span>
+            <span class="activity-text">@State.CurrentActivity</span>
+            @if (State.MoodEmoji != null)
+            {
+                <span class="mood-indicator">@State.MoodEmoji</span>
+            }
+        </div>
+    }
+</div>
+
+<style>
+.status-widget {
+    color: white;
+    font-family: 'Inter', sans-serif;
+}
+
+.status-primary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.status-indicator.online {
+    background: #4caf50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+}
+
+.status-indicator.busy {
+    background: #ff9800;
+    box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3);
+}
+
+.status-indicator.away {
+    background: #9e9e9e;
+    box-shadow: 0 0 0 2px rgba(158, 158, 158, 0.3);
+}
+
+.status-indicator.focused {
+    background: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+.status-indicator.online::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: inherit;
+    animation: pulse 2s infinite;
+}
+
+/* pulse animation moved to components.css */
+
+.status-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.status-name {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.status-state {
+    font-size: 13px;
+    opacity: 0.9;
+    line-height: 1.2;
+}
+
+.status-time {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.status-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.activity-label {
+    font-size: 14px;
+}
+
+.activity-text {
+    flex: 1;
+    truncate: true;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mood-indicator {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+</style>
+
+@code {
+    [Parameter] public PersonalityState? State { get; set; }
+    
+    private string GetStatusClass()
+    {
+        if (State == null) return "away";
+        
+        return State.IsOnline switch
+        {
+            true when State.CurrentMood?.Contains("Focused") == true => "focused",
+            true when State.CurrentMood?.Contains("Busy") == true => "busy", 
+            true => "online",
+            false => "away"
+        };
+    }
+    
+    private string GetStatusText()
+    {
+        if (State == null) return "Offline";
+        
+        return State.IsOnline switch
+        {
+            true when State.CurrentMood?.Contains("Focused") == true => "Focused",
+            true when State.CurrentMood?.Contains("Busy") == true => "Busy",
+            true => "Online",
+            false => "Offline"
+        };
+    }
+    
+    private string GetActivityIcon()
+    {
+        if (State?.CurrentActivity == null) return "💻";
+        
+        return State.CurrentActivity.ToLower() switch
+        {
+            var activity when activity.Contains("review") => "🔍",
+            var activity when activity.Contains("meeting") => "📞", 
+            var activity when activity.Contains("coding") => "💻",
+            var activity when activity.Contains("debugging") => "🐛",
+            var activity when activity.Contains("architecture") => "🏗️",
+            var activity when activity.Contains("mentoring") => "👨‍🏫",
+            _ => "⚡"
+        };
+    }
+    
+    // PersonalityState moved to DigitalMe.Web.Models
+}

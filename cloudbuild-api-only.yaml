@@ -1,0 +1,43 @@
+# Build only API backend with database migration fix
+steps:
+  # Build Backend API (Cloud Run optimized)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/digitalme-api:$COMMIT_SHA'
+      - '-f'
+      - 'DigitalMe/Dockerfile.cloudrun'
+      - '.'
+    id: 'build-api'
+
+  # Push API image to Container Registry  
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/digitalme-api:$COMMIT_SHA'
+    id: 'push-api'
+
+  # Deploy Backend API to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'digitalme-api-v2'
+      - '--image=gcr.io/$PROJECT_ID/digitalme-api:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=1Gi'
+      - '--cpu=2'
+      - '--max-instances=10'
+      - '--timeout=300'
+      - '--add-cloudsql-instances=digitalme-470613:us-central1:digitalme-db'
+      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=digitalme;Password=digitalme123;,JWT__Key=digitalme-super-secret-key-12345678901234567890,JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24'
+      - '--set-secrets=ANTHROPIC_API_KEY=anthropic-api-key:latest,GITHUB_TOKEN=github-token:latest,TELEGRAM_BOT_TOKEN=telegram-bot-token:latest'
+    id: 'deploy-api'
+
+images:
+  - 'gcr.io/$PROJECT_ID/digitalme-api:$COMMIT_SHA'

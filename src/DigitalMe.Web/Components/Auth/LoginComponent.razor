@@ -1,0 +1,412 @@
+@using System.ComponentModel.DataAnnotations
+@inject IAuthService AuthService
+@inject ILogger<LoginComponent> Logger
+
+<div class="login-container">
+    <div class="login-form">
+        <div class="login-header">
+            <div class="logo">🤖</div>
+            <h2>Вход в DigitalMe</h2>
+            <p>Войдите, чтобы пообщаться с цифровой копией Ивана</p>
+        </div>
+
+        <EditForm Model="@_loginRequest" OnValidSubmit="@HandleLogin" class="form">
+            <DataAnnotationsValidator />
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <InputText id="email" 
+                          @bind-Value="_loginRequest.Email" 
+                          class="form-input" 
+                          placeholder="ivan@example.com"
+                          disabled="@_isLoading" />
+                <ValidationMessage For="@(() => _loginRequest.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <div class="password-input">
+                    <InputText id="password" 
+                              type="@(_showPassword ? "text" : "password")"
+                              @bind-Value="_loginRequest.Password" 
+                              class="form-input" 
+                              placeholder="Введите пароль"
+                              disabled="@_isLoading" />
+                    <button type="button" 
+                            class="password-toggle"
+                            @onclick="@(() => _showPassword = !_showPassword)">
+                        @if (_showPassword)
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7Z" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2,5.27L3.28,4L20,20.72L18.73,22L15.65,18.92C14.5,19.3 13.28,19.5 12,19.5C7,19.5 2.73,16.39 1,12C1.69,10.24 2.79,8.69 4.19,7.46L2,5.27M12,9A3,3 0 0,1 15,12C15,12.35 14.94,12.69 14.83,13L11,9.17C11.31,9.06 11.65,9 12,9M12,4.5C17,4.5 21.27,7.61 23,12C22.18,14.08 20.79,15.88 19,17.19L17.58,15.76C18.94,14.82 20.06,13.54 20.82,12C19.17,8.64 15.76,6.5 12,6.5C10.91,6.5 9.84,6.68 8.84,7L7.3,5.47C8.74,4.85 10.34,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C12.69,17.5 13.37,17.43 14,17.29L11.72,15C10.29,14.85 9.15,13.71 9,12.28L5.6,8.87C4.61,9.72 3.78,10.78 3.18,12Z" />
+                            </svg>
+                        }
+                    </button>
+                </div>
+                <ValidationMessage For="@(() => _loginRequest.Password)" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-message">
+                    ⚠️ @_errorMessage
+                </div>
+            }
+
+            <div class="form-actions">
+                <button type="submit" 
+                        class="login-button" 
+                        disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <div class="loading-spinner"></div>
+                        <span>Вход...</span>
+                    }
+                    else
+                    {
+                        <span>Войти</span>
+                    }
+                </button>
+
+                <div class="auth-links">
+                    <a href="#" @onclick:preventDefault @onclick="HandleForgotPassword" class="forgot-password-link">
+                        Забыли пароль?
+                    </a>
+                    <div class="register-link">
+                        Нет аккаунта? <a href="#" @onclick:preventDefault @onclick="@(() => OnSwitchToRegister.InvokeAsync())">Зарегистрироваться</a>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+        <div class="demo-credentials">
+            <h4>🧪 Demo доступ:</h4>
+            <p><strong>Email:</strong> demo@digitalme.ai</p>
+            <p><strong>Password:</strong> Ivan2024!</p>
+            <button @onclick="FillDemoCredentials" class="demo-button">
+                Использовать demo данные
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 50%, #ff6f00 100%);
+    padding: 20px;
+}
+
+.login-form {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.login-header h2 {
+    color: #1a237e;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.login-header p {
+    color: #757575;
+    font-size: 14px;
+    margin: 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #212121;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #1a237e;
+}
+
+.form-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f5f5f5;
+}
+
+.password-input {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #757575;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: #1a237e;
+}
+
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 4px solid #c62828;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.login-button {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.login-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+}
+
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.auth-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+}
+
+.forgot-password-link {
+    color: #1a237e;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+    color: #3f51b5;
+    text-decoration: underline;
+}
+
+.register-link {
+    color: #757575;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #1a237e;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.register-link a:hover {
+    color: #3f51b5;
+    text-decoration: underline;
+}
+
+.demo-credentials {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 1px dashed #bdbdbd;
+}
+
+.demo-credentials h4 {
+    color: #1a237e;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.demo-credentials p {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    margin: 4px 0;
+    color: #424242;
+}
+
+.demo-button {
+    background: #ff6f00;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s ease;
+}
+
+.demo-button:hover {
+    background: #ff8f00;
+}
+
+/* Validation messages */
+ /*
+.validation-message {
+    color: #c62828;
+    font-size: 12px;
+    margin-top: 4px;
+}
+ */
+</style>
+
+@code {
+    [Parameter] public EventCallback<string> OnLoginSuccess { get; set; }
+    [Parameter] public EventCallback OnSwitchToRegister { get; set; }
+
+    private LoginRequest _loginRequest = new();
+    private bool _isLoading;
+    private bool _showPassword;
+    private string _errorMessage = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        if (_isLoading) 
+        {
+            return;
+        }
+
+        _isLoading = true;
+        _errorMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var result = await AuthService.LoginAsync(_loginRequest.Email, _loginRequest.Password);
+            
+            if (result.Success)
+            {
+                Logger.LogInformation("Login successful for user: {Email}", _loginRequest.Email);
+                
+                // Notify parent component
+                await OnLoginSuccess.InvokeAsync(result.Token ?? string.Empty);
+            }
+            else
+            {
+                _errorMessage = result.ErrorMessage ?? "Ошибка входа. Попробуйте позже.";
+                Logger.LogWarning("Login failed for user {Email}: {Error}", _loginRequest.Email, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error during login");
+            _errorMessage = "Произошла непредвиденная ошибка. Попробуйте позже.";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private Task HandleForgotPassword()
+    {
+        // TODO: Implement password reset functionality
+        _errorMessage = "Функция восстановления пароля будет доступна в следующих версиях.";
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+    private void FillDemoCredentials()
+    {
+        _loginRequest.Email = "demo@digitalme.ai";
+        _loginRequest.Password = "Ivan2024!";
+        StateHasChanged();
+    }
+
+    private class LoginRequest
+    {
+        [Required(ErrorMessage = "Email обязателен")]
+        [EmailAddress(ErrorMessage = "Введите корректный email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Пароль обязателен")]
+        [MinLength(6, ErrorMessage = "Пароль должен содержать минимум 6 символов")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

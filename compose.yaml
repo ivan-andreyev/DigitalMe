@@ -1,0 +1,7 @@
+﻿services:
+  digitalme:
+    image: digitalme
+    build:
+      context: .
+      dockerfile: DigitalMe/Dockerfile
+

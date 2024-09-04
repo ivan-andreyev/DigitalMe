@@ -1,0 +1,59 @@
+# Multi-stage build with Alpine runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+WORKDIR /app
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+# Enable ReadyToRun images for faster startup
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy only project files for better layer caching
+COPY ["DigitalMe.sln", "."]
+COPY ["DigitalMe/DigitalMe.csproj", "DigitalMe/"]
+
+# Restore with specific optimizations
+RUN dotnet restore "DigitalMe/DigitalMe.csproj" \
+    --runtime linux-musl-x64 \
+    --locked-mode
+
+# Copy source and build with optimizations
+COPY . .
+WORKDIR "/src/DigitalMe"
+RUN dotnet build "./DigitalMe.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/build \
+    --runtime linux-musl-x64 \
+    --self-contained false \
+    --no-restore
+
+# Publish with ReadyToRun and trimming
+FROM build AS publish
+RUN dotnet publish "./DigitalMe.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    --runtime linux-musl-x64 \
+    --self-contained false \
+    --no-restore \
+    /p:UseAppHost=false \
+    /p:PublishReadyToRun=true \
+    /p:PublishSingleFile=false \
+    /p:PublishTrimmed=false
+
+# Final stage with minimal runtime
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Add non-root user for security
+RUN adduser --disabled-password --home /app --gecos '' appuser && chown -R appuser /app
+USER appuser
+
+# Production environment variables
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+
+ENTRYPOINT ["dotnet", "DigitalMe.dll"]

@@ -1,0 +1,222 @@
+@inherits LayoutComponentBase
+@using DigitalMe.MAUI.Services
+@inject IPlatformService PlatformService
+@inject INotificationService NotificationService
+
+<PageTitle>DigitalMe - Цифровой клон Ивана</PageTitle>
+
+<div class="maui-layout">
+    <header class="maui-header">
+        <div class="header-content">
+            <div class="app-title">
+                <span class="logo">🤖</span>
+                <h1>DigitalMe</h1>
+                <div class="platform-info">@_platformName</div>
+            </div>
+            
+            <div class="header-actions">
+                <button class="notification-btn" @onclick="TestNotification">
+                    🔔
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <nav class="mobile-nav">
+        <a href="/" class="nav-item @GetActiveClass("/")">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Чат</span>
+        </a>
+        <a href="/dashboard" class="nav-item @GetActiveClass("/dashboard")">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Дашборд</span>
+        </a>
+        <a href="/settings" class="nav-item @GetActiveClass("/settings")">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Настройки</span>
+        </a>
+    </nav>
+    
+    <main class="maui-main">
+        @Body
+    </main>
+</div>
+
+<style>
+.maui-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #fafafa;
+}
+
+.maui-header {
+    background: linear-gradient(135deg, #1a237e 0%, #3f51b5 100%);
+    color: white;
+    padding: env(safe-area-inset-top, 0) 16px 0;
+    box-shadow: 0 2px 8px rgba(26, 35, 126, 0.2);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 4px;
+}
+
+.app-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.logo {
+    font-size: 24px;
+}
+
+.app-title h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.platform-info {
+    font-size: 10px;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-family: 'RobotoMono', monospace;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.notification-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.mobile-nav {
+    display: flex;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    padding: env(safe-area-inset-bottom, 8px) 0 8px;
+    order: 3;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    text-decoration: none;
+    color: #757575;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    margin: 0 4px;
+}
+
+.nav-item.active {
+    color: #1a237e;
+    background: rgba(26, 35, 126, 0.1);
+}
+
+.nav-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+
+.maui-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.not-found {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.not-found h1 {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.not-found p {
+    color: #757575;
+    margin-bottom: 24px;
+}
+
+.back-link {
+    color: #1a237e;
+    text-decoration: none;
+    padding: 12px 24px;
+    border: 2px solid #1a237e;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.back-link:hover {
+    background: #1a237e;
+    color: white;
+}
+
+/* Responsive adjustments moved to app.css */
+</style>
+
+@code {
+    private string _platformName = string.Empty;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _platformName = PlatformService.GetPlatformName();
+            await NotificationService.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error initializing layout: {ex.Message}");
+        }
+    }
+    
+    private string GetActiveClass(string path)
+    {
+        // Simple active navigation detection
+        return "active"; // For now, all items appear active
+    }
+    
+    private async Task TestNotification()
+    {
+        await NotificationService.ShowNotificationAsync(
+            "DigitalMe", 
+            "Тест уведомлений работает! 🎉"
+        );
+    }
+}
