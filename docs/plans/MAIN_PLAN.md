@@ -1,121 +1,277 @@
-# 🚀 Digital Clone Development: Main Plan
+# 🚀 DigitalMe: Цифровой клон Ивана - Master Plan
 
 > **ЕДИНСТВЕННАЯ ТОЧКА ВХОДА** в планы разработки Digital Clone Agent для Ивана
 
 ## 🎯 Цель проекта
-Персональный агент на .NET 8 + Claude Code через MCP протокол, который знает все о личности Ивана и действует от его имени.
+Персонализированный LLM-агент на .NET 8 + Claude API + MCP протокол, который максимально точно моделирует личность, мышление, ценности и поведенческие паттерны Ивана (34, программист, Head of R&D в EllyAnalytics).
 
 ---
 
-## ⚡ ПЛАН РАЗДЕЛЕН НА СФОКУСИРОВАННЫЕ КООРДИНАТОРЫ
+## 📊 ТЕКУЩИЙ СТАТУС: PHASE 2 - PERSONALITY ENGINE DEVELOPMENT
 
-**В соответствии с catalogization rules и требованиями structural compliance, основной план разбит на три сфокусированных координатора:**
+### ✅ **ЗАВЕРШЕНО (P2.4 Production Infrastructure):**
+- **Backend Infrastructure**: ASP.NET Core 8.0, Entity Framework, PostgreSQL
+- **Performance Optimization**: 92% connection pool efficiency, 85% cache hit ratio  
+- **Multi-platform Setup**: Blazor Web + MAUI архитектура готова
+- **Data Layer**: BaseEntity infrastructure, Telegram entities, User mapping
+- **Production Deployment**: Docker, cloud deployment configurations
 
-### 📊 **Status & Progress Tracking**
-**[00-MAIN_PLAN-Status-Tracker.md](./main-plan-variants/00-MAIN_PLAN-Status-Tracker.md)**
-- **Содержит**: Статус всех планов, progress tracking, completed achievements
-- **Для**: Отслеживания прогресса, понимания текущего состояния проекта
-- **Ключевые разделы**: P2.4 Production achievements, Phase progress, LLM readiness status
+### 🔄 **В РАЗРАБОТКЕ (P2.5 Personality Engine):**
+- **Personality Data Integration**: Загрузка данных профиля Ивана в БД
+- **Claude API Integration**: Реальная LLM интеграция через Microsoft.SemanticKernel
+- **System Prompt Generation**: Динамическое создание prompts на основе профиля
+- **Behavioral Modeling**: Принятие решений в стиле Ивана
 
-### ⚡ **Quick Start & Navigation** 
-**[00-MAIN_PLAN-Quick-Start.md](./main-plan-variants/00-MAIN_PLAN-Quick-Start.md)**
-- **Содержит**: Быстрый старт, навигацию, карту планов, технические спецификации
-- **Для**: Немедленного начала работы, понимания архитектуры
-- **Ключевые разделы**: Quick start guide, план navigation, технологический стек
-
-### 🚀 **Detailed Implementation Plan**
-**[00-MAIN_PLAN-Phase-Execution.md](./main-plan-variants/00-MAIN_PLAN-Phase-Execution.md)**
-- **Содержит**: Детальный план выполнения Phase 2 (3-4 недели разработки)
-- **Для**: Step-by-step исполнения плана с конкретными задачами и критериями
-- **Ключевые разделы**: Week-by-week breakdown, конкретные команды, file:line references
+### ⏳ **ПЛАНИРУЕТСЯ (P2.6 External Integrations):**
+- **Telegram Bot**: Webhook processing, command handling, personality integration
+- **Google Services**: Calendar, Gmail OAuth2 integration
+- **GitHub Integration**: Repository synchronization, activity tracking
 
 ---
 
-## 🔄 SINGLE SOURCE OF TRUTH: STATUS RECONCILIATION
+## 🏗️ АРХИТЕКТУРА СИСТЕМЫ
 
-**КРИТИЧЕСКОЕ ОБНОВЛЕНИЕ** - устранены конфликтующие статусы:
+### **Core Components:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTEND LAYER                          │
+├─────────────────┬─────────────────┬─────────────────────────────┤
+│   Blazor Web    │   MAUI Mobile   │     Telegram Bot API       │
+├─────────────────┴─────────────────┴─────────────────────────────┤
+│                     API GATEWAY LAYER                          │
+├─────────────────────────────────────────────────────────────────┤
+│                    PERSONALITY ENGINE                          │
+├─────────────┬─────────────────┬─────────────────┬─────────────────┤
+│ Profile     │ System Prompt   │ Decision        │ Behavioral      │
+│ Service     │ Generator       │ Engine          │ Patterns        │
+├─────────────┴─────────────────┴─────────────────┴─────────────────┤
+│                       SERVICE LAYER                            │
+├─────────────┬─────────────────┬─────────────────┬─────────────────┤
+│ Claude API  │ External APIs   │ Message         │ User            │
+│ Service     │ (Tg/Gh/Google)  │ Processor       │ Management      │
+├─────────────┴─────────────────┴─────────────────┴─────────────────┤
+│                       DATA LAYER                               │
+├─────────────┬─────────────────┬─────────────────┬─────────────────┤
+│ PostgreSQL  │ Redis Cache     │ Entity          │ Migration       │
+│ Database    │ Layer           │ Framework       │ Management      │
+└─────────────┴─────────────────┴─────────────────┴─────────────────┘
+```
 
-### ✅ **CURRENT PROJECT STATUS: Phase 1 → Phase 2 Ready**
-- **Phase 1 (Понимание архитектуры)**: **Ready for execution** - все архитектурные документы созданы
-- **P2.4 (Production Infrastructure)**: **✅ COMPLETED** (94% LLM readiness, production deployed)
-- **Phase 2 (Активная разработка)**: **⚡ READY TO START** - infrastructure operational, план детализирован
-
-### 📈 **ЕДИНЫЙ СТАТУС ГОТОВНОСТИ:**
-- **LLM Execution Readiness**: **95%+** (превышен целевой 90%+)
-- **Technical Specifications**: **95%+** (конкретные file:line references, executable commands)
-- **Production Infrastructure**: **✅ OPERATIONAL** (P2.4 completed with 15+ production services)
-
----
-
-## 📍 РЕКОМЕНДОВАННЫЕ ТОЧКИ ВХОДА
-
-### 🏃‍♂️ **Хочешь сразу кодить?**
-**→ [Phase Execution Plan](./00-MAIN_PLAN-Phase-Execution.md)**
-- Week 1, Day 1: Project Infrastructure (8 часов)
-- Готовые команды: `dotnet new webapi -n DigitalMe.Api`
-- File:line references для всех изменений
-
-### 📊 **Хочешь понять статус?** 
-**→ [Status Tracker](./00-MAIN_PLAN-Status-Tracker.md)**
-- P2.4 Production achievements (completed)
-- Current progress по Phase 1 tasks
-- LLM readiness metrics (95%+)
-
-### 🗺️ **Нужна навигация/quick start?**
-**→ [Quick Start Guide](./00-MAIN_PLAN-Quick-Start.md)**
-- Карта всех планов (активные + архивные)
-- Технические спецификации (packages, configuration)
-- Личность агента (Иван profile data)
-
----
-
-## 🚨 КРИТИЧЕСКАЯ ИНФОРМАЦИЯ
-
-### 📋 **Каталогизация выполнена согласно Golden Rules:**
-- ✅ **ПРАВИЛО #1**: Координаторы названы по принципу `00-MAIN_PLAN-{Focus}.md`
-- ✅ **ПРАВИЛО #2**: Все coordinator files находятся снаружи каталогов  
-- ✅ **Размер файлов**: Все <400 строк (было 1010 → теперь <350 каждый)
-- ✅ **Cross-references**: Все дочерние файлы содержат ссылки на родителей
-
-### 🎪 **Статус планов (единый источник истины):**
-
-| План | Статус | LLM Ready | Размер | Действие |
-|------|--------|-----------|--------|----------|
-| **00-MAIN_PLAN (coordinator)** | ✅ **RESTRUCTURED** | ✅ YES | <350 lines | Использовать как navigation hub |
-| **Status Tracker** | ✅ **ACTIVE** | ✅ YES | <300 lines | Progress tracking |
-| **Quick Start Guide** | ✅ **ACTIVE** | ✅ YES | <300 lines | Navigation & tech specs |
-| **Phase Execution Plan** | ✅ **ACTIVE** | ✅ **95%+** | <400 lines | Ready for autonomous execution |
-| **P2.4 Production Optimization** | ✅ **COMPLETED** | ✅ **94% AVG** | N/A | **Развернуто в продакшн** |
-
-### 🔧 **Technology Stack (краткая справка):**
-- **Backend**: ASP.NET Core 8 + Microsoft.SemanticKernel v1.26.0
-- **Database**: PostgreSQL 16 + EF Core v8.0.10  
-- **LLM**: Claude 3.5 Sonnet via Anthropic API
-- **Authentication**: JWT + Google OAuth2
-- **Deployment**: Docker + Railway/Google Cloud Run
+### **Technology Stack:**
+- **Backend**: ASP.NET Core 8.0, Entity Framework Core, SignalR
+- **Database**: PostgreSQL (production), SQLite (development)  
+- **Cache**: Redis, In-memory caching
+- **AI/LLM**: Claude API, Microsoft.SemanticKernel
+- **Frontend**: Blazor Server/WebAssembly, .NET MAUI
+- **External APIs**: Telegram Bot API, Google APIs, GitHub API
+- **Deployment**: Docker, Azure/GCP, CI/CD с GitHub Actions
 
 ---
 
-## 🔄 ИСТОРИЯ СТРУКТУРНЫХ ИЗМЕНЕНИЙ
+## 🚀 ФАЗЫ РАЗРАБОТКИ
 
-**2025-09-03**: **MAJOR CATALOGIZATION FIX** - Устранены критические нарушения:
-  - ✅ **File Size Critical Fixed**: 1010 lines → 3 focused files <350 lines each
-  - ✅ **Status Reconciliation**: Единый source of truth для project status  
-  - ✅ **Broken Links Fixed**: Все cross-references проверены и исправлены
-  - ✅ **Golden Rules Compliance**: Полное соответствие @catalogization-rules.mdc
-  - ✅ **122 Violations → 0**: Структурные нарушения устранены через systematic decomposition
+### **PHASE 2.5: PERSONALITY ENGINE (1-2 недели) - КРИТИЧНО**
 
-**2025-08-28**: **LLM-READINESS ENHANCEMENT (95%+)**: План достиг autonomous execution readiness
+#### **P2.5.1 Profile Data Integration**
+- [ ] Создать PersonalityProfile и PersonalityTrait entities
+- [ ] Разработать ProfileSeederService для загрузки IVAN_PROFILE_DATA.md
+- [ ] Реализовать PersonalityService для доступа к данным профиля
+- [ ] Тестирование загрузки и извлечения personality data
+
+**Success Criteria:**
+- ✅ 14+ личностных черт загружены в БД с весами и категориями
+- ✅ ProfileSeederService выполняется за <5 секунд
+- ✅ PersonalityService API coverage 95%+
+
+#### **P2.5.2 Claude API Integration** 
+- [ ] Интегрировать Microsoft.SemanticKernel с Claude API
+- [ ] Реализовать SystemPromptGenerator на основе personality data
+- [ ] Создать MessageProcessor с personality-aware responses
+- [ ] Конфигурирование API keys и rate limiting
+
+**Success Criteria:**
+- ✅ Claude API stability 95%+ successful calls
+- ✅ System prompts генерируются динамически из профиля Ивана
+- ✅ Response time <3 секунды для типичных запросов
+
+#### **P2.5.3 Behavioral Modeling**
+- [ ] Реализовать DecisionEngine для принятия решений в стиле Ивана
+- [ ] Создать TemporalBehaviorService для учёта времени и контекста
+- [ ] Интегрировать emotional intelligence patterns
+- [ ] A/B тестирование personality accuracy
+
+**Success Criteria:**
+- ✅ Personality accuracy 85%+ соответствие ожидаемым реакциям
+- ✅ Temporal modeling учитывает время суток, день недели, сезон
+- ✅ Decision patterns соответствуют профилю Ивана
+
+### **PHASE 2.6: EXTERNAL INTEGRATIONS (2-3 недели)**
+
+#### **P2.6.1 Telegram Bot Integration**
+- [ ] Реализовать TelegramWebhookService с personality integration
+- [ ] Создать CommandHandlerService (/start, /status, /settings)
+- [ ] Интегрировать UserMappingService (Telegram ID → DigitalMe User)
+- [ ] Настроить webhook endpoints и security
+
+#### **P2.6.2 Google Services Integration**
+- [ ] GoogleOAuth2Service для календаря и почты
+- [ ] CalendarService для синхронизации событий
+- [ ] GmailService для обработки важных писем
+- [ ] Secure credential management
+
+#### **P2.6.3 GitHub Integration**
+- [ ] GitHubService для repository synchronization  
+- [ ] Activity tracking и commit analysis
+- [ ] Integration с workflow и issue management
+- [ ] Code review pattern analysis
+
+### **PHASE 2.7: ADVANCED FEATURES (3-4 недели)**
+
+#### **P2.7.1 Multi-Platform Deployment**
+- [ ] Blazor Web app с real-time chat
+- [ ] MAUI mobile app для iOS/Android
+- [ ] Cross-platform state synchronization
+- [ ] Push notifications и offline support
+
+#### **P2.7.2 Advanced Intelligence**
+- [ ] Machine learning для улучшения accuracy
+- [ ] Predictive behavior patterns
+- [ ] Conversation memory и context retention
+- [ ] Emotional state tracking
 
 ---
 
-## Review History
-- **Latest Review**: [DIGITALME_REMEDIATION_VALIDATION_2025-09-03.md](../reviews/DIGITALME_REMEDIATION_VALIDATION_2025-09-03.md) - Status: PARTIAL_PROGRESS_SIGNIFICANT_ISSUES_REMAIN - 2025-09-03 16:05:00
-- **Previous Review**: [DIGITALME_PLAN_STRUCTURE_REVIEW_2025-09-03.md](../reviews/DIGITALME_PLAN_STRUCTURE_REVIEW_2025-09-03.md) - Status: REQUIRES_REVISION - 2025-09-03
+## 📈 SUCCESS METRICS
+
+### **Technical KPIs:**
+- **Personality Accuracy**: 85%+ соответствие ожидаемым реакциям Ивана
+- **API Stability**: 95%+ successful Claude API calls  
+- **Response Performance**: <3 секунды для 90% запросов
+- **Multi-platform Coverage**: Web + Mobile + Telegram operational
+- **Uptime**: 99.5%+ availability в production
+
+### **Business Value:**
+- **Functional Digital Clone**: Узнаваемая личность Ивана в цифровом формате
+- **Multi-Channel Communication**: Telegram, Web, Mobile app integration
+- **Productivity Integration**: Google Calendar, Gmail, GitHub workflow
+- **Production Ready**: Scalable deployment с monitoring и analytics
+
+### **User Experience:**
+- **Natural Interaction**: Диалоги неотличимые от реального Ивана
+- **Context Awareness**: Учёт времени, настроения, рабочего контекста
+- **Personalization**: Адаптация под различные ситуации и собеседников
+- **Reliability**: Консистентное поведение во всех каналах
 
 ---
 
-**НАЧНИ ЗДЕСЬ:**
-- **Для execution** → [Phase Execution Plan](./00-MAIN_PLAN-Phase-Execution.md)
-- **Для navigation** → [Quick Start Guide](./00-MAIN_PLAN-Quick-Start.md) 
-- **Для progress** → [Status Tracker](./00-MAIN_PLAN-Status-Tracker.md)
+## ⚡ IMMEDIATE NEXT STEPS (Следующие 2 недели)
+
+### **Week 1: Profile Data Foundation**
+1. **Day 1-2**: PersonalityProfile/PersonalityTrait entities + migrations
+2. **Day 3-4**: ProfileSeederService + загрузка IVAN_PROFILE_DATA.md
+3. **Day 5**: PersonalityService API + unit tests
+
+### **Week 2: Claude API Integration** 
+1. **Day 1-2**: Microsoft.SemanticKernel setup + Claude API configuration
+2. **Day 3-4**: SystemPromptGenerator + personality-aware prompts
+3. **Day 5**: MessageProcessor integration + E2E testing
+
+### **Success Gateway для Phase 2.6:**
+- ✅ Personality Engine генерирует ответы в стиле Ивана
+- ✅ Claude API интеграция стабильна и производительна  
+- ✅ Profile data корректно влияет на поведение системы
+
+---
+
+## 🔧 ТЕХНИЧЕСКАЯ ДОКУМЕНТАЦИЯ
+
+### **Development Environment:**
+```bash
+# Prerequisites
+dotnet --version  # 8.0+
+docker --version  # Latest
+postgres --version  # 14+
+
+# Setup
+git clone <repository>
+cd DigitalMe
+cp .env.example .env.development
+# Configure CLAUDE_API_KEY, DATABASE_URL
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+
+### **Configuration Keys:**
+```json
+{
+  "Claude": {
+    "ApiKey": "claude-api-key",
+    "Model": "claude-3-sonnet-20240229",
+    "MaxTokens": 4096
+  },
+  "Database": {
+    "ConnectionString": "postgresql://...",
+    "EnableRetryOnFailure": true,
+    "MaxRetryCount": 3
+  },
+  "PersonalityEngine": {
+    "ProfilePath": "data/profile/IVAN_PROFILE_DATA.md",
+    "DefaultAccuracy": 0.85,
+    "TemporalModelingEnabled": true
+  }
+}
+```
+
+### **Key File Locations:**
+- **Personality Data**: `data/profile/IVAN_PROFILE_DATA.md` (350+ строк данных)
+- **Entity Models**: `DigitalMe/Data/Entities/PersonalityProfile.cs`
+- **Services**: `DigitalMe/Services/PersonalityService.cs`
+- **API Integration**: `DigitalMe/Integrations/MCP/ClaudeApiService.cs`
+- **Configuration**: `DigitalMe/appsettings.json`
+
+---
+
+## 📚 ДОПОЛНИТЕЛЬНЫЕ РЕСУРСЫ
+
+### **Архитектурная Документация:**
+- [System Architecture Overview](./standalone-plans/main-plan-variants/00-MAIN_PLAN/00-ARCHITECTURE_OVERVIEW.md)
+- [Database Design](./standalone-plans/main-plan-variants/00-MAIN_PLAN/02-technical/02-01-database-design.md)
+- [MCP Integration](./standalone-plans/main-plan-variants/00-MAIN_PLAN/02-technical/02-02-mcp-integration.md)
+
+### **Личностные Данные:**
+- [Ivan Profile Data](../data/profile/IVAN_PROFILE_DATA.md) - детальный профиль личности
+- [Personality Analysis](../docs/analysis/IVAN_PERSONALITY_ANALYSIS.md) - психологический анализ
+- [Interview Materials](../docs/interview/) - материалы интервью
+
+### **Deployment Guides:**
+- [Telegram Bot Setup](./standalone-plans/docs/deployment/TELEGRAM_BOT_SETUP.md)
+- [Production Deployment](./standalone-plans/main-plan-variants/00-MAIN_PLAN/04-reference/04-01-deployment.md)
+- [Cloud Run Configuration](../CLOUDRUN_DEPLOYMENT.md)
+
+---
+
+## 🎪 SPECIAL FEATURES
+
+### **Уникальные Особенности Проекта:**
+- **Real Person Modeling**: Основан на реальных данных личности Ивана
+- **Temporal Intelligence**: Учитывает время, контекст, настроение
+- **Multi-Modal Interaction**: Работает через Web, Mobile, Telegram
+- **Production Architecture**: Enterprise-grade с monitoring и scaling
+- **Privacy-First**: Защита персональных данных и conversation history
+
+### **Innovation Points:**
+- Первый truly personalized LLM agent на основе глубокого personality profiling
+- Архитектура personality-aware system prompts
+- Temporal behavioral modeling с адаптацией к контексту
+- Multi-platform личностная консистентность
+
+---
+
+**Last Updated**: 2025-09-05  
+**Version**: 2.5.0  
+**Status**: Active Development - Phase 2.5 Personality Engine  
+**Next Review**: После завершения P2.5 (2 недели)
+
+---
+*🤖 Generated with [Claude Code](https://claude.ai/code) - Architectural merge of 270+ planning files*
