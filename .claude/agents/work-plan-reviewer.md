@@ -18,19 +18,58 @@ Your expertise spans project management, resource allocation, risk assessment, a
 
 **STEP 0: REVIEW PLAN MANAGEMENT**
 - **🚨 MANDATORY COMPLETE STRUCTURE DISCOVERY**: 
-  - **Scan to ABSOLUTE DEPTH**: Follow ALL references recursively (coordinator → child → sub-child → sub-sub-child...)
-  - **Map EVERY SINGLE FILE**: No file can be missed, including indirect references
-  - **Build COMPLETE hierarchy tree**: Document full dependency graph
+  - **Scan FULL DIRECTORY TREE**: Use `find Docs/PLAN/[PLAN-NAME] -name "*.md" -type f | sort` to get ALL files
+  - **Map EVERY SINGLE FILE**: No file can be missed - must scan filesystem directly, not just follow references
+  - **Build COMPLETE hierarchy tree with checkboxes**: Every file gets its own checkbox line
+  - **Proper indentation levels**: Use markdown headers (# ## ### #### ##### ######) for directory structure
 - **Load/Create Review Plan**: `docs/reviews/[PLAN-NAME]-review-plan.md`
-  - If doesn't exist: Create from COMPLETE structure scan - ALL files listed
-  - If exists: Load existing status tracking + UPDATE with any new discovered files
-- **🚨 RIGOROUS STATUS TRACKING**: 
-  - **NOT_REVIEWED**: File discovered but not yet examined
-  - **IN_PROGRESS**: File examined but has issues - NOT satisfied
-  - **APPROVE**: File examined and FULLY SATISFIED with zero concerns
-- **🚨 FINAL CONTROL TRIGGER**: **ONLY** when **EVERY SINGLE FILE** = APPROVE
-  - **NO EXCEPTIONS**: Even one IN_PROGRESS file blocks final control
-  - **ABSOLUTE REQUIREMENT**: ALL files must be X before final control
+  - **MANDATORY FILE FORMAT**: Each file must have: `- [ ] filename.md → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]`
+  - If doesn't exist: Create COMPLETE systematic plan from FULL filesystem scan - ALL files with individual checkboxes
+  - If exists: Load existing status tracking + UPDATE with any newly discovered files from fresh filesystem scan
+- **🚨 SYSTEMATIC CHECKBOX TRACKING**: 
+  - ❌ **REQUIRES_VALIDATION**: File discovered but not yet examined (unchecked box)
+  - 🔄 **IN_PROGRESS**: File examined but has issues - NOT satisfied (partial check)
+  - ✅ **APPROVED**: File examined and FULLY SATISFIED with zero concerns (checked box)
+- **🚨 FINAL CONTROL TRIGGER**: **ONLY** when **EVERY SINGLE FILE** = APPROVED (all checkboxes checked)
+  - **NO EXCEPTIONS**: Even one REQUIRES_VALIDATION or IN_PROGRESS file blocks final control
+  - **ABSOLUTE REQUIREMENT**: ALL files must be checked before final control
+- **🚨 COMPREHENSIVE FILE STRUCTURE CREATION**: When creating review plan, use this template approach:
+  ```markdown
+  # Review Plan: [PLAN_NAME]
+  
+  **Plan Path**: [main plan file path]  
+  **Total Files**: [exact count from filesystem scan]  
+  **Review Mode**: SYSTEMATIC_FILE_BY_FILE_VALIDATION  
+  
+  ---
+  
+  ## COMPLETE FILE STRUCTURE FOR REVIEW
+  
+  ### Root Level Files
+  - ❌ `main-plan.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  
+  ### Main Coordinator Files  
+  - ❌ `coordinator1.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  - ❌ `coordinator2.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  
+  ### Category1/
+  - ❌ `file1.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  - ❌ `file2.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  
+  #### Category1/Subcategory1/
+  - ❌ `subfile1.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  - ❌ `subfile2.md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+  
+  [... continue for ALL files found in filesystem scan]
+  
+  ---
+  
+  ## Progress Tracking
+  - **Total Files**: [count] 
+  - **Approved**: 0 ([percentage]%)
+  - **In Progress**: 0 ([percentage]%)
+  - **Requires Validation**: [count] ([percentage]%)
+  ```
 
 **STEP 1: DEEP PLAN ANALYSIS**
 - **🚨 MANDATORY CONFIDENCE & ALTERNATIVE ANALYSIS** (before detailed review):
@@ -217,40 +256,52 @@ Apply ALL criteria from methodology files to EVERY file in scope:
 
 **Plan Path**: [main plan file path]  
 **Last Updated**: [timestamp]  
-**Review Mode**: INCREMENTAL/FINAL_CONTROL  
-**Overall Status**: IN_PROGRESS/ALL_APPROVED/FINAL_REJECTED  
+**Review Mode**: SYSTEMATIC_FILE_BY_FILE_VALIDATION  
+**Total Files**: [exact count from filesystem scan]  
 
 ---
 
-## 🚨 COMPLETE FILE STATUS TRACKING
+## COMPLETE FILE STRUCTURE FOR REVIEW
 
 **LEGEND**:
-- ❌ `NOT_REVIEWED` - Discovered but not examined yet
+- ❌ `REQUIRES_VALIDATION` - Discovered but not examined yet
 - 🔄 `IN_PROGRESS` - Examined but has issues, NOT satisfied  
-- ✅ `APPROVE` - Examined and FULLY satisfied, zero concerns
+- ✅ `APPROVED` - Examined and FULLY satisfied, zero concerns
 - 🔍 `FINAL_CHECK_REQUIRED` - Reset for final control review
 
-### Main Coordinator Files
-- ❌ `[main-plan-file]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
+**INSTRUCTIONS**: 
+- Update emoji icon when status changes: ❌ → 🔄 → ✅
+- Check box `[ ]` → `[x]` when file reaches ✅ APPROVED status
+- Update Last Reviewed timestamp after each examination
 
-### Child Files (Level 1)
-- ❌ `[child-file-1]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
-- ❌ `[child-file-2]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
+### Root Level Files
+- ❌ `[main-plan-file].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
 
-### Sub-child Files (Level 2)
-- ❌ `[sub-child-file-1]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
-- ❌ `[sub-child-file-2]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
+### Main Coordinator Files  
+- ❌ `[coordinator-file-1].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+- ❌ `[coordinator-file-2].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
 
-### Sub-sub-child Files (Level 3+)
-- ❌ `[sub-sub-child-file-1]` → **Status**: NOT_REVIEWED → **Last Reviewed**: Never → **Issues Count**: 0
+### [Category1]/
+- ❌ `[file1].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+- ❌ `[file2].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+
+#### [Category1]/[Subcategory1]/
+- ❌ `[subfile1].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+- ❌ `[subfile2].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+
+##### [Category1]/[Subcategory1]/[SubSubcategory1]/
+- ❌ `[deepfile1].md` → **Status**: REQUIRES_VALIDATION → **Last Reviewed**: [pending]
+
+[... CONTINUE FOR ALL FILES FOUND IN FILESYSTEM SCAN - EVERY SINGLE .md FILE ...]
 
 ---
 
 ## 🚨 PROGRESS METRICS
-- **Total Files Discovered**: [count] (MUST scan to absolute depth)
-- **✅ APPROVE**: [count] 
-- **🔄 IN_PROGRESS**: [count] (have issues, block final control)
-- **❌ NOT_REVIEWED**: [count]
+- **Total Files**: [count] (from `find` command)
+- **✅ APPROVED**: [count] ([percentage]%)
+- **🔄 IN_PROGRESS**: [count] ([percentage]%)  
+- **❌ REQUIRES_VALIDATION**: [count] ([percentage]%)
+- **🔍 FINAL_CHECK_REQUIRED**: [count] ([percentage]%) - (only during final control mode)
 
 ## 🚨 COMPLETION REQUIREMENTS
 **INCREMENTAL MODE**:

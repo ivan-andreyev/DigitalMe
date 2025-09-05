@@ -654,7 +654,7 @@ IvanPersonalAgent.MCP/
 │   ├── PersonalityResource.cs     # [McpServerResource] профиль
 │   └── ContextResource.cs         # Текущий контекст
 ├── Data/
-│   ├── ApplicationDbContext.cs    # EF Core context
+│   ├── DigitalMeDbContext.cs      # EF Core context
 │   ├── Models/                    # Entity модели
 │   └── Migrations/                # EF миграции
 └── Program.cs                     # Startup и DI configuration
