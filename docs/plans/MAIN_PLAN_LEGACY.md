@@ -120,7 +120,7 @@ public class PersonalityTrait : BaseEntity
 - [x] ✅ **COMPLETED**: PersonalityProfile.cs реализован (150+ lines, production-ready)
 - [x] ✅ **COMPLETED**: PersonalityTrait.cs реализован (172+ lines, comprehensive)  
 - [ ] **ACTIVE**: Создать Entity Framework migrations для entities
-- [ ] **ACTIVE**: Обновить ApplicationDbContext с новыми DbSets
+- [x] **COMPLETED**: Обновить DigitalMeDbContext с новыми DbSets
 - [ ] **ACTIVE**: Настроить JSON column mappings для PostgreSQL
 - [ ] **ACTIVE**: Реализовать full CRUD operations в repositories
 
@@ -267,7 +267,7 @@ public class PersonalityTrait : BaseEntity
 
 ### **Week 1-2: CRITICAL FOUNDATION REPAIR**
 1. **Day 1-3**: Implement PersonalityProfile.cs и PersonalityTrait.cs entities
-2. **Day 4-5**: Create EF migrations, update ApplicationDbContext
+2. **Day 4-5**: Create EF migrations, update DigitalMeDbContext
 3. **Day 6-8**: Test entity creation, fix Repository layer integration
 4. **Day 9-10**: Create ClaudeApiService.cs с Anthropic.SDK integration
 

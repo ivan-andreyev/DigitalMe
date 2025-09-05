@@ -9,25 +9,18 @@
 
 ## 📊 ТЕКУЩИЙ СТАТУС: PHASE P2.1-P2.4 - IMPLEMENTATION CYCLE
 
-### ✅ **ЗАВЕРШЕНО (P1.5 Foundation Development - APPROVED):**
+### ✅ **FOUNDATION COMPLETE (P1.5 - APPROVED):**
 - **Backend Infrastructure**: ASP.NET Core 8.0, Entity Framework Core, PostgreSQL/SQLite
-- **Dependency Management**: Anthropic.SDK v5.5.1, Telegram.Bot, Google APIs, Octokit
-- **CRITICAL ENTITIES**: ✅ **PersonalityProfile.cs** (150+ lines, production-ready)
-- **CRITICAL ENTITIES**: ✅ **PersonalityTrait.cs** (172+ lines, comprehensive with TemporalBehaviorPattern)
-- **CLAUDE INTEGRATION**: ✅ **ClaudeApiService.cs** (303+ lines, full Anthropic.SDK integration)
-- **Service Layer Framework**: PersonalityService with business logic, Repository pattern
-- **API Infrastructure**: Controllers ready, DTOs defined, logging configured
+- **CRITICAL ENTITIES**: PersonalityProfile.cs (150 lines), PersonalityTrait.cs (237 lines)
+- **CLAUDE INTEGRATION**: ClaudeApiService.cs (302 lines, full Anthropic.SDK integration)
+- **Dependencies**: Anthropic.SDK v5.5.1, Telegram.Bot, Google APIs, Octokit configured
 
 ### 🎯 **CURRENT FOCUS: P2.1-P2.4 Implementation Cycle**
-**Status**: ✅ **FOUNDATION APPROVED** (Score: 8.25/10) - Ready for execution  
-**Timeline**: 2-3 weeks intensive development  
+**Status**: 🔄 **P2.1 IN PROGRESS** - Database migrations in progress, entities completed  
+**Timeline**: 25 days intensive development  
 **Target**: Production-ready personality engine MVP  
 
-### 🚀 **ACTIVE PHASES (P2.1-P2.4):**
-- **P2.1 Database Schema & Migrations** (Days 1-5): EF configurations, migrations, repository pattern
-- **P2.2 Service Layer Integration** (Days 6-10): PersonalityService updates, Claude integration
-- **P2.3 Data Loading Infrastructure** (Days 11-15): IVAN_PROFILE_DATA.md parser and seeder
-- **P2.4 End-to-End Integration** (Days 16-20): Complete conversation pipeline, API endpoints
+**Phase Details**: Transitioned to MVP approach - see MVP-Phase*.md files below for simplified execution plans
 
 ---
 
@@ -71,30 +64,32 @@ public class PersonalityTrait : BaseEntity
 ```
 
 ### **Core Components:**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND LAYER                          │
-├─────────────────┬─────────────────┬─────────────────────────────┤
-│   Blazor Web    │   MAUI Mobile   │     Telegram Bot API       │
-├─────────────────┴─────────────────┴─────────────────────────────┤
-│                     API GATEWAY LAYER                          │
-├─────────────────────────────────────────────────────────────────┤
-│                    PERSONALITY ENGINE                          │
-├─────────────┬─────────────────┬─────────────────┬─────────────────┤
-│ Profile     │ System Prompt   │ Claude API      │ Message         │
-│ Service     │ Generator       │ Service         │ Processor       │
-├─────────────┴─────────────────┴─────────────────┴─────────────────┤
-│                       SERVICE LAYER                            │
-├─────────────┬─────────────────┬─────────────────┬─────────────────┤
-│ Profile     │ External APIs   │ User            │ Repository      │
-│ Seeder      │ (Tg/Gh/Google)  │ Management      │ Layer           │
-├─────────────┴─────────────────┴─────────────────┴─────────────────┤
-│                       DATA LAYER                               │
-├─────────────┬─────────────────┬─────────────────┬─────────────────┤
-│ PostgreSQL  │ SQLite (Dev)    │ Entity          │ Migration       │
-│ (Production)│ Database        │ Framework       │ Management      │
-└─────────────┴─────────────────┴─────────────────┴─────────────────┘
-```
+
+**Frontend Layer:**
+- Blazor Web UI - main conversation interface and admin panel
+- MAUI Mobile app - mobile personality agent access
+- Telegram Bot API - messaging integration
+
+**API Gateway Layer:**
+- REST API endpoints for personality engine access
+- Authentication and request routing
+
+**Personality Engine Core:**
+- PersonalityService - core personality modeling logic
+- SystemPromptGenerator - dynamic prompt generation from traits
+- ClaudeApiService - Claude API integration
+- MessageProcessor - conversation orchestration
+
+**Service Layer:**
+- ProfileSeederService - data loading from IVAN_PROFILE_DATA.md
+- External API integrations (Telegram, GitHub, Google)
+- User management and security services
+- Repository pattern for data access
+
+**Data Layer:**
+- PostgreSQL (production) / SQLite (development)
+- Entity Framework Core with proper migrations
+- PersonalityProfile and PersonalityTrait entities
 
 ### **Technology Stack (FINALIZED):**
 - **Backend**: ASP.NET Core 8.0, Entity Framework Core 8.0
@@ -110,61 +105,63 @@ public class PersonalityTrait : BaseEntity
 
 ## 🚀 ФАЗЫ РАЗРАБОТКИ
 
-### **PHASE 2: P2.1-P2.4 IMPLEMENTATION CYCLE (2-3 недели)**
+### **PHASE 2: P2.1-P2.4 IMPLEMENTATION CYCLE (25 дней)**
 
-> **FOUNDATION SUCCESS**: ✅ Критические блокеры устранены - PersonalityProfile.cs, PersonalityTrait.cs, ClaudeApiService.cs реализованы  
-> **PLAN APPROVED**: Score 8.25/10 - Ready for P2.1-P2.4 execution cycle  
-> **DETAILED PLAN**: [P2.1-P2.4-EXECUTION-PLAN.md](./P2.1-P2.4-EXECUTION-PLAN.md)
+> **FOUNDATION SUCCESS**: ✅ Critical blockers resolved - all essential entities implemented  
+> **STATUS**: 🔄 P2.1 Database Schema & Migrations **IN PROGRESS** (entities complete, migrations pending)  
+> **PHASE PLANS**: [P2.1-P2.4-Execution/](docs/plans/P2.1-P2.4-Execution/) directory contains detailed phase-specific plans
 
-#### **P2.1 Database Schema & Migrations (Days 1-5)** ✅ **Foundation Ready**
-- [x] ✅ **COMPLETED**: PersonalityProfile.cs реализован (150+ lines, production-ready)
-- [x] ✅ **COMPLETED**: PersonalityTrait.cs реализован (172+ lines, comprehensive)  
-- [ ] **ACTIVE**: Создать Entity Framework migrations для entities
-- [ ] **ACTIVE**: Обновить ApplicationDbContext с новыми DbSets
-- [ ] **ACTIVE**: Настроить JSON column mappings для PostgreSQL
-- [ ] **ACTIVE**: Реализовать full CRUD operations в repositories
+#### **P2.1 Database Schema & Migrations (Days 1-5)** 🔄 **IN PROGRESS**
+- [x] ✅ **COMPLETED**: PersonalityProfile.cs реализован (150 lines, production-ready)
+- [x] ✅ **COMPLETED**: PersonalityTrait.cs реализован (237 lines, comprehensive)  
+- [ ] 📋 **PENDING**: Создать Entity Framework migrations для entities
+- [x] ✅ **COMPLETED**: Обновить DigitalMeDbContext с новыми DbSets
+- [ ] 📋 **PENDING**: Настроить JSON column mappings для PostgreSQL
+- [ ] 📋 **PENDING**: Реализовать full CRUD operations в repositories
 
 **Success Criteria:**
 - ✅ PersonalityProfile.cs содержит все необходимые свойства (COMPLETED)
 - ✅ PersonalityTrait.cs с правильными relationships (COMPLETED)
-- [ ] Database migrations успешно применяются
-- [ ] Repository pattern fully implements CRUD operations
-- [ ] JSON columns serialize/deserialize properly
+- [ ] Database migrations for PersonalityProfile and PersonalityTrait entities successfully applied
+- [ ] Repository pattern implements full CRUD operations with proper error handling
+- [ ] PostgreSQL JSON columns for complex properties serialize/deserialize correctly
 
-#### **P2.2 Service Layer Integration (Days 6-10)** ✅ **Foundation Ready**
-- [x] ✅ **COMPLETED**: ClaudeApiService.cs реализован (303+ lines, full integration)
-- [ ] **ACTIVE**: Update PersonalityService для работы с real entities
-- [ ] **ACTIVE**: Create MessageProcessor для end-to-end conversation flow
-- [ ] **ACTIVE**: Update PersonalityService.GenerateSystemPromptAsync() с actual traits
-- [ ] **ACTIVE**: Configure dependency injection для all new services
+#### **P2.2 API Implementation (Days 6-10)** 📋 **PENDING**
+- [x] ✅ **COMPLETED**: ClaudeApiService.cs реализован (302 lines, full integration)
+- [ ] 📋 **PENDING**: Update PersonalityService для работы с real entities
+- [ ] 📋 **PENDING**: Create MessageProcessor для end-to-end conversation flow
+- [ ] 📋 **PENDING**: Implement ProfileSeederService для loading IVAN_PROFILE_DATA.md
+- [ ] 📋 **PENDING**: Update PersonalityService.GenerateSystemPromptAsync() с actual traits
+- [ ] 📋 **PENDING**: Configure dependency injection для all new services
 
 **Success Criteria:**
 - ✅ ClaudeApiService успешно взаимодействует с Claude API (COMPLETED)
 - ✅ Full Anthropic.SDK integration implemented (COMPLETED)
-- [ ] PersonalityService works with real PersonalityProfile entities
-- [ ] MessageProcessor orchestrates full conversation flow
-- [ ] System prompts generate dynamically from actual profile data
+- [ ] PersonalityService works with real PersonalityProfile entities from database
+- [ ] MessageProcessor orchestrates full conversation flow with personality context
+- [ ] ProfileSeederService loads IVAN_PROFILE_DATA.md into database with proper trait mapping
+- [ ] System prompts generate dynamically from actual profile data with all personality traits
 
-#### **P2.3 Data Loading Infrastructure (Days 11-15)**
-- [ ] **ACTIVE**: Создать MarkdownProfileParser для IVAN_PROFILE_DATA.md
-- [ ] **ACTIVE**: Implement ProfileSeederService с idempotent loading
-- [ ] **ACTIVE**: Create comprehensive data validation engine
-- [ ] **ACTIVE**: Map Ivan's personality traits с proper categories и weights
-- [ ] **ACTIVE**: Test complete data loading cycle с integrity checks
+#### **P2.3 UI Development (Days 11-18)** 📋 **PENDING**
+- [ ] 📋 **PENDING**: Create Blazor components for personality profile display
+- [ ] 📋 **PENDING**: Implement conversation interface with Claude API integration
+- [ ] 📋 **PENDING**: Develop admin panel for profile management
+- [ ] 📋 **PENDING**: Add real-time conversation features with personality context
+- [ ] 📋 **PENDING**: Implement responsive design for mobile and desktop
 
 **Success Criteria:**
-- [ ] IVAN_PROFILE_DATA.md успешно парсится в structured data
-- [ ] Ivan PersonalityProfile exists in database с complete trait relationships
-- [ ] All personality traits created with proper categories и weights
-- [ ] Data seeding is idempotent и transactionally safe
-- [ ] Profile data passes validation и integrity checks
+- [ ] Blazor UI components properly display personality profile information
+- [ ] Conversation interface successfully integrates with backend personality engine
+- [ ] Admin panel allows full CRUD operations on personality profiles
+- [ ] Real-time conversation shows personality-aware responses
+- [ ] UI is responsive and works on mobile devices and desktop browsers
 
-#### **P2.4 End-to-End Integration (Days 16-20)**
-- [ ] **ACTIVE**: Complete full conversation pipeline integration
-- [ ] **ACTIVE**: Implement ConversationController с personality-aware endpoints
-- [ ] **ACTIVE**: Create comprehensive integration testing
-- [ ] **ACTIVE**: Performance testing и optimization
-- [ ] **ACTIVE**: Documentation и deployment preparation
+#### **P2.4 End-to-End Integration (Days 19-25)** 📋 **PENDING**
+- [ ] 📋 **PENDING**: Complete full conversation pipeline integration
+- [ ] 📋 **PENDING**: Implement ConversationController с personality-aware endpoints
+- [ ] 📋 **PENDING**: Create comprehensive integration testing
+- [ ] 📋 **PENDING**: Performance testing и optimization
+- [ ] 📋 **PENDING**: Documentation и deployment preparation
 
 **Success Criteria:**
 - [ ] Complete conversation pipeline functional end-to-end
@@ -179,7 +176,7 @@ public class PersonalityTrait : BaseEntity
 ## 🎯 FUTURE PHASES (POST-MVP)
 
 ### **PHASE 3: EXTERNAL INTEGRATIONS**
-> **Detailed Plan**: [Phase3/EXTERNAL_INTEGRATIONS.md](./Phase3/EXTERNAL_INTEGRATIONS.md)
+> **Status**: FUTURE PLANNING - Moved to post-MVP development
 
 **Timeline**: 6-8 weeks после MVP  
 **Focus**: Telegram Bot, Google Services, GitHub Integration
@@ -194,18 +191,13 @@ public class PersonalityTrait : BaseEntity
 
 ### **Phase 2 MVP Success Criteria (Current Focus):**
 
-#### **Foundation Complete (✅ ACHIEVED):**
-- ✅ PersonalityProfile.cs: Complete entity (150+ lines, production-ready)
-- ✅ PersonalityTrait.cs: Full implementation (172+ lines, comprehensive)
-- ✅ ClaudeApiService.cs: Complete Claude API integration (303+ lines)
-
 #### **P2.1-P2.4 Target Outcomes:**
-- [ ] Database migrations successfully applied
-- [ ] PersonalityService works with real entities  
-- [ ] IVAN_PROFILE_DATA.md loaded into database
-- [ ] End-to-end conversation pipeline functional
-- [ ] Basic personality engine generates coherent responses
-- [ ] Foundation ready for external integrations
+- [ ] 🔄 **P2.1**: Database migrations successfully applied, CRUD operations functional
+- [ ] 📋 **P2.2**: PersonalityService works with real entities, MessageProcessor and ProfileSeederService implemented
+- [ ] 📋 **P2.3**: Blazor UI components with conversation interface and admin panel completed
+- [ ] 📋 **P2.4**: End-to-end conversation pipeline functional with personality-aware responses
+
+**Quality Target**: Production-ready personality engine MVP, foundation ready for Phase 3 integrations
 
 **Quality Gates:**
 - **Data Integrity**: All core components implemented and functional
@@ -215,67 +207,56 @@ public class PersonalityTrait : BaseEntity
 
 ---
 
-## 🔧 TECHNICAL REFERENCE
+## 🔧 MVP TECHNICAL REFERENCE
 
-### **Implementation Status:**
+### **MVP Implementation Status:**
 
-#### **✅ FOUNDATION COMPLETED (All Critical Blockers Resolved):**
-- **PersonalityProfile.cs** ✅ **IMPLEMENTED**
-  - **Path**: `DigitalMe/Data/Entities/PersonalityProfile.cs`
-  - **Status**: ✅ **PRODUCTION-READY** (150+ lines, comprehensive)
+#### **✅ FOUNDATION READY:**
+| Component | Status | Location | Lines |
+|-----------|--------|----------|-------|
+| PersonalityProfile.cs | ✅ **READY** | `DigitalMe/Data/Entities/` | 150 |
+| PersonalityTrait.cs | ✅ **READY** | `DigitalMe/Data/Entities/` | 237 |
+| ClaudeApiService.cs | ✅ **READY** | `DigitalMe/Integrations/MCP/` | 302 |
 
-- **PersonalityTrait.cs** ✅ **IMPLEMENTED**  
-  - **Path**: `DigitalMe/Data/Entities/PersonalityTrait.cs`
-  - **Status**: ✅ **PRODUCTION-READY** (172+ lines, comprehensive)
+#### **📋 MVP TARGETS** (упрощенные):
+- **Phase 1**: SQLite migrations + hardcoded Ivan data → [MVP-Phase1-Database-Setup.md](MVP-Phase1-Database-Setup.md)
+- **Phase 2**: Простой PersonalityService + MessageProcessor → [MVP-Phase2-Core-Services.md](MVP-Phase2-Core-Services.md)
+- **Phase 3**: Одна Blazor страница для чата → [MVP-Phase3-Basic-UI.md](MVP-Phase3-Basic-UI.md)
+- **Phase 4**: End-to-end MVP testing → [MVP-Phase4-Integration.md](MVP-Phase4-Integration.md)
 
-- **ClaudeApiService.cs** ✅ **IMPLEMENTED**
-  - **Path**: `DigitalMe/Integrations/MCP/ClaudeApiService.cs`
-  - **Status**: ✅ **PRODUCTION-READY** (303+ lines, full integration)
-
-#### **📋 NEXT IMPLEMENTATION TARGETS:**
-- **ProfileSeederService.cs** (📋 P2.3 TARGET)
-- **MessageProcessor.cs** (📋 P2.2 TARGET)
-
-### **Configuration & Environment:**
-> **Detailed Documentation**: [coordinator-sections/05-TECHNICAL_DOCS.md](./coordinator-sections/05-TECHNICAL_DOCS.md)
-
----
-
-## 📚 RESOURCES & DOCUMENTATION
-
-### **Core Data Assets:**
-- [Ivan Profile Data](../data/profile/IVAN_PROFILE_DATA.md) - 350+ lines of personality data
-- [Personality Analysis](../docs/analysis/IVAN_PERSONALITY_ANALYSIS.md) - psychological analysis
-- [Interview Materials](../docs/interview/) - interview transcripts
-
-### **Architectural Documentation:**
-> **Complete Technical Reference**: [coordinator-sections/01-ARCHITECTURE.md](./coordinator-sections/01-ARCHITECTURE.md)
-
-### **Deployment Information:**
-> **Deployment Guides**: [coordinator-sections/06-ADDITIONAL_RESOURCES.md](./coordinator-sections/06-ADDITIONAL_RESOURCES.md)
+### **MVP Configuration:**
+- **Database**: SQLite только (development)
+- **Framework**: ASP.NET Core 8.0 + Blazor
+- **AI Integration**: Claude API через Anthropic.SDK v5.5.1 ✅
+- **Deployment**: Локально только (БЕЗ production)
 
 ---
 
-## 🎪 PROJECT UNIQUENESS
+## 📚 MVP RESOURCES
 
-### **Innovation Points:**
-- **Real Person Modeling**: Based on comprehensive personality profiling of Ivan
-- **Temporal Intelligence**: Context and time-aware personality modeling
-- **Multi-Modal Consistency**: Personality consistency across platforms
-- **Production Architecture**: Enterprise-grade with monitoring and scaling
-- **Privacy-First Design**: Secure personal data and conversation handling
+### **Core Data** (для hardcoded loading):
+- [Ivan Profile Data](../../data/profile/IVAN_PROFILE_DATA.md) - источник для hardcoded traits
+- [Personality Analysis](../../docs/analysis/IVAN_PERSONALITY_ANALYSIS.md) - базис для prompt generation
+
+### **MVP Focus:**
+- **Real Person Modeling**: Базовое моделирование личности Ивана
+- **Single Platform**: Только веб-интерфейс  
+- **Core Pipeline**: User input → Personality context → Claude API → Response
+- ❌ **НЕТ**: Multi-modal, enterprise features, production deployment
 
 ---
 
 ## Review History
-- **Latest Review**: [MAIN-PLAN-review-plan.md](../../docs/reviews/MAIN-PLAN-review-plan.md) - Status: ✅ **APPROVED** (Score: 8.25/10) - 2025-09-04
-- **Foundation Status**: ✅ **PRODUCTION-READY** - All critical blockers resolved
-- **Implementation Cycle**: [P2.1-P2.4-EXECUTION-PLAN.md](./P2.1-P2.4-EXECUTION-PLAN.md) - Ready for execution
+- **RADICAL CLEANUP**: 2025-09-05 - Deleted 187 overengineering files (195→8 files remaining)
+- **SCOPE OVERLOAD FIX**: 2025-09-05 - Упрощен с enterprise-grade (73 задачи, 47+ дней) до реалистичного MVP (15 дней)
+- **Previous Reviews**: Enterprise планы архивированы как overengineering
+- **Foundation Status**: ✅ **ENTITIES READY** - PersonalityProfile, PersonalityTrait, ClaudeApiService готовы
+- **MVP Status**: 🔄 **CLEAN STRUCTURE** - осталось только 7 MVP файлов + MAIN_PLAN.md
 
 ---
 
 **Last Updated**: 2025-09-05  
-**Version**: 2.1.1 (Complete Coordinator Version)  
-**Status**: ✅ **Foundation Complete** → **P2.1-P2.4 Implementation Cycle**  
-**Execution Plan**: [P2.1-P2.4-EXECUTION-PLAN.md](./P2.1-P2.4-EXECUTION-PLAN.md)  
-**Next Review**: After P2.1-P2.4 completion (MVP personality engine ready)
+**Version**: 3.1.0 (RADICAL CLEANUP - Structure Simplified)  
+**Status**: ✅ **CLEAN MVP STRUCTURE** - 195→8 files, overengineering eliminated  
+**Previous Plans**: 187 files deleted (archived-variants/, standalone-plans/, Phase3/, coordinator-sections/, P2.1-P2.4-Execution/)  
+**Next Step**: Execute MVP plans with clean, focused structure
