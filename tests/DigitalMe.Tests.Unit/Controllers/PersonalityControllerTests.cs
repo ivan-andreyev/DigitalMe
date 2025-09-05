@@ -4,7 +4,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using DigitalMe.DTOs;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Builders;
 
@@ -25,7 +25,7 @@ public class PersonalityControllerTests : IClassFixture<TestWebApplicationFactor
     public async Task GetPersonality_WithExistingPersonality_ShouldReturnPersonalityWithTraits()
     {
         // Arrange
-        var personality = PersonalityProfileBuilder.ForIvan();
+        var personality = PersonalityProfileBuilder.ForIvan().Build();
         var trait1 = PersonalityTraitBuilder.Create()
             .WithCategory("Core")
             .WithName("Analytical")
@@ -216,7 +216,7 @@ public class PersonalityControllerTests : IClassFixture<TestWebApplicationFactor
     public async Task GetSystemPrompt_WithValidPersonalityId_ShouldReturnSystemPrompt()
     {
         // Arrange
-        var personality = PersonalityProfileBuilder.ForIvan();
+        var personality = PersonalityProfileBuilder.ForIvan().Build();
         var traits = new[]
         {
             PersonalityTraitBuilder.Create()

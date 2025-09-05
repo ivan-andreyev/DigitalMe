@@ -1,25 +1,88 @@
-﻿**/.dockerignore
-**/.env
-**/.git
+# Docker ignore file for DigitalMe
+# Optimizes build context and reduces image size
+
+# Binaries and build artifacts
+**/bin/
+**/obj/
+**/out/
+**/TestResults/
+
+# Dependencies
+**/packages/
+**/.nuget/
+
+# IDE and editor files
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/*.sln.docstates
+**/*.userprefs
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+**/*.tmp
+**/*.temp
+
+# Logs
+**/logs/
+**/*.log
+**/npm-debug.log*
+
+# Runtime files
+**/appsettings.Development.json
+**/appsettings.Local.json
+
+# Documentation and markdown
+**/*.md
+**/docs/
+**/README*
+
+# Git files
+**/.git/
 **/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/.idea
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/azds.yaml
-**/bin
-**/charts
-**/docker-compose*
+**/.gitattributes
+
+# CI/CD files
+**/.github/
+**/azure-pipelines.yml
+**/.azure/
+
+# MAUI project (excluded from CI builds)
+**/src/DigitalMe.MAUI/
+
+# Test files and coverage
+**/TestResults/
+**/coverage/
+**/*.trx
+**/*.coverage
+
+# Node.js dependencies (if any)
+**/node_modules/
+**/package-lock.json
+**/yarn.lock
+
+# Backup and temporary files
+**/*.bak
+**/*.backup
+**/*.old
+**/*.orig
+
+# Docker files (avoid recursion)
 **/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
-**/secrets.dev.yaml
-**/values.dev.yaml
-LICENSE
-README.md
+**/.dockerignore
+
+# Environment files with secrets
+**/.env
+**/.env.local
+**/.env.production
+
+# Emergency backup directories
+**/emergency-backup/
+
+# Planning and documentation directories
+**/plans/
+**/analysis/
+**/review/

@@ -4,7 +4,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using DigitalMe.DTOs;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Builders;
 

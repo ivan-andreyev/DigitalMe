@@ -7,7 +7,7 @@ using Xunit;
 using FluentAssertions;
 using DigitalMe.Data;
 using DigitalMe.DTOs;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -289,11 +289,11 @@ public class ChatFlowTests : IClassFixture<WebApplicationFactory<Program>>, IAsy
         // Create Ivan's personality profile
         var ivanPersonality = new PersonalityProfile
         {
-            Id = Guid.NewGuid(),
+            // Id will be auto-generated
             Name = "Ivan",
             Description = "Ivan is a 34-year-old Head of R&D with analytical, direct, technical personality",
-            Traits = "{\"name\":\"Ivan\",\"age\":34,\"profession\":\"Head of R&D\",\"personality\":\"Analytical, Direct, Technical\",\"communication_style\":\"Professional but friendly\"}",
-            CreatedAt = DateTime.UtcNow,
+            Traits = new List<PersonalityTrait>(),
+            // CreatedAt will be auto-set
             UpdatedAt = DateTime.UtcNow
         };
 
@@ -318,7 +318,7 @@ public class ChatFlowTests : IClassFixture<WebApplicationFactory<Program>>, IAsy
             }
         };
         
-        ivanPersonality.PersonalityTraits = traits;
+        ivanPersonality.Traits = traits;
 
         context.PersonalityProfiles.Add(ivanPersonality);
         await context.SaveChangesAsync();

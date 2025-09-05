@@ -4,7 +4,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using DigitalMe.DTOs;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Builders;
 
@@ -25,7 +25,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task GetStatus_WithIvanPersonalityExists_ShouldReturnReadyStatus()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
 
         // Act
@@ -85,7 +85,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_WithIvanPersonality_ShouldProcessMessageAndReturnResponse()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         var traits = new[]
         {
             PersonalityTraitBuilder.Create()
@@ -138,7 +138,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_MultipleMessages_ShouldMaintainConversationContext()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
 
         var userId = "contextuser456";
@@ -190,7 +190,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_DifferentUsers_ShouldCreateSeparateConversations()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
 
         var user1Request = new ChatRequestDto
@@ -239,7 +239,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_DifferentPlatforms_ShouldCreateSeparateConversations()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
 
         var userId = "multiplatformuser";
@@ -290,7 +290,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_WithEmptyMessage_ShouldProcessSuccessfully()
     {
         // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan();
+        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
 
         var chatRequest = new ChatRequestDto

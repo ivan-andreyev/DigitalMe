@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DigitalMe.Services;
 using DigitalMe.Repositories;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 
 namespace DigitalMe.Tests.Unit.Services;

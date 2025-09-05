@@ -137,6 +137,11 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IPersonalityService, PersonalityService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
+
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<DigitalMeDbContext>("database")
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 builder.Services.AddScoped<IHealthChecker, HealthChecker>();
 builder.Services.AddScoped<IMessageProcessor, MessageProcessor>();
 

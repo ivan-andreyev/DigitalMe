@@ -1,0 +1,59 @@
+name: Security Scan
+
+on:
+  schedule:
+    # Run security scan daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+jobs:
+  security-analysis:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0'
+
+    - name: 🔄 Restore Dependencies
+      run: dotnet restore DigitalMe.CI.sln
+
+    - name: 🔍 Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+
+    - name: 🔨 Build for Analysis
+      run: dotnet build DigitalMe.CI.sln --configuration Release --no-restore
+
+    - name: 📊 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+    - name: 🔐 Run DevSkim Analysis
+      uses: microsoft/DevSkim-Action@v1
+      
+    - name: 📋 Upload DevSkim Results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: devskim-results.sarif
+
+    - name: 🛡️ Run .NET Security Scan
+      run: |
+        dotnet list package --vulnerable --include-transitive --format json > vulnerability-report.json
+        
+    - name: 📤 Upload Vulnerability Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: vulnerability-report
+        path: vulnerability-report.json

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging;
 using DigitalMe.Services.Tools;
+using DigitalMe.Data.Entities;
 using DigitalMe.Models;
 
 namespace DigitalMe.Tests.Integration;

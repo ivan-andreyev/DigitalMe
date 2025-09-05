@@ -1,17 +1,21 @@
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
+using System.Collections.Generic;
 
 namespace DigitalMe.Tests.Unit.Builders;
 
 public class PersonalityProfileBuilder
 {
-    private PersonalityProfile _profile;
+    private readonly PersonalityProfile _profile;
 
     public PersonalityProfileBuilder()
     {
         _profile = new PersonalityProfile();
     }
 
-    public static PersonalityProfileBuilder Create() => new();
+    public static PersonalityProfileBuilder Create()
+    {
+        return new PersonalityProfileBuilder();
+    }
 
     public PersonalityProfileBuilder WithId(Guid id)
     {
@@ -31,7 +35,7 @@ public class PersonalityProfileBuilder
         return this;
     }
 
-    public PersonalityProfileBuilder WithTraits(string traits)
+    public PersonalityProfileBuilder WithTraits(ICollection<PersonalityTrait> traits)
     {
         _profile.Traits = traits;
         return this;
@@ -43,50 +47,44 @@ public class PersonalityProfileBuilder
         return this;
     }
 
-    public PersonalityProfileBuilder WithUpdatedAt(DateTime updatedAt)
+    public PersonalityProfileBuilder WithAge(int age)
     {
-        _profile.UpdatedAt = updatedAt;
+        _profile.Age = age;
         return this;
     }
 
-    public PersonalityProfileBuilder WithPersonalityTrait(PersonalityTrait trait)
+    public PersonalityProfileBuilder WithTags(List<PersonalityTrait> traits)
     {
-        _profile.PersonalityTraits.Add(trait);
+        _profile.Traits = traits;
         return this;
     }
 
-    public PersonalityProfileBuilder WithPersonalityTraits(ICollection<PersonalityTrait> traits)
+    public static PersonalityProfileBuilder ForIvan()
     {
-        _profile.PersonalityTraits = traits;
-        return this;
-    }
-
-    public PersonalityProfile Build() => _profile;
-
-    public static PersonalityProfile Default() => Create()
-        .WithName("Ivan Petrov")
-        .WithDescription("Head of R&D, pragmatic programmer, focus on results")
-        .WithTraits("""
+        var traits = new List<PersonalityTrait>
         {
-            "personality": "analytical",
-            "communication_style": "direct",
-            "technical_preferences": "C#, .NET, strongly typed",
-            "decision_making": "data-driven"
-        }
-        """)
-        .Build();
-
-    public static PersonalityProfile ForIvan() => Create()
-        .WithName("Ivan Digital Clone")
-        .WithDescription("Digital representation of Ivan's personality and thinking patterns")
-        .WithTraits("""
-        {
-            "core_values": ["efficiency", "quality", "family"],
-            "communication_style": "structured_direct",
-            "technical_stack": ["csharp", "dotnet", "clean_architecture"],
-            "work_philosophy": "pragmatic_perfectionist",
-            "leadership_style": "mentoring_technical_lead"
-        }
-        """)
-        .Build();
+            new PersonalityTrait(Guid.NewGuid(), "Communication", "Direct", "Прямолинейное общение без лишних слов", 8.0),
+            new PersonalityTrait(Guid.NewGuid(), "Technical", "Expert", "Глубокие технические знания в .NET/C#", 9.0),
+            new PersonalityTrait(Guid.NewGuid(), "Philosophy", "Independent", "Всем похуй - независимая позиция", 7.0)
+        };
+        
+        return Create()
+            .WithName("Ivan")
+            .WithAge(34)
+            .WithDescription("Программист, Head of R&D, прямолинейный и честный")
+            .WithTraits(traits);
+    }
+    
+    public static PersonalityProfileBuilder Default()
+    {
+        return Create()
+            .WithName("Default Profile")
+            .WithAge(30)
+            .WithDescription("Default test personality profile");
+    }
+    
+    public PersonalityProfile Build()
+    {
+        return _profile;
+    }
 }

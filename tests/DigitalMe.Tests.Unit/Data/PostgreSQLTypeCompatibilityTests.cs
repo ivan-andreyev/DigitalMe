@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Tests.Unit.Data;
 
@@ -158,7 +158,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         {
             Name = "DateTime Test Profile",
             Description = "Testing DateTime field compatibility",
-            Traits = "{\"test\": \"trait\"}",
+            Traits = new List<PersonalityTrait>(),
             CreatedAt = createdTime, // These were TEXT fields
             UpdatedAt = updatedTime
         };
@@ -196,9 +196,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             TelegramMessageId = 123456,
             ChatId = 789,
             Text = "Test Telegram message",
-            FromUsername = "testuser",
-            IsFromIvan = true, // Boolean field that was INTEGER
-            ProcessedByAgent = false, // Boolean field that was INTEGER  
+            Username = "testuser",
             MessageDate = messageDate, // DateTime that was TEXT
             CreatedAt = createdDate // DateTime that was TEXT
         };
@@ -212,18 +210,17 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             .FirstOrDefaultAsync(t => t.TelegramMessageId == 123456);
 
         savedMessage.Should().NotBeNull("telegram message should save with mixed field types");
-        savedMessage!.IsFromIvan.Should().BeTrue("boolean IsFromIvan should be preserved");
-        savedMessage.ProcessedByAgent.Should().BeFalse("boolean ProcessedByAgent should be preserved");
+        savedMessage!.Username.Should().Be("testuser");
         savedMessage.MessageDate.Should().BeCloseTo(messageDate, TimeSpan.FromSeconds(1));
         savedMessage.CreatedAt.Should().BeCloseTo(createdDate, TimeSpan.FromSeconds(1));
 
-        // Test queries that combine boolean and DateTime operations
-        var ivanRecentMessages = await _context.TelegramMessages
-            .Where(t => t.IsFromIvan == true && t.MessageDate > DateTime.UtcNow.AddHours(-1))
+        // Test queries that combine string and DateTime operations
+        var userRecentMessages = await _context.TelegramMessages
+            .Where(t => t.Username == "testuser" && t.MessageDate > DateTime.UtcNow.AddHours(-1))
             .ToListAsync();
 
-        ivanRecentMessages.Should().Contain(t => t.Id == telegramMessage.Id,
-            "complex queries with boolean AND DateTime should work");
+        userRecentMessages.Should().Contain(t => t.Id == telegramMessage.Id,
+            "complex queries with string AND DateTime should work");
     }
 
     [Fact]
@@ -240,7 +237,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             Id = personalityId,
             Name = "GUID Test",
             Description = "Testing GUID fields",
-            Traits = "{}",
+            Traits = new List<PersonalityTrait>(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

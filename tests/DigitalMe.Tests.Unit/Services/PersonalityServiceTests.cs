@@ -1,4 +1,4 @@
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Repositories;
 using DigitalMe.Services;
 using DigitalMe.Tests.Unit.Builders;
@@ -26,7 +26,7 @@ public class PersonalityServiceTests : TestBase
     public async Task GetPersonalityAsync_WithValidName_ReturnsPersonalityProfile()
     {
         // Arrange
-        var expectedProfile = PersonalityProfileBuilder.ForIvan();
+        var expectedProfile = PersonalityProfileBuilder.ForIvan().Build();
         _mockRepository.Setup(r => r.GetProfileAsync("Ivan Digital Clone"))
             .ReturnsAsync(expectedProfile);
 
@@ -174,7 +174,7 @@ public class PersonalityServiceTests : TestBase
     public async Task GenerateSystemPromptAsync_WithProfileButNoTraits_ReturnsBasicSystemPrompt()
     {
         // Arrange
-        var profile = PersonalityProfileBuilder.ForIvan();
+        var profile = PersonalityProfileBuilder.ForIvan().Build();
         var emptyTraits = new List<PersonalityTrait>();
         
         _mockRepository.Setup(r => r.GetProfileByIdAsync(profile.Id))

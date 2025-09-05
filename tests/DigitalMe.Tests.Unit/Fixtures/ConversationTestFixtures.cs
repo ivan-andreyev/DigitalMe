@@ -1,4 +1,4 @@
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Tests.Unit.Builders;
 
 namespace DigitalMe.Tests.Unit.Fixtures;

@@ -3,8 +3,10 @@ using FluentAssertions;
 using Moq;
 using Microsoft.Extensions.Logging;
 using DigitalMe.Services.AgentBehavior;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Services;
+using DigitalMe.Services.Tools;
+using DigitalMe.Models;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -12,6 +14,7 @@ public class AgentBehaviorEngineTests
 {
     private readonly Mock<IPersonalityService> _mockPersonalityService;
     private readonly Mock<IMcpService> _mockMcpService;
+    private readonly Mock<IToolRegistry> _mockToolRegistry;
     private readonly Mock<ILogger<AgentBehaviorEngine>> _mockLogger;
     private readonly AgentBehaviorEngine _engine;
 
@@ -19,8 +22,9 @@ public class AgentBehaviorEngineTests
     {
         _mockPersonalityService = new Mock<IPersonalityService>();
         _mockMcpService = new Mock<IMcpService>();
+        _mockToolRegistry = new Mock<IToolRegistry>();
         _mockLogger = new Mock<ILogger<AgentBehaviorEngine>>();
-        _engine = new AgentBehaviorEngine(_mockPersonalityService.Object, _mockMcpService.Object, _mockLogger.Object);
+        _engine = new AgentBehaviorEngine(_mockPersonalityService.Object, _mockMcpService.Object, _mockToolRegistry.Object, _mockLogger.Object);
     }
 
     [Fact]
@@ -189,10 +193,9 @@ public class AgentBehaviorEngineTests
             Id = Guid.NewGuid(),
             Name = "Ivan",
             Description = "Test personality for Ivan - direct, technical, analytical",
-            Traits = "{\"communication\":\"direct\",\"technical\":\"expert\",\"personality\":\"analytical\"}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            PersonalityTraits = new List<PersonalityTrait>
+            Traits = new List<PersonalityTrait>
             {
                 new PersonalityTrait
                 {

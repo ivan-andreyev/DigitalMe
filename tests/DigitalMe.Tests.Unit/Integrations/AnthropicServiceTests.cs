@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using Moq.Protected;
 using DigitalMe.Integrations.MCP;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 
 namespace DigitalMe.Tests.Unit.Integrations;
@@ -212,7 +212,7 @@ public class AnthropicServiceTests
     }
 
     [Fact]
-    public async Task SendMessageAsync_WithPersonalityTraits_ShouldIncludePersonalityInSystemPrompt()
+    public async Task SendMessageAsync_WithTraits_ShouldIncludePersonalityInSystemPrompt()
     {
         // Arrange
         var message = "How should I approach this technical problem?";
@@ -299,10 +299,9 @@ public class AnthropicServiceTests
             Id = Guid.NewGuid(),
             Name = "Ivan",
             Description = "Test personality - direct, technical, analytical",
-            Traits = "{\"communication\":\"direct\",\"technical\":\"expert\"}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            PersonalityTraits = new List<PersonalityTrait>
+            Traits = new List<PersonalityTrait>
             {
                 new PersonalityTrait
                 {

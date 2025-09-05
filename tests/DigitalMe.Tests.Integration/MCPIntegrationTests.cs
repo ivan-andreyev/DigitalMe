@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging;
 using DigitalMe.Integrations.MCP;
 using DigitalMe.Services;
+using DigitalMe.Data.Entities;
 using DigitalMe.Models;
 
 namespace DigitalMe.Tests.Integration;

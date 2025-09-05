@@ -1,0 +1,243 @@
+name: DigitalMe CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main, master ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+
+env:
+  DOTNET_VERSION: '8.0'
+  SOLUTION_PATH: 'DigitalMe.sln'
+  CONFIGURATION: 'Release'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: digitalme_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Cache Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.props') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: 🔄 Restore Dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: 🔍 Code Analysis
+      run: |
+        echo "Running code analysis..."
+        dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+
+    - name: 🧪 Run Unit Tests
+      run: |
+        dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
+          --configuration ${{ env.CONFIGURATION }} \
+          --no-build \
+          --logger "trx;LogFileName=unit-tests.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory TestResults
+
+    - name: 🔗 Run Integration Tests
+      run: |
+        dotnet test tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj \
+          --configuration ${{ env.CONFIGURATION }} \
+          --no-build \
+          --logger "trx;LogFileName=integration-tests.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory TestResults
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=digitalme_test;Username=postgres;Password=postgres"
+
+    - name: 📊 Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: TestResults/
+        retention-days: 30
+
+    - name: 📋 Test Report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: '.NET Test Results'
+        path: 'TestResults/*.trx'
+        reporter: 'dotnet-trx'
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 🚀 Checkout Code  
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔄 Restore Dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: 🔍 Build for Analysis
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Debug --no-restore
+
+    - name: 🧹 Run Code Analysis
+      run: |
+        echo "Running static code analysis..."
+        # Add your preferred static analysis tools here
+        # Example: dotnet-sonarscanner, security scanning, etc.
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔒 Run Security Scan
+      uses: securecodewarrior/github-action-add-sarif@v1
+      if: false # Enable when you have SARIF results
+      with:
+        sarif-file: 'security-results.sarif'
+
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🔑 Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 📝 Extract Metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}/digitalme
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: 🔨 Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, build-docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.digitalme.app
+    
+    steps:
+    - name: 🚀 Deploy to Staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your staging deployment logic here
+        # Example: kubectl, docker-compose, cloud deployment, etc.
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, build-docker]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    environment:
+      name: production
+      url: https://digitalme.app
+    
+    steps:
+    - name: 🚀 Deploy to Production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment logic here
+        # Example: Blue-green deployment, rolling updates, etc.
+
+  notify:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: always() && (failure() || success())
+    
+    steps:
+    - name: 📢 Notify on Success
+      if: needs.build.result == 'success'
+      run: |
+        echo "✅ DigitalMe build succeeded!"
+        # Add notifications: Slack, Teams, email, etc.
+        
+    - name: 📢 Notify on Failure  
+      if: needs.build.result == 'failure'
+      run: |
+        echo "❌ DigitalMe build failed!"
+        # Add failure notifications: Slack, Teams, email, etc.

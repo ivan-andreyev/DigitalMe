@@ -62,9 +62,13 @@
 
 	<!-- Windows-specific properties -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<WindowsPackageType>MSIX</WindowsPackageType>
+		<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+		<WindowsPackageType>None</WindowsPackageType>
 		<GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+		<UseWinUI>true</UseWinUI>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<UseAppHost>true</UseAppHost>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<ItemGroup>

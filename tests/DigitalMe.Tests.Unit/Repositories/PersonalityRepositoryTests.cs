@@ -1,5 +1,5 @@
 using DigitalMe.Data;
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 using DigitalMe.Repositories;
 using DigitalMe.Tests.Unit.Builders;
 using DigitalMe.Tests.Unit.Fixtures;
@@ -23,7 +23,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
         
-        var profile = PersonalityProfileBuilder.ForIvan();
+        var profile = PersonalityProfileBuilder.ForIvan().Build();
         context.PersonalityProfiles.Add(profile);
         await context.SaveChangesAsync();
 
@@ -52,7 +52,7 @@ public class PersonalityRepositoryTests : TestBase
     }
 
     [Fact]
-    public async Task GetProfileAsync_IncludesPersonalityTraits()
+    public async Task GetProfileAsync_IncludesTraits()
     {
         // Arrange
         await using var context = CreateContext();
@@ -67,8 +67,8 @@ public class PersonalityRepositoryTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result!.PersonalityTraits.Should().HaveCount(traits.Count);
-        result.PersonalityTraits.Should().BeEquivalentTo(traits, options => 
+        result!.Traits.Should().HaveCount(traits.Count);
+        result.Traits.Should().BeEquivalentTo(traits, options => 
             options.Excluding(t => t.PersonalityProfile));
     }
 
@@ -79,7 +79,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
         await context.SaveChangesAsync();
 
@@ -89,7 +89,7 @@ public class PersonalityRepositoryTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(profile, options => 
-            options.Excluding(p => p.PersonalityTraits));
+            options.Excluding(p => p.Traits));
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class PersonalityRepositoryTests : TestBase
         var savedProfile = await context.PersonalityProfiles.FindAsync(profile.Id);
         savedProfile.Should().NotBeNull();
         savedProfile.Should().BeEquivalentTo(profile, options => 
-            options.Excluding(p => p.PersonalityTraits));
+            options.Excluding(p => p.Traits));
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
         await context.SaveChangesAsync();
 
@@ -173,7 +173,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
         await context.SaveChangesAsync();
 
@@ -210,7 +210,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
 
         var traits = new List<PersonalityTrait>
@@ -262,7 +262,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
         await context.SaveChangesAsync();
 
@@ -295,7 +295,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
 
         var trait = PersonalityTraitBuilder.Default();
@@ -327,7 +327,7 @@ public class PersonalityRepositoryTests : TestBase
         await using var context = CreateContext();
         var repository = new PersonalityRepository(context);
 
-        var profile = PersonalityProfileBuilder.Default();
+        var profile = PersonalityProfileBuilder.Default().Build();
         context.PersonalityProfiles.Add(profile);
 
         var trait = PersonalityTraitBuilder.Default();

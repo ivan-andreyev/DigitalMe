@@ -12,13 +12,13 @@ public abstract class BaseEntity : IEntity
     /// Unique identifier for the entity, auto-generated on creation.
     /// </summary>
     [Key]
-    public Guid Id { get; protected set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
     
     /// <summary>
     /// Timestamp when the entity was created (UTC).
     /// Set automatically on construction, immutable thereafter.
     /// </summary>
-    public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     /// <summary>
     /// Timestamp when the entity was last updated (UTC).
