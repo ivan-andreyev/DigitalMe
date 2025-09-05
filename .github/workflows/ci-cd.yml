@@ -2,14 +2,14 @@ name: DigitalMe CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ master ]  # Only master triggers full CI/CD
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
       - 'LICENSE'
   pull_request:
-    branches: [ main, master ]
+    branches: [ master ]  # PRs only to master
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -136,7 +136,7 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
     - name: 🚀 Checkout Code
@@ -152,7 +152,7 @@ jobs:
     name: Build Docker Images
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
     - name: 🚀 Checkout Code
@@ -191,27 +191,11 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build, build-docker]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://staging.digitalme.app
-    
-    steps:
-    - name: 🚀 Deploy to Staging
-      run: |
-        echo "Deploying to staging environment..."
-        # Add your staging deployment logic here
-        # Example: kubectl, docker-compose, cloud deployment, etc.
-
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [build, build-docker]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
       name: production
       url: https://digitalme.app

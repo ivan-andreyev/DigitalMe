@@ -122,23 +122,41 @@ curl http://localhost:8080/runtime/threadpool # ThreadPool статистика
 
 ## 🚀 Development
 
-### Локальная разработка
+### Git Flow стратегия
 
 ```bash
-# Тестирование CI/CD pipeline локально
+# Повседневная разработка (develop ветка)
+git checkout develop
+git pull origin develop
+
+# Быстрая проверка перед коммитом
 ./scripts/test-ci-locally.sh
 
-# Запуск с горячей перезагрузкой
+# Локальная разработка
 dotnet watch run --project DigitalMe
 
-# Запуск тестов
-dotnet test DigitalMe.CI.sln --configuration Release
+# Слияние в production (master)
+# Создавайте Pull Request: develop → master
+```
+
+**📖 Подробнее:** [Git Flow Documentation](./README-GIT-FLOW.md)
+
+### Локальное тестирование
+
+```bash
+# Полное тестирование CI/CD pipeline
+./scripts/test-ci-locally.sh
+
+# Только юнит тесты (быстро)
+dotnet test tests/DigitalMe.Tests.Unit
+
+# Все тесты
+dotnet test DigitalMe.sln --configuration Release
 ```
 
 ### Структура проектов
 
-- **`DigitalMe.sln`** - Полный solution (включая MAUI)
-- **`DigitalMe.CI.sln`** - CI/CD solution (без MAUI для стабильности)
+- **`DigitalMe.sln`** - Полный solution (все проекты включая MAUI)
 
 ### Database Setup
 

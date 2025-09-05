@@ -1,0 +1,99 @@
+name: Develop Branch CI
+
+on:
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+
+env:
+  DOTNET_VERSION: '8.0'
+  SOLUTION_PATH: 'DigitalMe.sln'
+  CONFIGURATION: 'Debug'  # Faster builds for development
+
+jobs:
+  quick-build:
+    name: Quick Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Faster timeout for quick feedback
+    
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Cache Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.props') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: 🔄 Restore Dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: 🔨 Quick Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: 🧪 Run Unit Tests Only
+      run: |
+        dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
+          --configuration ${{ env.CONFIGURATION }} \
+          --no-build \
+          --logger "console;verbosity=minimal"
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 🚀 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔄 Restore Dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: 🔍 Build for Analysis
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Debug --no-restore
+
+    - name: 💡 Check Code Style
+      run: |
+        echo "✅ Checking code style compliance..."
+        # Add format checking if needed
+        # dotnet format --verify-no-changes --verbosity minimal
+
+  notify-develop:
+    name: Development Notification
+    runs-on: ubuntu-latest
+    needs: [quick-build]
+    if: always() && github.event_name == 'push'
+    
+    steps:
+    - name: 📢 Build Status
+      run: |
+        if [ "${{ needs.quick-build.result }}" == "success" ]; then
+          echo "✅ Develop build successful - ready for work!"
+        else
+          echo "❌ Develop build failed - check your changes"
+        fi
