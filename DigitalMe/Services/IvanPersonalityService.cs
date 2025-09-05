@@ -51,7 +51,7 @@ public class IvanPersonalityService : IIvanPersonalityService
             // Id, CreatedAt, UpdatedAt are handled by base constructor
             Name = "Ivan Digital Clone",
             Description = "Digital clone of Ivan - 34-year-old Head of R&D at EllyAnalytics",
-            PersonalityTraits = new List<PersonalityTrait>
+            Traits = new List<PersonalityTrait>
             {
                 new() { Name = "Age", Description = "34 years old", Category = "Demographics", Weight = 0.8 },
                 new() { Name = "Location", Description = "Batumi, Georgia (originally from Orsk, Russia)", Category = "Demographics", Weight = 0.7 },
@@ -70,7 +70,7 @@ public class IvanPersonalityService : IIvanPersonalityService
             }
         };
 
-        _logger.LogInformation("Ivan's personality profile loaded with {TraitCount} traits", _cachedProfile.PersonalityTraits?.Count ?? 0);
+        _logger.LogInformation("Ivan's personality profile loaded with {TraitCount} traits", _cachedProfile.Traits?.Count ?? 0);
 
         return Task.FromResult(_cachedProfile);
     }

@@ -184,10 +184,10 @@ builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramMessageDispatche
 builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommandHandler, DigitalMe.Services.Telegram.TelegramCommandHandler>();
 
 // Telegram Commands - Command pattern implementations
-builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommand, DigitalMe.Services.Telegram.Commands.StartCommand>();
-builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommand, DigitalMe.Services.Telegram.Commands.HelpCommand>();
-builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommand, DigitalMe.Services.Telegram.Commands.StatusCommand>();
-builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommand, DigitalMe.Services.Telegram.Commands.SettingsCommand>();
+builder.Services.AddScoped<DigitalMe.Services.Telegram.Commands.ITelegramCommand, DigitalMe.Services.Telegram.Commands.StartCommand>();
+builder.Services.AddScoped<DigitalMe.Services.Telegram.Commands.ITelegramCommand, DigitalMe.Services.Telegram.Commands.HelpCommand>();
+builder.Services.AddScoped<DigitalMe.Services.Telegram.Commands.ITelegramCommand, DigitalMe.Services.Telegram.Commands.StatusCommand>();
+builder.Services.AddScoped<DigitalMe.Services.Telegram.Commands.ITelegramCommand, DigitalMe.Services.Telegram.Commands.SettingsCommand>();
 
 // User Mapping Service - for Telegram user identity mapping
 builder.Services.AddScoped<DigitalMe.Services.UserMapping.IUserMappingService, DigitalMe.Services.UserMapping.UserMappingService>();

@@ -114,7 +114,7 @@ public class DigitalMeDbContext : IdentityDbContext
         // PersonalityProfile relationships
         modelBuilder.Entity<PersonalityTrait>()
             .HasOne(pt => pt.PersonalityProfile)
-            .WithMany(pp => pp.PersonalityTraits)
+            .WithMany(pp => pp.Traits)
             .HasForeignKey(pt => pt.PersonalityProfileId)
             .OnDelete(DeleteBehavior.Cascade);
             

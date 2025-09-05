@@ -16,14 +16,14 @@ public class PersonalityRepository : IPersonalityRepository
     public async Task<PersonalityProfile?> GetProfileAsync(string name)
     {
         return await _context.PersonalityProfiles
-            .Include(p => p.PersonalityTraits)
+            .Include(p => p.Traits)
             .FirstOrDefaultAsync(p => p.Name == name);
     }
 
     public async Task<PersonalityProfile?> GetProfileByIdAsync(Guid id)
     {
         return await _context.PersonalityProfiles
-            .Include(p => p.PersonalityTraits)
+            .Include(p => p.Traits)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

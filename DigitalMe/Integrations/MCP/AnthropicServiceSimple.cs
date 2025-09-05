@@ -165,7 +165,7 @@ public class AnthropicServiceSimple : IAnthropicService
         var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
         var systemPrompt = _ivanPersonalityService.GenerateSystemPrompt(ivanProfile);
         
-        _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfile.PersonalityTraits?.Count ?? 0);
+        _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfile.Traits?.Count ?? 0);
         return systemPrompt;
     }
 

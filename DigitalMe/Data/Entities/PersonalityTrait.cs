@@ -103,6 +103,12 @@ public class PersonalityTrait : BaseEntity
     public virtual PersonalityProfile Profile { get; set; } = null!;
 
     /// <summary>
+    /// Navigation property to the PersonalityProfile this trait belongs to.
+    /// Used by Entity Framework for relationship mapping and queries.
+    /// </summary>
+    public virtual PersonalityProfile PersonalityProfile { get; set; } = null!;
+
+    /// <summary>
     /// Default constructor for Entity Framework.
     /// </summary>
     public PersonalityTrait() : base() { }
