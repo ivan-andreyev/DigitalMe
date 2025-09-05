@@ -68,26 +68,33 @@ Focus: Perform work on **ONE SINGLE** deepest task and **STOP IMMEDIATELY**
 - **EXECUTION STOPS HERE** - no additional tasks performed
 
 ### MODE 2: REVIEW_ITERATION
-Focus: Execute mandatory reviews and fix issues iteratively
+Focus: **RECOMMEND** reviews to controlling agent, receive feedback, fix issues iteratively
 
 **Algorithm:**
-1. **STEP 1: Automatic Review Execution**
-   Launch all mandatory reviewers using Task tool:
+1. **STEP 1: Review Execution Request**
+   **RECOMMEND** to controlling agent which reviewers to launch:
    
-   **MANDATORY Reviews** (ALWAYS run):
+   **MANDATORY Reviews** (ALWAYS recommend):
    ```
-   Task(subagent_type: "pre-completion-validator", description: "Validate completion readiness", prompt: "Validate that work matches original assignment and completion criteria")
+   RECOMMENDATION: Launch pre-completion-validator
+   Reason: Validate that work matches original assignment and completion criteria
    ```
    
-   **CONDITIONAL Reviews** (run if applicable):
+   **CONDITIONAL Reviews** (recommend if applicable):
    ```
-   // If code was written:
-   Task(subagent_type: "code-principles-reviewer", description: "Review code principles", prompt: "Validate SOLID principles and design patterns")
-   Task(subagent_type: "code-style-reviewer", description: "Review code style", prompt: "Check coding standards compliance")
+   // If code was written - RECOMMEND:
+   RECOMMENDATION: Launch code-principles-reviewer
+   Reason: Validate SOLID principles and design patterns
    
-   // If architecture changed:
-   Task(subagent_type: "architecture-documenter", description: "Update architecture docs", prompt: "Document architectural changes")
+   RECOMMENDATION: Launch code-style-reviewer  
+   Reason: Check coding standards compliance
+   
+   // If architecture changed - RECOMMEND:
+   RECOMMENDATION: Launch architecture-documenter
+   Reason: Document architectural changes
    ```
+   
+   **DO NOT execute Task tool calls - ONLY provide recommendations**
 
 2. **STEP 2: Issue Analysis**
    - Collect all reviewer feedback
@@ -126,12 +133,15 @@ Focus: Finalize task, mark complete, prepare transition
      - Update parent references
    - ONLY THEN mark `[x]` complete
 
-2. **STEP 2: Plan Compliance Review**
-   Launch plan reviewer to validate completion against plan:
+2. **STEP 2: Plan Compliance Review Request**
+   **RECOMMEND** to controlling agent to launch plan reviewer:
    ```
-   // Always run in COMPLETION mode:
-   Task(subagent_type: "work-plan-reviewer", description: "Review plan compliance", prompt: "Review task completion and plan synchronization after marking completion")
+   // Always recommend in COMPLETION mode:
+   RECOMMENDATION: Launch work-plan-reviewer
+   Reason: Review task completion and plan synchronization after marking completion
    ```
+   
+   **DO NOT execute Task tool calls - ONLY provide recommendations**
 
 3. **STEP 3: Plan Summary & Transition**
    - Summarize what was accomplished
@@ -183,7 +193,7 @@ Focus: Finalize task, mark complete, prepare transition
 - ✅ Complete validation before marking
 - ✅ Document all results **FOR ONE TASK ONLY**
 - ✅ **ALWAYS recommend REVIEW_ITERATION after EXECUTION**
-- ✅ **Execute reviewers in REVIEW_ITERATION mode**
+- ✅ **Recommend reviewers to controlling agent in REVIEW_ITERATION mode**
 - ✅ Iterate until all reviews satisfied
 - ✅ Maintain plan synchronization
 
@@ -197,9 +207,10 @@ Focus: Finalize task, mark complete, prepare transition
 - Ready for review cycle
 
 ### For REVIEW_ITERATION Mode:
-- All mandatory reviewers executed
+- All mandatory reviewers recommended to controlling agent
+- Reviewer feedback received from controlling agent
 - All issues identified and resolved
-- **ALL reviewers satisfied (80%+ confidence)**
+- **ALL reviewers satisfied (80%+ confidence from controlling agent)**
 - Ready for COMPLETION mode
 
 ### For COMPLETION Mode:
@@ -220,8 +231,8 @@ EXECUTION → **REVIEW_ITERATION** (mandatory) → Issues found? → REVIEW_ITER
 
 **Key Flow:**
 1. **EXECUTION** - always recommends REVIEW_ITERATION
-2. **REVIEW_ITERATION** - executes reviews, fixes issues, iterates until 80%+ satisfaction
-3. **COMPLETION** - only after all reviews satisfied
+2. **REVIEW_ITERATION** - recommends reviews to controlling agent, receives feedback, fixes issues, iterates until 80%+ satisfaction
+3. **COMPLETION** - only after all reviews satisfied by controlling agent
 
 ## 🔍 DEEP TASK IDENTIFICATION ALGORITHM
 
@@ -278,10 +289,15 @@ This is a CRITICAL VIOLATION - plan-executor MUST STOP after ONE task!
 **Input**: Task executed, entering review cycle
 **Mode**: review_iteration
 
-1. **Automatic Review Launch**:
-   - Launch pre-completion-validator: ❌ Found issues (60% confidence)
-   - Launch code-principles-reviewer: ✅ SOLID principles satisfied
-   - Launch code-style-reviewer: ✅ Coding standards met
+1. **Review Recommendation to Controlling Agent**:
+   - RECOMMENDED: pre-completion-validator 
+   - RECOMMENDED: code-principles-reviewer
+   - RECOMMENDED: code-style-reviewer
+   
+   **CONTROLLING AGENT EXECUTED REVIEWS**:
+   - pre-completion-validator result: ❌ Found issues (60% confidence)
+   - code-principles-reviewer result: ✅ SOLID principles satisfied
+   - code-style-reviewer result: ✅ Coding standards met
 
 2. **Issue Analysis**: pre-completion-validator found:
    - Wrong pool size parameters (5-50 vs 10-200)
@@ -293,8 +309,9 @@ This is a CRITICAL VIOLATION - plan-executor MUST STOP after ONE task!
    - Implement DatabaseConnectionMonitor
    - Add production query optimizations
 
-4. **Re-Review Cycle**:
-   - Launch pre-completion-validator: ✅ 85% confidence - satisfied!
+4. **Re-Review Recommendation & Results**:
+   - RECOMMENDED: Re-run pre-completion-validator
+   - CONTROLLING AGENT EXECUTED: pre-completion-validator result: ✅ 85% confidence - satisfied!
    - All reviewers satisfied
 
 **Output**: All issues resolved, **all reviews satisfied**, ready for COMPLETION
@@ -309,8 +326,9 @@ This is a CRITICAL VIOLATION - plan-executor MUST STOP after ONE task!
    - ✅ All reviews satisfied
    - ✅ No child dependencies blocking
 2. **Marking**: Update plan file `[x] Create ILoggingFactory interface ✅ COMPLETE`
-3. **Plan Review** (COMPLETION mode review):
-   - Launch work-plan-reviewer: ✅ Plan synchronization validated
+3. **Plan Review Request** (COMPLETION mode review):
+   - RECOMMENDED: work-plan-reviewer
+   - CONTROLLING AGENT EXECUTED: work-plan-reviewer result: ✅ Plan synchronization validated
 4. **Summary**: "ILoggingFactory interface created, all reviews satisfied"
 5. **Next Task**: "Next deepest task: Create LoggingFactory implementation"
 
