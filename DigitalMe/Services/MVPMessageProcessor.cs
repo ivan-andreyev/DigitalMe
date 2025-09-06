@@ -35,11 +35,8 @@ public class MVPMessageProcessor : IMVPMessageProcessor
         {
             _logger.LogInformation("🔄 Processing user message (length: {MessageLength})", userMessage.Length);
 
-            // Step 1: Get Ivan's personality context - использую специальный MVP метод
-            var mvpPersonalityService = _personalityService as MVPPersonalityService;
-            var systemPrompt = mvpPersonalityService != null 
-                ? await mvpPersonalityService.GenerateIvanSystemPromptAsync()
-                : await _personalityService.GenerateSystemPromptAsync(Guid.NewGuid()); // Fallback
+            // Step 1: Get Ivan's personality context - используем интерфейсный метод для SOLID compliance
+            var systemPrompt = await _personalityService.GenerateIvanSystemPromptAsync();
             
             if (string.IsNullOrWhiteSpace(systemPrompt))
             {

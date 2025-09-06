@@ -121,4 +121,16 @@ public class PersonalityService : IPersonalityService
     {
         return await _personalityRepository.DeleteProfileAsync(id);
     }
+
+    public async Task<string> GenerateIvanSystemPromptAsync()
+    {
+        var ivanPersonality = await GetPersonalityAsync("Ivan");
+        if (ivanPersonality != null)
+        {
+            return await GenerateSystemPromptAsync(ivanPersonality.Id);
+        }
+        
+        _logger.LogWarning("Ivan personality profile not found, using default system prompt");
+        return "You are Ivan, a digital assistant. Respond professionally and helpfully.";
+    }
 }
