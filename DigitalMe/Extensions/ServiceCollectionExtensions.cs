@@ -77,8 +77,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
         services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackWebhookService, DigitalMe.Integrations.External.Slack.SlackWebhookService>();
         
-        // ClickUp Integration - TODO
-        // services.AddScoped<IClickUpService, ClickUpService>();
+        // ClickUp Integration - COMPLETED ✅
+        services.AddScoped<DigitalMe.Integrations.External.ClickUp.IClickUpService, DigitalMe.Integrations.External.ClickUp.ClickUpService>();
+        services.AddScoped<DigitalMe.Integrations.External.ClickUp.IClickUpWebhookService, DigitalMe.Integrations.External.ClickUp.ClickUpWebhookService>();
         
         return services;
     }
@@ -95,8 +96,8 @@ public static class ServiceCollectionExtensions
         // Slack HTTP client - COMPLETED ✅
         services.AddHttpClient<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
         
-        // Future HTTP clients will be added here:
-        // services.AddHttpClient<IClickUpService, ClickUpService>();
+        // ClickUp HTTP client - COMPLETED ✅
+        services.AddHttpClient<DigitalMe.Integrations.External.ClickUp.IClickUpService, DigitalMe.Integrations.External.ClickUp.ClickUpService>();
         
         return services;
     }

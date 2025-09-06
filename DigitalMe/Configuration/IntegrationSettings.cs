@@ -38,9 +38,70 @@ public class SlackSettings : BaseIntegrationSettings
 /// </summary>
 public class ClickUpSettings : BaseIntegrationSettings
 {
+    /// <summary>
+    /// ClickUp API Token (Personal or OAuth).
+    /// Format: pk_[team_id]_[token]
+    /// </summary>
     public string ApiToken { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Team ID for team-specific operations.
+    /// Can be found in ClickUp team settings.
+    /// </summary>
     public string TeamId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Workspace ID (legacy, kept for compatibility).
+    /// </summary>
     public string WorkspaceId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Default Space ID for operations.
+    /// Used when space is not explicitly specified.
+    /// </summary>
+    public string? DefaultSpaceId { get; set; }
+
+    /// <summary>
+    /// Default List ID for task creation.
+    /// Used when list is not explicitly specified.
+    /// </summary>
+    public string? DefaultListId { get; set; }
+
+    /// <summary>
+    /// Enable time tracking features.
+    /// Set to false if time tracking is not needed.
+    /// </summary>
+    public bool EnableTimeTracking { get; set; } = true;
+
+    /// <summary>
+    /// Enable webhook notifications.
+    /// Set to false to disable webhook processing.
+    /// </summary>
+    public bool EnableWebhooks { get; set; } = true;
+
+    /// <summary>
+    /// Webhook secret for signature validation.
+    /// Used to verify webhook authenticity.
+    /// </summary>
+    public string? WebhookSecret { get; set; }
+
+    /// <summary>
+    /// Default assignee ID for created tasks.
+    /// User ID from ClickUp team members.
+    /// </summary>
+    public int? DefaultAssigneeId { get; set; }
+
+    /// <summary>
+    /// Default priority level for new tasks.
+    /// Values: 1=Urgent, 2=High, 3=Normal, 4=Low
+    /// </summary>
+    public int DefaultPriority { get; set; } = 3;
+
+    /// <summary>
+    /// Default status for new tasks.
+    /// Should match status name in target list/space.
+    /// </summary>
+    public string DefaultStatus { get; set; } = "To Do";
 }
 
 /// <summary>
