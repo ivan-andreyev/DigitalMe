@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Digital Ivan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.ivan {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-bubble {
+            background: #007bff;
+            color: white;
+        }
+
+        .message.ivan .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e1e5e9;
+        }
+
+        .message-author {
+            font-size: 12px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .message.user .message-author {
+            color: #007bff;
+        }
+
+        .message.ivan .message-author {
+            color: #28a745;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-area input:focus {
+            border-color: #007bff;
+        }
+
+        .input-area button {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .input-area button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        .input-area button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: none;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .input-area {
+                padding: 15px;
+            }
+
+            .input-area input {
+                padding: 10px 14px;
+            }
+
+            .input-area button {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Chat with Digital Ivan</h1>
+            <p>Talk to Ivan, 34, Head of R&D at EllyAnalytics</p>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="message ivan">
+                <div class="message-author">Ivan</div>
+                <div class="message-bubble">
+                    Hi! I'm Ivan, your digital clone. I'm a 34-year-old programmer and Head of R&D at EllyAnalytics. 
+                    Feel free to ask me about C#, .NET, architecture, or anything else. How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            Ivan is typing...
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type your message..." />
+            <button id="sendButton" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const loading = document.getElementById('loading');
+
+        // Handle Enter key press
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Disable input while processing
+            setLoading(true);
+
+            // Add user message to chat
+            addMessage(message, true);
+            messageInput.value = '';
+
+            try {
+                // Call MVP API endpoint
+                const response = await fetch('/api/mvp/conversation/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ Message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                // Add Ivan's response to chat
+                addMessage(data.response, false);
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addErrorMessage('Sorry, there was an error sending your message. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ivan'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-author">${isUser ? 'You' : 'Ivan'}</div>
+                <div class="message-bubble">${escapeHtml(text)}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addErrorMessage(text) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = text;
+            
+            messagesContainer.appendChild(errorDiv);
+            scrollToBottom();
+        }
+
+        function setLoading(isLoading) {
+            sendButton.disabled = isLoading;
+            messageInput.disabled = isLoading;
+            loading.style.display = isLoading ? 'block' : 'none';
+            
+            if (isLoading) {
+                sendButton.textContent = 'Sending...';
+            } else {
+                sendButton.textContent = 'Send';
+                messageInput.focus();
+            }
+        }
+
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Focus on input when page loads
+        window.addEventListener('load', () => {
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html>

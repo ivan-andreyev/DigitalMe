@@ -55,3 +55,12 @@ public class MessageProcessingException : DigitalMeException
     public MessageProcessingException(string message, Exception innerException, object? errorData = null)
         : base("MESSAGE_PROCESSING_ERROR", message, innerException, errorData) { }
 }
+
+public class ExternalServiceException : DigitalMeException
+{
+    public ExternalServiceException(string message, object? errorData = null)
+        : base("EXTERNAL_SERVICE_ERROR", message, errorData) { }
+
+    public ExternalServiceException(string message, Exception innerException, object? errorData = null)
+        : base("EXTERNAL_SERVICE_ERROR", message, innerException, errorData) { }
+}

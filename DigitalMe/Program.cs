@@ -134,6 +134,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // DigitalMe Services - Standardized Registration
 builder.Services.AddDigitalMeServices(builder.Configuration);
 
+// Configure Security settings
+builder.Services.Configure<DigitalMe.Services.Security.SecuritySettings>(
+    builder.Configuration.GetSection("Security"));
+
+// Configure JWT settings
+builder.Services.Configure<DigitalMe.Configuration.JwtSettings>(
+    builder.Configuration.GetSection("JWT"));
+
 // Health Checks
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<DigitalMeDbContext>("database")
@@ -285,6 +293,11 @@ try
                 {
                     logger.LogInformation("✅ STEP 12: Database is up to date - no migrations to apply");
                 }
+                
+                // Seed Ivan's personality data for MVP
+                logger.LogInformation("🌱 STEP 14: Seeding Ivan's personality data...");
+                DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
+                logger.LogInformation("✅ STEP 15: Ivan's personality data seeded successfully!");
             }
         }
         catch (Exception ex)
@@ -313,6 +326,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

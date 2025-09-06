@@ -3,7 +3,7 @@
 > **PARENT PLAN**: [MAIN_PLAN.md](MAIN_PLAN.md) → MVP Implementation → Phase 3  
 > **SCOPE**: МИНИМАЛЬНАЯ Blazor страница для чата  
 > **TIMELINE**: 4 дня  
-> **STATUS**: 📋 **PENDING** - Waiting for Phase 2
+> **STATUS**: 🔄 **IN PROGRESS** - Starting Task 1: Single Chat Page
 
 ---
 

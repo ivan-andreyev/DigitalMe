@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
 using DigitalMe.Services;
+using DigitalMe.Services.Resilience;
+using DigitalMe.Services.Performance;
+using DigitalMe.Services.Security;
 using DigitalMe.Repositories;
 using DigitalMe.Integrations.External.Telegram;
 using DigitalMe.Integrations.External.Google;
 using DigitalMe.Integrations.External.GitHub;
 using DigitalMe.Integrations.MCP;
 using DigitalMe.Configuration;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace DigitalMe.Extensions;
 
@@ -32,11 +37,23 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
-        services.AddScoped<IPersonalityService, PersonalityService>();
+        // MVP: Use simplified PersonalityService without repository pattern
+        services.AddScoped<IPersonalityService, MVPPersonalityService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();
+        services.AddScoped<IMVPMessageProcessor, MVPMessageProcessor>();
         services.AddScoped<IHealthChecker, HealthChecker>();
+        
+        // Resilience services
+        services.AddSingleton<IResiliencePolicyService, ResiliencePolicyService>();
+        
+        // Performance optimization services
+        services.AddSingleton<IPerformanceOptimizationService, PerformanceOptimizationService>();
+        services.AddMemoryCache(); // Required for response caching
+        
+        // Security services
+        services.AddScoped<ISecurityValidationService, SecurityValidationService>();
         
         return services;
     }
@@ -87,22 +104,102 @@ public static class ServiceCollectionExtensions
     }
     
     /// <summary>
-    /// Register all HTTP clients for external APIs
+    /// Register all HTTP clients for external APIs with resilience policies
     /// </summary>
     public static IServiceCollection AddHttpClients(this IServiceCollection services)
     {
-        // Standard HTTP clients for external integrations
-        services.AddHttpClient<ITelegramService, TelegramService>();
-        services.AddHttpClient<IGitHubService, GitHubService>();
+        // Create service provider to get resilience policy service
+        var serviceProvider = services.BuildServiceProvider();
+        var resiliencePolicyService = serviceProvider.GetService<IResiliencePolicyService>();
+
+        // Telegram HTTP client with resilience policies and pooling optimization
+        services.AddHttpClient<ITelegramService, TelegramService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 10
+            })
+            .AddPolicyHandler((serviceProvider, request) => 
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("telegram") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3, 
+                           _ => TimeSpan.FromSeconds(2));
+            });
         
-        // GitHub Enhanced HTTP client
-        services.AddHttpClient<IGitHubEnhancedService, GitHubEnhancedService>();
+        // GitHub HTTP clients with resilience policies and optimized pooling
+        services.AddHttpClient<IGitHubService, GitHubService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 20 // Higher for GitHub due to better rate limits
+            })
+            .AddPolicyHandler((serviceProvider, request) => 
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("github") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3, 
+                           _ => TimeSpan.FromSeconds(2));
+            });
         
-        // Slack HTTP client - COMPLETED ✅
-        services.AddHttpClient<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
+        services.AddHttpClient<IGitHubEnhancedService, GitHubEnhancedService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 20,
+            })
+            .AddPolicyHandler((serviceProvider, request) => 
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("github") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3, 
+                           _ => TimeSpan.FromSeconds(2));
+            });
         
-        // ClickUp HTTP client - COMPLETED ✅
-        services.AddHttpClient<DigitalMe.Integrations.External.ClickUp.IClickUpService, DigitalMe.Integrations.External.ClickUp.ClickUpService>();
+        // Slack HTTP client with resilience policies and conservative pooling - COMPLETED ✅
+        services.AddHttpClient<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 5, // Conservative for Slack rate limits
+            })
+            .AddPolicyHandler((serviceProvider, request) => 
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("slack") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3, 
+                           _ => TimeSpan.FromSeconds(2));
+            });
+        
+        // ClickUp HTTP client with resilience policies and balanced pooling - COMPLETED ✅
+        services.AddHttpClient<DigitalMe.Integrations.External.ClickUp.IClickUpService, DigitalMe.Integrations.External.ClickUp.ClickUpService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 15, // Balanced for ClickUp
+            })
+            .AddPolicyHandler((serviceProvider, request) => 
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("clickup") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3, 
+                           _ => TimeSpan.FromSeconds(2));
+            });
         
         return services;
     }
