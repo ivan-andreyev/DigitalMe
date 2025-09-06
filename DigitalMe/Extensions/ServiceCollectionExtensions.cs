@@ -38,7 +38,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
         // MVP: Use simplified PersonalityService without repository pattern
-        services.AddScoped<IPersonalityService, MVPPersonalityService>();
+        // Register both interfaces for ISP compliance
+        services.AddScoped<MVPPersonalityService>();
+        services.AddScoped<IPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
+        services.AddScoped<IMVPPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();

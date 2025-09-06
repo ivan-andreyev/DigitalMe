@@ -8,8 +8,9 @@ namespace DigitalMe.Services;
 /// <summary>
 /// Simple MVP personality service with direct DbContext access
 /// No repository pattern - direct database operations for simplicity
+/// Implements both IPersonalityService (for compatibility) and IMVPPersonalityService (ISP compliance)
 /// </summary>
-public class MVPPersonalityService : IPersonalityService
+public class MVPPersonalityService : IPersonalityService, IMVPPersonalityService
 {
     private readonly DigitalMeDbContext _context;
     private readonly ILogger<MVPPersonalityService> _logger;
