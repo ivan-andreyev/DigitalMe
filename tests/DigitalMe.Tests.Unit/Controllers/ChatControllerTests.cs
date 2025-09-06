@@ -37,9 +37,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         var content = await response.Content.ReadAsStringAsync();
         var statusResponse = JsonSerializer.Deserialize<JsonElement>(content);
         
-        statusResponse.GetProperty("PersonalityLoaded").GetBoolean().Should().BeTrue();
-        // Note: McpConnected might be false in test environment due to external dependencies
-        statusResponse.GetProperty("Timestamp").ValueKind.Should().Be(JsonValueKind.String);
+        statusResponse.GetProperty("personalityLoaded").GetBoolean().Should().BeTrue();
+        // Note: mcpConnected might be false in test environment due to external dependencies
+        statusResponse.GetProperty("timestamp").ValueKind.Should().Be(JsonValueKind.String);
     }
 
     [Fact]
@@ -56,8 +56,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         var content = await response.Content.ReadAsStringAsync();
         var statusResponse = JsonSerializer.Deserialize<JsonElement>(content);
         
-        statusResponse.GetProperty("PersonalityLoaded").GetBoolean().Should().BeFalse();
-        statusResponse.GetProperty("Status").GetString().Should().Be("Not Ready");
+        statusResponse.GetProperty("personalityLoaded").GetBoolean().Should().BeFalse();
+        statusResponse.GetProperty("status").GetString().Should().Be("Not Ready");
     }
 
     [Fact]
