@@ -41,7 +41,8 @@ public class ClaudeApiService : IClaudeApiService
         _logger = logger;
 
         // Initialize Anthropic client
-        var apiKey = _configuration["Claude:ApiKey"] 
+        var apiKey = _configuration["Anthropic:ApiKey"] 
+            ?? Environment.GetEnvironmentVariable(_configuration["Anthropic:ApiKeyEnvironmentVariable"] ?? "ANTHROPIC_API_KEY")
             ?? throw new ArgumentException("Claude API key not configured");
 
         _anthropicClient = new AnthropicClient(apiKey);

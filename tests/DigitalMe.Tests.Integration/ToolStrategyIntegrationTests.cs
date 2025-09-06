@@ -23,7 +23,7 @@ public class ToolStrategyIntegrationTests : IClassFixture<CustomWebApplicationFa
     }
 
     [Fact]
-    public async Task ToolRegistry_ShouldRegisterAllAvailableStrategies()
+    public void ToolRegistry_ShouldRegisterAllAvailableStrategies()
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();

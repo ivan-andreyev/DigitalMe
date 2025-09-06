@@ -13,6 +13,7 @@ namespace DigitalMe.Tests.Integration;
 public class MCPIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
+#pragma warning disable CS0414 // Field assigned but never used - intended for future MCP server configuration
     private readonly string _mcpServerUrl = "http://localhost:3000/mcp";
 
     public MCPIntegrationTests(WebApplicationFactory<Program> factory)
@@ -132,8 +133,9 @@ public class MCPIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         agentResult.AgentResponse.Content.Should().Contain("структурированный", "should mention structured approach");
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         // Clean up any resources if needed
+        return ValueTask.CompletedTask;
     }
 }

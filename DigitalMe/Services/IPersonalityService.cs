@@ -1,4 +1,4 @@
-using DigitalMe.Models;
+using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services;
 
