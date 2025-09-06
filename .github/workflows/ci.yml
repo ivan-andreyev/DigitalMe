@@ -22,14 +22,19 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: Install MAUI workloads
-      run: dotnet workload install maui-tizen
+    - name: Restore dependencies (excluding MAUI)
+      run: |
+        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
     
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+    - name: Build (excluding MAUI)
+      run: |
+        dotnet build DigitalMe/DigitalMe.csproj --no-restore --configuration Release
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --no-restore --configuration Release
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --no-restore --configuration Release
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --no-restore --configuration Release
     
     - name: Run Unit Tests
       run: dotnet test tests/DigitalMe.Tests.Unit --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"

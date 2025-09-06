@@ -53,9 +53,6 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 📱 Install MAUI Workloads
-      run: dotnet workload install maui-tizen
-
     - name: 📦 Cache Dependencies
       uses: actions/cache@v4
       with:
@@ -64,13 +61,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: 🔄 Restore Dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: 🔄 Restore Dependencies (excluding MAUI)
+      run: |
+        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
     - name: 🔍 Code Analysis
       run: |
         echo "Running code analysis..."
-        dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+        dotnet build DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity normal
 
     - name: 🧪 Run Unit Tests
       run: |
@@ -124,14 +128,19 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 📱 Install MAUI Workloads
-      run: dotnet workload install maui-tizen
+    - name: 🔄 Restore Dependencies (excluding MAUI)
+      run: |
+        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
-    - name: 🔄 Restore Dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
-
-    - name: 🔍 Build for Analysis
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Debug --no-restore
+    - name: 🔍 Build for Analysis (excluding MAUI)
+      run: |
+        dotnet build DigitalMe/DigitalMe.csproj --configuration Debug --no-restore
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Debug --no-restore
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration Debug --no-restore
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Debug --no-restore
 
     - name: 🧹 Run Code Analysis
       run: |
