@@ -14,6 +14,7 @@ public class DigitalMeDbContext : IdentityDbContext
     
     public DbSet<PersonalityProfile> PersonalityProfiles { get; set; }
     public DbSet<PersonalityTrait> PersonalityTraits { get; set; }
+    public DbSet<TemporalBehaviorPattern> TemporalBehaviorPatterns { get; set; }
     public DbSet<Conversation> Conversations { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<TelegramMessage> TelegramMessages { get; set; }
@@ -147,10 +148,8 @@ public class DigitalMeDbContext : IdentityDbContext
             .HasIndex(c => new { c.StartTime, c.EndTime });
             
         // JSON Value Converters for complex fields
-        // PersonalityProfile.Traits is already string - just set column type for PostgreSQL
-        modelBuilder.Entity<PersonalityProfile>()
-            .Property(e => e.Traits)
-            .HasColumnType("jsonb"); // PostgreSQL JSONB for better performance
+        // Note: PersonalityProfile.Traits is a navigation property (ICollection<PersonalityTrait>), not a JSON string
+        // It's configured through relationships, not as a direct property
             
         // Message.Metadata is already string - just set column type for PostgreSQL  
         modelBuilder.Entity<Message>()
@@ -160,6 +159,7 @@ public class DigitalMeDbContext : IdentityDbContext
         // Base Entity configurations - apply to all entities inheriting from BaseEntity/AuditableBaseEntity
         ConfigureBaseEntity(modelBuilder.Entity<PersonalityProfile>());
         ConfigureBaseEntity(modelBuilder.Entity<PersonalityTrait>());
+        ConfigureBaseEntity(modelBuilder.Entity<TemporalBehaviorPattern>());
         ConfigureBaseEntity(modelBuilder.Entity<Conversation>());
         ConfigureBaseEntity(modelBuilder.Entity<Message>());
         
@@ -217,10 +217,8 @@ public class DigitalMeDbContext : IdentityDbContext
             .HasDatabaseName("IX_Messages_Metadata_GIN")
             .HasMethod("gin"); // PostgreSQL GIN index for JSONB queries
             
-        modelBuilder.Entity<PersonalityProfile>()
-            .HasIndex(pp => pp.Traits)
-            .HasDatabaseName("IX_PersonalityProfiles_Traits_GIN")
-            .HasMethod("gin");
+        // Note: PersonalityProfile.Traits is a navigation property, not a JSONB column
+        // Indexes on navigation properties should be set on the foreign key instead
     }
     
     /// <summary>

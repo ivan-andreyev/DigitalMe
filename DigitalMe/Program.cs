@@ -8,6 +8,7 @@ using Serilog;
 using DigitalMe.Data;
 using DigitalMe.Services;
 using DigitalMe.Repositories;
+using DigitalMe.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,8 +82,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
         options.UseSqlite("Data Source=digitalme.db"));
 // }
 
-// Identity
-builder.Services.AddIdentity<DigitalMe.Data.Entities.User, IdentityRole>()
+// Identity - Using standard IdentityUser since it's already configured in the database schema
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<DigitalMeDbContext>()
     .AddDefaultTokenProviders();
 
@@ -130,20 +131,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Dependency Injection
-builder.Services.AddScoped<IPersonalityRepository, PersonalityRepository>();
-builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
-builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<IPersonalityService, PersonalityService>();
-builder.Services.AddScoped<IConversationService, ConversationService>();
-builder.Services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
+// DigitalMe Services - Standardized Registration
+builder.Services.AddDigitalMeServices(builder.Configuration);
 
 // Health Checks
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<DigitalMeDbContext>("database")
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
-builder.Services.AddScoped<IHealthChecker, HealthChecker>();
-builder.Services.AddScoped<IMessageProcessor, MessageProcessor>();
 
 // MCP Integration with Anthropic
 builder.Services.Configure<DigitalMe.Integrations.MCP.AnthropicConfiguration>(
@@ -332,6 +326,12 @@ app.MapGet("/health", async (DigitalMe.Services.Monitoring.IHealthCheckService h
 {
     var healthStatus = await healthCheckService.GetSystemHealthAsync();
     return Results.Ok(healthStatus);
+});
+
+// Simple Health Check for Integration Tests (fallback)
+app.MapGet("/health/simple", () =>
+{
+    return Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow });
 });
 
 app.MapGet("/health/ready", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>

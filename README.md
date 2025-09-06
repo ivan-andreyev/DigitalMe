@@ -139,7 +139,8 @@ dotnet watch run --project DigitalMe
 # Создавайте Pull Request: develop → master
 ```
 
-**📖 Подробнее:** [Git Flow Documentation](./README-GIT-FLOW.md)
+**📖 Planning & Architecture:** [Master Plan](./docs/plans/MAIN_PLAN.md) - Central entry point for all plans  
+**📖 Git Workflow:** [Git Flow Documentation](./docs/README-GIT-FLOW.md)
 
 ### Локальное тестирование
 
@@ -278,10 +279,10 @@ dotnet test tests/DigitalMe.Tests.Integration
 
 ## 📚 Documentation
 
-- **[CI/CD Setup](./README-CI-CD.md)** - Подробная настройка pipeline
+- **[CI/CD Setup](./docs/README-CI-CD.md)** - Подробная настройка pipeline
 - **[Architecture](./docs/architecture/)** - Архитектурная документация
 - **[API Reference](./docs/api/)** - Справочник API
-- **[Deployment Guide](./docs/deployment/)** - Руководство по развертыванию
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Руководство по развертыванию
 
 ## 🏆 Status
 

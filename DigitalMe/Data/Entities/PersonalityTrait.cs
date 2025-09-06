@@ -97,15 +97,10 @@ public class PersonalityTrait : BaseEntity
     // Navigation Properties
 
     /// <summary>
-    /// Navigation property to the associated personality profile.
-    /// </summary>
-    [ForeignKey(nameof(PersonalityProfileId))]
-    public virtual PersonalityProfile Profile { get; set; } = null!;
-
-    /// <summary>
     /// Navigation property to the PersonalityProfile this trait belongs to.
     /// Used by Entity Framework for relationship mapping and queries.
     /// </summary>
+    [ForeignKey(nameof(PersonalityProfileId))]
     public virtual PersonalityProfile PersonalityProfile { get; set; } = null!;
 
     /// <summary>

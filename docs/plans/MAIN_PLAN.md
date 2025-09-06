@@ -1,6 +1,27 @@
 # 🚀 DigitalMe: Цифровой клон Ивана - Master Plan Coordinator
 
-> **ЕДИНСТВЕННАЯ ТОЧКА ВХОДА** в планы разработки Digital Clone Agent для Ивана
+> **ЦЕНТРАЛЬНАЯ ТОЧКА ВХОДА** во все планы разработки и архитектурные решения DigitalMe
+
+## 📋 НАВИГАЦИЯ ПО ПЛАНАМ
+
+### **🎯 Стратегические документы:**
+- **[MASTER-DEVELOPMENT-DECISIONS-LOG.md](MASTER-DEVELOPMENT-DECISIONS-LOG.md)** - Главный лог всех принятых решений
+  - Все стратегические решения и их обоснования
+  - Reference map ко всем документам проекта
+  - Трекинг изменений приоритетов и подходов
+
+### **🚀 Активные планы выполнения:**
+- **[INTEGRATION-FOCUSED-HYBRID-PLAN.md](INTEGRATION-FOCUSED-HYBRID-PLAN.md)** - Текущий план разработки (7-8 недель)
+  - Phase 1: Foundation Fixes (3-5 дней)
+  - Phase 2: Slack + ClickUp + GitHub integrations (2-3 недели) 
+  - Phase 3: Quality & optimization (1-2 недели)
+
+### **📚 Индексы и навигация:**
+- **[PLANS-INDEX.md](PLANS-INDEX.md)** - Полный индекс всех планов и архитектурных документов
+  - Навигация по ролям (стратегические/разработка/архитектура)
+  - Статус документов и их взаимосвязи
+
+---
 
 ## 🎯 Цель проекта
 Персонализированный LLM-агент на .NET 8 + Claude API + MCP протокол, который максимально точно моделирует личность, мышление, ценности и поведенческие паттерны Ивана (34, программист, Head of R&D в EllyAnalytics).
@@ -255,8 +276,22 @@ public class PersonalityTrait : BaseEntity
 
 ---
 
-**Last Updated**: 2025-09-05  
-**Version**: 3.1.0 (RADICAL CLEANUP - Structure Simplified)  
-**Status**: ✅ **CLEAN MVP STRUCTURE** - 195→8 files, overengineering eliminated  
-**Previous Plans**: 187 files deleted (archived-variants/, standalone-plans/, Phase3/, coordinator-sections/, P2.1-P2.4-Execution/)  
-**Next Step**: Execute MVP plans with clean, focused structure
+### **📊 Архитектурная документация:**
+- **[Docs/Architecture/Vision/](../Docs/Architecture/Vision/)** - Сохранённое архитектурное видение ($200K-400K IP)
+  - ARCHITECTURAL-VISION.md - Executive архитектурное видение
+  - DOMAIN-MODEL-BLUEPRINT.md - Complete domain model
+  - SERVICE-ARCHITECTURE-ROADMAP.md - Service layer roadmap
+  - TECHNICAL-DEBT-ANALYSIS.md - Strategic gap analysis
+- **[ARCHITECTURAL-INTELLIGENCE-SUMMARY.md](ARCHITECTURAL-INTELLIGENCE-SUMMARY.md)** - Быстрый архитектурный справочник
+
+### **🔄 MVP планы (упрощённые):**
+- **[MVP-Phase1-Database-Setup.md](MVP-Phase1-Database-Setup.md)** - SQLite migrations + hardcoded Ivan data
+- **[MVP-Phase2-Core-Services.md](MVP-Phase2-Core-Services.md)** - Простой PersonalityService + MessageProcessor  
+- **[MVP-Phase3-Basic-UI.md](MVP-Phase3-Basic-UI.md)** - Одна Blazor страница для чата
+- **[MVP-Phase4-Integration.md](MVP-Phase4-Integration.md)** - End-to-end MVP testing
+
+**Last Updated**: 2025-09-06  
+**Version**: 3.2.0 (CENTRAL ENTRY POINT - All Plans Connected)  
+**Status**: ✅ **INTEGRATION-FOCUSED DEVELOPMENT** - Integration coverage prioritized  
+**Current Focus**: [INTEGRATION-FOCUSED-HYBRID-PLAN.md](INTEGRATION-FOCUSED-HYBRID-PLAN.md) execution
+**Strategic Decision**: Ширина интеграций (B) → Глубина интеграций (A) → Обобщение (C)
