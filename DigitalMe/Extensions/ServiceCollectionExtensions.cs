@@ -56,8 +56,10 @@ public static class ServiceCollectionExtensions
         // Google services
         services.AddScoped<ICalendarService, CalendarService>();
         
-        // GitHub integration
+        // GitHub integration - Enhanced version
         services.AddScoped<IGitHubService, GitHubService>();
+        services.AddScoped<IGitHubEnhancedService, GitHubEnhancedService>();
+        services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
         
         // MCP Integration
         services.Configure<AnthropicConfiguration>(
@@ -92,6 +94,9 @@ public static class ServiceCollectionExtensions
         // Standard HTTP clients for external integrations
         services.AddHttpClient<ITelegramService, TelegramService>();
         services.AddHttpClient<IGitHubService, GitHubService>();
+        
+        // GitHub Enhanced HTTP client
+        services.AddHttpClient<IGitHubEnhancedService, GitHubEnhancedService>();
         
         // Slack HTTP client - COMPLETED ✅
         services.AddHttpClient<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
