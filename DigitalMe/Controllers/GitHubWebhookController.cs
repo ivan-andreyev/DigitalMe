@@ -10,7 +10,7 @@ namespace DigitalMe.Controllers;
 /// Controller for handling GitHub webhook events
 /// </summary>
 [ApiController]
-[Route("api/github/webhook")]
+[Route("api/webhooks/github")]
 public class GitHubWebhookController : ControllerBase
 {
     private readonly IGitHubWebhookService _webhookService;

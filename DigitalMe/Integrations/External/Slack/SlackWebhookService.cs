@@ -332,7 +332,7 @@ public class SlackWebhookService : ISlackWebhookService
     }
 
     // Event handlers
-    private async Task<bool> HandleMessageEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleMessageEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("Handling message event from user {UserId} in channel {ChannelId}: {Text}",
             slackEvent.User, slackEvent.Channel, slackEvent.Text);
@@ -340,12 +340,12 @@ public class SlackWebhookService : ISlackWebhookService
         // Ignore bot messages to prevent loops
         if (slackEvent.Subtype == "bot_message")
         {
-            return true;
+            return Task.FromResult(true);
         }
 
         // Process the message - this is where you'd integrate with your AI/personality engine
         // For now, just log it
-        return true;
+        return Task.FromResult(true);
     }
 
     private async Task<bool> HandleAppMentionEventAsync(SlackEvent slackEvent)
@@ -363,55 +363,55 @@ public class SlackWebhookService : ISlackWebhookService
         return true;
     }
 
-    private async Task<bool> HandleReactionAddedEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleReactionAddedEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("Reaction '{Reaction}' added by user {UserId} to message in channel {ChannelId}",
             slackEvent.Reaction, slackEvent.User, slackEvent.Item?.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleReactionRemovedEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleReactionRemovedEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("Reaction '{Reaction}' removed by user {UserId} from message in channel {ChannelId}",
             slackEvent.Reaction, slackEvent.User, slackEvent.Item?.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleChannelCreatedEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleChannelCreatedEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("Channel created: {ChannelId}", slackEvent.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleChannelDeletedEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleChannelDeletedEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("Channel deleted: {ChannelId}", slackEvent.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleMemberJoinedChannelEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleMemberJoinedChannelEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("User {UserId} joined channel {ChannelId}", slackEvent.User, slackEvent.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleMemberLeftChannelEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleMemberLeftChannelEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("User {UserId} left channel {ChannelId}", slackEvent.User, slackEvent.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleFileSharedEventAsync(SlackEvent slackEvent)
+    private Task<bool> HandleFileSharedEventAsync(SlackEvent slackEvent)
     {
         _logger.LogInformation("File shared by user {UserId} in channel {ChannelId}", 
             slackEvent.User, slackEvent.Channel);
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> HandleUnknownEventAsync(string eventType, SlackEvent slackEvent)
+    private Task<bool> HandleUnknownEventAsync(string eventType, SlackEvent slackEvent)
     {
         _logger.LogWarning("Unknown event type: {EventType}", eventType);
-        return true;
+        return Task.FromResult(true);
     }
 
     // Interactive component handlers

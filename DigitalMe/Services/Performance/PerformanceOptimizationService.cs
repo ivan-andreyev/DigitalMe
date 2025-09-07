@@ -107,15 +107,15 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
 
     #region Rate Limiting
 
-    public async Task<bool> ShouldRateLimitAsync(string serviceName, string identifier)
+    public Task<bool> ShouldRateLimitAsync(string serviceName, string identifier)
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
         
-        return bucket.ShouldRateLimit();
+        return Task.FromResult(bucket.ShouldRateLimit());
     }
 
-    public async Task RecordRateLimitUsageAsync(string serviceName, string identifier)
+    public Task RecordRateLimitUsageAsync(string serviceName, string identifier)
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
@@ -127,14 +127,16 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
         _requestMetrics.AddOrUpdate(metricsKey, 
             new RequestMetrics { TotalRequests = 1 },
             (k, v) => { v.TotalRequests++; return v; });
+            
+        return Task.CompletedTask;
     }
 
-    public async Task<RateLimitStatus> GetRateLimitStatusAsync(string serviceName, string identifier)
+    public Task<RateLimitStatus> GetRateLimitStatusAsync(string serviceName, string identifier)
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
         
-        return bucket.GetStatus();
+        return Task.FromResult(bucket.GetStatus());
     }
 
     #endregion

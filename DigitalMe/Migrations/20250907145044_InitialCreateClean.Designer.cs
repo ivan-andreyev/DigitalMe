@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalMe.Migrations
 {
     [DbContext(typeof(DigitalMeDbContext))]
-    [Migration("20250907130721_InitialClean")]
-    partial class InitialClean
+    [Migration("20250907145044_InitialCreateClean")]
+    partial class InitialCreateClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
