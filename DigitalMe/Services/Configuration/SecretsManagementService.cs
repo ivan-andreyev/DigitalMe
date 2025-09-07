@@ -191,6 +191,11 @@ public class SecretsManagementService : ISecretsManagementService
     {
         return _environment.IsProduction() || _environment.IsStaging();
     }
+    
+    public bool IsTestEnvironment()
+    {
+        return _environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase);
+    }
 
     // Private helper methods
 

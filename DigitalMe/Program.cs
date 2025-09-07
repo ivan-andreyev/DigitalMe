@@ -459,8 +459,8 @@ try
                 secretsLogger?.LogWarning("   Weak: {Secret}", weak);
             }
             
-            // In production, fail fast for critical secrets
-            if (secretsService.IsSecureEnvironment() && validation.MissingSecrets.Any())
+            // In production, fail fast for critical secrets (but allow Testing environment)
+            if (secretsService.IsSecureEnvironment() && !secretsService.IsTestEnvironment() && validation.MissingSecrets.Any())
             {
                 throw new InvalidOperationException($"Critical secrets validation failed in production environment. Missing: {string.Join(", ", validation.MissingSecrets)}");
             }

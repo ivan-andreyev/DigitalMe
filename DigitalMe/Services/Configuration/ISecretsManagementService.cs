@@ -41,6 +41,12 @@ public interface ISecretsManagementService
     /// </summary>
     /// <returns>True if in production environment</returns>
     bool IsSecureEnvironment();
+    
+    /// <summary>
+    /// Checks if running in Testing environment
+    /// </summary>
+    /// <returns>True if in Testing environment</returns>
+    bool IsTestEnvironment();
 }
 
 /// <summary>
