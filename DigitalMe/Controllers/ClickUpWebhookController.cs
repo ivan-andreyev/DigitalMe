@@ -1,5 +1,6 @@
 using DigitalMe.Integrations.External.ClickUp;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DigitalMe.Controllers;
 
@@ -26,6 +27,7 @@ public class ClickUpWebhookController : ControllerBase
     /// Receives ClickUp webhook events.
     /// </summary>
     [HttpPost]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> ReceiveWebhook()
     {
         try
@@ -74,6 +76,7 @@ public class ClickUpWebhookController : ControllerBase
     /// Handles ClickUp webhook verification/ping requests.
     /// </summary>
     [HttpGet]
+    [EnableRateLimiting("api")]
     public IActionResult VerifyWebhook()
     {
         _logger.LogInformation("ClickUp webhook verification request received");
@@ -97,6 +100,7 @@ public class ClickUpWebhookController : ControllerBase
     /// Health check endpoint for ClickUp webhook integration.
     /// </summary>
     [HttpGet("health")]
+    [EnableRateLimiting("api")]
     public IActionResult Health()
     {
         return Ok(new
@@ -112,6 +116,7 @@ public class ClickUpWebhookController : ControllerBase
     /// Endpoint for testing ClickUp webhook processing (development only).
     /// </summary>
     [HttpPost("test")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> TestWebhook([FromBody] object testPayload)
     {
         if (!IsDevelopmentEnvironment())

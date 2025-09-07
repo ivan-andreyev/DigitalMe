@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Text;
 using System.Runtime;
 using Serilog;
@@ -11,6 +12,22 @@ using DigitalMe.Repositories;
 using DigitalMe.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Secure Configuration Loading - User Secrets for development, environment variables for production
+if (builder.Environment.IsDevelopment())
+{
+    // User Secrets for development environment
+    builder.Configuration.AddUserSecrets<Program>();
+}
+else if (builder.Environment.IsProduction())
+{
+    // In production, rely on environment variables
+    // Note: AddEnvironmentVariables() is already included by default in WebApplicationBuilder
+    builder.Configuration.AddEnvironmentVariables();
+    
+    // For Azure/cloud deployments, add Key Vault configuration here
+    // Example: builder.Configuration.AddAzureKeyVault(...);
+}
 
 // Configure runtime optimizations for production
 if (builder.Environment.IsProduction())
@@ -102,10 +119,35 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// JWT Authentication
+// JWT Authentication with Secure Key Management
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Securely get JWT key with environment variable fallback
+        var jwtKey = builder.Configuration["JWT:Key"];
+        var envJwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+        
+        // Use environment variable if available, otherwise use config
+        var secureJwtKey = !string.IsNullOrWhiteSpace(envJwtKey) ? envJwtKey : jwtKey;
+        
+        // Validate key strength
+        if (string.IsNullOrWhiteSpace(secureJwtKey) || secureJwtKey.Length < 32)
+        {
+            if (builder.Environment.IsProduction())
+            {
+                throw new InvalidOperationException("JWT key must be at least 32 characters in production. Set JWT_KEY environment variable.");
+            }
+            
+            // Generate secure key for development
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var keyBytes = new byte[64];
+            rng.GetBytes(keyBytes);
+            secureJwtKey = Convert.ToBase64String(keyBytes);
+            
+            var logger = builder.Services.BuildServiceProvider().GetService<ILogger<Program>>();
+            logger?.LogWarning("Generated temporary JWT key for development. For production, set JWT_KEY environment variable.");
+        }
+        
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -114,8 +156,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["JWT:Issuer"],
             ValidAudience = builder.Configuration["JWT:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secureJwtKey))
         };
         
         // Configure for API - return JSON responses instead of redirects
@@ -130,6 +171,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+// Secrets Management Service - Must be registered before other services that need secrets
+builder.Services.AddSingleton<DigitalMe.Services.Configuration.ISecretsManagementService, 
+                               DigitalMe.Services.Configuration.SecretsManagementService>();
 
 // DigitalMe Services - Standardized Registration
 builder.Services.AddDigitalMeServices(builder.Configuration);
@@ -146,10 +191,16 @@ builder.Services.Configure<DigitalMe.Services.Security.SecuritySettings>(
 builder.Services.Configure<DigitalMe.Configuration.JwtSettings>(
     builder.Configuration.GetSection("JWT"));
 
-// Health Checks
+// Health Checks - Standard ASP.NET Core as required by MVP Phase 6 plan
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<DigitalMeDbContext>("database")
-    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+    .AddDbContextCheck<DigitalMeDbContext>()
+    .AddCheck("claude-api", () => 
+    {
+        var apiKey = builder.Configuration["Anthropic:ApiKey"];
+        return !string.IsNullOrEmpty(apiKey) 
+            ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy() 
+            : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Claude API key not configured");
+    });
 
 // MCP Integration with Anthropic
 builder.Services.Configure<DigitalMe.Integrations.MCP.AnthropicConfiguration>(
@@ -224,6 +275,85 @@ builder.Services.AddScoped<DigitalMe.Services.Monitoring.MetricsAggregator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.SystemMetricsCalculator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.IHealthCheckService, DigitalMe.Services.Monitoring.HealthCheckService>();
+
+// Add metrics collection as required by MVP Phase 6 plan
+builder.Services.AddSingleton<DigitalMe.Services.Monitoring.IMetricsLogger, DigitalMe.Services.Monitoring.MetricsLogger>();
+
+// API Security - Rate Limiting Configuration
+builder.Services.AddRateLimiter(options =>
+{
+    // Fixed window rate limiter for general API endpoints (100 requests per minute per IP)
+    options.AddPolicy("api", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
+                QueueLimit = 10
+            }));
+    
+    // Strict rate limiter for authentication endpoints (10 requests per minute per IP)
+    options.AddPolicy("auth", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
+                QueueLimit = 2
+            }));
+    
+    // Sliding window rate limiter for chat endpoints (50 requests per minute per IP)
+    options.AddPolicy("chat", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new System.Threading.RateLimiting.SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 50,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6, // 10-second segments
+                QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
+                QueueLimit = 5
+            }));
+    
+    // Strict rate limiter for webhook endpoints (30 requests per minute per IP)
+    options.AddPolicy("webhook", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
+                QueueLimit = 5
+            }));
+    
+    // Global rejection response
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", cancellationToken);
+    };
+});
+
+// Production Security Configuration - HSTS, HTTPS redirection, and security headers
+if (builder.Environment.IsProduction())
+{
+    builder.Services.AddHsts(options =>
+    {
+        options.Preload = true;
+        options.IncludeSubDomains = true;
+        options.MaxAge = TimeSpan.FromDays(365);
+    });
+
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.HttpsPort = 443;
+    });
+}
 
 var app = builder.Build();
 
@@ -301,15 +431,89 @@ catch (Exception scopeEx)
     migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
 }
 
-migrationLogger?.LogInformation("✅ MIGRATION SECTION COMPLETED - Proceeding to middleware and Telegram initialization");
+migrationLogger?.LogInformation("✅ MIGRATION SECTION COMPLETED - Proceeding to secrets validation and middleware");
+
+// Validate secrets configuration at startup for early error detection
+try
+{
+    var secretsLogger = app.Services.GetService<ILogger<Program>>();
+    secretsLogger?.LogInformation("🔐 SECRETS VALIDATION: Starting configuration validation...");
+    
+    using (var secretsScope = app.Services.CreateScope())
+    {
+        var secretsService = secretsScope.ServiceProvider.GetRequiredService<DigitalMe.Services.Configuration.ISecretsManagementService>();
+        var validation = secretsService.ValidateSecrets();
+        
+        if (!validation.IsValid)
+        {
+            secretsLogger?.LogError("❌ SECRETS VALIDATION FAILED: {MissingCount} missing secrets, {WeakCount} weak secrets", 
+                validation.MissingSecrets.Count, validation.WeakSecrets.Count);
+            
+            foreach (var missing in validation.MissingSecrets)
+            {
+                secretsLogger?.LogError("   Missing: {Secret}", missing);
+            }
+            
+            foreach (var weak in validation.WeakSecrets)
+            {
+                secretsLogger?.LogWarning("   Weak: {Secret}", weak);
+            }
+            
+            // In production, fail fast for critical secrets
+            if (secretsService.IsSecureEnvironment() && validation.MissingSecrets.Any())
+            {
+                throw new InvalidOperationException($"Critical secrets validation failed in production environment. Missing: {string.Join(", ", validation.MissingSecrets)}");
+            }
+        }
+        else
+        {
+            secretsLogger?.LogInformation("✅ SECRETS VALIDATION: All critical secrets configured correctly");
+        }
+        
+        // Log warnings and recommendations
+        foreach (var warning in validation.Warnings)
+        {
+            secretsLogger?.LogWarning("⚠️ SECRETS: {Warning}", warning);
+        }
+        
+        foreach (var recommendation in validation.SecurityRecommendations)
+        {
+            secretsLogger?.LogInformation("💡 SECURITY: {Recommendation}", recommendation);
+        }
+    }
+}
+catch (Exception secretsEx)
+{
+    var secretsLogger = app.Services.GetService<ILogger<Program>>();
+    secretsLogger?.LogError(secretsEx, "❌ CRITICAL ERROR: Secrets validation failed");
+    
+    // In production, fail fast for secrets issues
+    if (app.Environment.IsProduction())
+    {
+        throw;
+    }
+}
 
 // Configure the HTTP request pipeline
 app.UseMiddleware<DigitalMe.Middleware.RequestLoggingMiddleware>();
 app.UseMiddleware<DigitalMe.Middleware.GlobalExceptionHandlingMiddleware>();
+
+// Rate Limiting - apply before authentication for security
+app.UseRateLimiter();
+
+// Security Headers - add early in pipeline for all environments
+app.UseMiddleware<DigitalMe.Middleware.SecurityHeadersMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+// Production Security Middleware - apply HSTS in production
+if (app.Environment.IsProduction())
+{
+    app.UseHsts();
 }
 
 app.UseStaticFiles();
@@ -330,8 +534,15 @@ app.MapGet("/personality", () => Results.Content("<h1>Ivan's Personality</h1><p>
 // SignalR Hub mapping
 app.MapHub<DigitalMe.Hubs.ChatHub>("/chathub");
 
-// Enhanced Health Check Endpoints
-app.MapGet("/health", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
+// Standard ASP.NET Core Health Check Endpoints as required by MVP Phase 6 plan
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+
+// Enhanced Health Check Endpoints (preserving existing advanced monitoring)
+app.MapGet("/health/enhanced", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
     var healthStatus = await healthCheckService.GetSystemHealthAsync();
     return Results.Ok(healthStatus);
@@ -343,7 +554,7 @@ app.MapGet("/health/simple", () =>
     return Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow });
 });
 
-app.MapGet("/health/ready", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
+app.MapGet("/health/enhanced/ready", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
     var readinessStatus = await healthCheckService.GetReadinessAsync();
     return readinessStatus.IsReady ? Results.Ok(readinessStatus) : Results.Problem(statusCode: 503, detail: readinessStatus.Reason);
@@ -373,6 +584,56 @@ app.MapGet("/metrics/{timeWindowMinutes:int}", async (int timeWindowMinutes, Dig
     var timeWindow = TimeSpan.FromMinutes(Math.Max(1, Math.Min(timeWindowMinutes, 1440))); // 1 min to 24 hours
     var metrics = await metricsService.GetMetricsSummaryAsync(timeWindow);
     return Results.Ok(metrics);
+});
+
+// Operational Information Endpoint - Production monitoring and diagnostics
+app.MapGet("/info", () => new
+{
+    Version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
+    Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+    Timestamp = DateTime.UtcNow,
+    RuntimeInformation = new
+    {
+        FrameworkDescription = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+        OSDescription = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+        ProcessArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString()
+    },
+    SystemInfo = new
+    {
+        MachineName = Environment.MachineName,
+        ProcessorCount = Environment.ProcessorCount,
+        WorkingSet = Environment.WorkingSet,
+        TotalPhysicalMemory = GC.GetTotalMemory(false)
+    }
+});
+
+// Secrets Validation Endpoint - Security monitoring (development/staging only)
+app.MapGet("/security/secrets-validation", (DigitalMe.Services.Configuration.ISecretsManagementService secretsService, IWebHostEnvironment environment) =>
+{
+    // Only allow in development/staging for security reasons
+    if (environment.IsProduction())
+    {
+        return Results.NotFound();
+    }
+    
+    var validation = secretsService.ValidateSecrets();
+    return Results.Ok(new
+    {
+        validation.IsValid,
+        MissingSecretsCount = validation.MissingSecrets.Count,
+        WeakSecretsCount = validation.WeakSecrets.Count,
+        WarningsCount = validation.Warnings.Count,
+        SecurityRecommendationsCount = validation.SecurityRecommendations.Count,
+        Details = new
+        {
+            validation.MissingSecrets,
+            validation.WeakSecrets,
+            validation.Warnings,
+            validation.SecurityRecommendations
+        },
+        IsSecureEnvironment = secretsService.IsSecureEnvironment(),
+        Timestamp = DateTime.UtcNow
+    });
 });
 
 // Runtime optimization validation endpoints

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using DigitalMe.Services;
 using DigitalMe.DTOs;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost("send")]
+    [EnableRateLimiting("chat")]
     public async Task<ActionResult<MessageDto>> SendMessage([FromBody] ChatRequestDto request)
     {
         try
@@ -82,6 +84,7 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet("status")]
+    [EnableRateLimiting("api")]
     public async Task<ActionResult<object>> GetStatus()
     {
         var ivanProfile = await _personalityService.GetIvanProfileAsync();

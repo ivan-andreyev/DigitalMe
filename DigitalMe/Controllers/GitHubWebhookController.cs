@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using DigitalMe.Configuration;
 using DigitalMe.Integrations.External.GitHub;
@@ -31,6 +32,7 @@ public class GitHubWebhookController : ControllerBase
     /// Main webhook endpoint for GitHub events
     /// </summary>
     [HttpPost]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> ReceiveWebhook()
     {
         try
@@ -122,6 +124,7 @@ public class GitHubWebhookController : ControllerBase
     /// Health check endpoint for GitHub webhooks
     /// </summary>
     [HttpGet("health")]
+    [EnableRateLimiting("api")]
     public IActionResult Health()
     {
         return Ok(new
@@ -138,6 +141,7 @@ public class GitHubWebhookController : ControllerBase
     /// Configuration endpoint to check webhook settings
     /// </summary>
     [HttpGet("config")]
+    [EnableRateLimiting("api")]
     public IActionResult Config()
     {
         return Ok(new
@@ -157,6 +161,7 @@ public class GitHubWebhookController : ControllerBase
     /// Test endpoint for validating webhook configuration
     /// </summary>
     [HttpPost("test")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> TestWebhook([FromBody] TestWebhookRequest request)
     {
         try

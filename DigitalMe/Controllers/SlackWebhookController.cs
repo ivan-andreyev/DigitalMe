@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using DigitalMe.Integrations.External.Slack;
 using DigitalMe.Integrations.External.Slack.Models;
 using System.Text;
@@ -33,6 +34,7 @@ public class SlackWebhookController : ControllerBase
     /// Handles event subscriptions, URL verification, and other JSON payloads
     /// </summary>
     [HttpPost("events")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> HandleEvents()
     {
         try
@@ -102,6 +104,7 @@ public class SlackWebhookController : ControllerBase
     /// Handles form-encoded payloads from Slack interactive elements
     /// </summary>
     [HttpPost("interactive")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> HandleInteractive()
     {
         try
@@ -177,6 +180,7 @@ public class SlackWebhookController : ControllerBase
     /// Handles slash command requests from Slack
     /// </summary>
     [HttpPost("commands")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> HandleCommands()
     {
         try
@@ -248,6 +252,7 @@ public class SlackWebhookController : ControllerBase
     /// Health check endpoint for Slack webhook configuration
     /// </summary>
     [HttpGet("health")]
+    [EnableRateLimiting("api")]
     public IActionResult Health()
     {
         return Ok(new 
@@ -268,6 +273,7 @@ public class SlackWebhookController : ControllerBase
     /// Test endpoint for webhook functionality (development only)
     /// </summary>
     [HttpPost("test")]
+    [EnableRateLimiting("webhook")]
     public async Task<IActionResult> TestWebhook([FromBody] object payload)
     {
         if (!_configuration.GetValue<bool>("Environment:IsDevelopment"))
@@ -290,6 +296,7 @@ public class SlackWebhookController : ControllerBase
     /// OAuth callback endpoint for Slack app installation
     /// </summary>
     [HttpGet("oauth/callback")]
+    [EnableRateLimiting("api")]
     public async Task<IActionResult> OAuthCallback([FromQuery] string code, [FromQuery] string? state)
     {
         try
@@ -322,6 +329,7 @@ public class SlackWebhookController : ControllerBase
     /// Endpoint to initiate Slack app installation
     /// </summary>
     [HttpGet("install")]
+    [EnableRateLimiting("api")]
     public IActionResult Install()
     {
         var clientId = _configuration["Slack:ClientId"];
