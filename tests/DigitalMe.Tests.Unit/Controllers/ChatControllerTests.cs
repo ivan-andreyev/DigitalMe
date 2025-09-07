@@ -21,9 +21,23 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         _client = factory.CreateClient();
     }
 
+    private async Task ClearDatabase()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        
+        // Clear all data to ensure test isolation
+        context.PersonalityTraits.RemoveRange(context.PersonalityTraits);
+        context.PersonalityProfiles.RemoveRange(context.PersonalityProfiles);
+        await context.SaveChangesAsync();
+    }
+
     [Fact]
     public async Task GetStatus_WithIvanPersonalityExists_ShouldReturnReadyStatus()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
@@ -45,6 +59,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task GetStatus_WithoutIvanPersonality_ShouldReturnNotReadyStatus()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange - No Ivan personality seeded
 
         // Act
@@ -63,6 +80,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithoutIvanPersonality_ShouldReturnBadRequest()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var chatRequest = new ChatRequestDto
         {
@@ -84,6 +104,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithIvanPersonality_ShouldProcessMessageAndReturnResponse()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         var traits = new[]
@@ -137,6 +160,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_MultipleMessages_ShouldMaintainConversationContext()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
@@ -189,6 +215,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_DifferentUsers_ShouldCreateSeparateConversations()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
@@ -238,6 +267,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_DifferentPlatforms_ShouldCreateSeparateConversations()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);
@@ -289,6 +321,9 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithEmptyMessage_ShouldProcessSuccessfully()
     {
+        // Ensure clean database state
+        await ClearDatabase();
+        
         // Arrange
         var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
         await SeedTestData(ivanPersonality);

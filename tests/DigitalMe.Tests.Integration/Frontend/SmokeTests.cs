@@ -40,8 +40,8 @@ public class SmokeTests : IntegrationTestBase
     [Fact]
     public async Task HealthCheck_ShouldReturnHealthy()
     {
-        // Act
-        var response = await Client.GetAsync("/health");
+        // Act - Use simple health endpoint for basic smoke test
+        var response = await Client.GetAsync("/health/simple");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

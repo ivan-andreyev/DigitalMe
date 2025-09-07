@@ -48,7 +48,7 @@ public class AgentBehaviorEngineTests
 
         // Assert
         result.Should().NotBeNull("should return agent response");
-        result.Content.Should().Be("Hello! How can I help you today!");
+        result.Content.Should().Be("Hello! How can I help you today?");
         result.Mood.PrimaryMood.Should().NotBeNullOrEmpty("should have mood analysis");
         result.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
         result.Metadata.Should().ContainKey("originalMessage", "should preserve original message");

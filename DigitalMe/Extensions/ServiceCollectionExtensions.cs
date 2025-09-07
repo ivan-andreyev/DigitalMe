@@ -58,6 +58,12 @@ public static class ServiceCollectionExtensions
         // Security services
         services.AddScoped<ISecurityValidationService, SecurityValidationService>();
         
+        // Health check services
+        services.AddScoped<DigitalMe.Services.Monitoring.IHealthCheckService, DigitalMe.Services.Monitoring.HealthCheckService>();
+        
+        // Performance metrics services
+        services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
+        
         return services;
     }
     

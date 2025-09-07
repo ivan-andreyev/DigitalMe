@@ -16,6 +16,33 @@ public class PersonalityController : ControllerBase
         _personalityService = personalityService;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<object>> GetDefaultPersonality()
+    {
+        try
+        {
+            // Return Ivan's personality as default for integration tests
+            var personality = await _personalityService.GetPersonalityAsync("Ivan");
+            if (personality == null)
+            {
+                return Ok(new { message = "No personalities configured yet", status = "empty" });
+            }
+
+            return Ok(new PersonalityProfileDto
+            {
+                Id = personality.Id,
+                Name = personality.Name,
+                Description = personality.Description,
+                CreatedAt = personality.CreatedAt,
+                UpdatedAt = personality.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+        }
+    }
+
     [HttpGet("{name}")]
     public async Task<ActionResult<PersonalityProfileDto>> GetPersonality(string name)
     {

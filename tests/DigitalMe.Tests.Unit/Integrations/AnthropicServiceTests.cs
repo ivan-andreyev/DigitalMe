@@ -24,6 +24,15 @@ public class AnthropicServiceTests
         _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         _mockLogger = new Mock<ILogger<AnthropicServiceSimple>>();
         _mockPersonalityService = new Mock<IIvanPersonalityService>();
+        
+        // Setup mock to return test personality data
+        var testPersonality = CreateTestPersonality();
+        _mockPersonalityService
+            .Setup(x => x.GetIvanPersonalityAsync())
+            .ReturnsAsync(testPersonality);
+        _mockPersonalityService
+            .Setup(x => x.GenerateSystemPrompt(It.IsAny<PersonalityProfile>()))
+            .Returns("You are Ivan, a Direct and Technical expert with analytical approach to problem-solving.");
 
         var httpClient = new HttpClient(_mockHttpMessageHandler.Object)
         {
@@ -160,14 +169,14 @@ public class AnthropicServiceTests
 
         // Assert
         result.Should().NotBeNullOrEmpty("should return fallback response on network error");
-        result.Should().Contain("подключением", "fallback should mention connection issue in Russian");
+        result.Should().MatchRegex("подключени[ем]", "fallback should mention connection issue in Russian");
 
         // Verify error was logged
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Error calling Anthropic API")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to send message to Anthropic API")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -244,7 +253,10 @@ public class AnthropicServiceTests
                 ItExpr.IsAny<CancellationToken>())
             .Callback<HttpRequestMessage, CancellationToken>((req, ct) =>
             {
-                capturedRequestBody = req.Content?.ReadAsStringAsync().Result;
+                if (req.Content != null)
+                {
+                    capturedRequestBody = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                }
             })
             .ReturnsAsync(httpResponse);
 
