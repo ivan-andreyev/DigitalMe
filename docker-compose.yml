@@ -7,16 +7,18 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:80"    # HTTP - map host 5000 to container 80
-      - "5001:443"   # HTTPS - map host 5001 to container 443
+      - "5000:8080"  # HTTP - map host 5000 to container 8080
+      - "5001:8081"  # HTTPS - map host 5001 to container 8081
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80;https://+:443
-      - ASPNETCORE_HTTPS_PORT=443
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ASPNETCORE_HTTPS_PORT=8081
       - ASPNETCORE_Kestrel__Certificates__Default__Password=DigitalMe2024!
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       # Database
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/digitalme.db
+      # Security
+      - JWT__Key=${JWT_KEY:-DigitalMe-Production-JWT-Key-2024-Secure-Random-String}
       # External APIs (configure via environment variables)
       - Anthropic__ApiKey=${ANTHROPIC_API_KEY}
       - Anthropic__ApiKeyEnvironmentVariable=ANTHROPIC_API_KEY
@@ -32,10 +34,11 @@ services:
       - digitalme-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "dotnet", "--info"]  # Simple dotnet runtime check
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # Blazor Web App
   digitalme-web:

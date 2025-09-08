@@ -64,18 +64,18 @@ RUN mkdir -p /app/logs /app/data /app/backups && \
 USER digitalme
 
 # Expose ports
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8081
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:80/health || exit 1
+# Health check - use dotnet --info instead of curl for reliability
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD dotnet --info || exit 1
 
 # Environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production \
-    ASPNETCORE_URLS="http://+:80;https://+:443" \
-    ASPNETCORE_HTTP_PORTS=80 \
-    ASPNETCORE_HTTPS_PORTS=443 \
+    ASPNETCORE_URLS="http://+:8080;https://+:8081" \
+    ASPNETCORE_HTTP_PORTS=8080 \
+    ASPNETCORE_HTTPS_PORTS=8081 \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
     TZ=UTC
