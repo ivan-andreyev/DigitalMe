@@ -10,23 +10,17 @@ using DigitalMe.Data;
 
 namespace DigitalMe.Tests.Unit.Services;
 
-public class ConversationServiceTests : IDisposable
+public class ConversationServiceTests : BaseTestWithDatabase
 {
-    private readonly DigitalMeDbContext _context;
     private readonly Mock<ILogger<ConversationService>> _mockLogger;
     private readonly ConversationService _service;
 
     public ConversationServiceTests()
     {
-        var options = new DbContextOptionsBuilder<DigitalMeDbContext>()
-            .UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}")
-            .Options;
-        
-        _context = new DigitalMeDbContext(options);
         _mockLogger = new Mock<ILogger<ConversationService>>();
         
-        var conversationRepository = new ConversationRepository(_context);
-        var messageRepository = new MessageRepository(_context);
+        var conversationRepository = new ConversationRepository(Context);
+        var messageRepository = new MessageRepository(Context);
         
         _service = new ConversationService(conversationRepository, messageRepository, _mockLogger.Object);
     }
@@ -51,7 +45,7 @@ public class ConversationServiceTests : IDisposable
         result.StartedAt.Should().BeBefore(DateTime.UtcNow.AddSeconds(1), "should set recent start time");
         
         // Verify saved to database
-        var savedConversation = await _context.Conversations.FindAsync(result.Id);
+        var savedConversation = await Context.Conversations.FindAsync(result.Id);
         savedConversation.Should().NotBeNull("should be saved to database");
     }
 
@@ -73,8 +67,8 @@ public class ConversationServiceTests : IDisposable
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
         
-        _context.Conversations.Add(existingConversation);
-        await _context.SaveChangesAsync();
+        Context.Conversations.Add(existingConversation);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await _service.StartConversationAsync(platform, userId, title);
@@ -85,7 +79,7 @@ public class ConversationServiceTests : IDisposable
         result.Title.Should().Be("Existing Conversation", "should keep existing title");
         
         // Should not create duplicate
-        var allUserConversations = await _context.Conversations
+        var allUserConversations = await Context.Conversations
             .Where(c => c.UserId == userId && c.Platform == platform)
             .ToListAsync();
         allUserConversations.Should().HaveCount(1, "should not create duplicate conversations");
@@ -102,8 +96,8 @@ public class ConversationServiceTests : IDisposable
             Title = "Test Chat",
             IsActive = true
         };
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        Context.Conversations.Add(conversation);
+        await Context.SaveChangesAsync();
 
         var role = "user";
         var content = "Hello Ivan!";
@@ -123,7 +117,7 @@ public class ConversationServiceTests : IDisposable
         result.Metadata.Should().NotBeNullOrEmpty("should serialize metadata");
         
         // Verify saved to database
-        var savedMessage = await _context.Messages.FindAsync(result.Id);
+        var savedMessage = await Context.Messages.FindAsync(result.Id);
         savedMessage.Should().NotBeNull("should be saved to database");
         savedMessage!.Content.Should().Be(content);
     }
@@ -155,8 +149,8 @@ public class ConversationServiceTests : IDisposable
             Title = "History Test",
             IsActive = true
         };
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        Context.Conversations.Add(conversation);
+        await Context.SaveChangesAsync();
 
         // Add messages in specific order
         var messages = new[]
@@ -167,8 +161,8 @@ public class ConversationServiceTests : IDisposable
             new Message { ConversationId = conversation.Id, Role = "assistant", Content = "Second response", Timestamp = DateTime.UtcNow.AddMinutes(-4) }
         };
         
-        _context.Messages.AddRange(messages);
-        await _context.SaveChangesAsync();
+        Context.Messages.AddRange(messages);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await _service.GetConversationHistoryAsync(conversation.Id, 10);
@@ -191,13 +185,13 @@ public class ConversationServiceTests : IDisposable
             Title = "Limit Test",
             IsActive = true
         };
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        Context.Conversations.Add(conversation);
+        await Context.SaveChangesAsync();
 
         // Add 5 messages
         for (int i = 0; i < 5; i++)
         {
-            _context.Messages.Add(new Message
+            Context.Messages.Add(new Message
             {
                 ConversationId = conversation.Id,
                 Role = i % 2 == 0 ? "user" : "assistant",
@@ -206,7 +200,7 @@ public class ConversationServiceTests : IDisposable
                 Metadata = "{}"
             });
         }
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await _service.GetConversationHistoryAsync(conversation.Id, 3);
@@ -232,8 +226,8 @@ public class ConversationServiceTests : IDisposable
             new Conversation { Platform = "Mobile", UserId = targetUserId, Title = "Wrong Platform", IsActive = true }
         };
 
-        _context.Conversations.AddRange(conversations);
-        await _context.SaveChangesAsync();
+        Context.Conversations.AddRange(conversations);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await _service.GetUserConversationsAsync(platform, targetUserId);
@@ -257,8 +251,8 @@ public class ConversationServiceTests : IDisposable
             IsActive = true,
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        Context.Conversations.Add(conversation);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await _service.EndConversationAsync(conversation.Id);
@@ -267,7 +261,7 @@ public class ConversationServiceTests : IDisposable
         result.Should().NotBeNull("should return updated conversation");
         result.IsActive.Should().Be(false, "should mark conversation as inactive");
         
-        var updatedConversation = await _context.Conversations.FindAsync(conversation.Id);
+        var updatedConversation = await Context.Conversations.FindAsync(conversation.Id);
         updatedConversation.Should().NotBeNull();
         updatedConversation!.IsActive.Should().Be(false, "should mark as inactive");
         updatedConversation.EndedAt.Should().NotBeNull("should set end time");
@@ -286,8 +280,4 @@ public class ConversationServiceTests : IDisposable
             .WithMessage("*not found*");
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
 }
