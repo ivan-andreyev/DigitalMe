@@ -460,7 +460,13 @@ try
             }
             
             // In production, fail fast for critical secrets (but allow Testing environment)
-            if (secretsService.IsSecureEnvironment() && !secretsService.IsTestEnvironment() && validation.MissingSecrets.Any())
+            var isSecure = secretsService.IsSecureEnvironment();
+            var isTest = secretsService.IsTestEnvironment();
+            var hasMissing = validation.MissingSecrets.Any();
+            
+            secretsLogger?.LogInformation("Environment check: IsSecure={IsSecure}, IsTest={IsTest}, HasMissing={HasMissing}", isSecure, isTest, hasMissing);
+            
+            if (isSecure && !isTest && hasMissing)
             {
                 throw new InvalidOperationException($"Critical secrets validation failed in production environment. Missing: {string.Join(", ", validation.MissingSecrets)}");
             }
