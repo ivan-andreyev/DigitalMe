@@ -383,7 +383,9 @@ var migrationLogger = app.Services.GetService<ILogger<Program>>();
 migrationLogger?.LogInformation("🚀 APPLICATION BUILD COMPLETED - Starting migration check");
 
 // Auto-apply migrations on startup for Cloud SQL
-try
+await Task.Run(async () =>
+{
+    try
 {
     migrationLogger?.LogInformation("🔍 STEP 1: Creating service scope for migrations");
     using (var scope = app.Services.CreateScope())
@@ -402,7 +404,7 @@ try
         {
             // Use DatabaseMigrationService for better separation of concerns
             var migrationService = scope.ServiceProvider.GetRequiredService<DigitalMe.Services.Database.IDatabaseMigrationService>();
-            migrationService.ApplyMigrations(context);
+            await migrationService.ApplyMigrationsAsync(context);
                 
             // Seed Ivan's personality data for MVP (skip in Test environment for test isolation)
             if (app.Environment.EnvironmentName != "Testing")
@@ -430,6 +432,7 @@ catch (Exception scopeEx)
     migrationLogger?.LogError(scopeEx, "❌ CRITICAL ERROR - Failed to create service scope for migrations. Error: {ErrorMessage}", scopeEx.Message);
     migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
 }
+});
 
 migrationLogger?.LogInformation("✅ MIGRATION SECTION COMPLETED - Proceeding to secrets validation and middleware");
 

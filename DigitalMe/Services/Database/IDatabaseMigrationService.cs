@@ -11,7 +11,7 @@ public interface IDatabaseMigrationService
     /// Applies database migrations with proper error handling and recovery
     /// </summary>
     /// <param name="context">Database context for migration operations</param>
-    void ApplyMigrations(DigitalMeDbContext context);
+    Task ApplyMigrationsAsync(DigitalMeDbContext context);
     
     /// <summary>
     /// Validates database migration consistency and detects sync issues
@@ -24,5 +24,5 @@ public interface IDatabaseMigrationService
     /// Handles database creation when connection fails
     /// </summary>
     /// <param name="context">Database context for creation operations</param>
-    void HandleDatabaseCreation(DigitalMeDbContext context);
+    Task HandleDatabaseCreationAsync(DigitalMeDbContext context);
 }
