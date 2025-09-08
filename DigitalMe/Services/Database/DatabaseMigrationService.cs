@@ -203,19 +203,26 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     {
         try
         {
+            _logger.LogInformation("🔧 BLOCKER #1 FIX: Checking existing schema synchronization...");
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+            
+            _logger.LogInformation("🔧 Applied migrations count: {AppliedCount}", appliedMigrations.Count());
             
             // Only proceed if migration history is completely empty
             if (appliedMigrations.Any())
             {
+                _logger.LogInformation("🔧 Migration history not empty, skipping sync");
                 return false;
             }
             
             // Check if key tables exist (indicating database was created outside migrations)
+            _logger.LogInformation("🔧 Checking for existing core schema...");
             bool hasExistingTables = await CheckForExistingCoreSchema(context);
+            _logger.LogInformation("🔧 Has existing tables: {HasTables}", hasExistingTables);
             
             if (!hasExistingTables)
             {
+                _logger.LogInformation("🔧 Fresh database detected, proceeding with normal migration");
                 return false; // Fresh database, proceed with normal migration
             }
             
@@ -251,15 +258,18 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     {
         try
         {
+            _logger.LogInformation("🔧 BLOCKER #1 FIX: Attempting to query AspNetRoles table...");
+            
             // Check for AspNetRoles table by trying to query it directly
             var roleCount = await context.Set<IdentityRole>().CountAsync();
             
-            _logger.LogInformation("🔍 Core schema check - AspNetRoles table exists with {Count} roles", roleCount);
+            _logger.LogInformation("🔧 SUCCESS: AspNetRoles table exists with {Count} roles", roleCount);
+            _logger.LogInformation("🔧 BLOCKER #1 FIX: Core schema detected - should trigger sync");
             return true; // If we can query the table, it exists
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Schema check failed, assuming fresh database");
+            _logger.LogInformation("🔧 BLOCKER #1 FIX: AspNetRoles table query failed - fresh database: {ErrorMessage}", ex.Message);
             return false;
         }
     }

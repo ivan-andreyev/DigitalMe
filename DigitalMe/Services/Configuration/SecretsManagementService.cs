@@ -261,10 +261,17 @@ public class SecretsManagementService : ISecretsManagementService
     {
         try
         {
+            _logger.LogInformation("🔧 BLOCKER #2 FIX: Attempting to get environment variable '{VarName}'", variableName);
+            
             // Try standard .NET environment variable access first
             var envValue = Environment.GetEnvironmentVariable(variableName);
+            _logger.LogInformation("🔧 .NET Environment.GetEnvironmentVariable('{VarName}') = '{Value}'", 
+                variableName, envValue ?? "null");
+            
             if (!string.IsNullOrWhiteSpace(envValue))
             {
+                _logger.LogInformation("🔧 BLOCKER #2 FIX: Found via standard .NET - '{VarName}' = {Length} chars", 
+                    variableName, envValue.Length);
                 return envValue;
             }
 
