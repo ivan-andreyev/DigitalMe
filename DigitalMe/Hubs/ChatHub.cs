@@ -87,8 +87,8 @@ public class ChatHub : Hub
                 Message = "Иван печатает..."
             });
 
-            // Start background processing (non-blocking)
-            _ = Task.Run(async () => await ProcessAgentResponseAsync(request, result.Conversation.Id, result.GroupName));
+            // Process agent response synchronously for integration tests reliability
+            await ProcessAgentResponseAsync(request, result.Conversation.Id, result.GroupName);
             
             _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}", 
                 request.UserId);

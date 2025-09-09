@@ -24,7 +24,7 @@ public class MessageRepository : IMessageRepository
     {
         return await _context.Messages
             .Where(m => m.ConversationId == conversationId)
-            .OrderBy(m => m.Timestamp)
+            .OrderByDescending(m => m.Timestamp)
             .Skip(skip)
             .Take(take)
             .ToListAsync();

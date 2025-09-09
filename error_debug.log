@@ -1,0 +1,8 @@
+  Определение проектов для восстановления...
+  Все проекты обновлены для восстановления.
+  DigitalMe -> C:\Sources\DigitalMe\DigitalMe\bin\Debug\net8.0\DigitalMe.dll
+  DigitalMe.Tests.Unit -> C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\bin\Debug\net8.0\DigitalMe.Tests.Unit.dll
+  DigitalMe.Web -> C:\Sources\DigitalMe\src\DigitalMe.Web\bin\Debug\net8.0\DigitalMe.Web.dll
+C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\ChatFlowTests.cs(197,23): error CS0246: Не удалось найти тип или имя пространства имен "AssertionException" (возможно, отсутствует директива using или ссылка на сборку). [C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj]
+C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\ChatFlowTests.cs(206,23): error CS0246: Не удалось найти тип или имя пространства имен "AssertionException" (возможно, отсутствует директива using или ссылка на сборку). [C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj]
+C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\CustomWebApplicationFactory.cs(213,38): warning CS8603: Возможно, возврат ссылки, допускающей значение NULL. [C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj]

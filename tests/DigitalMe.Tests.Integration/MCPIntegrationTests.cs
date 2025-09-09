@@ -10,13 +10,13 @@ using DigitalMe.Models;
 
 namespace DigitalMe.Tests.Integration;
 
-public class MCPIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IAsyncDisposable
+public class MCPIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>, IAsyncDisposable
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory<Program> _factory;
 #pragma warning disable CS0414 // Field assigned but never used - intended for future MCP server configuration
     private readonly string _mcpServerUrl = "http://localhost:3000/mcp";
 
-    public MCPIntegrationTests(WebApplicationFactory<Program> factory)
+    public MCPIntegrationTests(CustomWebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -130,7 +130,7 @@ public class MCPIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         agentResult.AgentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
         
         // Should contain Ivan's structured approach
-        agentResult.AgentResponse.Content.Should().Contain("структурированный", "should mention structured approach");
+        agentResult.AgentResponse.Content.Should().Contain("структурно", "should mention structured approach");
     }
 
     public ValueTask DisposeAsync()

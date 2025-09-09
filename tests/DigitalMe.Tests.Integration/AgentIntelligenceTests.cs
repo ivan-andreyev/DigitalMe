@@ -7,16 +7,17 @@ using DigitalMe.DTOs;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.AgentBehavior;
 using DigitalMe.Services;
+using System.Text.Json;
 
 namespace DigitalMe.Tests.Integration;
 
-public class AgentIntelligenceTests : IClassFixture<WebApplicationFactory<Program>>, IAsyncDisposable
+public class AgentIntelligenceTests : IClassFixture<CustomWebApplicationFactory<Program>>, IAsyncDisposable
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory<Program> _factory;
     private HubConnection? _connection;
     private readonly string _testUserId = "agent-test-user";
 
-    public AgentIntelligenceTests(WebApplicationFactory<Program> factory)
+    public AgentIntelligenceTests(CustomWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         
@@ -84,7 +85,7 @@ public class AgentIntelligenceTests : IClassFixture<WebApplicationFactory<Progra
         agentMessage.Content.Should().NotContain("техническая проблема", "should not be error fallback");
         agentMessage.Metadata.Should().ContainKey("confidence", "should have confidence metadata");
         
-        var confidence = Convert.ToDouble(agentMessage.Metadata["confidence"]);
+        var confidence = ((JsonElement)agentMessage.Metadata["confidence"]).GetDouble();
         confidence.Should().BeGreaterThan(0.5, "should have decent confidence score");
     }
 

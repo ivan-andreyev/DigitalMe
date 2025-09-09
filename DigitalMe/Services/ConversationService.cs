@@ -46,6 +46,13 @@ public class ConversationService : IConversationService
 
     public async Task<Message> AddMessageAsync(Guid conversationId, string role, string content, Dictionary<string, object>? metadata = null)
     {
+        // Validate that the conversation exists before adding a message
+        var conversation = await _conversationRepository.GetConversationAsync(conversationId);
+        if (conversation == null)
+        {
+            throw new ArgumentException($"Conversation with ID {conversationId} does not exist.", nameof(conversationId));
+        }
+
         var message = new Message
         {
             ConversationId = conversationId,
@@ -66,7 +73,9 @@ public class ConversationService : IConversationService
     {
         var conversation = await _conversationRepository.GetConversationAsync(conversationId);
         if (conversation == null)
+        {
             throw new ArgumentException($"Conversation with ID {conversationId} not found");
+        }
 
         conversation.IsActive = false;
         conversation.EndedAt = DateTime.UtcNow;

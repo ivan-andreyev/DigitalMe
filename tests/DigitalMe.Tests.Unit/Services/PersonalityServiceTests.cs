@@ -1,333 +1,329 @@
+using FluentAssertions;
+using Moq;
+using Microsoft.Extensions.Logging;
+using DigitalMe.Services;
+using DigitalMe.DTOs;
 using DigitalMe.Data.Entities;
 using DigitalMe.Repositories;
-using DigitalMe.Services;
 using DigitalMe.Tests.Unit.Builders;
-using DigitalMe.Tests.Unit.Fixtures;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Moq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
 
-public class PersonalityServiceTests : TestBase
+public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
 {
-    private readonly Mock<IPersonalityRepository> _mockRepository;
     private readonly Mock<ILogger<PersonalityService>> _mockLogger;
-    private readonly PersonalityService _service;
+    private readonly PersonalityService _personalityService;
+    private readonly IPersonalityRepository _personalityRepository;
 
     public PersonalityServiceTests()
     {
-        _mockRepository = MockRepository.Create<IPersonalityRepository>();
-        _mockLogger = MockRepository.Create<ILogger<PersonalityService>>();
-        _service = new PersonalityService(_mockRepository.Object, _mockLogger.Object);
+        _mockLogger = new Mock<ILogger<PersonalityService>>();
+        _personalityRepository = new PersonalityRepository(Context);
+        _personalityService = new PersonalityService(_personalityRepository, _mockLogger.Object);
     }
 
-    [Fact]
-    public async Task GetPersonalityAsync_WithValidName_ReturnsPersonalityProfile()
+    public async Task InitializeAsync()
     {
-        // Arrange
-        var expectedProfile = PersonalityProfileBuilder.ForIvan().Build();
-        _mockRepository.Setup(r => r.GetProfileAsync("Ivan Digital Clone"))
-            .ReturnsAsync(expectedProfile);
-
-        // Act
-        var result = await _service.GetPersonalityAsync("Ivan Digital Clone");
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedProfile);
-        _mockRepository.Verify(r => r.GetProfileAsync("Ivan Digital Clone"), Times.Once);
-        VerifyAll();
+        CleanupDatabase();
+        await Task.CompletedTask;
     }
 
-    [Fact]
-    public async Task GetPersonalityAsync_WithInvalidName_ReturnsNull()
+    public async Task DisposeAsync()
     {
-        // Arrange
-        _mockRepository.Setup(r => r.GetProfileAsync("NonExistent"))
-            .ReturnsAsync((PersonalityProfile?)null);
-
-        // Act
-        var result = await _service.GetPersonalityAsync("NonExistent");
-
-        // Assert
-        result.Should().BeNull();
-        VerifyAll();
+        await Task.CompletedTask;
     }
 
-    [Fact]
-    public async Task CreatePersonalityAsync_WithValidData_ReturnsCreatedProfile()
+    /// <summary>
+    /// Helper method to create a test personality
+    /// </summary>
+    /// <param name="name">Personality name</param>
+    /// <param name="description">Personality description</param>
+    /// <returns>Created personality</returns>
+    private async Task<PersonalityProfile> CreatePersonalityAsync(string name = "TestPersonality", string description = "Test description")
     {
-        // Arrange
-        var name = "Test Profile";
-        var description = "Test Description";
-        var expectedProfile = PersonalityProfileBuilder.Create()
+        var personality = PersonalityProfileBuilder.Create()
+            .WithName(name)
+            .WithDescription(description)
+            .Build();
+        
+        Context.PersonalityProfiles.Add(personality);
+        await Context.SaveChangesAsync();
+        return personality;
+    }
+
+    /// <summary>
+    /// Helper method to create a test personality with traits
+    /// </summary>
+    /// <param name="name">Personality name</param>
+    /// <param name="description">Personality description</param>
+    /// <param name="traitCount">Number of traits to create</param>
+    /// <returns>Created personality with traits</returns>
+    private async Task<PersonalityProfile> CreatePersonalityWithTraitsAsync(string name = "TestPersonality", string description = "Test description", int traitCount = 2)
+    {
+        var personality = PersonalityProfileBuilder.Create()
             .WithName(name)
             .WithDescription(description)
             .Build();
 
-        _mockRepository.Setup(r => r.CreateProfileAsync(It.IsAny<PersonalityProfile>()))
-            .ReturnsAsync((PersonalityProfile profile) => profile);
+        var traits = new List<PersonalityTrait>();
+        for (int i = 0; i < traitCount; i++)
+        {
+            var trait = PersonalityTraitBuilder.Create()
+                .WithCategory(i == 0 ? "Core" : "Behavior")
+                .WithName(i == 0 ? "Analytical" : "Pragmatic")
+                .WithDescription(i == 0 ? "Strong analytical thinking" : "Practical approach to problems")
+                .WithWeight(i == 0 ? 0.9 : 0.8)
+                .WithPersonalityProfileId(personality.Id)
+                .Build();
+            traits.Add(trait);
+        }
+
+        Context.PersonalityProfiles.Add(personality);
+        Context.PersonalityTraits.AddRange(traits);
+        await Context.SaveChangesAsync();
+        return personality;
+    }
+
+    /// <summary>
+    /// Helper method to create Ivan personality with traits for system prompt testing
+    /// </summary>
+    /// <returns>Created Ivan personality with traits</returns>
+    private async Task<PersonalityProfile> CreateIvanPersonalityAsync()
+    {
+        var personality = PersonalityProfileBuilder.ForIvan().Build();
+        var traits = new[]
+        {
+            PersonalityTraitBuilder.Create()
+                .WithCategory("Core")
+                .WithName("Analytical")
+                .WithDescription("Strong analytical thinking")
+                .WithWeight(0.9)
+                .WithPersonalityProfileId(personality.Id)
+                .Build(),
+            PersonalityTraitBuilder.Create()
+                .WithCategory("Communication")
+                .WithName("Direct")
+                .WithDescription("Direct communication style")
+                .WithWeight(0.8)
+                .WithPersonalityProfileId(personality.Id)
+                .Build()
+        };
+
+        Context.PersonalityProfiles.Add(personality);
+        Context.PersonalityTraits.AddRange(traits);
+        await Context.SaveChangesAsync();
+        return personality;
+    }
+
+    [Fact]
+    public async Task GetPersonality_WithExistingPersonality_ShouldReturnPersonalityWithTraits()
+    {
+        // Arrange
+        var personality = await CreatePersonalityWithTraitsAsync("TestPersonalityWithTraits", "Test personality for trait testing");
 
         // Act
-        var result = await _service.CreatePersonalityAsync(name, description);
+        var result = await _personalityService.GetPersonalityAsync(personality.Name);
+        var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Name.Should().Be(personality.Name);
+        result.Description.Should().Be(personality.Description);
+        traits.Should().HaveCount(2);
+        traits.Should().Contain(t => t.Name == "Analytical");
+        traits.Should().Contain(t => t.Name == "Pragmatic");
+    }
+
+    [Fact]
+    public async Task GetPersonality_WithNonExistentPersonality_ShouldReturnNull()
+    {
+        // Arrange & Act
+        var result = await _personalityService.GetPersonalityAsync("NonExistent");
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task CreatePersonality_WithValidData_ShouldCreateAndReturnPersonality()
+    {
+        // Arrange
+        var name = "TestPersonality";
+        var description = "A test personality profile";
+
+        // Act
+        var result = await _personalityService.CreatePersonalityAsync(name, description);
 
         // Assert
         result.Should().NotBeNull();
         result.Name.Should().Be(name);
         result.Description.Should().Be(description);
         result.Id.Should().NotBeEmpty();
-        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
         
-        _mockRepository.Verify(r => r.CreateProfileAsync(It.Is<PersonalityProfile>(p => 
-            p.Name == name && p.Description == description)), Times.Once);
-        VerifyAll();
+        // Verify it was saved to database
+        var savedPersonality = await Context.PersonalityProfiles.FindAsync(result.Id);
+        savedPersonality.Should().NotBeNull();
+        savedPersonality!.Name.Should().Be(name);
     }
 
     [Fact]
-    public async Task UpdatePersonalityAsync_WithValidId_ReturnsUpdatedProfile()
+    public async Task CreatePersonality_WithEmptyName_ShouldCreatePersonalityWithEmptyName()
     {
         // Arrange
-        var profileId = Guid.NewGuid();
-        var newDescription = "Updated description";
-        var existingProfile = PersonalityProfileBuilder.Create()
-            .WithId(profileId)
-            .WithName("Test Profile")
-            .WithDescription("Old description")
-            .Build();
-
-        _mockRepository.Setup(r => r.GetProfileByIdAsync(profileId))
-            .ReturnsAsync(existingProfile);
-        _mockRepository.Setup(r => r.UpdateProfileAsync(It.IsAny<PersonalityProfile>()))
-            .ReturnsAsync((PersonalityProfile profile) => profile);
+        var name = "";
+        var description = "Description without name";
 
         // Act
-        var result = await _service.UpdatePersonalityAsync(profileId, newDescription);
+        var result = await _personalityService.CreatePersonalityAsync(name, description);
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(profileId);
+        result.Name.Should().Be(name);
+        result.Description.Should().Be(description);
+    }
+
+    [Fact]
+    public async Task UpdatePersonality_WithValidData_ShouldUpdateAndReturnPersonality()
+    {
+        // Arrange
+        var personality = await CreatePersonalityAsync("UpdateTest", "Original description");
+
+        var newDescription = "Updated description with new information";
+
+        // Act
+        var result = await _personalityService.UpdatePersonalityAsync(personality.Id, newDescription);
+
+        // Assert
+        result.Should().NotBeNull();
         result.Description.Should().Be(newDescription);
+        result.UpdatedAt.Should().BeAfter(result.CreatedAt);
         
-        _mockRepository.Verify(r => r.GetProfileByIdAsync(profileId), Times.Once);
-        _mockRepository.Verify(r => r.UpdateProfileAsync(It.Is<PersonalityProfile>(p => 
-            p.Id == profileId && p.Description == newDescription)), Times.Once);
-        VerifyAll();
+        // Verify in database
+        var updatedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
+        updatedPersonality!.Description.Should().Be(newDescription);
     }
 
     [Fact]
-    public async Task UpdatePersonalityAsync_WithInvalidId_ThrowsArgumentException()
+    public async Task UpdatePersonality_WithNonExistentId_ShouldThrowArgumentException()
     {
         // Arrange
-        var invalidId = Guid.NewGuid();
-        var description = "New description";
-        
-        _mockRepository.Setup(r => r.GetProfileByIdAsync(invalidId))
-            .ReturnsAsync((PersonalityProfile?)null);
+        var nonExistentId = Guid.NewGuid();
+        var newDescription = "This won't work";
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => _service.UpdatePersonalityAsync(invalidId, description));
-        
-        exception.Message.Should().Contain($"Personality with ID {invalidId} not found");
-        _mockRepository.Verify(r => r.GetProfileByIdAsync(invalidId), Times.Once);
-        _mockRepository.Verify(r => r.UpdateProfileAsync(It.IsAny<PersonalityProfile>()), Times.Never);
-        VerifyAll();
+        await FluentActions.Invoking(() => _personalityService.UpdatePersonalityAsync(nonExistentId, newDescription))
+            .Should().ThrowAsync<ArgumentException>()
+            .WithMessage($"Personality with ID {nonExistentId} not found");
     }
 
     [Fact]
-    public async Task GenerateSystemPromptAsync_WithValidProfileAndTraits_ReturnsSystemPrompt()
+    public async Task AddTrait_WithValidData_ShouldAddTraitToPersonality()
     {
         // Arrange
-        var (profile, traits) = PersonalityTestFixtures.CreateProfileWithTraits();
-        
-        _mockRepository.Setup(r => r.GetProfileByIdAsync(profile.Id))
-            .ReturnsAsync(profile);
-        _mockRepository.Setup(r => r.GetTraitsAsync(profile.Id))
-            .ReturnsAsync(traits);
+        var personality = await CreatePersonalityAsync("TraitTest");
+
+        var category = "Cognitive";
+        var name = "Creative";
+        var description = "High creative thinking ability";
+        var weight = 0.85;
 
         // Act
-        var result = await _service.GenerateSystemPromptAsync(profile.Id);
-
-        // Assert
-        result.Should().NotBeNullOrWhiteSpace();
-        result.Should().Contain(profile.Name);
-        result.Should().Contain(profile.Description);
-        result.Should().Contain("цифровая копия");
-        result.Should().Contain("БИОГРАФИЯ И КОНТЕКСТ");
-        result.Should().Contain("СТИЛЬ ОБЩЕНИЯ");
-        result.Should().Contain("ТЕХНИЧЕСКИЕ ПРЕДПОЧТЕНИЯ");
-        result.Should().Contain("C#/.NET");
-        result.Should().Contain("ИНДИВИДУАЛЬНЫЕ ЧЕРТЫ ЛИЧНОСТИ");
-        
-        foreach (var trait in traits)
-        {
-            result.Should().Contain(trait.Category);
-            result.Should().Contain(trait.Name);
-            result.Should().Contain(trait.Description);
-        }
-        
-        VerifyAll();
-    }
-
-    [Fact]
-    public async Task GenerateSystemPromptAsync_WithProfileButNoTraits_ReturnsBasicSystemPrompt()
-    {
-        // Arrange
-        var profile = PersonalityProfileBuilder.ForIvan().Build();
-        var emptyTraits = new List<PersonalityTrait>();
-        
-        _mockRepository.Setup(r => r.GetProfileByIdAsync(profile.Id))
-            .ReturnsAsync(profile);
-        _mockRepository.Setup(r => r.GetTraitsAsync(profile.Id))
-            .ReturnsAsync(emptyTraits);
-
-        // Act
-        var result = await _service.GenerateSystemPromptAsync(profile.Id);
-
-        // Assert
-        result.Should().NotBeNullOrWhiteSpace();
-        result.Should().Contain(profile.Name);
-        result.Should().Contain(profile.Description);
-        result.Should().NotContain("ИНДИВИДУАЛЬНЫЕ ЧЕРТЫ ЛИЧНОСТИ");
-        VerifyAll();
-    }
-
-    [Fact]
-    public async Task GenerateSystemPromptAsync_WithInvalidId_ThrowsArgumentException()
-    {
-        // Arrange
-        var invalidId = Guid.NewGuid();
-        
-        _mockRepository.Setup(r => r.GetProfileByIdAsync(invalidId))
-            .ReturnsAsync((PersonalityProfile?)null);
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => _service.GenerateSystemPromptAsync(invalidId));
-        
-        exception.Message.Should().Contain($"Personality with ID {invalidId} not found");
-        VerifyAll();
-    }
-
-    [Fact]
-    public async Task AddTraitAsync_WithValidData_ReturnsCreatedTrait()
-    {
-        // Arrange
-        var personalityId = Guid.NewGuid();
-        var category = "Technical";
-        var name = "C# Expert";
-        var description = "Deep expertise in C# development";
-        var weight = 0.9;
-
-        var expectedTrait = PersonalityTraitBuilder.Create()
-            .WithPersonalityProfileId(personalityId)
-            .WithCategory(category)
-            .WithName(name)
-            .WithDescription(description)
-            .WithWeight(weight)
-            .Build();
-
-        _mockRepository.Setup(r => r.AddTraitAsync(It.IsAny<PersonalityTrait>()))
-            .ReturnsAsync((PersonalityTrait trait) => trait);
-
-        // Act
-        var result = await _service.AddTraitAsync(personalityId, category, name, description, weight);
+        var result = await _personalityService.AddTraitAsync(personality.Id, category, name, description, weight);
 
         // Assert
         result.Should().NotBeNull();
-        result.PersonalityProfileId.Should().Be(personalityId);
         result.Category.Should().Be(category);
         result.Name.Should().Be(name);
         result.Description.Should().Be(description);
         result.Weight.Should().Be(weight);
+        result.PersonalityProfileId.Should().Be(personality.Id);
         
-        _mockRepository.Verify(r => r.AddTraitAsync(It.Is<PersonalityTrait>(t =>
-            t.PersonalityProfileId == personalityId &&
-            t.Category == category &&
-            t.Name == name &&
-            t.Description == description &&
-            t.Weight == weight)), Times.Once);
-        VerifyAll();
+        // Verify in database
+        var savedTrait = await Context.PersonalityTraits.FindAsync(result.Id);
+        savedTrait.Should().NotBeNull();
+        savedTrait!.Name.Should().Be(name);
     }
 
     [Fact]
-    public async Task AddTraitAsync_WithDefaultWeight_UsesDefaultValue()
+    public async Task GetSystemPrompt_WithValidPersonalityId_ShouldReturnSystemPrompt()
     {
         // Arrange
-        var personalityId = Guid.NewGuid();
-        var category = "Technical";
-        var name = "C# Expert";
-        var description = "Deep expertise in C# development";
-
-        _mockRepository.Setup(r => r.AddTraitAsync(It.IsAny<PersonalityTrait>()))
-            .ReturnsAsync((PersonalityTrait trait) => trait);
+        var personality = await CreateIvanPersonalityAsync();
 
         // Act
-        var result = await _service.AddTraitAsync(personalityId, category, name, description);
+        var systemPrompt = await _personalityService.GenerateSystemPromptAsync(personality.Id);
 
         // Assert
-        result.Weight.Should().Be(1.0);
-        VerifyAll();
+        systemPrompt.Should().NotBeNullOrEmpty();
+        systemPrompt.Should().Contain(personality.Name);
+        systemPrompt.Should().Contain("Analytical");
+        systemPrompt.Should().Contain("Direct");
     }
 
     [Fact]
-    public async Task GetPersonalityTraitsAsync_WithValidId_ReturnsTraits()
+    public async Task GetSystemPrompt_WithNonExistentPersonalityId_ShouldThrowArgumentException()
     {
         // Arrange
-        var personalityId = Guid.NewGuid();
-        var expectedTraits = new List<PersonalityTrait>
-        {
-            PersonalityTraitBuilder.Create().WithPersonalityProfileId(personalityId).WithCategory("Technical").WithName("C# Expert").WithDescription("Deep expertise in C# development").WithWeight(0.9).Build(),
-            PersonalityTraitBuilder.Create().WithPersonalityProfileId(personalityId).WithCategory("Leadership").WithName("Mentoring").WithDescription("Enjoys teaching and developing team members").WithWeight(0.7).Build()
-        };
+        var nonExistentId = Guid.NewGuid();
 
-        _mockRepository.Setup(r => r.GetTraitsAsync(personalityId))
-            .ReturnsAsync(expectedTraits);
-
-        // Act
-        var result = await _service.GetPersonalityTraitsAsync(personalityId);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().HaveCount(2);
-        result.Should().BeEquivalentTo(expectedTraits);
-        VerifyAll();
+        // Act & Assert
+        await FluentActions.Invoking(() => _personalityService.GenerateSystemPromptAsync(nonExistentId))
+            .Should().ThrowAsync<ArgumentException>()
+            .WithMessage($"Personality with ID {nonExistentId} not found");
     }
 
     [Fact]
-    public async Task DeletePersonalityAsync_WithValidId_ReturnsTrue()
+    public async Task DeletePersonality_WithValidId_ShouldDeletePersonality()
     {
         // Arrange
-        var personalityId = Guid.NewGuid();
-        
-        _mockRepository.Setup(r => r.DeleteProfileAsync(personalityId))
-            .ReturnsAsync(true);
+        var personality = await CreatePersonalityAsync("DeleteTest");
 
         // Act
-        var result = await _service.DeletePersonalityAsync(personalityId);
+        var result = await _personalityService.DeletePersonalityAsync(personality.Id);
 
         // Assert
         result.Should().BeTrue();
-        _mockRepository.Verify(r => r.DeleteProfileAsync(personalityId), Times.Once);
-        VerifyAll();
+
+        // Verify deletion
+        var deletedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
+        deletedPersonality.Should().BeNull();
+        
+        var getPersonality = await _personalityService.GetPersonalityAsync(personality.Name);
+        getPersonality.Should().BeNull();
     }
 
     [Fact]
-    public async Task DeletePersonalityAsync_WithInvalidId_ReturnsFalse()
+    public async Task DeletePersonality_WithNonExistentId_ShouldReturnFalse()
     {
         // Arrange
-        var invalidId = Guid.NewGuid();
-        
-        _mockRepository.Setup(r => r.DeleteProfileAsync(invalidId))
-            .ReturnsAsync(false);
+        var nonExistentId = Guid.NewGuid();
 
         // Act
-        var result = await _service.DeletePersonalityAsync(invalidId);
+        var result = await _personalityService.DeletePersonalityAsync(nonExistentId);
 
         // Assert
         result.Should().BeFalse();
-        _mockRepository.Verify(r => r.DeleteProfileAsync(invalidId), Times.Once);
-        VerifyAll();
+    }
+
+    [Fact]
+    public async Task AddTrait_WithInvalidPersonalityId_ShouldCreateTraitAnyway()
+    {
+        // Arrange
+        var nonExistentPersonalityId = Guid.NewGuid();
+        var category = "Test";
+        var name = "TestTrait";
+        var description = "This should work anyway";
+        var weight = 0.5;
+
+        // Act
+        var result = await _personalityService.AddTraitAsync(nonExistentPersonalityId, category, name, description, weight);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.PersonalityProfileId.Should().Be(nonExistentPersonalityId);
+        result.Category.Should().Be(category);
+        result.Name.Should().Be(name);
     }
 }

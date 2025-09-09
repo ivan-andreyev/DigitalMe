@@ -39,7 +39,9 @@ public class ConversationController : ControllerBase
     {
         var conversation = await _conversationService.GetActiveConversationAsync(platform, userId);
         if (conversation == null)
+        {
             return NotFound("No active conversation found");
+        }
 
         var messages = conversation.Messages.Select(m => new MessageDto
         {
@@ -85,17 +87,24 @@ public class ConversationController : ControllerBase
     [HttpPost("{conversationId}/messages")]
     public async Task<ActionResult<MessageDto>> AddMessage(Guid conversationId, [FromBody] CreateMessageDto dto)
     {
-        var message = await _conversationService.AddMessageAsync(conversationId, dto.Role, dto.Content, dto.Metadata);
-        
-        return Ok(new MessageDto
+        try
         {
-            Id = message.Id,
-            ConversationId = message.ConversationId,
-            Role = message.Role,
-            Content = message.Content,
-            Timestamp = message.Timestamp,
-            Metadata = dto.Metadata ?? new Dictionary<string, object>()
-        });
+            var message = await _conversationService.AddMessageAsync(conversationId, dto.Role, dto.Content, dto.Metadata);
+            
+            return Ok(new MessageDto
+            {
+                Id = message.Id,
+                ConversationId = message.ConversationId,
+                Role = message.Role,
+                Content = message.Content,
+                Timestamp = message.Timestamp,
+                Metadata = dto.Metadata ?? new Dictionary<string, object>()
+            });
+        }
+        catch (ArgumentException ex) when (ex.ParamName == "conversationId")
+        {
+            return NotFound($"Conversation with ID {conversationId} does not exist.");
+        }
     }
 
     [HttpPost("{conversationId}/end")]

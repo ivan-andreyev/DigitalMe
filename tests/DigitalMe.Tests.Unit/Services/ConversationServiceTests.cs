@@ -128,14 +128,12 @@ public class ConversationServiceTests : BaseTestWithDatabase
         // Arrange
         var nonExistentConversationId = Guid.NewGuid();
         
-        // Act
-        var result = await _service.AddMessageAsync(nonExistentConversationId, "user", "test", null);
+        // Act & Assert - should throw exception for non-existent conversation
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+            _service.AddMessageAsync(nonExistentConversationId, "user", "test", null));
         
-        // Assert - service should create message even for non-existent conversation
-        result.Should().NotBeNull("message should be created");
-        result.ConversationId.Should().Be(nonExistentConversationId);
-        result.Role.Should().Be("user");
-        result.Content.Should().Be("test");
+        exception.ParamName.Should().Be("conversationId");
+        exception.Message.Should().Contain($"Conversation with ID {nonExistentConversationId} does not exist");
     }
 
     [Fact]

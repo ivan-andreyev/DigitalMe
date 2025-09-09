@@ -149,7 +149,7 @@ public class MockMcpService : IMcpService
 }
 ```
 
-**IClaudeApiService Mock** (based on actual interface):
+**IClaudeApiService Mock** (based on actual interface from DigitalMe.Integrations.MCP.ClaudeApiService.cs):
 ```csharp
 public class MockClaudeApiService : IClaudeApiService
 {
@@ -162,7 +162,17 @@ public class MockClaudeApiService : IClaudeApiService
     public Task<bool> ValidateApiConnectionAsync() => Task.FromResult(true);
     
     public Task<ClaudeApiHealth> GetHealthStatusAsync()
-        => Task.FromResult(new ClaudeApiHealth { IsHealthy = true, Status = "Mock OK" });
+        => Task.FromResult(new ClaudeApiHealth 
+        {
+            IsHealthy = true, 
+            Status = "Mock OK",
+            ResponseTimeMs = 50,
+            LastChecked = DateTime.UtcNow,
+            Model = "claude-3-5-sonnet",
+            MaxTokens = 4096,
+            AvailableRequests = 5,
+            MaxConcurrentRequests = 5
+        });
 }
 ```
 
@@ -174,7 +184,7 @@ public class MockClaudeApiService : IClaudeApiService
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "DataSource=:memory:"
+    "DefaultConnection": "InMemoryDatabase-Testing"
   },
   "Logging": {
     "LogLevel": {
@@ -199,23 +209,37 @@ public class MockClaudeApiService : IClaudeApiService
 
 ## Implementation Timeline
 
+**Updated Timeline**: Extended to 6 weeks to account for SignalR complexity and proper infrastructure analysis.
+
+**Critical Dependencies**: 
+- CustomWebApplicationFactory has existing tool strategy conflicts that must be resolved
+- SignalR handshake issues are affecting all 28 integration tests and require comprehensive debugging
+- Existing test infrastructure needs baseline documentation before modifications
+
 ### Week 1: Unit Test Stabilization
 - **Days 1-2**: Migrate failing controller tests to BaseTestWithDatabase pattern
 - **Days 3-4**: Fix service tests with proper dependency injection
 - **Day 5**: Achieve 95%+ unit test success rate
 
-### Week 2: Integration Test Foundation  
-- **Days 1-2**: Implement TestWebApplicationFactory with proper service mocking
-- **Days 3-4**: Fix SignalR connection issues using standard test patterns
-- **Day 5**: Achieve basic integration test connectivity (50%+ pass rate)
+### Weeks 2-3: Integration Test Foundation  
+- **Week 2**: Analyze and fix CustomWebApplicationFactory issues (existing tool strategy conflicts)
+- **Days 1-3**: Implement proper service mocking with correct interface signatures
+- **Days 4-5**: Begin SignalR connection debugging using WebApplicationFactory + SignalR test client
+- **Week 3**: Complete SignalR integration testing
+- **Days 1-7**: Deep SignalR debugging (handshake failures affecting all 28 integration tests)
+- **Days 8-10**: Achieve basic integration test connectivity (50%+ pass rate)
 
-### Week 3: Service Integration
+### Week 4: Service Integration
 - **Days 1-3**: Implement all service mocks with correct interfaces
 - **Days 4-5**: End-to-end integration test scenarios
 
-### Week 4: Optimization & Documentation
-- **Days 1-2**: Performance optimization and test cleanup
-- **Days 3-5**: Documentation and knowledge transfer
+### Weeks 5-6: Optimization & Documentation
+- **Week 5**: Performance optimization and test cleanup
+- **Days 1-3**: Test execution performance tuning
+- **Days 4-5**: Test data management and isolation strategies
+- **Week 6**: Documentation and knowledge transfer
+- **Days 1-3**: Comprehensive testing documentation
+- **Days 4-5**: Knowledge transfer and maintenance guidelines
 
 ---
 
@@ -226,15 +250,17 @@ public class MockClaudeApiService : IClaudeApiService
 - **BaseTestWithDatabase Adoption**: All database-dependent tests migrated
 - **Test Execution Time**: Under 30 seconds for full unit test suite
 
-### Phase 2 Targets (Week 2)
-- **Integration Test Success Rate**: 70%+ (20+ of 28 tests)
+### Phase 2 Targets (Weeks 2-3)
+- **CustomWebApplicationFactory Issues**: Resolved tool strategy conflicts
+- **Service Mock Coverage**: All external dependencies properly mocked with correct interfaces
 - **SignalR Connection Success**: 100% (eliminate handshake failures)
-- **Service Mock Coverage**: All external dependencies mocked
+- **Integration Test Success Rate**: 70%+ (20+ of 28 tests)
 
-### Final Targets (Week 4)
+### Final Targets (Week 6)
 - **Overall Test Success Rate**: 95%+ across all test projects
 - **CI/CD Reliability**: Consistent results across test runs
 - **Test Maintenance**: Standard patterns reduce future maintenance overhead
+- **Test Infrastructure**: Documented, maintainable, and extensible
 
 ---
 
@@ -242,13 +268,17 @@ public class MockClaudeApiService : IClaudeApiService
 
 ### Technical Risks
 - **EF Core InMemory Limitations**: Already proven successful with PersonalityRepositoryTests
-- **SignalR Testing Complexity**: Use Microsoft-documented WebApplicationFactory approach
-- **Service Interface Changes**: Mock interfaces are based on current codebase analysis
+- **SignalR Testing Complexity**: Major risk - all 28 integration tests failing with handshake issues
+- **CustomWebApplicationFactory Issues**: Existing tool strategy conflicts need resolution
+- **Service Interface Changes**: Mock interfaces verified against actual codebase (IClaudeApiService analyzed)
+- **Timeline Risk**: 6 weeks may still be compressed for complex SignalR debugging
 
 ### Schedule Risks
 - **Phase 1 Foundation**: Build only on proven BaseTestWithDatabase pattern
 - **Incremental Delivery**: Each phase delivers measurable improvements
-- **Fallback Strategy**: If integration tests prove complex, focus on 95%+ unit test reliability
+- **SignalR Complexity**: Major schedule risk - may require 2-3 weeks just for SignalR debugging
+- **Fallback Strategy**: If integration tests prove too complex, focus on 95%+ unit test reliability
+- **Infrastructure Dependencies**: Must resolve CustomWebApplicationFactory issues before SignalR work
 
 ---
 

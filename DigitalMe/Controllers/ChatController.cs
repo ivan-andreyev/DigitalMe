@@ -12,15 +12,18 @@ public class ChatController : ControllerBase
 {
     private readonly IMVPPersonalityService _personalityService;
     private readonly IMVPMessageProcessor _messageProcessor;
+    private readonly IConversationService _conversationService;
     private readonly ILogger<ChatController> _logger;
 
     public ChatController(
         IMVPPersonalityService personalityService,
         IMVPMessageProcessor messageProcessor,
+        IConversationService conversationService,
         ILogger<ChatController> logger)
     {
         _personalityService = personalityService;
         _messageProcessor = messageProcessor;
+        _conversationService = conversationService;
         _logger = logger;
     }
 
@@ -51,6 +54,16 @@ public class ChatController : ControllerBase
                 return BadRequest("Ivan's personality profile not found. Please create it first.");
             }
 
+            // Get or create active conversation for this user+platform
+            var conversation = await _conversationService.GetActiveConversationAsync(request.Platform, request.UserId);
+            if (conversation == null)
+            {
+                conversation = await _conversationService.StartConversationAsync(request.Platform, request.UserId, "Chat Session");
+            }
+
+            // Add user message to conversation
+            await _conversationService.AddMessageAsync(conversation.Id, "user", userMessage);
+
             // Process message through MVP pipeline
             var response = await _messageProcessor.ProcessMessageAsync(userMessage);
 
@@ -58,14 +71,24 @@ public class ChatController : ControllerBase
             var mood = AnalyzeMood(userMessage, response);
             var confidence = CalculateConfidence(response);
 
+            // Add assistant response to conversation and return it
+            var assistantMessage = await _conversationService.AddMessageAsync(conversation.Id, "assistant", response, new Dictionary<string, object>
+            {
+                ["platform"] = request.Platform,
+                ["userId"] = request.UserId,
+                ["processed_via"] = "MVP_Pipeline",
+                ["mood"] = mood,
+                ["confidence"] = confidence
+            });
+
             // Return enhanced response for conversation pipeline
             return Ok(new MessageDto
             {
-                Id = Guid.NewGuid(),
-                ConversationId = Guid.NewGuid(), // MVP: Simple conversation handling
-                Role = "assistant",
-                Content = response,
-                Timestamp = DateTime.UtcNow,
+                Id = assistantMessage.Id,
+                ConversationId = assistantMessage.ConversationId,
+                Role = assistantMessage.Role,
+                Content = assistantMessage.Content,
+                Timestamp = assistantMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
                     ["platform"] = request.Platform,
@@ -138,15 +161,21 @@ public class ChatController : ControllerBase
     private double CalculateConfidence(string response)
     {
         if (string.IsNullOrEmpty(response))
+        {
             return 0.0;
+        }
 
         double confidence = 0.7; // Base confidence
 
         // Higher confidence for longer, more detailed responses
         if (response.Length > 200)
+        {
             confidence += 0.1;
+        }
         if (response.Length > 500)
+        {
             confidence += 0.1;
+        }
 
         // Higher confidence for responses with technical terms (Ivan's expertise)
         var techTerms = new[] { "C#", ".NET", "code", "system", "architecture", "solution", "implementation" };
@@ -155,7 +184,9 @@ public class ChatController : ControllerBase
 
         // Higher confidence for structured responses
         if (response.Contains("1.") || response.Contains("2.") || response.Contains("•"))
+        {
             confidence += 0.05;
+        }
 
         // Cap confidence at 0.95 to maintain realism
         return Math.Min(confidence, 0.95);

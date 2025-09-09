@@ -124,7 +124,7 @@ Your expertise spans project management, resource allocation, risk assessment, a
 Apply ALL criteria from methodology files to EVERY file in scope:
 1. **Structural compliance** (per `@catalogization-rules.mdc`) - GOLDEN RULES, naming, structure
 2. **Technical specifications** (per `@common-plan-reviewer.mdc`) - implementation details, code specs
-3. **LLM readiness assessment** - tool calls >30-40, context complexity, actionability
+3. **LLM readiness assessment** (per `@llm-readiness-assessment.mdc`) - автоматический алгоритм оценки готовности к реализации
 4. **Project management viability** - timelines, dependencies, risks
 5. **🚨 SOLUTION APPROPRIATENESS CHECK** (new mandatory aspect):
    - **Reinvention detection**: Flag any components that duplicate existing libraries/tools
@@ -220,7 +220,7 @@ Apply ALL criteria from methodology files to EVERY file in scope:
 ## Quality Metrics
 - **Structural Compliance**: [score/10]
 - **Technical Specifications**: [score/10] 
-- **LLM Readiness**: [score/10]
+- **LLM Readiness**: [score/10] (per `@llm-readiness-assessment.mdc`)
 - **Project Management**: [score/10]
 - **🚨 Solution Appropriateness**: [score/10] *(NEW - checks for reinvention, over-engineering)*
 - **Overall Score**: [average score/10]
