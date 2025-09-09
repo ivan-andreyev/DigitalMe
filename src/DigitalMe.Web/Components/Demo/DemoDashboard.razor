@@ -1,0 +1,820 @@
+@inject IDemoMetricsService MetricsService
+@inject ILogger<DemoDashboard> Logger
+@implements IDisposable
+@using DigitalMe.Web.Services
+
+<div class="demo-dashboard">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>🚀 DigitalMe Platform - Live Demo Dashboard</h1>
+            <p class="subtitle">Real-time system metrics and enterprise capabilities showcase</p>
+        </div>
+        <div class="status-indicator">
+            <span class="status-dot @(isConnected ? "connected" : "disconnected")"></span>
+            <span class="status-text">@(isConnected ? "Live Data Connected" : "Demo Mode")</span>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-indicator">
+            <div class="loading-spinner"></div>
+            <p>Loading enterprise metrics...</p>
+        </div>
+    }
+    else
+    {
+    <div class="metrics-grid">
+        <!-- System Health Metrics -->
+        <div class="metric-section">
+            <h3>🏥 System Health</h3>
+            <div class="metric-cards">
+                <div class="metric-card success">
+                    <div class="metric-value">@systemHealth.ApiResponseTime ms</div>
+                    <div class="metric-label">API Response Time</div>
+                    <div class="metric-trend">@GetTrendIcon(systemHealth.ApiTrend) @systemHealth.ApiTrend</div>
+                </div>
+                <div class="metric-card info">
+                    <div class="metric-value">@systemHealth.ActiveConnections</div>
+                    <div class="metric-label">Active Connections</div>
+                    <div class="metric-trend">@GetTrendIcon(systemHealth.ConnectionTrend) @systemHealth.ConnectionTrend</div>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-value">@systemHealth.MemoryUsage%</div>
+                    <div class="metric-label">Memory Usage</div>
+                    <div class="metric-trend">@GetTrendIcon(systemHealth.MemoryTrend) @systemHealth.MemoryTrend</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Status -->
+        <div class="metric-section">
+            <h3>🔗 Enterprise Integrations</h3>
+            <div class="integration-status">
+                @foreach (var integration in integrationStatus)
+                {
+                    <div class="integration-item @GetStatusClass(integration.Status)">
+                        <div class="integration-icon">@integration.Icon</div>
+                        <div class="integration-details">
+                            <div class="integration-name">@integration.Name</div>
+                            <div class="integration-info">
+                                <span class="status-badge @GetStatusClass(integration.Status)">@integration.Status</span>
+                                <span class="response-time">@integration.LastResponseTime ms</span>
+                            </div>
+                        </div>
+                        <div class="integration-metrics">
+                            <div class="metric-mini">@integration.RequestsToday</div>
+                            <div class="metric-mini-label">Requests Today</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- AI Performance Metrics -->
+        <div class="metric-section">
+            <h3>🧠 AI Performance</h3>
+            <div class="metric-cards">
+                <div class="metric-card primary">
+                    <div class="metric-value">@aiMetrics.PersonalityAccuracy%</div>
+                    <div class="metric-label">Personality Accuracy</div>
+                    <div class="metric-description">Response alignment with Ivan's personality</div>
+                </div>
+                <div class="metric-card secondary">
+                    <div class="metric-value">@aiMetrics.ResponseQuality</div>
+                    <div class="metric-label">Response Quality Score</div>
+                    <div class="metric-description">Average quality rating (1-10)</div>
+                </div>
+                <div class="metric-card accent">
+                    <div class="metric-value">@aiMetrics.LearningProgress%</div>
+                    <div class="metric-label">Learning Progress</div>
+                    <div class="metric-description">Continuous personality refinement</div>
+                </div>
+            </div>
+            <div class="ai-activity-stats">
+                <div class="activity-stat">
+                    <span class="activity-count">@aiMetrics.ConversationsToday</span>
+                    <span class="activity-label">Conversations Today</span>
+                </div>
+                <div class="activity-stat">
+                    <span class="activity-count">@aiMetrics.MessagesProcessed</span>
+                    <span class="activity-label">Messages This Week</span>
+                </div>
+                <div class="activity-stat">
+                    <span class="activity-count">@aiMetrics.LastModelUpdate.ToString("MMM dd")</span>
+                    <span class="activity-label">Last Update</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Health Insights -->
+        <div class="metric-section">
+            <h3>🔍 System Insights</h3>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <span class="insight-icon">⚡</span>
+                        <span class="insight-title">Performance</span>
+                    </div>
+                    <div class="insight-content">
+                        System running @(systemHealth.IsHealthy ? "optimally" : "degraded") with @systemHealth.ApiResponseTime ms average response time.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <span class="insight-icon">🚀</span>
+                        <span class="insight-title">Business Value</span>
+                    </div>
+                    <div class="insight-content">
+                        Platform generates @businessMetrics.ROIPercentage.ToString("N0")% ROI with @businessMetrics.ComponentsBuilt enterprise components.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Value Metrics -->
+        <div class="metric-section">
+            <h3>💼 Business Impact</h3>
+            <div class="business-metrics">
+                <div class="business-card large">
+                    <div class="business-value">$@businessMetrics.PlatformValue.ToString("N0")</div>
+                    <div class="business-label">Platform Value Generated</div>
+                    <div class="business-description">Enterprise IP and reusable components</div>
+                </div>
+                <div class="business-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.ComponentsBuilt</span>
+                        <span class="stat-label">Reusable Components</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.IntegrationsReady</span>
+                        <span class="stat-label">Production Integrations</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.TimeToMarket%</span>
+                        <span class="stat-label">Faster Development</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.ROIPercentage.ToString("N0")%</span>
+                        <span class="stat-label">ROI Performance</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.DevelopmentVelocity</span>
+                        <span class="stat-label">Sprint Velocity</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@businessMetrics.TechnicalDebt</span>
+                        <span class="stat-label">Technical Debt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Activity Feed -->
+        <div class="metric-section full-width">
+            <h3>📊 Live Activity Stream</h3>
+            <div class="activity-feed">
+                @foreach (var activity in recentActivities.Take(8))
+                {
+                    <div class="activity-item @GetActivityClass(activity.Type)">
+                        <div class="activity-time">@activity.Time.ToString("HH:mm:ss")</div>
+                        <div class="activity-icon">@activity.Icon</div>
+                        <div class="activity-message">@activity.Message</div>
+                        <div class="activity-metric">@activity.Metric</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+<style>
+.demo-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-content h1 {
+    color: #1a237e;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.subtitle {
+    color: #757575;
+    font-size: 16px;
+    margin: 0;
+    font-weight: 400;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+    background: #4caf50;
+}
+
+.status-dot.disconnected {
+    background: #ff9800;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    grid-auto-flow: dense;
+}
+
+.metric-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.metric-section.full-width {
+    grid-column: 1 / -1;
+}
+
+.metric-section h3 {
+    color: #1a237e;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+}
+
+.metric-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+}
+
+.metric-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid var(--card-border);
+    background: var(--card-bg);
+}
+
+.metric-card.success {
+    --card-border: #4caf50;
+    --card-bg: #e8f5e8;
+}
+
+.metric-card.info {
+    --card-border: #2196f3;
+    --card-bg: #e3f2fd;
+}
+
+.metric-card.warning {
+    --card-border: #ff9800;
+    --card-bg: #fff3e0;
+}
+
+.metric-card.primary {
+    --card-border: #1a237e;
+    --card-bg: #e8eaf6;
+}
+
+.metric-card.secondary {
+    --card-border: #7b1fa2;
+    --card-bg: #f3e5f5;
+}
+
+.metric-card.accent {
+    --card-border: #00796b;
+    --card-bg: #e0f2f1;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--card-border);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #424242;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.metric-description {
+    font-size: 12px;
+    color: #757575;
+    line-height: 1.3;
+}
+
+.metric-trend {
+    font-size: 12px;
+    color: #4caf50;
+    font-weight: 500;
+}
+
+.integration-status {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.integration-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--status-border);
+    background: var(--status-bg);
+    transition: all 0.2s ease;
+}
+
+.integration-item.online {
+    --status-border: #4caf50;
+    --status-bg: #e8f5e8;
+}
+
+.integration-item.degraded {
+    --status-border: #ff9800;
+    --status-bg: #fff3e0;
+}
+
+.integration-item.offline {
+    --status-border: #f44336;
+    --status-bg: #ffebee;
+}
+
+.integration-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+}
+
+.integration-details {
+    flex: 1;
+}
+
+.integration-name {
+    font-weight: 600;
+    color: #212121;
+    margin-bottom: 4px;
+}
+
+.integration-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-badge {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    color: white;
+    background: var(--status-border);
+}
+
+.response-time {
+    font-size: 12px;
+    color: #757575;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.integration-metrics {
+    text-align: right;
+}
+
+.metric-mini {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--status-border);
+}
+
+.metric-mini-label {
+    font-size: 11px;
+    color: #757575;
+}
+
+.business-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.business-card.large {
+    grid-row: span 2;
+    padding: 24px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #1a237e, #3f51b5);
+    color: white;
+    text-align: center;
+}
+
+.business-value {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.business-label {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.business-description {
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.business-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 1200px) {
+    .business-stats {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+.stat-item {
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #757575;
+    font-weight: 500;
+}
+
+.ai-activity-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.activity-stat {
+    text-align: center;
+}
+
+.activity-count {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 4px;
+}
+
+.activity-label {
+    font-size: 11px;
+    color: #757575;
+    font-weight: 500;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.insight-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid #1a237e;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.insight-icon {
+    font-size: 16px;
+}
+
+.insight-title {
+    font-weight: 600;
+    color: #1a237e;
+    font-size: 14px;
+}
+
+.insight-content {
+    color: #424242;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e3f2fd;
+    border-top: 4px solid #1a237e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loading-indicator p {
+    color: #757575;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.activity-feed {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: var(--activity-bg);
+    border-left: 4px solid var(--activity-border);
+    font-size: 14px;
+}
+
+.activity-item.integration {
+    --activity-bg: #e3f2fd;
+    --activity-border: #2196f3;
+}
+
+.activity-item.ai {
+    --activity-bg: #f3e5f5;
+    --activity-border: #9c27b0;
+}
+
+.activity-item.system {
+    --activity-bg: #e8f5e8;
+    --activity-border: #4caf50;
+}
+
+.activity-item.business {
+    --activity-bg: #fff3e0;
+    --activity-border: #ff9800;
+}
+
+.activity-time {
+    font-family: 'Roboto Mono', monospace;
+    color: #757575;
+    min-width: 60px;
+    font-size: 12px;
+}
+
+.activity-icon {
+    font-size: 16px;
+}
+
+.activity-message {
+    flex: 1;
+    color: #212121;
+}
+
+.activity-metric {
+    font-weight: 600;
+    color: var(--activity-border);
+    font-size: 13px;
+}
+
+@@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .business-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .business-card.large {
+        grid-row: span 1;
+    }
+}
+</style>
+
+@code {
+    private bool isConnected = true;
+    private Timer? refreshTimer;
+    
+    private SystemHealthMetrics systemHealth = new();
+    private List<IntegrationStatus> integrationStatus = new();
+    private AiMetrics aiMetrics = new();
+    private BusinessMetrics businessMetrics = new();
+    private List<ActivityLog> recentActivities = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInitialData();
+        
+        // Set up auto-refresh timer
+        refreshTimer = new Timer(async _ => await RefreshData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+    }
+
+    private async Task LoadInitialData()
+    {
+        try
+        {
+            isLoading = true;
+            
+            // Load real metrics from service
+            var healthTask = MetricsService.GetSystemHealthAsync();
+            var integrationTask = MetricsService.GetIntegrationStatusAsync();
+            var aiTask = MetricsService.GetAiMetricsAsync();
+            var businessTask = MetricsService.GetBusinessMetricsAsync();
+            var activitiesTask = MetricsService.GetRecentActivitiesAsync();
+            
+            await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
+            
+            systemHealth = await healthTask;
+            integrationStatus = await integrationTask;
+            aiMetrics = await aiTask;
+            businessMetrics = await businessTask;
+            recentActivities = await activitiesTask;
+            
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load initial dashboard data");
+            isLoading = false;
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        try
+        {
+            // Get fresh data from metrics service
+            var healthTask = MetricsService.GetSystemHealthAsync();
+            var integrationTask = MetricsService.GetIntegrationStatusAsync();
+            var aiTask = MetricsService.GetAiMetricsAsync();
+            var businessTask = MetricsService.GetBusinessMetricsAsync();
+            var activitiesTask = MetricsService.GetRecentActivitiesAsync();
+            
+            await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
+            
+            systemHealth = await healthTask;
+            integrationStatus = await integrationTask;
+            aiMetrics = await aiTask;
+            businessMetrics = await businessTask;
+            recentActivities = await activitiesTask;
+            
+            isConnected = systemHealth.IsHealthy;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error refreshing demo dashboard data");
+            isConnected = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string GetTrendIcon(string trend)
+    {
+        return trend.Contains("↑") ? "📈" : trend.Contains("↓") ? "📉" : "➡️";
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status.ToLower();
+    }
+
+    private string GetActivityClass(string type)
+    {
+        return type;
+    }
+
+    public void Dispose()
+    {
+        refreshTimer?.Dispose();
+    }
+
+    private class SystemHealthMetrics
+    {
+        public int ApiResponseTime { get; set; }
+        public int ActiveConnections { get; set; }
+        public int MemoryUsage { get; set; }
+        public string ApiTrend { get; set; } = "";
+        public string ConnectionTrend { get; set; } = "";
+        public string MemoryTrend { get; set; } = "";
+    }
+
+    private class IntegrationStatus
+    {
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string Status { get; set; } = "";
+        public int LastResponseTime { get; set; }
+        public int RequestsToday { get; set; }
+    }
+
+    private class AiMetrics
+    {
+        public int PersonalityAccuracy { get; set; }
+        public double ResponseQuality { get; set; }
+        public int LearningProgress { get; set; }
+    }
+
+    private class BusinessMetrics
+    {
+        public int PlatformValue { get; set; }
+        public int ComponentsBuilt { get; set; }
+        public int IntegrationsReady { get; set; }
+        public int TimeToMarket { get; set; }
+        public string TechnicalDebt { get; set; } = "";
+    }
+
+    private class ActivityLog
+    {
+        public DateTime Time { get; set; }
+        public string Type { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string Metric { get; set; } = "";
+    }
+}

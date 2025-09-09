@@ -1,0 +1,49 @@
+@page "/integrations"
+@using DigitalMe.Web.Components.Demo
+
+<PageTitle>Enterprise Integrations - DigitalMe</PageTitle>
+
+<div class="integrations-showcase">
+    <div class="showcase-header">
+        <h1>🔗 Enterprise Integration Showcase</h1>
+        <p class="lead">Experience real-time connections to major enterprise platforms</p>
+    </div>
+
+    <InteractiveDemoFlow />
+    
+    <!-- Backup Demo Control -->
+    <BackupDemoControl />
+</div>
+
+<style>
+.integrations-showcase {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.showcase-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 40px;
+    background: linear-gradient(135deg, #00796b, #4db6ac);
+    color: white;
+    border-radius: 20px;
+}
+
+.showcase-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+}
+
+.lead {
+    font-size: 18px;
+    margin: 0;
+    opacity: 0.9;
+}
+</style>
+
+@code {
+    // Integrations showcase page using the InteractiveDemoFlow component
+}

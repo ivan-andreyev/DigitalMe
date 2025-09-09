@@ -1,6 +1,165 @@
 ﻿@page "/"
 @using DigitalMe.Web.Components.Chat
+@using DigitalMe.Web.Components.Dashboard
 
-<PageTitle>Чат - DigitalMe</PageTitle>
+<PageTitle>DigitalMe - Enterprise AI Platform</PageTitle>
 
-<ChatContainer />
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">DigitalMe Enterprise Platform</h1>
+                    <p class="hero-subtitle">AI-Powered Digital Personality Platform with Enterprise Integrations</p>
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">🧠</span>
+                            <span>Advanced AI Personality Modeling</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔗</span>
+                            <span>Enterprise Integrations</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🚀</span>
+                            <span>Production-Ready Platform</span>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="/chat" class="btn btn-primary">Start Demo</a>
+                        <a href="/dashboard" class="btn btn-secondary">View Analytics</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="platform-preview">
+                        <div class="preview-header">
+                            <div class="preview-controls">
+                                <span class="control"></span>
+                                <span class="control"></span>
+                                <span class="control"></span>
+                            </div>
+                            <span class="preview-title">DigitalMe Platform</span>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ai-avatar">
+                                <div class="avatar-circle">
+                                    <span class="avatar-icon">🤖</span>
+                                </div>
+                                <div class="ai-status">
+                                    <span class="status-indicator active"></span>
+                                    <span class="status-text">AI Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enterprise Integrations Section -->
+    <section class="integrations-section">
+        <div class="container">
+            <h2 class="section-title">Enterprise Integrations</h2>
+            <p class="section-subtitle">Connect with your existing enterprise workflow tools</p>
+            <div class="integration-logos">
+                <div class="integration-item">
+                    <div class="integration-logo slack">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                        </svg>
+                    </div>
+                    <h3>Slack Integration</h3>
+                    <p>Real-time workspace communication</p>
+                </div>
+                <div class="integration-item">
+                    <div class="integration-logo clickup">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2 18.439l3.69-2.828c1.961 2.56 4.044 3.739 6.363 3.739 2.307 0 4.33-1.166 6.203-3.704L22 18.405C19.298 22.065 15.941 24 12.053 24 8.178 24 4.847 22.078 2 18.439zM12.04 6.15l-6.568 5.66-2.14-2.52L12.04 1l8.666 8.29-2.141 2.52L12.04 6.15z"/>
+                        </svg>
+                    </div>
+                    <h3>ClickUp Integration</h3>
+                    <p>Project management and task tracking</p>
+                </div>
+                <div class="integration-item">
+                    <div class="integration-logo github">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </div>
+                    <h3>GitHub Integration</h3>
+                    <p>Code repository analysis and management</p>
+                </div>
+                <div class="integration-item">
+                    <div class="integration-logo telegram">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        </svg>
+                    </div>
+                    <h3>Telegram Integration</h3>
+                    <p>Instant messaging and notifications</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Capabilities Section -->
+    <section class="capabilities-section">
+        <div class="container">
+            <h2 class="section-title">Platform Capabilities</h2>
+            <div class="capabilities-grid">
+                <div class="capability-card">
+                    <div class="capability-icon">🧠</div>
+                    <h3>AI Personality Engine</h3>
+                    <p>Advanced Claude API integration with sophisticated personality modeling and contextual response generation</p>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🔐</div>
+                    <h3>Enterprise Security</h3>
+                    <p>Production-grade security with JWT authentication, rate limiting, and comprehensive input validation</p>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">📊</div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Complete observability with health monitoring, performance metrics, and operational dashboards</p>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🚀</div>
+                    <h3>Scalable Architecture</h3>
+                    <p>Container-ready deployment with modular architecture designed for enterprise scalability</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Demo Section -->
+    <section class="demo-section">
+        <div class="container">
+            <div class="demo-content">
+                <div class="demo-text">
+                    <h2>Experience the Platform</h2>
+                    <p>Interact with Digital Ivan - an AI-powered personality model trained on real professional data and enterprise workflows.</p>
+                    <div class="demo-features">
+                        <div class="demo-feature">
+                            <span class="demo-icon">✨</span>
+                            <span>Natural conversation with professional context</span>
+                        </div>
+                        <div class="demo-feature">
+                            <span class="demo-icon">🎯</span>
+                            <span>Technical expertise demonstration</span>
+                        </div>
+                        <div class="demo-feature">
+                            <span class="demo-icon">📈</span>
+                            <span>Real-time personality trait analysis</span>
+                        </div>
+                    </div>
+                    <a href="/chat" class="btn btn-demo">Start Interactive Demo</a>
+                </div>
+                <div class="demo-preview">
+                    <ChatContainer />
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

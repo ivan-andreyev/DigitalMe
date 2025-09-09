@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "DigitalMe",
+      "copyrightText": "Copyright (c) {year} {companyName}. All rights reserved.",
+      "headerDecoration": "//",
+      "documentExposedElements": true,
+      "documentInternalElements": true,
+      "documentPrivateElements": false,
+      "documentPrivateFields": false,
+      "xmlHeader": true
+    },
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace",
+      "blankLinesBetweenUsingGroups": "require"
+    },
+    "namingRules": {
+      "allowCommonHungarianPrefixes": false,
+      "allowedHungarianPrefixes": []
+    },
+    "maintainabilityRules": {
+      "topLevelTypes": [
+        "class",
+        "interface",
+        "struct",
+        "delegate",
+        "enum"
+      ]
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require",
+      "allowDoWhileOnClosingBrace": false
+    },
+    "readabilityRules": {
+      "allowBuiltInTypeAliases": true
+    }
+  }
+}
