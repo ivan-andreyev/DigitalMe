@@ -66,7 +66,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             // Calculate confidence based on various factors
             response.ConfidenceScore = CalculateConfidenceScore(message, context, response.Mood);
 
-            _logger.LogInformation("Agent response generated with confidence {Confidence}%", 
+            _logger.LogInformation("Agent response generated with confidence {Confidence}%",
                 response.ConfidenceScore * 100);
 
             return response;
@@ -74,7 +74,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to process message through Agent Behavior Engine");
-            
+
             // Create a fresh response for fallback
             var fallbackResponse = new AgentResponse();
             fallbackResponse.Content = "I'm experiencing some technical difficulties right now. Please try rephrasing your question.";
@@ -83,14 +83,14 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             fallbackResponse.Metadata["originalMessage"] = message;
             fallbackResponse.Metadata["fallback"] = true;
             fallbackResponse.TriggeredTools = new List<string>();
-            
+
             return fallbackResponse;
         }
     }
 
     public async Task<MoodAnalysis> AnalyzeMoodAsync(string message, PersonalityProfile personality)
     {
-        _logger.LogDebug("Analyzing mood for message: {MessagePreview}", 
+        _logger.LogDebug("Analyzing mood for message: {MessagePreview}",
             message.Length > 50 ? message.Substring(0, 50) + "..." : message);
 
         var moodAnalysis = new MoodAnalysis
@@ -154,17 +154,17 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
         // Find primary mood - prioritize general categories (positive, negative, neutral) over specific moods
         var generalMoods = new[] { "positive", "negative", "neutral" };
         var specificMoods = new[] { "technical", "frustration", "happiness", "confident" };
-        
+
         // First check if any general mood has significant score
         var strongGeneralMood = moodScores
             .Where(kvp => generalMoods.Contains(kvp.Key) && kvp.Value >= 0.5)
             .OrderByDescending(kvp => kvp.Value)
             .FirstOrDefault();
-            
+
         if (!strongGeneralMood.Equals(default(KeyValuePair<string, double>)))
         {
             moodAnalysis.PrimaryMood = strongGeneralMood.Key;
-            
+
             // Cap neutral intensity for appropriate test expectations
             if (strongGeneralMood.Key == "neutral")
                 moodAnalysis.Intensity = Math.Min(strongGeneralMood.Value, 0.4);
@@ -176,14 +176,14 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             // Fall back to highest scoring mood (could be specific)
             var primaryMood = moodScores.OrderByDescending(kvp => kvp.Value).First();
             moodAnalysis.PrimaryMood = primaryMood.Key;
-            
+
             // Cap neutral intensity for appropriate test expectations
             if (primaryMood.Key == "neutral")
                 moodAnalysis.Intensity = Math.Min(primaryMood.Value, 0.4);
             else
                 moodAnalysis.Intensity = primaryMood.Value;
         }
-        
+
         moodAnalysis.MoodScores = moodScores;
 
         await Task.Delay(10); // Simulate processing time
@@ -206,7 +206,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
 
             var shouldTrigger = await toolStrategy.ShouldTriggerAsync(message, context);
             _logger.LogDebug("Tool '{ToolName}' trigger check result: {ShouldTrigger}", toolName, shouldTrigger);
-            
+
             return shouldTrigger;
         }
         catch (Exception ex)
@@ -232,7 +232,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             var lastMessage = context.RecentMessages.Last();
             metadata["last_message_age_minutes"] = (DateTime.UtcNow - lastMessage.Timestamp).TotalMinutes;
             metadata["conversation_length"] = context.RecentMessages.Count();
-            
+
             var userMessages = context.RecentMessages.Where(m => m.Role == "user").Count();
             var assistantMessages = context.RecentMessages.Where(m => m.Role == "assistant").Count();
             metadata["user_assistant_ratio"] = userMessages > 0 ? (double)assistantMessages / userMessages : 0.0;
@@ -250,7 +250,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
 
     private async Task<List<string>> DetermineTriggeredToolsAsync(string message, PersonalityContext context)
     {
-        _logger.LogDebug("Determining triggered tools for message: {MessagePreview}", 
+        _logger.LogDebug("Determining triggered tools for message: {MessagePreview}",
             message.Length > 50 ? message.Substring(0, 50) + "..." : message);
 
         try
@@ -258,7 +258,7 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             var triggeredToolStrategies = await _toolRegistry.GetTriggeredToolsAsync(message, context);
             var triggeredTools = triggeredToolStrategies.Select(t => t.ToolName).ToList();
 
-            _logger.LogInformation("Found {Count} triggered tools: {Tools}", 
+            _logger.LogInformation("Found {Count} triggered tools: {Tools}",
                 triggeredTools.Count, string.Join(", ", triggeredTools));
 
             return triggeredTools;

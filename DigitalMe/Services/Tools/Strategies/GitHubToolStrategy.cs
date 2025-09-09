@@ -25,7 +25,7 @@ public class GitHubToolStrategy : BaseToolStrategy
     public override Task<bool> ShouldTriggerAsync(string message, PersonalityContext context)
     {
         var messageLower = message.ToLower();
-        
+
         // Триггеры для поиска в GitHub
         var shouldTrigger = ContainsWords(messageLower,
             "найди репозиторий", "github", "поищи код", "git",
@@ -40,7 +40,7 @@ public class GitHubToolStrategy : BaseToolStrategy
             shouldTrigger = ContainsWords(messageLower, "найди", "поищи", "search", "где найти");
         }
 
-        Logger.LogDebug("GitHub trigger check for message '{Message}': {Result}", 
+        Logger.LogDebug("GitHub trigger check for message '{Message}': {Result}",
             message.Length > 50 ? message[..50] + "..." : message, shouldTrigger);
 
         return Task.FromResult(shouldTrigger);
@@ -56,7 +56,7 @@ public class GitHubToolStrategy : BaseToolStrategy
 
             var query = GetParameter<string>(parameters, "query");
             var limit = GetParameter(parameters, "limit", 10); // По умолчанию 10 результатов
-            
+
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentException("Search query cannot be empty");
 
@@ -95,17 +95,18 @@ public class GitHubToolStrategy : BaseToolStrategy
                 tool_name = ToolName
             };
 
-            Logger.LogInformation("Successfully found {Count} GitHub repositories for query '{Query}'", 
+            Logger.LogInformation("Successfully found {Count} GitHub repositories for query '{Query}'",
                 limitedRepositories.Count, query);
             return result;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to search GitHub repositories");
-            return new { 
-                success = false, 
+            return new
+            {
+                success = false,
                 error = ex.Message,
-                tool_name = ToolName 
+                tool_name = ToolName
             };
         }
     }
@@ -117,23 +118,27 @@ public class GitHubToolStrategy : BaseToolStrategy
             type = "object",
             properties = new
             {
-                query = new { 
-                    type = "string", 
-                    description = "Поисковый запрос для поиска репозиториев" 
+                query = new
+                {
+                    type = "string",
+                    description = "Поисковый запрос для поиска репозиториев"
                 },
-                limit = new { 
-                    type = "integer", 
+                limit = new
+                {
+                    type = "integer",
                     description = "Максимальное количество результатов (по умолчанию 10, максимум 20)",
                     minimum = 1,
                     maximum = 20,
                     @default = 10
                 },
-                language = new { 
-                    type = "string", 
-                    description = "Фильтр по языку программирования (опционально)" 
+                language = new
+                {
+                    type = "string",
+                    description = "Фильтр по языку программирования (опционально)"
                 },
-                sort = new { 
-                    type = "string", 
+                sort = new
+                {
+                    type = "string",
                     description = "Сортировка результатов: stars, forks, updated (по умолчанию best-match)",
                     @enum = new[] { "stars", "forks", "updated" }
                 }

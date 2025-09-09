@@ -13,20 +13,20 @@ public interface IToolRegistry
     /// </summary>
     /// <param name="toolStrategy">Стратегия инструмента для регистрации</param>
     void RegisterTool(IToolStrategy toolStrategy);
-    
+
     /// <summary>
     /// Получает все зарегистрированные инструменты
     /// </summary>
     /// <returns>Коллекция всех доступных инструментов</returns>
     IEnumerable<IToolStrategy> GetAllTools();
-    
+
     /// <summary>
     /// Найти инструмент по имени
     /// </summary>
     /// <param name="toolName">Имя инструмента</param>
     /// <returns>Инструмент или null если не найден</returns>
     IToolStrategy? GetTool(string toolName);
-    
+
     /// <summary>
     /// Определяет какие инструменты должны сработать для данного сообщения
     /// </summary>

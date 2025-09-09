@@ -41,12 +41,12 @@ namespace DigitalMe.Services.Monitoring
             {
                 if (success)
                 {
-                    _logger.LogInformation("API call to {Endpoint} completed successfully in {Duration:N2}ms", 
+                    _logger.LogInformation("API call to {Endpoint} completed successfully in {Duration:N2}ms",
                         endpoint, duration.TotalMilliseconds);
                 }
                 else
                 {
-                    _logger.LogWarning("API call to {Endpoint} failed after {Duration:N2}ms", 
+                    _logger.LogWarning("API call to {Endpoint} failed after {Duration:N2}ms",
                         endpoint, duration.TotalMilliseconds);
                 }
             }

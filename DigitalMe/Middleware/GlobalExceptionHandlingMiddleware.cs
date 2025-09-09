@@ -23,7 +23,7 @@ public class GlobalExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred. RequestPath: {RequestPath}, Method: {Method}", 
+            _logger.LogError(ex, "An unhandled exception occurred. RequestPath: {RequestPath}, Method: {Method}",
                 context.Request.Path, context.Request.Method);
 
             await HandleExceptionAsync(context, ex);
@@ -33,7 +33,7 @@ public class GlobalExceptionHandlingMiddleware
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        
+
         var response = new ErrorResponse();
 
         switch (exception)
@@ -44,7 +44,7 @@ public class GlobalExceptionHandlingMiddleware
                 response.ErrorCode = digitalMeEx.ErrorCode;
                 response.Detail = digitalMeEx.InnerException?.Message;
                 response.ErrorData = digitalMeEx.ErrorData;
-                
+
                 // Specific status codes for certain error types
                 response.StatusCode = digitalMeEx switch
                 {
@@ -54,7 +54,7 @@ public class GlobalExceptionHandlingMiddleware
                     _ => (int)HttpStatusCode.InternalServerError
                 };
                 break;
-                
+
             case ArgumentNullException:
             case ArgumentException:
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -62,19 +62,19 @@ public class GlobalExceptionHandlingMiddleware
                 response.Detail = exception.Message;
                 response.ErrorCode = "INVALID_PARAMETERS";
                 break;
-                
+
             case UnauthorizedAccessException:
                 response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 response.Message = "Unauthorized access";
                 response.ErrorCode = "UNAUTHORIZED";
                 break;
-                
+
             case KeyNotFoundException:
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 response.Message = "Resource not found";
                 response.ErrorCode = "NOT_FOUND";
                 break;
-                
+
             default:
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.Message = "An internal server error occurred";

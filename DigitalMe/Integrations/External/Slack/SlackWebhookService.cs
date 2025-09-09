@@ -45,21 +45,21 @@ public class SlackWebhookService : ISlackWebhookService
             var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (Math.Abs(currentTimestamp - requestTimestamp) > 300) // 5 minutes
             {
-                _logger.LogWarning("Request timestamp too old: {RequestTime} vs {CurrentTime}", 
+                _logger.LogWarning("Request timestamp too old: {RequestTime} vs {CurrentTime}",
                     requestTimestamp, currentTimestamp);
                 return false;
             }
 
             // Create the signature base string
             var signatureBaseString = $"v0:{timestamp}:{body}";
-            
+
             // Calculate HMAC-SHA256
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(signingSecret));
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(signatureBaseString));
             var computedSignature = $"v0={Convert.ToHexString(computedHash).ToLower()}";
 
             var isValid = signature.Equals(computedSignature, StringComparison.OrdinalIgnoreCase);
-            
+
             if (!isValid)
             {
                 _logger.LogWarning("Webhook signature validation failed. Expected: {Expected}, Received: {Received}",
@@ -83,7 +83,7 @@ public class SlackWebhookService : ISlackWebhookService
         try
         {
             var webhookEvent = JsonSerializer.Deserialize<SlackWebhookEvent>(body);
-            
+
             if (webhookEvent?.Type == "url_verification" && !string.IsNullOrEmpty(webhookEvent.Challenge))
             {
                 _logger.LogInformation("Handling URL verification challenge");
@@ -295,7 +295,7 @@ public class SlackWebhookService : ISlackWebhookService
     {
         // Parse form-encoded payload (typically for interactive components and slash commands)
         var formData = System.Web.HttpUtility.ParseQueryString(body);
-        
+
         if (formData["payload"] != null)
         {
             // Interactive component
@@ -324,7 +324,7 @@ public class SlackWebhookService : ISlackWebhookService
                 ResponseUrl = formData["response_url"],
                 TriggerId = formData["trigger_id"]
             };
-            
+
             return await HandleSlashCommandAsync(command);
         }
 
@@ -356,7 +356,7 @@ public class SlackWebhookService : ISlackWebhookService
         // Respond to the mention
         if (!string.IsNullOrEmpty(slackEvent.Channel))
         {
-            await _slackService.SendMessageAsync(slackEvent.Channel, 
+            await _slackService.SendMessageAsync(slackEvent.Channel,
                 $"Hello <@{slackEvent.User}>! You mentioned me. How can I help you?");
         }
 
@@ -403,7 +403,7 @@ public class SlackWebhookService : ISlackWebhookService
 
     private Task<bool> HandleFileSharedEventAsync(SlackEvent slackEvent)
     {
-        _logger.LogInformation("File shared by user {UserId} in channel {ChannelId}", 
+        _logger.LogInformation("File shared by user {UserId} in channel {ChannelId}",
             slackEvent.User, slackEvent.Channel);
         return Task.FromResult(true);
     }
@@ -423,7 +423,7 @@ public class SlackWebhookService : ISlackWebhookService
             return CreateButtonResponse("No action found in payload.");
         }
 
-        _logger.LogInformation("Handling block action: {ActionId} with value: {Value}", 
+        _logger.LogInformation("Handling block action: {ActionId} with value: {Value}",
             action.ActionId, action.Value);
 
         return action.ActionId switch
@@ -481,13 +481,13 @@ public class SlackWebhookService : ISlackWebhookService
                 "• `chat <message>` - Chat with me\n" +
                 "• `status` - Check my status\n" +
                 "• `settings` - Configure settings"),
-            
+
             "chat" => await HandleChatCommandAsync(string.Join(" ", args.Skip(1))),
-            
+
             "status" => CreateSlashCommandResponse("DigitalMe is online and ready to help!"),
-            
+
             "settings" => CreateSlashCommandResponse("Settings panel would be displayed here."),
-            
+
             _ => CreateSlashCommandResponse($"Unknown subcommand: {subCommand}. Type `/digitalme help` for available commands.")
         };
     }
@@ -502,7 +502,7 @@ public class SlackWebhookService : ISlackWebhookService
         // This is where you'd integrate with your AI/personality engine
         // For now, just echo back with a simple response
         var response = $"You said: '{message}'. I'm processing this with my personality engine...";
-        
+
         return CreateSlashCommandResponse(response);
     }
 }

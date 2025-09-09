@@ -33,10 +33,10 @@ public class CalendarService : ICalendarService
         try
         {
             _logger.LogInformation("Initializing Google Calendar connection...");
-            
+
             // Parse OAuth2 credentials (expecting JSON format)
             var credentialStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(credentials));
-            
+
             // Initialize OAuth2 flow for Calendar API access
             var clientSecrets = await GoogleClientSecrets.FromStreamAsync(credentialStream).ConfigureAwait(false);
             _credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -53,7 +53,7 @@ public class CalendarService : ICalendarService
             });
 
             _isConnected = _credential != null && _googleCalendarService != null;
-            
+
             _logger.LogInformation("Google Calendar connection established: {Status}", _isConnected);
             return _isConnected;
         }

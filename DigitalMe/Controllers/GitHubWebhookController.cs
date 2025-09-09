@@ -47,7 +47,7 @@ public class GitHubWebhookController : ControllerBase
             var deliveryId = Request.Headers["X-GitHub-Delivery"].FirstOrDefault();
             var userAgent = Request.Headers["User-Agent"].FirstOrDefault();
 
-            _logger.LogInformation("Received GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}, UserAgent: {UserAgent}", 
+            _logger.LogInformation("Received GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}, UserAgent: {UserAgent}",
                 eventType, deliveryId, userAgent);
 
             // Validate required headers
@@ -95,7 +95,7 @@ public class GitHubWebhookController : ControllerBase
             // Process the webhook
             var result = await _webhookService.ProcessWebhookAsync(eventType, payload, deliveryId);
 
-            _logger.LogInformation("Successfully processed GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}, Result: {Result}", 
+            _logger.LogInformation("Successfully processed GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}, Result: {Result}",
                 eventType, deliveryId, result);
 
             return Ok(new
@@ -110,7 +110,7 @@ public class GitHubWebhookController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing GitHub webhook: {Message}", ex.Message);
-            
+
             return StatusCode(500, new
             {
                 success = false,
@@ -201,7 +201,7 @@ public class GitHubWebhookController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error testing GitHub webhook: {Message}", ex.Message);
-            
+
             return StatusCode(500, new
             {
                 success = false,

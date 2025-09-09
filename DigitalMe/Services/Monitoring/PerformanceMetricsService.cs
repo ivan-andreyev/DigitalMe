@@ -41,9 +41,9 @@ public class PerformanceMetricsService : IPerformanceMetricsService
             Metadata = new Dictionary<string, object> { ["operation"] = operationName }
         };
 
-        _responseTimeMetrics.AddOrUpdate(operationName, 
+        _responseTimeMetrics.AddOrUpdate(operationName,
             new List<MetricDataPoint> { dataPoint },
-            (key, existingList) => 
+            (key, existingList) =>
             {
                 lock (existingList)
                 {
@@ -57,7 +57,7 @@ public class PerformanceMetricsService : IPerformanceMetricsService
                 return existingList;
             });
 
-        _logger.LogDebug("Recorded response time for {Operation}: {Duration}ms (Success: {Success})", 
+        _logger.LogDebug("Recorded response time for {Operation}: {Duration}ms (Success: {Success})",
             operationName, duration.TotalMilliseconds, success);
     }
 
@@ -65,7 +65,7 @@ public class PerformanceMetricsService : IPerformanceMetricsService
     {
         var dataPoint = _systemCalculator.CreateMemoryDataPoint(context);
         _latestSystemMetrics.AddOrUpdate($"memory_{context}", dataPoint, (key, existing) => dataPoint);
-        
+
         _logger.LogDebug("Recorded memory usage for {Context}: {Memory}MB", context, dataPoint.Value);
     }
 
@@ -98,7 +98,7 @@ public class PerformanceMetricsService : IPerformanceMetricsService
                 return existingList;
             });
 
-        _logger.LogDebug("Recorded database query {QueryType}: {Duration}ms ({Records} records)", 
+        _logger.LogDebug("Recorded database query {QueryType}: {Duration}ms ({Records} records)",
             queryType, duration.TotalMilliseconds, recordCount);
     }
 
@@ -113,14 +113,14 @@ public class PerformanceMetricsService : IPerformanceMetricsService
         };
 
         _signalREvents.Enqueue(signalREvent);
-        
+
         // Keep only last 1000 SignalR events
         if (_signalREvents.Count > 1000)
         {
             _signalREvents.TryDequeue(out _);
         }
 
-        _logger.LogDebug("Recorded SignalR event {EventType} for connection {ConnectionId}", 
+        _logger.LogDebug("Recorded SignalR event {EventType} for connection {ConnectionId}",
             eventType, connectionId);
     }
 
@@ -136,14 +136,14 @@ public class PerformanceMetricsService : IPerformanceMetricsService
         };
 
         _agentResponseEvents.Enqueue(agentEvent);
-        
+
         // Keep only last 1000 agent events
         if (_agentResponseEvents.Count > 1000)
         {
             _agentResponseEvents.TryDequeue(out _);
         }
 
-        _logger.LogDebug("Recorded agent response {ResponseType}: {ProcessingTime}ms (Success: {Success}, Tokens: {Tokens})", 
+        _logger.LogDebug("Recorded agent response {ResponseType}: {ProcessingTime}ms (Success: {Success}, Tokens: {Tokens})",
             responseType, processingTime.TotalMilliseconds, success, tokenCount);
     }
 
@@ -158,7 +158,7 @@ public class PerformanceMetricsService : IPerformanceMetricsService
         };
 
         _userEngagementEvents.Enqueue(engagementEvent);
-        
+
         // Keep only last 2000 engagement events
         if (_userEngagementEvents.Count > 2000)
         {
@@ -232,9 +232,9 @@ public class PerformanceMetricsService : IPerformanceMetricsService
     private void CalculateSystemResourceMetrics(PerformanceMetricsSummary summary)
     {
         RecordMemoryUsage("metrics_collection"); // Update current metrics
-        
+
         var latestMemoryMetric = _latestSystemMetrics.Values
-            .Where(m => m.Metadata.ContainsKey("context") && 
+            .Where(m => m.Metadata.ContainsKey("context") &&
                        m.Metadata["context"].ToString() == "metrics_collection")
             .OrderByDescending(m => m.Timestamp)
             .FirstOrDefault();
@@ -284,7 +284,7 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
         _operationName = operationName;
         _context = context;
         _stopwatch = Stopwatch.StartNew();
-        
+
         if (!string.IsNullOrEmpty(context))
         {
             _metadata["context"] = context;
@@ -294,7 +294,7 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
     public void RecordSuccess(Dictionary<string, object>? metadata = null)
     {
         if (_resultRecorded) return;
-        
+
         if (metadata != null)
         {
             foreach (var kvp in metadata)
@@ -302,7 +302,7 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
                 _metadata[kvp.Key] = kvp.Value;
             }
         }
-        
+
         _metricsService.RecordResponseTime(_operationName, _stopwatch.Elapsed, success: true);
         _resultRecorded = true;
     }
@@ -310,7 +310,7 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
     public void RecordFailure(Exception? exception = null, Dictionary<string, object>? metadata = null)
     {
         if (_resultRecorded) return;
-        
+
         if (metadata != null)
         {
             foreach (var kvp in metadata)
@@ -318,13 +318,13 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
                 _metadata[kvp.Key] = kvp.Value;
             }
         }
-        
+
         if (exception != null)
         {
             _metadata["exception"] = exception.GetType().Name;
             _metadata["error_message"] = exception.Message;
         }
-        
+
         _metricsService.RecordResponseTime(_operationName, _stopwatch.Elapsed, success: false);
         _resultRecorded = true;
     }
@@ -337,15 +337,15 @@ internal class PerformanceTrackingScope : IPerformanceTrackingScope
     public void Dispose()
     {
         if (_disposed) return;
-        
+
         _stopwatch.Stop();
-        
+
         // If no explicit result was recorded, default to success
         if (!_resultRecorded)
         {
             RecordSuccess();
         }
-        
+
         _disposed = true;
     }
 }

@@ -54,10 +54,10 @@ public class AuthController : ControllerBase
             if (result.Succeeded)
             {
                 _logger.LogInformation("User {Email} registered successfully", request.Email);
-                
+
                 // Автоматически войдем в систему после регистрации
                 var token = await GenerateJwtToken(user);
-                
+
                 return Ok(new AuthResponse
                 {
                     Success = true,
@@ -113,7 +113,7 @@ public class AuthController : ControllerBase
             if (result.Succeeded)
             {
                 var token = await GenerateJwtToken(user);
-                
+
                 _logger.LogInformation("User {Email} logged in successfully", request.Email);
 
                 return Ok(new AuthResponse
@@ -198,7 +198,7 @@ public class RegisterRequest
 
     [Required(ErrorMessage = "Пароль обязателен")]
     [MinLength(8, ErrorMessage = "Пароль должен содержать минимум 8 символов")]
-    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
                       ErrorMessage = "Пароль должен содержать заглавные и строчные буквы, цифры и спецсимволы")]
     public string Password { get; set; } = string.Empty;
 
@@ -207,7 +207,7 @@ public class RegisterRequest
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
-public class LoginRequest  
+public class LoginRequest
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;

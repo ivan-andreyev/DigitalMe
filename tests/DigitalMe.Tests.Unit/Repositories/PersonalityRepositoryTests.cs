@@ -16,7 +16,7 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
     {
         // Arrange
         var repository = new PersonalityRepository(Context);
-        
+
         // Use existing Ivan profile from BaseTestWithDatabase
         var existingIvan = Context.PersonalityProfiles.First(p => p.Name == "Ivan");
 
@@ -76,7 +76,7 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(profile, options => 
+        result.Should().BeEquivalentTo(profile, options =>
             options.Excluding(p => p.Traits));
     }
 
@@ -116,7 +116,7 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
         // Verify it's saved in database
         var savedProfile = await Context.PersonalityProfiles.FindAsync(profile.Id);
         savedProfile.Should().NotBeNull();
-        savedProfile.Should().BeEquivalentTo(profile, options => 
+        savedProfile.Should().BeEquivalentTo(profile, options =>
             options.Excluding(p => p.Traits));
     }
 
@@ -131,10 +131,10 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
         await Context.SaveChangesAsync();
 
         var originalUpdatedAt = profile.UpdatedAt;
-        
+
         // Simulate passage of time
         await Task.Delay(10);
-        
+
         profile.Description = "Updated Description";
 
         // Act
@@ -212,7 +212,7 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
         // Assert
         var resultList = result.ToList();
         resultList.Should().HaveCount(4);
-        
+
         // Verify ordering: first by Category, then by Name
         resultList[0].Category.Should().Be("Communication");
         resultList[1].Category.Should().Be("Leadership");
@@ -264,7 +264,7 @@ public class PersonalityRepositoryTests : BaseTestWithDatabase
         // Verify it's saved
         var savedTrait = await Context.PersonalityTraits.FindAsync(trait.Id);
         savedTrait.Should().NotBeNull();
-        savedTrait.Should().BeEquivalentTo(trait, options => 
+        savedTrait.Should().BeEquivalentTo(trait, options =>
             options.Excluding(t => t.PersonalityProfile));
     }
 

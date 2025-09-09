@@ -39,7 +39,7 @@ public class HealthCheckService : IHealthCheckService
     public async Task<SystemHealthStatus> GetSystemHealthAsync()
     {
         using var scope = _metricsService.StartTracking("system_health_check");
-        
+
         var components = new Dictionary<string, ComponentHealthStatus>();
         var alerts = new List<HealthAlert>();
 
@@ -83,11 +83,11 @@ public class HealthCheckService : IHealthCheckService
             });
 
             var healthResults = await Task.WhenAll(healthCheckTasks);
-            
+
             foreach (var (componentName, status) in healthResults)
             {
                 components[componentName] = status;
-                
+
                 // Generate alerts for unhealthy components
                 if (status.Status != HealthStatus.Healthy)
                 {
@@ -107,7 +107,7 @@ public class HealthCheckService : IHealthCheckService
 
             // Calculate overall status
             var overallStatus = CalculateOverallStatus(components.Values);
-            
+
             // Get system metrics
             var performanceMetrics = await _metricsService.GetMetricsSummaryAsync(TimeSpan.FromMinutes(5));
             var systemMetrics = new SystemMetrics
@@ -144,7 +144,7 @@ public class HealthCheckService : IHealthCheckService
         {
             _logger.LogError(ex, "Failed to get system health status");
             scope.RecordFailure(ex);
-            
+
             return new SystemHealthStatus
             {
                 OverallStatus = HealthStatus.Unknown,
@@ -206,7 +206,7 @@ public class HealthCheckService : IHealthCheckService
     {
         var systemHealth = await GetSystemHealthAsync();
         var criticalComponents = new[] { "database", "tool_registry" };
-        
+
         var notReadyComponents = systemHealth.Components
             .Where(kvp => criticalComponents.Contains(kvp.Key) && kvp.Value.Status == HealthStatus.Unhealthy)
             .Select(kvp => kvp.Key)
@@ -222,7 +222,7 @@ public class HealthCheckService : IHealthCheckService
             IsReady = !notReadyComponents.Any(),
             ReadyComponents = readyComponents,
             NotReadyComponents = notReadyComponents,
-            Reason = notReadyComponents.Any() 
+            Reason = notReadyComponents.Any()
                 ? $"Critical components not ready: {string.Join(", ", notReadyComponents)}"
                 : "All critical components ready"
         };
@@ -273,24 +273,24 @@ public class HealthCheckService : IHealthCheckService
         Func<T, ComponentHealthStatus> resultMapper)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+
         try
         {
             var result = await healthCheckFunction();
             stopwatch.Stop();
-            
+
             var status = resultMapper(result);
             status.ComponentName = componentName;
             status.ResponseTime = stopwatch.Elapsed;
             status.LastChecked = DateTime.UtcNow;
-            
+
             return status;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
             _logger.LogError(ex, "Health check failed for component {Component}", componentName);
-            
+
             return new ComponentHealthStatus
             {
                 ComponentName = componentName,
@@ -327,12 +327,12 @@ public class HealthCheckService : IHealthCheckService
         return await ExecuteHealthCheck("database", async () =>
         {
             var canConnect = await _dbContext.Database.CanConnectAsync();
-            
+
             if (canConnect)
             {
                 // Quick query to test actual functionality
                 var conversationCount = await _dbContext.Conversations.CountAsync();
-                
+
                 return new HealthCheckResult
                 {
                     IsSuccessful = true,
@@ -378,7 +378,7 @@ public class HealthCheckService : IHealthCheckService
             await Task.Delay(1); // Make it async
             var allTools = _toolRegistry.GetAllTools().ToList();
             var status = allTools.Count >= 1 ? HealthStatus.Healthy : HealthStatus.Degraded;
-            
+
             return new HealthCheckResult
             {
                 IsSuccessful = status == HealthStatus.Healthy,
@@ -400,7 +400,7 @@ public class HealthCheckService : IHealthCheckService
             // Try to initialize the MCP client (non-blocking)
             var initTask = _mcpClient.InitializeAsync();
             var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
-            
+
             var completedTask = await Task.WhenAny(initTask, timeoutTask);
 
             if (completedTask == initTask)
@@ -443,11 +443,11 @@ public class HealthCheckService : IHealthCheckService
             var process = Process.GetCurrentProcess();
             var memoryUsage = process.WorkingSet64;
             var memoryUsageMB = memoryUsage / 1024 / 1024;
-            
+
             // Memory thresholds (in MB)
             const long warningThreshold = 500;
             const long criticalThreshold = 1000;
-            
+
             var status = memoryUsageMB switch
             {
                 > criticalThreshold => HealthStatus.Unhealthy,
@@ -485,14 +485,14 @@ public class HealthCheckService : IHealthCheckService
             var avgResponseTime = metrics.ResponseTimes.Values
                 .DefaultIfEmpty(new ResponseTimeMetric())
                 .Average(rt => rt.AverageResponseTime.TotalMilliseconds);
-            
+
             var errorRate = 1.0 - metrics.Business.AgentSuccessRate;
-            
+
             var status = (avgResponseTime, errorRate) switch
             {
-                (> 5000, _) => HealthStatus.Unhealthy, // Very slow responses
+                ( > 5000, _) => HealthStatus.Unhealthy, // Very slow responses
                 (_, > 0.1) => HealthStatus.Unhealthy,  // High error rate
-                (> 2000, _) => HealthStatus.Degraded,  // Slow responses
+                ( > 2000, _) => HealthStatus.Degraded,  // Slow responses
                 (_, > 0.05) => HealthStatus.Degraded,  // Moderate error rate
                 _ => HealthStatus.Healthy
             };
@@ -519,16 +519,16 @@ public class HealthCheckService : IHealthCheckService
     private static HealthStatus CalculateOverallStatus(IEnumerable<ComponentHealthStatus> components)
     {
         var statuses = components.Select(c => c.Status).ToList();
-        
+
         if (statuses.Any(s => s == HealthStatus.Unhealthy))
             return HealthStatus.Unhealthy;
-        
+
         if (statuses.Any(s => s == HealthStatus.Degraded))
             return HealthStatus.Degraded;
-        
+
         if (statuses.Any(s => s == HealthStatus.Unknown))
             return HealthStatus.Unknown;
-        
+
         return HealthStatus.Healthy;
     }
 

@@ -12,37 +12,37 @@ public interface IPerformanceMetricsService
     /// Records a response time metric for a specific operation.
     /// </summary>
     void RecordResponseTime(string operationName, TimeSpan duration, bool success = true);
-    
+
     /// <summary>
     /// Records memory usage at a specific point.
     /// </summary>
     void RecordMemoryUsage(string context);
-    
+
     /// <summary>
     /// Records database query performance metrics.
     /// </summary>
     void RecordDatabaseQuery(string queryType, TimeSpan duration, int recordCount = 0);
-    
+
     /// <summary>
     /// Records SignalR connection metrics.
     /// </summary>
     void RecordSignalRMetric(string eventType, string connectionId, TimeSpan? duration = null);
-    
+
     /// <summary>
     /// Records agent response quality metrics.
     /// </summary>
     void RecordAgentResponse(string responseType, bool success, TimeSpan processingTime, int tokenCount = 0);
-    
+
     /// <summary>
     /// Records user engagement metrics.
     /// </summary>
     void RecordUserEngagement(string userId, string action, Dictionary<string, object>? metadata = null);
-    
+
     /// <summary>
     /// Gets current performance metrics summary.
     /// </summary>
     Task<PerformanceMetricsSummary> GetMetricsSummaryAsync(TimeSpan? timeWindow = null);
-    
+
     /// <summary>
     /// Creates a performance tracking scope that automatically records timing.
     /// </summary>
@@ -56,19 +56,19 @@ public class PerformanceMetricsSummary
 {
     public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
     public TimeSpan TimeWindow { get; set; }
-    
+
     // Response Time Metrics
     public Dictionary<string, ResponseTimeMetric> ResponseTimes { get; set; } = new();
-    
+
     // System Resource Metrics
     public SystemResourceMetrics SystemResources { get; set; } = new();
-    
+
     // Database Performance Metrics
     public DatabaseMetrics Database { get; set; } = new();
-    
+
     // SignalR Connection Metrics
     public SignalRMetrics SignalR { get; set; } = new();
-    
+
     // Business Metrics
     public BusinessMetrics Business { get; set; } = new();
 }
@@ -126,12 +126,12 @@ public interface IPerformanceTrackingScope : IDisposable
     /// Records success and optionally adds metadata.
     /// </summary>
     void RecordSuccess(Dictionary<string, object>? metadata = null);
-    
+
     /// <summary>
     /// Records failure and optionally adds error information.
     /// </summary>
     void RecordFailure(Exception? exception = null, Dictionary<string, object>? metadata = null);
-    
+
     /// <summary>
     /// Adds metadata to the tracking scope.
     /// </summary>

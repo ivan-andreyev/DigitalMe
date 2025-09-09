@@ -152,7 +152,7 @@ public class ClickUpService : IClickUpService
             var json = await response.Content.ReadAsStringAsync();
             var tasksResponse = JsonSerializer.Deserialize<TasksResponse>(json, _jsonOptions);
 
-            _logger.LogDebug("Retrieved {TaskCount} tasks from list {ListId}", 
+            _logger.LogDebug("Retrieved {TaskCount} tasks from list {ListId}",
                 tasksResponse?.Tasks?.Count ?? 0, listId);
 
             return tasksResponse!;
@@ -177,7 +177,7 @@ public class ClickUpService : IClickUpService
             var json = await response.Content.ReadAsStringAsync();
             var tasksResponse = JsonSerializer.Deserialize<TasksResponse>(json, _jsonOptions);
 
-            _logger.LogDebug("Retrieved {TaskCount} tasks from team {TeamId}", 
+            _logger.LogDebug("Retrieved {TaskCount} tasks from team {TeamId}",
                 tasksResponse?.Tasks?.Count ?? 0, teamId);
 
             return tasksResponse!;
@@ -212,7 +212,7 @@ public class ClickUpService : IClickUpService
             var json = await response.Content.ReadAsStringAsync();
             var tasksResponse = JsonSerializer.Deserialize<TasksResponse>(json, _jsonOptions);
 
-            _logger.LogDebug("Found {TaskCount} tasks matching query: {Query}", 
+            _logger.LogDebug("Found {TaskCount} tasks matching query: {Query}",
                 tasksResponse?.Tasks?.Count ?? 0, query);
 
             return tasksResponse!;

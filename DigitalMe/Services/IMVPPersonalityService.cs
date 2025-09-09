@@ -12,12 +12,12 @@ public interface IMVPPersonalityService
     /// Gets Ivan's personality profile from database
     /// </summary>
     Task<PersonalityProfile?> GetIvanProfileAsync();
-    
+
     /// <summary>
     /// Generates system prompt specifically for Ivan's personality
     /// </summary>
     Task<string> GenerateIvanSystemPromptAsync();
-    
+
     /// <summary>
     /// Gets all personality traits for Ivan
     /// </summary>

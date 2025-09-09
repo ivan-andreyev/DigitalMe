@@ -38,7 +38,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var conversationDto = JsonSerializer.Deserialize<ConversationDto>(content, new JsonSerializerOptions
         {
@@ -86,7 +86,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var conversationDto = JsonSerializer.Deserialize<ConversationDto>(content, new JsonSerializerOptions
         {
@@ -109,7 +109,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("No active conversation found");
     }
@@ -148,7 +148,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var messageDtos = JsonSerializer.Deserialize<MessageDto[]>(content, new JsonSerializerOptions
         {
@@ -185,7 +185,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var messageDtos = JsonSerializer.Deserialize<MessageDto[]>(content, new JsonSerializerOptions
         {
@@ -218,7 +218,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var messageDto = JsonSerializer.Deserialize<MessageDto>(content, new JsonSerializerOptions
         {
@@ -267,7 +267,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var conversationDto = JsonSerializer.Deserialize<ConversationDto>(content, new JsonSerializerOptions
         {
@@ -331,7 +331,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var conversationDtos = JsonSerializer.Deserialize<ConversationDto[]>(content, new JsonSerializerOptions
         {
@@ -353,7 +353,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var conversationDtos = JsonSerializer.Deserialize<ConversationDto[]>(content, new JsonSerializerOptions
         {
@@ -368,11 +368,11 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
+
         // Ensure database is clean and recreated with Ivan
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
-        
+
         // Seed Ivan personality using the same logic as BaseTestWithDatabase
         var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
         ivan.Name = "Ivan";
@@ -389,7 +389,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
     {
         // First ensure clean database with Ivan
         await EnsureCleanDatabaseWithIvan();
-        
+
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
 

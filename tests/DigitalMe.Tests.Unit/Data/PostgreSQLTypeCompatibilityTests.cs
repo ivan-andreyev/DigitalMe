@@ -15,7 +15,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         var options = new DbContextOptionsBuilder<DigitalMeDbContext>()
             .UseInMemoryDatabase($"PostgreSQLTypeTest_{Guid.NewGuid()}")
             .Options;
-        
+
         _context = new DigitalMeDbContext(options);
         _context.Database.EnsureCreated();
     }
@@ -44,13 +44,13 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
 
         savedConversation.Should().NotBeNull("conversation should be saved successfully");
         savedConversation!.IsActive.Should().BeTrue("boolean field should maintain true value");
-        
+
         // Test boolean queries that were failing before
         var activeConversations = await _context.Conversations
             .Where(c => c.IsActive == true) // This query was failing with PostgreSQL
             .ToListAsync();
-            
-        activeConversations.Should().Contain(c => c.Id == conversation.Id, 
+
+        activeConversations.Should().Contain(c => c.Id == conversation.Id,
             "boolean comparison should work correctly");
 
         // Test boolean AND operations that were failing
@@ -71,7 +71,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         var conversation = new Conversation
         {
             Platform = "Web",
-            UserId = "datetime-test-user", 
+            UserId = "datetime-test-user",
             Title = "DateTime Field Test",
             IsActive = false,
             StartedAt = startTime, // These were TEXT fields causing casting issues
@@ -87,7 +87,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             .FirstOrDefaultAsync(c => c.UserId == "datetime-test-user");
 
         savedConversation.Should().NotBeNull("conversation with DateTime fields should save");
-        savedConversation!.StartedAt.Should().BeCloseTo(startTime, TimeSpan.FromSeconds(1), 
+        savedConversation!.StartedAt.Should().BeCloseTo(startTime, TimeSpan.FromSeconds(1),
             "StartedAt DateTime should be preserved accurately");
         savedConversation.EndedAt.Should().BeCloseTo(endTime, TimeSpan.FromSeconds(1),
             "EndedAt DateTime should be preserved accurately");
@@ -147,7 +147,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         orderedMessages.First().Id.Should().Be(message.Id);
     }
 
-    [Fact] 
+    [Fact]
     public async Task PersonalityProfile_DateTimeFields_ShouldHandleCorrectly()
     {
         // Arrange - Test PersonalityProfile DateTime fields
@@ -224,7 +224,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
     }
 
     [Fact]
-    public async Task AllEntities_GuidFields_ShouldHandleCorrectly() 
+    public async Task AllEntities_GuidFields_ShouldHandleCorrectly()
     {
         // Arrange - Test GUID fields that needed PostgreSQL UUID configuration
         var personalityId = Guid.NewGuid();

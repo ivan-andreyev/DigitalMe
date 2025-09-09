@@ -22,7 +22,7 @@ public class GitHubWebhookService : IGitHubWebhookService
     {
         _settings = integrationSettings.Value.GitHub;
         _logger = logger;
-        
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -47,13 +47,13 @@ public class GitHubWebhookService : IGitHubWebhookService
         try
         {
             var expectedSignature = signature[7..]; // Remove "sha256=" prefix
-            
+
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
             var computedSignature = Convert.ToHexString(computedHash).ToLowerInvariant();
-            
+
             var isValid = computedSignature == expectedSignature;
-            
+
             if (!isValid)
             {
                 _logger.LogWarning("GitHub webhook signature validation failed");
@@ -62,7 +62,7 @@ public class GitHubWebhookService : IGitHubWebhookService
             {
                 _logger.LogDebug("GitHub webhook signature validation successful");
             }
-            
+
             return isValid;
         }
         catch (Exception ex)
@@ -74,7 +74,7 @@ public class GitHubWebhookService : IGitHubWebhookService
 
     public async Task<string> ProcessWebhookAsync(string eventType, string payload, string? deliveryId = null)
     {
-        _logger.LogInformation("Processing GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}", 
+        _logger.LogInformation("Processing GitHub webhook - Event: {EventType}, DeliveryId: {DeliveryId}",
             eventType, deliveryId ?? "N/A");
 
         try
@@ -101,9 +101,9 @@ public class GitHubWebhookService : IGitHubWebhookService
                 _ => await HandleGenericEventAsync(eventType, payload)
             };
 
-            _logger.LogInformation("Successfully processed GitHub webhook - Event: {EventType}, Result: {Result}", 
+            _logger.LogInformation("Successfully processed GitHub webhook - Event: {EventType}, Result: {Result}",
                 eventType, result);
-            
+
             return result;
         }
         catch (Exception ex)
@@ -116,20 +116,20 @@ public class GitHubWebhookService : IGitHubWebhookService
     public async Task<string> HandlePushEventAsync(string payload)
     {
         _logger.LogDebug("Processing GitHub push event");
-        
+
         try
         {
             using var document = JsonDocument.Parse(payload);
             var root = document.RootElement;
-            
+
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
             var pusher = root.GetProperty("pusher").GetProperty("name").GetString();
             var ref_ = root.GetProperty("ref").GetString();
             var commits = root.GetProperty("commits").GetArrayLength();
-            
+
             var branchName = ref_?.Replace("refs/heads/", "") ?? "unknown";
-            
-            _logger.LogInformation("Push event: {Pusher} pushed {CommitCount} commits to {Branch} in {Repository}", 
+
+            _logger.LogInformation("Push event: {Pusher} pushed {CommitCount} commits to {Branch} in {Repository}",
                 pusher, commits, branchName, repository);
 
             // Here you could trigger additional workflows:
@@ -137,9 +137,9 @@ public class GitHubWebhookService : IGitHubWebhookService
             // - Trigger CI/CD pipelines
             // - Notify team channels
             // - Update project management tools
-            
+
             await Task.CompletedTask; // Placeholder for actual processing
-            
+
             return $"Processed push to {branchName} with {commits} commits";
         }
         catch (Exception ex)
@@ -152,12 +152,12 @@ public class GitHubWebhookService : IGitHubWebhookService
     public async Task<string> HandlePullRequestEventAsync(string payload)
     {
         _logger.LogDebug("Processing GitHub pull request event");
-        
+
         try
         {
             using var document = JsonDocument.Parse(payload);
             var root = document.RootElement;
-            
+
             var action = root.GetProperty("action").GetString();
             var pullRequest = root.GetProperty("pull_request");
             var number = pullRequest.GetProperty("number").GetInt32();
@@ -165,8 +165,8 @@ public class GitHubWebhookService : IGitHubWebhookService
             var state = pullRequest.GetProperty("state").GetString();
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
             var author = pullRequest.GetProperty("user").GetProperty("login").GetString();
-            
-            _logger.LogInformation("PR event: {Action} - PR #{Number} '{Title}' by {Author} in {Repository} (State: {State})", 
+
+            _logger.LogInformation("PR event: {Action} - PR #{Number} '{Title}' by {Author} in {Repository} (State: {State})",
                 action, number, title, author, repository, state);
 
             // Handle different PR actions
@@ -180,7 +180,7 @@ public class GitHubWebhookService : IGitHubWebhookService
                 "converted_to_draft" => await HandlePullRequestConvertedToDraftAsync(pullRequest),
                 _ => $"Unhandled PR action: {action}"
             };
-            
+
             return result;
         }
         catch (Exception ex)
@@ -193,12 +193,12 @@ public class GitHubWebhookService : IGitHubWebhookService
     public async Task<string> HandleIssueEventAsync(string payload)
     {
         _logger.LogDebug("Processing GitHub issue event");
-        
+
         try
         {
             using var document = JsonDocument.Parse(payload);
             var root = document.RootElement;
-            
+
             var action = root.GetProperty("action").GetString();
             var issue = root.GetProperty("issue");
             var number = issue.GetProperty("number").GetInt32();
@@ -206,8 +206,8 @@ public class GitHubWebhookService : IGitHubWebhookService
             var state = issue.GetProperty("state").GetString();
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
             var author = issue.GetProperty("user").GetProperty("login").GetString();
-            
-            _logger.LogInformation("Issue event: {Action} - Issue #{Number} '{Title}' by {Author} in {Repository} (State: {State})", 
+
+            _logger.LogInformation("Issue event: {Action} - Issue #{Number} '{Title}' by {Author} in {Repository} (State: {State})",
                 action, number, title, author, repository, state);
 
             // Handle different issue actions
@@ -223,7 +223,7 @@ public class GitHubWebhookService : IGitHubWebhookService
                 "unassigned" => await HandleIssueUnassignedAsync(issue, root),
                 _ => $"Unhandled issue action: {action}"
             };
-            
+
             return result;
         }
         catch (Exception ex)
@@ -236,12 +236,12 @@ public class GitHubWebhookService : IGitHubWebhookService
     public async Task<string> HandleWorkflowRunEventAsync(string payload)
     {
         _logger.LogDebug("Processing GitHub workflow run event");
-        
+
         try
         {
             using var document = JsonDocument.Parse(payload);
             var root = document.RootElement;
-            
+
             var action = root.GetProperty("action").GetString();
             var workflowRun = root.GetProperty("workflow_run");
             var name = workflowRun.GetProperty("name").GetString();
@@ -249,8 +249,8 @@ public class GitHubWebhookService : IGitHubWebhookService
             var conclusion = workflowRun.GetProperty("conclusion").GetString();
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
             var runNumber = workflowRun.GetProperty("run_number").GetInt32();
-            
-            _logger.LogInformation("Workflow event: {Action} - '{Name}' #{RunNumber} in {Repository} (Status: {Status}, Conclusion: {Conclusion})", 
+
+            _logger.LogInformation("Workflow event: {Action} - '{Name}' #{RunNumber} in {Repository} (Status: {Status}, Conclusion: {Conclusion})",
                 action, name, runNumber, repository, status, conclusion);
 
             // Handle workflow completion
@@ -265,7 +265,7 @@ public class GitHubWebhookService : IGitHubWebhookService
                     await HandleWorkflowFailureAsync(workflowRun);
                 }
             }
-            
+
             await Task.CompletedTask;
             return $"Processed workflow {action}: {name} #{runNumber} ({conclusion})";
         }
@@ -279,12 +279,12 @@ public class GitHubWebhookService : IGitHubWebhookService
     public async Task<string> HandleReviewEventAsync(string payload)
     {
         _logger.LogDebug("Processing GitHub review event");
-        
+
         try
         {
             using var document = JsonDocument.Parse(payload);
             var root = document.RootElement;
-            
+
             var action = root.GetProperty("action").GetString();
             var review = root.GetProperty("review");
             var pullRequest = root.GetProperty("pull_request");
@@ -292,8 +292,8 @@ public class GitHubWebhookService : IGitHubWebhookService
             var reviewer = review.GetProperty("user").GetProperty("login").GetString();
             var state = review.GetProperty("state").GetString();
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
-            
-            _logger.LogInformation("Review event: {Action} - {Reviewer} {State} PR #{Number} in {Repository}", 
+
+            _logger.LogInformation("Review event: {Action} - {Reviewer} {State} PR #{Number} in {Repository}",
                 action, reviewer, state, prNumber, repository);
 
             await Task.CompletedTask;

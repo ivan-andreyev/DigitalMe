@@ -37,7 +37,7 @@ public class SecurityValidationMiddleware
             // 1. Validate request size
             if (context.Request.ContentLength > _securitySettings.MaxPayloadSizeBytes)
             {
-                _logger.LogWarning("Request too large: {Size} bytes from {RemoteIp}", 
+                _logger.LogWarning("Request too large: {Size} bytes from {RemoteIp}",
                     context.Request.ContentLength, context.Connection.RemoteIpAddress);
                 context.Response.StatusCode = 413; // Payload Too Large
                 await context.Response.WriteAsync("Request payload too large");
@@ -47,7 +47,7 @@ public class SecurityValidationMiddleware
             // 2. Rate limiting check
             var clientId = GetClientIdentifier(context);
             var endpoint = $"{context.Request.Method}:{context.Request.Path}";
-            
+
             if (await securityService.IsRateLimitExceededAsync(clientId, endpoint))
             {
                 _logger.LogWarning("Rate limit exceeded for {ClientId} on {Endpoint}", clientId, endpoint);
@@ -60,7 +60,7 @@ public class SecurityValidationMiddleware
             if (IsWebhookEndpoint(context.Request.Path))
             {
                 var payload = await ReadRequestBodyAsync(context.Request);
-                
+
                 if (!await securityService.ValidateWebhookPayloadAsync(payload, _securitySettings.MaxPayloadSizeBytes))
                 {
                     _logger.LogWarning("Invalid webhook payload from {RemoteIp}", context.Connection.RemoteIpAddress);
@@ -68,7 +68,7 @@ public class SecurityValidationMiddleware
                     await context.Response.WriteAsync("Invalid payload");
                     return;
                 }
-                
+
                 // Reset stream position for next middleware
                 context.Request.Body.Position = 0;
             }
@@ -77,14 +77,14 @@ public class SecurityValidationMiddleware
             if (IsProtectedApiEndpoint(context.Request.Path))
             {
                 var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-                
+
                 if (string.IsNullOrEmpty(authHeader))
                 {
                     context.Response.StatusCode = 401; // Unauthorized
                     await context.Response.WriteAsync("Missing authorization header");
                     return;
                 }
-                
+
                 var tokenValidation = await securityService.ValidateJwtTokenAsync(authHeader);
                 if (!tokenValidation.IsValid)
                 {
@@ -92,7 +92,7 @@ public class SecurityValidationMiddleware
                     await context.Response.WriteAsync("Invalid token");
                     return;
                 }
-                
+
                 // Add claims to context
                 foreach (var claim in tokenValidation.Claims)
                 {
@@ -138,7 +138,7 @@ public class SecurityValidationMiddleware
     private static bool IsProtectedApiEndpoint(string path)
     {
         // API endpoints that require authentication (exclude auth endpoints)
-        return path.StartsWith("/api", StringComparison.OrdinalIgnoreCase) && 
+        return path.StartsWith("/api", StringComparison.OrdinalIgnoreCase) &&
                !path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase) &&
                !IsWebhookEndpoint(path);
     }
@@ -158,13 +158,13 @@ public class SecurityValidationMiddleware
     {
         // Enable buffering to allow multiple reads
         request.EnableBuffering();
-        
+
         using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
         var body = await reader.ReadToEndAsync();
-        
+
         // Reset position for next middleware
         request.Body.Position = 0;
-        
+
         return body;
     }
 
@@ -173,9 +173,9 @@ public class SecurityValidationMiddleware
         // Log security-relevant events for monitoring
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogDebug("Security validation passed for {ClientId} {Method} {Path}", 
-                clientId, 
-                context.Request.Method, 
+            _logger.LogDebug("Security validation passed for {ClientId} {Method} {Path}",
+                clientId,
+                context.Request.Method,
                 context.Request.Path);
         }
     }

@@ -42,7 +42,7 @@ public class MCPServiceProper : IMcpService
             // Fallback to direct Anthropic
             _logger.LogWarning("⚠️ MCP server unavailable, checking direct Anthropic fallback");
             var anthropicConnected = await _anthropicService.IsConnectedAsync();
-            
+
             if (anthropicConnected)
             {
                 _logger.LogInformation("✅ Using direct Anthropic as fallback");
@@ -64,7 +64,7 @@ public class MCPServiceProper : IMcpService
         try
         {
             _logger.LogInformation("🔍 SendMessageAsync called with message: '{Message}', MCP IsConnected: {IsConnected}", message, _mcpClient.IsConnected);
-            
+
             // Try to initialize if not connected
             if (!_mcpClient.IsConnected)
             {
@@ -72,7 +72,7 @@ public class MCPServiceProper : IMcpService
                 var initialized = await _mcpClient.InitializeAsync();
                 _logger.LogInformation("🔗 MCP initialization result: {Result}", initialized);
             }
-            
+
             if (_mcpClient.IsConnected)
             {
                 return await SendMessageViaMCPAsync(message, context);
@@ -128,9 +128,9 @@ public class MCPServiceProper : IMcpService
 
             if (response.Error != null)
             {
-                _logger.LogError("❌ MCP request failed: {ErrorCode} - {ErrorMessage}", 
+                _logger.LogError("❌ MCP request failed: {ErrorCode} - {ErrorMessage}",
                     response.Error.Code, response.Error.Message);
-                
+
                 // Fallback to direct Anthropic
                 return await _anthropicService.SendMessageAsync(message, context.Profile);
             }
@@ -162,12 +162,12 @@ public class MCPServiceProper : IMcpService
         else
         {
             _logger.LogWarning("⚠️ MCP not connected, cannot call tool: {ToolName}", toolName);
-            return new MCPResponse 
-            { 
-                Error = new MCPError 
-                { 
-                    Code = -32001, 
-                    Message = "MCP server not connected" 
+            return new MCPResponse
+            {
+                Error = new MCPError
+                {
+                    Code = -32001,
+                    Message = "MCP server not connected"
                 }
             };
         }
@@ -195,18 +195,18 @@ public class MCPServiceProper : IMcpService
         {
             // Try to parse as JSON first
             var jsonResult = JsonSerializer.Deserialize<JsonElement>(resultContent);
-            
+
             // Look for common response patterns
             if (jsonResult.TryGetProperty("content", out var contentElement))
             {
                 return contentElement.GetString() ?? resultContent;
             }
-            
+
             if (jsonResult.TryGetProperty("text", out var textElement))
             {
                 return textElement.GetString() ?? resultContent;
             }
-            
+
             if (jsonResult.TryGetProperty("message", out var messageElement))
             {
                 return messageElement.GetString() ?? resultContent;
@@ -234,7 +234,7 @@ public class MCPServiceProper : IMcpService
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityContext context)
     {
         var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
-        
+
         var responses = new[]
         {
             "Слушай, MCP протокол сейчас недоступен. Нужно поднять MCP сервер или настроить подключение как положено.",
@@ -246,7 +246,7 @@ public class MCPServiceProper : IMcpService
 
         var random = new Random();
         var response = responses[random.Next(responses.Length)];
-        
+
         _logger.LogInformation("Generated Ivan-style MCP fallback response");
         return response;
     }

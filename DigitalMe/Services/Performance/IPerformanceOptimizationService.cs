@@ -12,45 +12,45 @@ public interface IPerformanceOptimizationService
     /// Get cached response if available
     /// </summary>
     Task<T?> GetCachedResponseAsync<T>(string cacheKey, TimeSpan? expiration = null) where T : class;
-    
+
     /// <summary>
     /// Set cached response
     /// </summary>
     Task SetCachedResponseAsync<T>(string cacheKey, T value, TimeSpan? expiration = null) where T : class;
-    
+
     /// <summary>
     /// Remove cached response
     /// </summary>
     Task RemoveCachedResponseAsync(string cacheKey);
-    
+
     /// <summary>
     /// Get or set cached response with factory
     /// </summary>
     Task<T> GetOrSetCachedResponseAsync<T>(string cacheKey, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class;
-    
+
     /// <summary>
     /// Check if request should be rate limited
     /// </summary>
     Task<bool> ShouldRateLimitAsync(string serviceName, string identifier);
-    
+
     /// <summary>
     /// Record rate limit usage
     /// </summary>
     Task RecordRateLimitUsageAsync(string serviceName, string identifier);
-    
+
     /// <summary>
     /// Get rate limit status
     /// </summary>
     Task<RateLimitStatus> GetRateLimitStatusAsync(string serviceName, string identifier);
-    
+
     /// <summary>
     /// Batch multiple operations into single request
     /// </summary>
     Task<IEnumerable<TResult>> BatchOperationsAsync<TInput, TResult>(
-        IEnumerable<TInput> inputs, 
+        IEnumerable<TInput> inputs,
         Func<IEnumerable<TInput>, Task<IEnumerable<TResult>>> batchProcessor,
         int batchSize = 50);
-    
+
     /// <summary>
     /// Get HTTP client pool statistics
     /// </summary>

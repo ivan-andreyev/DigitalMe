@@ -14,7 +14,7 @@ public interface IIvanPersonalityService
     /// </summary>
     /// <returns>Объект PersonalityProfile с данными личности Ивана</returns>
     Task<PersonalityProfile> GetIvanPersonalityAsync();
-    
+
     /// <summary>
     /// Генерирует системный промпт для LLM на основе профиля личности.
     /// </summary>

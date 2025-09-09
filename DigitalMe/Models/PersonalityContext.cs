@@ -7,7 +7,7 @@ public class PersonalityContext
     public PersonalityProfile Profile { get; set; } = null!;
     public IEnumerable<Message> RecentMessages { get; set; } = new List<Message>();
     public Dictionary<string, object> CurrentState { get; set; } = new();
-    
+
     public string ToSystemPrompt()
     {
         var prompt = $@"

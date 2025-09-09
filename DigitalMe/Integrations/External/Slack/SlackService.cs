@@ -17,11 +17,11 @@ public class SlackService : ISlackService, IDisposable
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly SlackSettings _settings;
     private readonly IOptionsMonitor<IntegrationSettings> _integrationSettings;
-    
+
     private string _botToken = string.Empty;
     private bool _isConnected = false;
     private const string SlackApiBaseUrl = "https://slack.com/api/";
-    
+
     // Rate limiting - Slack allows 1+ requests per second per method
     private readonly SemaphoreSlim _rateLimitSemaphore;
     private DateTime _lastRequestTime = DateTime.MinValue;
@@ -60,7 +60,7 @@ public class SlackService : ISlackService, IDisposable
 
             if (_isConnected)
             {
-                _logger.LogInformation("Slack Bot connection established: {BotName} ({BotId})", 
+                _logger.LogInformation("Slack Bot connection established: {BotName} ({BotId})",
                     botInfo?.Name ?? "Unknown", botInfo?.Id ?? "unknown");
             }
 
@@ -82,10 +82,10 @@ public class SlackService : ISlackService, IDisposable
     public async Task DisconnectAsync()
     {
         _logger.LogInformation("Disconnecting from Slack API...");
-        
+
         _isConnected = false;
         _botToken = string.Empty;
-        
+
         await Task.CompletedTask;
     }
 
@@ -125,10 +125,10 @@ public class SlackService : ISlackService, IDisposable
             };
 
             var response = await MakeSlackApiCallAsync<SlackMessageResponse>("chat.postMessage", payload);
-            
-            _logger.LogInformation("Message sent successfully to {Channel}, timestamp: {Timestamp}", 
+
+            _logger.LogInformation("Message sent successfully to {Channel}, timestamp: {Timestamp}",
                 channel, response?.Timestamp);
-            
+
             return response ?? new SlackMessageResponse { Ok = false, Error = "Unknown error" };
         }
         catch (Exception ex)
@@ -144,7 +144,7 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Updating Slack message in channel {Channel}, timestamp {Timestamp}", 
+            _logger.LogInformation("Updating Slack message in channel {Channel}, timestamp {Timestamp}",
                 channel, timestamp);
 
             var payload = new
@@ -155,15 +155,15 @@ public class SlackService : ISlackService, IDisposable
             };
 
             var response = await MakeSlackApiCallAsync<SlackMessageResponse>("chat.update", payload);
-            
-            _logger.LogInformation("Message updated successfully in {Channel}, timestamp: {Timestamp}", 
+
+            _logger.LogInformation("Message updated successfully in {Channel}, timestamp: {Timestamp}",
                 channel, timestamp);
-            
+
             return response ?? new SlackMessageResponse { Ok = false, Error = "Unknown error" };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to update message in Slack channel {Channel}, timestamp {Timestamp}", 
+            _logger.LogError(ex, "Failed to update message in Slack channel {Channel}, timestamp {Timestamp}",
                 channel, timestamp);
             throw;
         }
@@ -175,7 +175,7 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Deleting Slack message from channel {Channel}, timestamp {Timestamp}", 
+            _logger.LogInformation("Deleting Slack message from channel {Channel}, timestamp {Timestamp}",
                 channel, timestamp);
 
             var payload = new
@@ -185,16 +185,16 @@ public class SlackService : ISlackService, IDisposable
             };
 
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("chat.delete", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("Message deletion {Result} for channel {Channel}, timestamp: {Timestamp}", 
+            _logger.LogInformation("Message deletion {Result} for channel {Channel}, timestamp: {Timestamp}",
                 success ? "successful" : "failed", channel, timestamp);
-            
+
             return success;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete message from Slack channel {Channel}, timestamp {Timestamp}", 
+            _logger.LogError(ex, "Failed to delete message from Slack channel {Channel}, timestamp {Timestamp}",
                 channel, timestamp);
             return false;
         }
@@ -214,21 +214,21 @@ public class SlackService : ISlackService, IDisposable
 
             using var httpClient = CreateHttpClient();
             using var formContent = new MultipartFormDataContent();
-            
+
             formContent.Add(new StringContent(channel), "channels");
             if (!string.IsNullOrEmpty(title))
                 formContent.Add(new StringContent(title), "title");
-            
+
             formContent.Add(new StreamContent(file), "file", filename);
 
             var response = await httpClient.PostAsync($"{SlackApiBaseUrl}files.upload", formContent);
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            
+
             var fileResponse = JsonSerializer.Deserialize<SlackFileResponse>(jsonResponse, GetJsonOptions());
-            
-            _logger.LogInformation("File upload {Result} for {Filename} to channel {Channel}", 
+
+            _logger.LogInformation("File upload {Result} for {Filename} to channel {Channel}",
                 fileResponse?.Ok == true ? "successful" : "failed", filename, channel);
-            
+
             return fileResponse ?? new SlackFileResponse { Ok = false, Error = "Unknown error" };
         }
         catch (Exception ex)
@@ -254,11 +254,11 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { file = fileId };
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("files.delete", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("File deletion {Result} for file {FileId}", 
+            _logger.LogInformation("File deletion {Result} for file {FileId}",
                 success ? "successful" : "failed", fileId);
-            
+
             return success;
         }
         catch (Exception ex)
@@ -282,10 +282,10 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { types = "public_channel,private_channel" };
             var response = await MakeSlackApiCallAsync<SlackChannelsResponse>("conversations.list", payload);
-            
+
             var channels = response?.Channels ?? Enumerable.Empty<SlackChannel>();
             _logger.LogInformation("Retrieved {Count} Slack channels", channels.Count());
-            
+
             return channels;
         }
         catch (Exception ex)
@@ -305,11 +305,11 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { channel = channelId };
             var response = await MakeSlackApiCallAsync<SlackChannelResponse>("conversations.info", payload);
-            
+
             var channel = response?.Channel ?? new SlackChannel { Id = channelId, Name = "Unknown" };
-            _logger.LogInformation("Retrieved channel info for {ChannelId}: {ChannelName}", 
+            _logger.LogInformation("Retrieved channel info for {ChannelId}: {ChannelName}",
                 channelId, channel.Name);
-            
+
             return channel;
         }
         catch (Exception ex)
@@ -325,17 +325,17 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Creating {Type} Slack channel: {Name}", 
+            _logger.LogInformation("Creating {Type} Slack channel: {Name}",
                 isPrivate ? "private" : "public", name);
 
             var payload = new { name, is_private = isPrivate };
             var apiMethod = isPrivate ? "conversations.create" : "conversations.create";
             var response = await MakeSlackApiCallAsync<SlackChannelResponse>(apiMethod, payload);
-            
+
             var channel = response?.Channel ?? new SlackChannel { Name = name };
-            _logger.LogInformation("Channel creation {Result} for {Name}: {ChannelId}", 
+            _logger.LogInformation("Channel creation {Result} for {Name}: {ChannelId}",
                 response?.Ok == true ? "successful" : "failed", name, channel.Id);
-            
+
             return channel;
         }
         catch (Exception ex)
@@ -355,11 +355,11 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { channel = channelId };
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("conversations.join", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("Channel join {Result} for {ChannelId}", 
+            _logger.LogInformation("Channel join {Result} for {ChannelId}",
                 success ? "successful" : "failed", channelId);
-            
+
             return success;
         }
         catch (Exception ex)
@@ -379,11 +379,11 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { channel = channelId };
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("conversations.leave", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("Channel leave {Result} for {ChannelId}", 
+            _logger.LogInformation("Channel leave {Result} for {ChannelId}",
                 success ? "successful" : "failed", channelId);
-            
+
             return success;
         }
         catch (Exception ex)
@@ -406,10 +406,10 @@ public class SlackService : ISlackService, IDisposable
             _logger.LogInformation("Retrieving Slack users");
 
             var response = await MakeSlackApiCallAsync<SlackUsersResponse>("users.list", null);
-            
+
             var users = response?.Members ?? Enumerable.Empty<SlackUser>();
             _logger.LogInformation("Retrieved {Count} Slack users", users.Count());
-            
+
             return users;
         }
         catch (Exception ex)
@@ -429,11 +429,11 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { user = userId };
             var response = await MakeSlackApiCallAsync<SlackUserResponse>("users.info", payload);
-            
+
             var user = response?.User ?? new SlackUser { Id = userId, Name = "Unknown" };
-            _logger.LogInformation("Retrieved user info for {UserId}: {UserName}", 
+            _logger.LogInformation("Retrieved user info for {UserId}: {UserName}",
                 userId, user.Name);
-            
+
             return user;
         }
         catch (Exception ex)
@@ -452,16 +452,16 @@ public class SlackService : ISlackService, IDisposable
             _logger.LogInformation("Retrieving Slack bot info");
 
             var response = await MakeSlackApiCallAsync<SlackAuthResponse>("auth.test", null);
-            
+
             var botUser = new SlackUser
             {
                 Id = response?.UserId ?? "unknown",
                 Name = response?.User ?? "DigitalMe Bot",
                 IsBot = true
             };
-            
+
             _logger.LogInformation("Retrieved bot info: {BotName} ({BotId})", botUser.Name, botUser.Id);
-            
+
             return botUser;
         }
         catch (Exception ex)
@@ -533,10 +533,10 @@ public class SlackService : ISlackService, IDisposable
 
             var payload = new { channel, limit };
             var response = await MakeSlackApiCallAsync<SlackMessagesResponse>("conversations.history", payload);
-            
+
             var messages = response?.Messages ?? Enumerable.Empty<SlackMessage>();
             _logger.LogInformation("Retrieved {Count} messages from channel {Channel}", messages.Count(), channel);
-            
+
             return messages;
         }
         catch (Exception ex)
@@ -553,21 +553,21 @@ public class SlackService : ISlackService, IDisposable
         try
         {
             var timestamp = ((DateTimeOffset)since).ToUnixTimeSeconds().ToString();
-            _logger.LogInformation("Retrieving {Limit} messages from Slack channel {Channel} since {Since}", 
+            _logger.LogInformation("Retrieving {Limit} messages from Slack channel {Channel} since {Since}",
                 limit, channel, since);
 
             var payload = new { channel, oldest = timestamp, limit };
             var response = await MakeSlackApiCallAsync<SlackMessagesResponse>("conversations.history", payload);
-            
+
             var messages = response?.Messages ?? Enumerable.Empty<SlackMessage>();
-            _logger.LogInformation("Retrieved {Count} messages from channel {Channel} since {Since}", 
+            _logger.LogInformation("Retrieved {Count} messages from channel {Channel} since {Since}",
                 messages.Count(), channel, since);
-            
+
             return messages;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve messages from Slack channel {Channel} since {Since}", 
+            _logger.LogError(ex, "Failed to retrieve messages from Slack channel {Channel} since {Since}",
                 channel, since);
             throw;
         }
@@ -576,7 +576,7 @@ public class SlackService : ISlackService, IDisposable
     public async Task<SlackMessage> GetMessageAsync(string channel, string timestamp)
     {
         var messages = await GetMessagesAsync(channel, 1);
-        return messages.FirstOrDefault(m => m.Timestamp == timestamp) ?? 
+        return messages.FirstOrDefault(m => m.Timestamp == timestamp) ??
                new SlackMessage { Channel = channel, Timestamp = timestamp, Text = "Message not found" };
     }
 
@@ -590,21 +590,21 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Adding reaction {Reaction} to message {Timestamp} in channel {Channel}", 
+            _logger.LogInformation("Adding reaction {Reaction} to message {Timestamp} in channel {Channel}",
                 reaction, timestamp, channel);
 
             var payload = new { channel, timestamp, name = reaction.TrimStart(':').TrimEnd(':') };
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("reactions.add", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("Reaction add {Result} for {Reaction} on message {Timestamp}", 
+            _logger.LogInformation("Reaction add {Result} for {Reaction} on message {Timestamp}",
                 success ? "successful" : "failed", reaction, timestamp);
-            
+
             return success;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to add reaction {Reaction} to message {Timestamp} in channel {Channel}", 
+            _logger.LogError(ex, "Failed to add reaction {Reaction} to message {Timestamp} in channel {Channel}",
                 reaction, timestamp, channel);
             return false;
         }
@@ -616,21 +616,21 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Removing reaction {Reaction} from message {Timestamp} in channel {Channel}", 
+            _logger.LogInformation("Removing reaction {Reaction} from message {Timestamp} in channel {Channel}",
                 reaction, timestamp, channel);
 
             var payload = new { channel, timestamp, name = reaction.TrimStart(':').TrimEnd(':') };
             var response = await MakeSlackApiCallAsync<SlackApiResponse>("reactions.remove", payload);
-            
+
             var success = response?.Ok ?? false;
-            _logger.LogInformation("Reaction remove {Result} for {Reaction} on message {Timestamp}", 
+            _logger.LogInformation("Reaction remove {Result} for {Reaction} on message {Timestamp}",
                 success ? "successful" : "failed", reaction, timestamp);
-            
+
             return success;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to remove reaction {Reaction} from message {Timestamp} in channel {Channel}", 
+            _logger.LogError(ex, "Failed to remove reaction {Reaction} from message {Timestamp} in channel {Channel}",
                 reaction, timestamp, channel);
             return false;
         }
@@ -642,21 +642,21 @@ public class SlackService : ISlackService, IDisposable
 
         try
         {
-            _logger.LogInformation("Retrieving reactions for message {Timestamp} in channel {Channel}", 
+            _logger.LogInformation("Retrieving reactions for message {Timestamp} in channel {Channel}",
                 timestamp, channel);
 
             var payload = new { channel, timestamp };
             var response = await MakeSlackApiCallAsync<SlackReactionsResponse>("reactions.get", payload);
-            
+
             var reactions = response?.Message?.Reactions ?? Enumerable.Empty<SlackReaction>();
-            _logger.LogInformation("Retrieved {Count} reactions for message {Timestamp}", 
+            _logger.LogInformation("Retrieved {Count} reactions for message {Timestamp}",
                 reactions.Count(), timestamp);
-            
+
             return reactions;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve reactions for message {Timestamp} in channel {Channel}", 
+            _logger.LogError(ex, "Failed to retrieve reactions for message {Timestamp} in channel {Channel}",
                 timestamp, channel);
             return Enumerable.Empty<SlackReaction>();
         }
@@ -680,7 +680,7 @@ public class SlackService : ISlackService, IDisposable
         httpClient.BaseAddress = new Uri(SlackApiBaseUrl);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botToken);
         httpClient.Timeout = TimeSpan.FromSeconds(_settings.TimeoutSeconds);
-        
+
         return httpClient;
     }
 
@@ -696,9 +696,9 @@ public class SlackService : ISlackService, IDisposable
             try
             {
                 using var httpClient = CreateHttpClient();
-                
+
                 HttpResponseMessage response;
-                
+
                 if (payload == null)
                 {
                     response = await httpClient.GetAsync(method);
@@ -711,12 +711,12 @@ public class SlackService : ISlackService, IDisposable
                 }
 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-                
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("Slack API call failed: {Method}, Status: {StatusCode}, Response: {Response}", 
+                    _logger.LogWarning("Slack API call failed: {Method}, Status: {StatusCode}, Response: {Response}",
                         method, response.StatusCode, jsonResponse);
-                    
+
                     if (retryCount < maxRetries)
                     {
                         var delay = TimeSpan.FromSeconds(Math.Pow(2, retryCount + 1)); // Exponential backoff
@@ -731,18 +731,18 @@ public class SlackService : ISlackService, IDisposable
             }
             catch (HttpRequestException ex) when (retryCount < maxRetries)
             {
-                _logger.LogWarning(ex, "HTTP request failed for Slack API method {Method}, retry {RetryCount}/{MaxRetries}", 
+                _logger.LogWarning(ex, "HTTP request failed for Slack API method {Method}, retry {RetryCount}/{MaxRetries}",
                     method, retryCount + 1, maxRetries);
-                
+
                 var delay = TimeSpan.FromSeconds(Math.Pow(2, retryCount + 1));
                 await Task.Delay(delay);
                 retryCount++;
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException && retryCount < maxRetries)
             {
-                _logger.LogWarning(ex, "Request timeout for Slack API method {Method}, retry {RetryCount}/{MaxRetries}", 
+                _logger.LogWarning(ex, "Request timeout for Slack API method {Method}, retry {RetryCount}/{MaxRetries}",
                     method, retryCount + 1, maxRetries);
-                
+
                 var delay = TimeSpan.FromSeconds(Math.Pow(2, retryCount + 1));
                 await Task.Delay(delay);
                 retryCount++;

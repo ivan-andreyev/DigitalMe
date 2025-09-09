@@ -20,7 +20,7 @@ public class ConversationController : ControllerBase
     public async Task<ActionResult<ConversationDto>> StartConversation([FromBody] CreateConversationDto dto)
     {
         var conversation = await _conversationService.StartConversationAsync(dto.Platform, dto.UserId, dto.Title);
-        
+
         return Ok(new ConversationDto
         {
             Id = conversation.Id,
@@ -70,7 +70,7 @@ public class ConversationController : ControllerBase
     public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(Guid conversationId, [FromQuery] int limit = 50)
     {
         var messages = await _conversationService.GetConversationHistoryAsync(conversationId, limit);
-        
+
         var messageDtos = messages.Select(m => new MessageDto
         {
             Id = m.Id,
@@ -90,7 +90,7 @@ public class ConversationController : ControllerBase
         try
         {
             var message = await _conversationService.AddMessageAsync(conversationId, dto.Role, dto.Content, dto.Metadata);
-            
+
             return Ok(new MessageDto
             {
                 Id = message.Id,
@@ -113,7 +113,7 @@ public class ConversationController : ControllerBase
         try
         {
             var conversation = await _conversationService.EndConversationAsync(conversationId);
-            
+
             return Ok(new ConversationDto
             {
                 Id = conversation.Id,
@@ -136,7 +136,7 @@ public class ConversationController : ControllerBase
     public async Task<ActionResult<IEnumerable<ConversationDto>>> GetUserConversations([FromQuery] string platform, [FromQuery] string userId)
     {
         var conversations = await _conversationService.GetUserConversationsAsync(platform, userId);
-        
+
         var conversationDtos = conversations.Select(c => new ConversationDto
         {
             Id = c.Id,

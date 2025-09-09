@@ -18,9 +18,9 @@ public class RequestLoggingMiddleware
     {
         var stopwatch = Stopwatch.StartNew();
         var traceId = Activity.Current?.Id ?? Guid.NewGuid().ToString();
-        
+
         // Log request
-        _logger.LogInformation("HTTP {Method} {Path} started. TraceId: {TraceId}, UserAgent: {UserAgent}", 
+        _logger.LogInformation("HTTP {Method} {Path} started. TraceId: {TraceId}, UserAgent: {UserAgent}",
             context.Request.Method,
             context.Request.Path.Value,
             traceId,
@@ -49,13 +49,13 @@ public class RequestLoggingMiddleware
         finally
         {
             stopwatch.Stop();
-            
+
             // Copy response body back
             responseBodyStream.Seek(0, SeekOrigin.Begin);
             await responseBodyStream.CopyToAsync(originalResponseBody);
-            
+
             // Log response
-            _logger.LogInformation("HTTP {Method} {Path} completed in {Duration}ms. StatusCode: {StatusCode}, TraceId: {TraceId}", 
+            _logger.LogInformation("HTTP {Method} {Path} completed in {Duration}ms. StatusCode: {StatusCode}, TraceId: {TraceId}",
                 context.Request.Method,
                 context.Request.Path.Value,
                 stopwatch.ElapsedMilliseconds,

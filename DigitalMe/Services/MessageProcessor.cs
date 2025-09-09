@@ -28,7 +28,7 @@ public class MessageProcessor : IMessageProcessor
     {
         try
         {
-            _logger.LogInformation("📝 Processing user message for UserId: {UserId}, Platform: {Platform}", 
+            _logger.LogInformation("📝 Processing user message for UserId: {UserId}, Platform: {Platform}",
                 request.UserId, request.Platform);
 
             // Get or create conversation
@@ -36,7 +36,7 @@ public class MessageProcessor : IMessageProcessor
                 request.Platform,
                 request.UserId,
                 "Real-time Chat");
-                
+
             _logger.LogInformation("✅ Conversation ID {ConversationId} created/found", conversation.Id);
 
             // Add user message
@@ -44,17 +44,17 @@ public class MessageProcessor : IMessageProcessor
                 conversation.Id,
                 "user",
                 request.Message);
-                
+
             _logger.LogInformation("✅ User message {MessageId} added", userMessage.Id);
 
             var groupName = $"chat_{request.UserId}";
-            
+
             return new ProcessMessageResult(conversation, userMessage, groupName);
         }
         catch (Exception ex) when (!(ex is DigitalMeException))
         {
             _logger.LogError(ex, "💥 Failed to process user message for UserId: {UserId}", request.UserId);
-            throw new MessageProcessingException("Failed to process user message", ex, 
+            throw new MessageProcessingException("Failed to process user message", ex,
                 new { userId = request.UserId, platform = request.Platform, messageLength = request.Message.Length });
         }
     }
@@ -73,7 +73,7 @@ public class MessageProcessor : IMessageProcessor
                 throw new PersonalityServiceException("Ivan's personality profile not found. Please create it first.",
                     new { userId = request.UserId, platform = request.Platform });
             }
-            
+
             _logger.LogInformation("✅ Personality profile loaded - {ProfileName}", personality.Name);
 
             // Create personality context
@@ -95,8 +95,8 @@ public class MessageProcessor : IMessageProcessor
             // Process through Agent Behavior Engine
             _logger.LogInformation("🤖 Processing message through Agent Behavior Engine");
             var agentResponse = await _agentBehaviorEngine.ProcessMessageAsync(request.Message, personalityContext);
-            
-            _logger.LogInformation("✅ Agent response generated - Length: {ContentLength}, Mood: {Mood}", 
+
+            _logger.LogInformation("✅ Agent response generated - Length: {ContentLength}, Mood: {Mood}",
                 agentResponse.Content.Length, agentResponse.Mood.PrimaryMood);
 
             // Save assistant response
@@ -105,7 +105,7 @@ public class MessageProcessor : IMessageProcessor
                 "assistant",
                 agentResponse.Content,
                 agentResponse.Metadata);
-                
+
             _logger.LogInformation("✅ Assistant message {MessageId} saved", assistantMessage.Id);
 
             return new ProcessAgentResponseResult(assistantMessage, agentResponse);
@@ -117,7 +117,7 @@ public class MessageProcessor : IMessageProcessor
         catch (Exception ex)
         {
             _logger.LogError(ex, "💥 Failed to process agent response for ConversationId: {ConversationId}", conversationId);
-            throw new AgentBehaviorException("Failed to process agent response", ex, 
+            throw new AgentBehaviorException("Failed to process agent response", ex,
                 new { conversationId, userId = request.UserId, platform = request.Platform });
         }
     }

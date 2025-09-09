@@ -29,7 +29,7 @@ public class ResiliencePolicyService : IResiliencePolicyService
     {
         _logger = logger;
         _settings = integrationSettings.Value;
-        
+
         _retryPolicies = new Dictionary<string, IAsyncPolicy<HttpResponseMessage>>();
         _circuitBreakerPolicies = new Dictionary<string, IAsyncPolicy<HttpResponseMessage>>();
         _combinedPolicies = new Dictionary<string, IAsyncPolicy<HttpResponseMessage>>();
@@ -126,10 +126,10 @@ public class ResiliencePolicyService : IResiliencePolicyService
     private void InitializeSlackPolicies()
     {
         var settings = _settings.Slack;
-        
+
         // Slack has strict rate limits, so be more conservative
         _retryPolicies["slack"] = Policy
-            .HandleResult<HttpResponseMessage>(r => 
+            .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode == HttpStatusCode.TooManyRequests ||
                 r.StatusCode >= HttpStatusCode.InternalServerError)
             .Or<HttpRequestException>()
@@ -150,7 +150,7 @@ public class ResiliencePolicyService : IResiliencePolicyService
                 });
 
         _circuitBreakerPolicies["slack"] = Policy
-            .HandleResult<HttpResponseMessage>(r => 
+            .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode >= HttpStatusCode.InternalServerError ||
                 r.StatusCode == HttpStatusCode.TooManyRequests)
             .CircuitBreakerAsync(3, TimeSpan.FromMinutes(2));
@@ -165,7 +165,7 @@ public class ResiliencePolicyService : IResiliencePolicyService
         var settings = _settings.ClickUp;
 
         _retryPolicies["clickup"] = Policy
-            .HandleResult<HttpResponseMessage>(r => 
+            .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode == HttpStatusCode.TooManyRequests ||
                 r.StatusCode >= HttpStatusCode.InternalServerError)
             .Or<HttpRequestException>()
@@ -195,7 +195,7 @@ public class ResiliencePolicyService : IResiliencePolicyService
 
         // GitHub has generous rate limits, so can be more aggressive
         _retryPolicies["github"] = Policy
-            .HandleResult<HttpResponseMessage>(r => 
+            .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode == HttpStatusCode.TooManyRequests ||
                 r.StatusCode >= HttpStatusCode.InternalServerError ||
                 r.StatusCode == HttpStatusCode.BadGateway ||
@@ -205,7 +205,7 @@ public class ResiliencePolicyService : IResiliencePolicyService
             .Or<TaskCanceledException>()
             .WaitAndRetryAsync(
                 retryCount: settings.MaxRetries,
-                sleepDurationProvider: retryAttempt => 
+                sleepDurationProvider: retryAttempt =>
                 {
                     // Check for rate limit reset header in real implementation
                     return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
@@ -231,14 +231,14 @@ public class ResiliencePolicyService : IResiliencePolicyService
         var settings = _settings.Telegram;
 
         _retryPolicies["telegram"] = Policy
-            .HandleResult<HttpResponseMessage>(r => 
+            .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode == HttpStatusCode.TooManyRequests ||
                 r.StatusCode >= HttpStatusCode.InternalServerError)
             .Or<HttpRequestException>()
             .Or<TaskCanceledException>()
             .WaitAndRetryAsync(
                 retryCount: settings.MaxRetries,
-                sleepDurationProvider: retryAttempt => 
+                sleepDurationProvider: retryAttempt =>
                 {
                     // Telegram has specific rate limiting rules
                     return retryAttempt switch

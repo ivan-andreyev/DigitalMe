@@ -38,7 +38,7 @@ public class SystemMetricsCalculator
                 ThreadCount = threadCount
             };
 
-            _logger.LogDebug("Calculated system metrics for {Context}: Memory={Memory}MB, Threads={Threads}, GC={GC}", 
+            _logger.LogDebug("Calculated system metrics for {Context}: Memory={Memory}MB, Threads={Threads}, GC={GC}",
                 context, memoryUsageMB, threadCount, gcCollections);
 
             return metrics;
@@ -56,7 +56,7 @@ public class SystemMetricsCalculator
     public MetricDataPoint CreateMemoryDataPoint(string context)
     {
         var systemMetrics = CalculateSystemResources(context);
-        
+
         return new MetricDataPoint
         {
             Timestamp = DateTime.UtcNow,
@@ -74,7 +74,7 @@ public class SystemMetricsCalculator
     /// <summary>
     /// Calculates database connection metrics summary.
     /// </summary>
-    public DatabaseMetrics CalculateDatabaseMetrics(ConcurrentDictionary<string, List<MetricDataPoint>> databaseMetrics, 
+    public DatabaseMetrics CalculateDatabaseMetrics(ConcurrentDictionary<string, List<MetricDataPoint>> databaseMetrics,
         DateTime cutoffTime, MetricsAggregator aggregator)
     {
         var dbMetrics = new DatabaseMetrics();
@@ -133,7 +133,7 @@ public class SystemMetricsCalculator
             // In production, you'd use PerformanceCounter or more sophisticated metrics
             var totalProcessorTime = process.TotalProcessorTime;
             var currentTime = DateTime.UtcNow;
-            
+
             // Return 0 for now - proper CPU calculation requires time-based sampling
             return 0.0;
         }

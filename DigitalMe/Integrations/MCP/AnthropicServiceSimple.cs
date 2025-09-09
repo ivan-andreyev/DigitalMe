@@ -39,7 +39,7 @@ public class AnthropicServiceSimple : IAnthropicService
 
         // Try to get API key from environment variable if not set in config
         var apiKey = GetApiKey();
-        
+
         _httpClient.BaseAddress = new Uri(_config.BaseUrl);
         if (!string.IsNullOrEmpty(apiKey))
         {
@@ -80,7 +80,7 @@ public class AnthropicServiceSimple : IAnthropicService
             _logger.LogInformation("Sending message to Anthropic API: {Message}", message.Substring(0, Math.Min(100, message.Length)));
 
             var systemPrompt = await GenerateSystemPromptAsync(personality);
-            
+
             var request = new
             {
                 model = _config.Model,
@@ -96,12 +96,12 @@ public class AnthropicServiceSimple : IAnthropicService
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync("v1/messages", content);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var responseText = await response.Content.ReadAsStringAsync();
                 var responseData = JsonSerializer.Deserialize<JsonElement>(responseText);
-                
+
                 if (responseData.TryGetProperty("content", out var contentArray) &&
                     contentArray.GetArrayLength() > 0 &&
                     contentArray[0].TryGetProperty("text", out var textElement))
@@ -164,7 +164,7 @@ public class AnthropicServiceSimple : IAnthropicService
         // Always use Ivan's real personality data
         var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
         var systemPrompt = _ivanPersonalityService.GenerateSystemPrompt(ivanProfile);
-        
+
         _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfile.Traits?.Count ?? 0);
         return systemPrompt;
     }
@@ -173,10 +173,10 @@ public class AnthropicServiceSimple : IAnthropicService
     {
         // Use Ivan's personality even in fallback responses
         var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
-        
+
         // Use a consistent fallback response that contains all expected keywords for tests
         var response = "Проблема с подключением к Claude API. Сейчас работаю в fallback режиме, но это не то же самое что полный доступ к Claude. Настрой API как положено - я же Head of R&D, должен все работать правильно.";
-        
+
         _logger.LogInformation("Generated fallback response in Ivan's personality style");
         return response;
     }

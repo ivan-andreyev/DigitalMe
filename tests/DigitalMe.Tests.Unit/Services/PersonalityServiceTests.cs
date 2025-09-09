@@ -46,7 +46,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
             .WithName(name)
             .WithDescription(description)
             .Build();
-        
+
         Context.PersonalityProfiles.Add(personality);
         await Context.SaveChangesAsync();
         return personality;
@@ -161,7 +161,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.Description.Should().Be(description);
         result.Id.Should().NotBeEmpty();
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
-        
+
         // Verify it was saved to database
         var savedPersonality = await Context.PersonalityProfiles.FindAsync(result.Id);
         savedPersonality.Should().NotBeNull();
@@ -199,7 +199,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.Should().NotBeNull();
         result.Description.Should().Be(newDescription);
         result.UpdatedAt.Should().BeAfter(result.CreatedAt);
-        
+
         // Verify in database
         var updatedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
         updatedPersonality!.Description.Should().Be(newDescription);
@@ -239,7 +239,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.Description.Should().Be(description);
         result.Weight.Should().Be(weight);
         result.PersonalityProfileId.Should().Be(personality.Id);
-        
+
         // Verify in database
         var savedTrait = await Context.PersonalityTraits.FindAsync(result.Id);
         savedTrait.Should().NotBeNull();
@@ -289,7 +289,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         // Verify deletion
         var deletedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
         deletedPersonality.Should().BeNull();
-        
+
         var getPersonality = await _personalityService.GetPersonalityAsync(personality.Name);
         getPersonality.Should().BeNull();
     }

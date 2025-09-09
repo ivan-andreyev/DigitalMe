@@ -67,14 +67,14 @@ public class PersonalityProfileBuilder
             new PersonalityTrait(Guid.NewGuid(), "Technical", "Expert", "Глубокие технические знания в .NET/C#", 9.0),
             new PersonalityTrait(Guid.NewGuid(), "Philosophy", "Independent", "Всем похуй - независимая позиция", 7.0)
         };
-        
+
         return Create()
             .WithName("Ivan")
             .WithAge(34)
             .WithDescription("Программист, Head of R&D, прямолинейный и честный")
             .WithTraits(traits);
     }
-    
+
     public static PersonalityProfileBuilder Default()
     {
         return Create()
@@ -82,7 +82,7 @@ public class PersonalityProfileBuilder
             .WithAge(30)
             .WithDescription("Default test personality profile");
     }
-    
+
     public PersonalityProfile Build()
     {
         return _profile;

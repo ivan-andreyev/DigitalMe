@@ -25,14 +25,14 @@ public class TelegramToolStrategy : BaseToolStrategy
     public override Task<bool> ShouldTriggerAsync(string message, PersonalityContext context)
     {
         var messageLower = message.ToLower();
-        
+
         // Триггеры для Telegram
-        var shouldTrigger = ContainsWords(messageLower, 
-            "отправь", "пошли", "напиши в телеграм", "telegram", 
+        var shouldTrigger = ContainsWords(messageLower,
+            "отправь", "пошли", "напиши в телеграм", "telegram",
             "телега", "тг", "отправь сообщение", "пошли в тг",
             "напиши в тг", "send telegram");
 
-        Logger.LogDebug("Telegram trigger check for message '{Message}': {Result}", 
+        Logger.LogDebug("Telegram trigger check for message '{Message}': {Result}",
             message.Length > 50 ? message[..50] + "..." : message, shouldTrigger);
 
         return Task.FromResult(shouldTrigger);
@@ -77,10 +77,11 @@ public class TelegramToolStrategy : BaseToolStrategy
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to send Telegram message");
-            return new { 
-                success = false, 
+            return new
+            {
+                success = false,
                 error = ex.Message,
-                tool_name = ToolName 
+                tool_name = ToolName
             };
         }
     }
@@ -92,13 +93,15 @@ public class TelegramToolStrategy : BaseToolStrategy
             type = "object",
             properties = new
             {
-                chat_id = new { 
-                    type = "integer", 
-                    description = "ID чата в Telegram" 
+                chat_id = new
+                {
+                    type = "integer",
+                    description = "ID чата в Telegram"
                 },
-                message = new { 
-                    type = "string", 
-                    description = "Текст сообщения для отправки" 
+                message = new
+                {
+                    type = "string",
+                    description = "Текст сообщения для отправки"
                 }
             },
             required = new[] { "chat_id", "message" }

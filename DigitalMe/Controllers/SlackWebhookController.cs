@@ -61,7 +61,7 @@ public class SlackWebhookController : ControllerBase
 
                 if (!isValidSignature)
                 {
-                    _logger.LogWarning("Invalid webhook signature received from IP: {RemoteIp}", 
+                    _logger.LogWarning("Invalid webhook signature received from IP: {RemoteIp}",
                         Request.HttpContext.Connection.RemoteIpAddress);
                     return Unauthorized("Invalid signature");
                 }
@@ -130,7 +130,7 @@ public class SlackWebhookController : ControllerBase
 
                 if (!isValidSignature)
                 {
-                    _logger.LogWarning("Invalid webhook signature for interactive component from IP: {RemoteIp}", 
+                    _logger.LogWarning("Invalid webhook signature for interactive component from IP: {RemoteIp}",
                         Request.HttpContext.Connection.RemoteIpAddress);
                     return Unauthorized("Invalid signature");
                 }
@@ -155,7 +155,7 @@ public class SlackWebhookController : ControllerBase
             }
 
             var response = await _webhookService.HandleInteractiveComponentAsync(payload);
-            
+
             if (response != null)
             {
                 return Ok(response);
@@ -206,7 +206,7 @@ public class SlackWebhookController : ControllerBase
 
                 if (!isValidSignature)
                 {
-                    _logger.LogWarning("Invalid webhook signature for slash command from IP: {RemoteIp}", 
+                    _logger.LogWarning("Invalid webhook signature for slash command from IP: {RemoteIp}",
                         Request.HttpContext.Connection.RemoteIpAddress);
                     return Unauthorized("Invalid signature");
                 }
@@ -214,7 +214,7 @@ public class SlackWebhookController : ControllerBase
 
             // Parse the form-encoded slash command data
             var formData = System.Web.HttpUtility.ParseQueryString(body);
-            
+
             var command = new SlackSlashCommand
             {
                 Token = formData["token"],
@@ -233,7 +233,7 @@ public class SlackWebhookController : ControllerBase
             };
 
             var response = await _webhookService.HandleSlashCommandAsync(command);
-            
+
             if (response != null)
             {
                 return Ok(response);
@@ -255,15 +255,15 @@ public class SlackWebhookController : ControllerBase
     [EnableRateLimiting("api")]
     public IActionResult Health()
     {
-        return Ok(new 
-        { 
-            status = "healthy", 
+        return Ok(new
+        {
+            status = "healthy",
             service = "Slack Webhook Handler",
             timestamp = DateTime.UtcNow,
             endpoints = new
             {
                 events = "/api/webhooks/slack/events",
-                interactive = "/api/webhooks/slack/interactive", 
+                interactive = "/api/webhooks/slack/interactive",
                 commands = "/api/webhooks/slack/commands"
             }
         });
@@ -281,14 +281,14 @@ public class SlackWebhookController : ControllerBase
             return NotFound();
         }
 
-        _logger.LogInformation("Test webhook endpoint called with payload: {Payload}", 
+        _logger.LogInformation("Test webhook endpoint called with payload: {Payload}",
             JsonSerializer.Serialize(payload));
 
-        return Ok(new 
-        { 
-            status = "test_ok", 
+        return Ok(new
+        {
+            status = "test_ok",
             message = "Test webhook received",
-            receivedAt = DateTime.UtcNow 
+            receivedAt = DateTime.UtcNow
         });
     }
 
@@ -311,11 +311,11 @@ public class SlackWebhookController : ControllerBase
 
             // Here you would typically exchange the code for an access token
             // This is a simplified implementation
-            return Ok(new 
-            { 
-                status = "oauth_success", 
+            return Ok(new
+            {
+                status = "oauth_success",
                 message = "Slack app installation completed",
-                timestamp = DateTime.UtcNow 
+                timestamp = DateTime.UtcNow
             });
         }
         catch (Exception ex)
@@ -334,7 +334,7 @@ public class SlackWebhookController : ControllerBase
     {
         var clientId = _configuration["Slack:ClientId"];
         var redirectUri = _configuration["Slack:RedirectUri"];
-        
+
         if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
         {
             return BadRequest("Slack app not properly configured");
@@ -343,8 +343,8 @@ public class SlackWebhookController : ControllerBase
         var scope = "app_mentions:read,channels:history,channels:read,chat:write,commands,files:read,reactions:read,users:read";
         var installUrl = $"https://slack.com/oauth/v2/authorize?client_id={clientId}&scope={scope}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
 
-        return Ok(new 
-        { 
+        return Ok(new
+        {
             install_url = installUrl,
             message = "Visit the install_url to add the DigitalMe bot to your Slack workspace"
         });

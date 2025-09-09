@@ -8,7 +8,7 @@ public static class PersonalityTestFixtures
     public static PersonalityProfile CreateCompleteIvanProfile()
     {
         var profileId = Guid.NewGuid();
-        
+
         var profile = PersonalityProfileBuilder.Create()
             .WithId(profileId)
             .WithName("Ivan Digital Clone")
@@ -75,7 +75,7 @@ public static class PersonalityTestFixtures
     {
         yield return CreateCompleteIvanProfile();
         yield return CreateMinimalProfile();
-        
+
         yield return PersonalityProfileBuilder.Create()
             .WithName("Test Manager Profile")
             .WithDescription("Profile focused on management and team coordination")

@@ -5,14 +5,14 @@ public abstract class DigitalMeException : Exception
     public string ErrorCode { get; }
     public object? ErrorData { get; }
 
-    protected DigitalMeException(string errorCode, string message, object? errorData = null) 
+    protected DigitalMeException(string errorCode, string message, object? errorData = null)
         : base(message)
     {
         ErrorCode = errorCode;
         ErrorData = errorData;
     }
 
-    protected DigitalMeException(string errorCode, string message, Exception innerException, object? errorData = null) 
+    protected DigitalMeException(string errorCode, string message, Exception innerException, object? errorData = null)
         : base(message, innerException)
     {
         ErrorCode = errorCode;

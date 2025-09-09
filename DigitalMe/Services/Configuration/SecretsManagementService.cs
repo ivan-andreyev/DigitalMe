@@ -39,7 +39,7 @@ public class SecretsManagementService : ISecretsManagementService
                 var envValue = GetEnvironmentVariableCrossPlatform(environmentVariableName);
                 if (!string.IsNullOrWhiteSpace(envValue))
                 {
-                    _logger.LogDebug("Secret '{SecretKey}' loaded from environment variable '{EnvVar}'", 
+                    _logger.LogDebug("Secret '{SecretKey}' loaded from environment variable '{EnvVar}'",
                         secretKey, environmentVariableName);
                     return envValue;
                 }
@@ -50,7 +50,7 @@ public class SecretsManagementService : ISecretsManagementService
             var autoEnvValue = GetEnvironmentVariableCrossPlatform(autoEnvVar);
             if (!string.IsNullOrWhiteSpace(autoEnvValue))
             {
-                _logger.LogDebug("Secret '{SecretKey}' loaded from auto-detected environment variable '{EnvVar}'", 
+                _logger.LogDebug("Secret '{SecretKey}' loaded from auto-detected environment variable '{EnvVar}'",
                     secretKey, autoEnvVar);
                 return autoEnvValue;
             }
@@ -69,13 +69,13 @@ public class SecretsManagementService : ISecretsManagementService
     public string GetRequiredSecret(string secretKey, string? environmentVariableName = null)
     {
         var secret = GetSecret(secretKey, environmentVariableName);
-        
+
         if (string.IsNullOrWhiteSpace(secret))
         {
-            var envVarInfo = !string.IsNullOrEmpty(environmentVariableName) 
-                ? $" or environment variable '{environmentVariableName}'" 
+            var envVarInfo = !string.IsNullOrEmpty(environmentVariableName)
+                ? $" or environment variable '{environmentVariableName}'"
                 : "";
-            
+
             throw new InvalidOperationException(
                 $"Required secret '{secretKey}' not found in configuration{envVarInfo}. " +
                 $"Please configure this value using User Secrets (development) or environment variables (production).");
@@ -132,7 +132,7 @@ public class SecretsManagementService : ISecretsManagementService
         if (IsSecureEnvironment())
         {
             result.SecurityRecommendations.Add("Production environment detected - ensure all secrets are configured via environment variables or secure key vault");
-            
+
             // Check if any secrets are still using placeholder values
             foreach (var (key, _) in criticalSecrets.Concat(recommendedSecrets))
             {
@@ -156,21 +156,21 @@ public class SecretsManagementService : ISecretsManagementService
     {
         // Try to get configured key first
         var configuredKey = GetSecret("JWT:Key", "JWT_KEY");
-        
+
         if (!string.IsNullOrWhiteSpace(configuredKey) && !IsPlaceholderValue(configuredKey))
         {
             // Validate key strength
             if (configuredKey.Length < 32)
             {
-                _logger.LogWarning("Configured JWT key is shorter than recommended 32 characters ({Length} chars)", 
+                _logger.LogWarning("Configured JWT key is shorter than recommended 32 characters ({Length} chars)",
                     configuredKey.Length);
             }
-            
+
             if (!IsSecureEnvironment() && configuredKey.Contains("YourSuperSecretKey"))
             {
                 _logger.LogWarning("JWT key appears to be a default/example value - consider updating for production use");
             }
-            
+
             return configuredKey;
         }
 
@@ -191,7 +191,7 @@ public class SecretsManagementService : ISecretsManagementService
     {
         return _environment.IsProduction() || _environment.IsStaging();
     }
-    
+
     public bool IsTestEnvironment()
     {
         return _environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase);
@@ -204,7 +204,7 @@ public class SecretsManagementService : ISecretsManagementService
         var placeholders = new[]
         {
             "your-api-key-here",
-            "YOUR_API_KEY_HERE", 
+            "YOUR_API_KEY_HERE",
             "your-token-here",
             "YOUR_TOKEN_HERE",
             "YourSuperSecretKey",
@@ -216,7 +216,7 @@ public class SecretsManagementService : ISecretsManagementService
             " "
         };
 
-        return placeholders.Any(placeholder => 
+        return placeholders.Any(placeholder =>
             value.Contains(placeholder, StringComparison.OrdinalIgnoreCase) ||
             string.IsNullOrWhiteSpace(value));
     }
@@ -262,15 +262,15 @@ public class SecretsManagementService : ISecretsManagementService
         try
         {
             _logger.LogInformation("🔧 BLOCKER #2 FIX: Attempting to get environment variable '{VarName}'", variableName);
-            
+
             // Try standard .NET environment variable access first
             var envValue = Environment.GetEnvironmentVariable(variableName);
-            _logger.LogInformation("🔧 .NET Environment.GetEnvironmentVariable('{VarName}') = '{Value}'", 
+            _logger.LogInformation("🔧 .NET Environment.GetEnvironmentVariable('{VarName}') = '{Value}'",
                 variableName, envValue ?? "null");
-            
+
             if (!string.IsNullOrWhiteSpace(envValue))
             {
-                _logger.LogInformation("🔧 BLOCKER #2 FIX: Found via standard .NET - '{VarName}' = {Length} chars", 
+                _logger.LogInformation("🔧 BLOCKER #2 FIX: Found via standard .NET - '{VarName}' = {Length} chars",
                     variableName, envValue.Length);
                 return envValue;
             }
@@ -295,10 +295,10 @@ public class SecretsManagementService : ISecretsManagementService
                     {
                         var output = process.StandardOutput.ReadToEnd().Trim();
                         process.WaitForExit();
-                        
+
                         if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
                         {
-                            _logger.LogDebug("Environment variable '{VarName}' found via PowerShell: {ValueLength} chars", 
+                            _logger.LogDebug("Environment variable '{VarName}' found via PowerShell: {ValueLength} chars",
                                 variableName, output.Length);
                             return output;
                         }
@@ -326,11 +326,11 @@ public class SecretsManagementService : ISecretsManagementService
                     {
                         var cmdOutput = cmdProcess.StandardOutput.ReadToEnd().Trim();
                         cmdProcess.WaitForExit();
-                        
-                        if (cmdProcess.ExitCode == 0 && !string.IsNullOrWhiteSpace(cmdOutput) && 
+
+                        if (cmdProcess.ExitCode == 0 && !string.IsNullOrWhiteSpace(cmdOutput) &&
                             !cmdOutput.Equals($"%{variableName}%", StringComparison.OrdinalIgnoreCase))
                         {
-                            _logger.LogDebug("Environment variable '{VarName}' found via cmd: {ValueLength} chars", 
+                            _logger.LogDebug("Environment variable '{VarName}' found via cmd: {ValueLength} chars",
                                 variableName, cmdOutput.Length);
                             return cmdOutput;
                         }
