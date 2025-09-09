@@ -7,6 +7,7 @@ using DigitalMe.DTOs;
 using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Builders;
+using DigitalMe.Tests.Unit.Fixtures;
 
 namespace DigitalMe.Tests.Unit.Controllers;
 
@@ -363,6 +364,22 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
         conversationDtos!.Should().BeEmpty();
     }
 
+    private async Task EnsureCleanDatabaseWithIvan()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        
+        // Ensure database is clean and recreated with Ivan
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+        
+        // Seed Ivan personality using the same logic as BaseTestWithDatabase
+        var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
+        ivan.Name = "Ivan";
+        context.PersonalityProfiles.Add(ivan);
+        await context.SaveChangesAsync();
+    }
+
     private async Task SeedTestData(Conversation conversation, Message[]? messages = null)
     {
         await SeedTestData(new[] { conversation }, messages);
@@ -370,12 +387,11 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
     private async Task SeedTestData(Conversation[] conversations, Message[]? messages = null)
     {
+        // First ensure clean database with Ivan
+        await EnsureCleanDatabaseWithIvan();
+        
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
-        // Ensure database is clean
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.EnsureCreatedAsync();
 
         foreach (var conversation in conversations)
         {

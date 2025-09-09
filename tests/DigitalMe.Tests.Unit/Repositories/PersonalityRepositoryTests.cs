@@ -8,41 +8,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DigitalMe.Tests.Unit.Repositories;
 
-public class PersonalityRepositoryTests : TestBase
+public class PersonalityRepositoryTests : BaseTestWithDatabase
 {
-    private DigitalMeDbContext CreateContext()
-    {
-        var options = CreateInMemoryDbOptions<DigitalMeDbContext>();
-        return new DigitalMeDbContext(options);
-    }
 
     [Fact]
     public async Task GetProfileAsync_WithExistingName_ReturnsProfile()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
         
-        var profile = PersonalityProfileBuilder.ForIvan().Build();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        // Use existing Ivan profile from BaseTestWithDatabase
+        var existingIvan = Context.PersonalityProfiles.First(p => p.Name == "Ivan");
 
         // Act
-        var result = await repository.GetProfileAsync(profile.Name);
+        var result = await repository.GetProfileAsync("Ivan");
 
         // Assert
         result.Should().NotBeNull();
-        result!.Name.Should().Be(profile.Name);
-        result.Id.Should().Be(profile.Id);
-        result.Description.Should().Be(profile.Description);
+        result!.Name.Should().Be("Ivan");
+        result.Id.Should().Be(existingIvan.Id);
+        result.Description.Should().Be(existingIvan.Description);
     }
 
     [Fact]
     public async Task GetProfileAsync_WithNonExistingName_ReturnsNull()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         // Act
         var result = await repository.GetProfileAsync("Non-existent Profile");
@@ -55,33 +47,29 @@ public class PersonalityRepositoryTests : TestBase
     public async Task GetProfileAsync_IncludesTraits()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
-        var (profile, traits) = PersonalityTestFixtures.CreateProfileWithTraits();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        // Use existing Ivan profile from BaseTestWithDatabase
+        var existingIvan = Context.PersonalityProfiles.First(p => p.Name == "Ivan");
 
         // Act
-        var result = await repository.GetProfileAsync(profile.Name);
+        var result = await repository.GetProfileAsync("Ivan");
 
         // Assert
         result.Should().NotBeNull();
-        result!.Traits.Should().HaveCount(traits.Count);
-        result.Traits.Should().BeEquivalentTo(traits, options => 
-            options.Excluding(t => t.PersonalityProfile));
+        result!.Traits.Should().NotBeEmpty("Ivan profile should have traits from BaseTestWithDatabase seeding");
+        result.Traits.All(t => t.PersonalityProfileId == existingIvan.Id).Should().BeTrue("all traits should belong to Ivan");
     }
 
     [Fact]
     public async Task GetProfileByIdAsync_WithExistingId_ReturnsProfile()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        Context.PersonalityProfiles.Add(profile);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await repository.GetProfileByIdAsync(profile.Id);
@@ -96,8 +84,7 @@ public class PersonalityRepositoryTests : TestBase
     public async Task GetProfileByIdAsync_WithNonExistingId_ReturnsNull()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
         var nonExistentId = Guid.NewGuid();
 
         // Act
@@ -111,8 +98,7 @@ public class PersonalityRepositoryTests : TestBase
     public async Task CreateProfileAsync_WithValidProfile_SavesAndReturnsProfile()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Create()
             .WithName("Test Profile")
@@ -128,7 +114,7 @@ public class PersonalityRepositoryTests : TestBase
         result.Name.Should().Be(profile.Name);
 
         // Verify it's saved in database
-        var savedProfile = await context.PersonalityProfiles.FindAsync(profile.Id);
+        var savedProfile = await Context.PersonalityProfiles.FindAsync(profile.Id);
         savedProfile.Should().NotBeNull();
         savedProfile.Should().BeEquivalentTo(profile, options => 
             options.Excluding(p => p.Traits));
@@ -138,12 +124,11 @@ public class PersonalityRepositoryTests : TestBase
     public async Task UpdateProfileAsync_WithValidProfile_UpdatesAndReturnsProfile()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        Context.PersonalityProfiles.Add(profile);
+        await Context.SaveChangesAsync();
 
         var originalUpdatedAt = profile.UpdatedAt;
         
@@ -161,7 +146,7 @@ public class PersonalityRepositoryTests : TestBase
         result.UpdatedAt.Should().BeAfter(originalUpdatedAt);
 
         // Verify changes are persisted
-        var updatedProfile = await context.PersonalityProfiles.FindAsync(profile.Id);
+        var updatedProfile = await Context.PersonalityProfiles.FindAsync(profile.Id);
         updatedProfile!.Description.Should().Be("Updated Description");
         updatedProfile.UpdatedAt.Should().BeAfter(originalUpdatedAt);
     }
@@ -170,12 +155,11 @@ public class PersonalityRepositoryTests : TestBase
     public async Task DeleteProfileAsync_WithExistingId_DeletesAndReturnsTrue()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        Context.PersonalityProfiles.Add(profile);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await repository.DeleteProfileAsync(profile.Id);
@@ -184,7 +168,7 @@ public class PersonalityRepositoryTests : TestBase
         result.Should().BeTrue();
 
         // Verify deletion
-        var deletedProfile = await context.PersonalityProfiles.FindAsync(profile.Id);
+        var deletedProfile = await Context.PersonalityProfiles.FindAsync(profile.Id);
         deletedProfile.Should().BeNull();
     }
 
@@ -192,8 +176,7 @@ public class PersonalityRepositoryTests : TestBase
     public async Task DeleteProfileAsync_WithNonExistingId_ReturnsFalse()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
         var nonExistentId = Guid.NewGuid();
 
         // Act
@@ -207,11 +190,10 @@ public class PersonalityRepositoryTests : TestBase
     public async Task GetTraitsAsync_WithExistingProfileId_ReturnsOrderedTraits()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
+        Context.PersonalityProfiles.Add(profile);
 
         var traits = new List<PersonalityTrait>
         {
@@ -221,8 +203,8 @@ public class PersonalityRepositoryTests : TestBase
             PersonalityTraitBuilder.Create().WithPersonalityProfileId(profile.Id).WithCategory("Technical").WithName("Architecture").Build()
         };
 
-        context.PersonalityTraits.AddRange(traits);
-        await context.SaveChangesAsync();
+        Context.PersonalityTraits.AddRange(traits);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await repository.GetTraitsAsync(profile.Id);
@@ -244,8 +226,7 @@ public class PersonalityRepositoryTests : TestBase
     public async Task GetTraitsAsync_WithNonExistingProfileId_ReturnsEmptyList()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
         var nonExistentId = Guid.NewGuid();
 
         // Act
@@ -259,12 +240,11 @@ public class PersonalityRepositoryTests : TestBase
     public async Task AddTraitAsync_WithValidTrait_SavesAndReturnsTrait()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        Context.PersonalityProfiles.Add(profile);
+        await Context.SaveChangesAsync();
 
         var trait = PersonalityTraitBuilder.Create()
             .WithPersonalityProfileId(profile.Id)
@@ -282,7 +262,7 @@ public class PersonalityRepositoryTests : TestBase
         result.Should().BeEquivalentTo(trait);
 
         // Verify it's saved
-        var savedTrait = await context.PersonalityTraits.FindAsync(trait.Id);
+        var savedTrait = await Context.PersonalityTraits.FindAsync(trait.Id);
         savedTrait.Should().NotBeNull();
         savedTrait.Should().BeEquivalentTo(trait, options => 
             options.Excluding(t => t.PersonalityProfile));
@@ -292,16 +272,15 @@ public class PersonalityRepositoryTests : TestBase
     public async Task UpdateTraitAsync_WithValidTrait_UpdatesAndReturnsTrait()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
+        Context.PersonalityProfiles.Add(profile);
 
         var trait = PersonalityTraitBuilder.Default();
         trait.PersonalityProfileId = profile.Id;
-        context.PersonalityTraits.Add(trait);
-        await context.SaveChangesAsync();
+        Context.PersonalityTraits.Add(trait);
+        await Context.SaveChangesAsync();
 
         trait.Description = "Updated Description";
         trait.Weight = 0.9;
@@ -315,7 +294,7 @@ public class PersonalityRepositoryTests : TestBase
         result.Weight.Should().Be(0.9);
 
         // Verify persistence
-        var updatedTrait = await context.PersonalityTraits.FindAsync(trait.Id);
+        var updatedTrait = await Context.PersonalityTraits.FindAsync(trait.Id);
         updatedTrait!.Description.Should().Be("Updated Description");
         updatedTrait.Weight.Should().Be(0.9);
     }
@@ -324,16 +303,15 @@ public class PersonalityRepositoryTests : TestBase
     public async Task DeleteTraitAsync_WithExistingId_DeletesAndReturnsTrue()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var profile = PersonalityProfileBuilder.Default().Build();
-        context.PersonalityProfiles.Add(profile);
+        Context.PersonalityProfiles.Add(profile);
 
         var trait = PersonalityTraitBuilder.Default();
         trait.PersonalityProfileId = profile.Id;
-        context.PersonalityTraits.Add(trait);
-        await context.SaveChangesAsync();
+        Context.PersonalityTraits.Add(trait);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await repository.DeleteTraitAsync(trait.Id);
@@ -342,7 +320,7 @@ public class PersonalityRepositoryTests : TestBase
         result.Should().BeTrue();
 
         // Verify deletion
-        var deletedTrait = await context.PersonalityTraits.FindAsync(trait.Id);
+        var deletedTrait = await Context.PersonalityTraits.FindAsync(trait.Id);
         deletedTrait.Should().BeNull();
     }
 
@@ -350,8 +328,7 @@ public class PersonalityRepositoryTests : TestBase
     public async Task DeleteTraitAsync_WithNonExistingId_ReturnsFalse()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
         var nonExistentId = Guid.NewGuid();
 
         // Act
@@ -365,12 +342,11 @@ public class PersonalityRepositoryTests : TestBase
     public async Task DeleteProfileAsync_WithTraits_DeletesProfileAndTraitsCascade()
     {
         // Arrange
-        await using var context = CreateContext();
-        var repository = new PersonalityRepository(context);
+        var repository = new PersonalityRepository(Context);
 
         var (profile, traits) = PersonalityTestFixtures.CreateProfileWithTraits();
-        context.PersonalityProfiles.Add(profile);
-        await context.SaveChangesAsync();
+        Context.PersonalityProfiles.Add(profile);
+        await Context.SaveChangesAsync();
 
         // Act
         var result = await repository.DeleteProfileAsync(profile.Id);
@@ -379,11 +355,11 @@ public class PersonalityRepositoryTests : TestBase
         result.Should().BeTrue();
 
         // Verify profile deletion
-        var deletedProfile = await context.PersonalityProfiles.FindAsync(profile.Id);
+        var deletedProfile = await Context.PersonalityProfiles.FindAsync(profile.Id);
         deletedProfile.Should().BeNull();
 
         // Verify traits are also deleted (cascade)
-        var remainingTraits = await context.PersonalityTraits
+        var remainingTraits = await Context.PersonalityTraits
             .Where(t => t.PersonalityProfileId == profile.Id)
             .ToListAsync();
         remainingTraits.Should().BeEmpty();

@@ -7,6 +7,7 @@ using DigitalMe.DTOs;
 using DigitalMe.Data.Entities;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Builders;
+using DigitalMe.Tests.Unit.Fixtures;
 
 namespace DigitalMe.Tests.Unit.Controllers;
 
@@ -21,26 +22,27 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         _client = factory.CreateClient();
     }
 
-    private async Task ClearDatabase()
+    private async Task EnsureCleanDatabaseWithIvan()
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
         
-        // Clear all data to ensure test isolation
-        context.PersonalityTraits.RemoveRange(context.PersonalityTraits);
-        context.PersonalityProfiles.RemoveRange(context.PersonalityProfiles);
+        // Ensure database is clean and recreated with Ivan
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+        
+        // Seed Ivan personality using the same logic as BaseTestWithDatabase
+        var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
+        ivan.Name = "Ivan";
+        context.PersonalityProfiles.Add(ivan);
         await context.SaveChangesAsync();
     }
 
     [Fact]
     public async Task GetStatus_WithIvanPersonalityExists_ShouldReturnReadyStatus()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        await SeedTestData(ivanPersonality);
+        // Arrange - Use consistent Ivan seeding
+        await EnsureCleanDatabaseWithIvan();
 
         // Act
         var response = await _client.GetAsync("/api/chat/status");
@@ -59,10 +61,12 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task GetStatus_WithoutIvanPersonality_ShouldReturnNotReadyStatus()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange - No Ivan personality seeded
+        // Arrange - Clean database WITHOUT Ivan seeding
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+        // Don't seed Ivan - this is the test case
 
         // Act
         var response = await _client.GetAsync("/api/chat/status");
@@ -80,8 +84,12 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithoutIvanPersonality_ShouldReturnBadRequest()
     {
-        // Ensure clean database state
-        await ClearDatabase();
+        // Arrange - Clean database WITHOUT Ivan seeding
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+        // Don't seed Ivan - this is the test case
         
         // Arrange
         var chatRequest = new ChatRequestDto
@@ -104,28 +112,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithIvanPersonality_ShouldProcessMessageAndReturnResponse()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        var traits = new[]
-        {
-            PersonalityTraitBuilder.Create()
-                .WithCategory("Communication")
-                .WithName("Direct")
-                .WithDescription("Direct communication style")
-                .WithWeight(0.9)
-                .Build(),
-            PersonalityTraitBuilder.Create()
-                .WithCategory("Technical")
-                .WithName("Analytical")
-                .WithDescription("Strong analytical mindset")
-                .WithWeight(0.8)
-                .Build()
-        };
-
-        await SeedTestData(ivanPersonality, traits);
+        // Arrange - Use consistent Ivan seeding
+        await EnsureCleanDatabaseWithIvan();
 
         var chatRequest = new ChatRequestDto
         {
@@ -160,12 +148,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_MultipleMessages_ShouldMaintainConversationContext()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        await SeedTestData(ivanPersonality);
+        // Arrange - Use consistent Ivan seeding
+        await EnsureCleanDatabaseWithIvan();
 
         var userId = "contextuser456";
         var platform = "Telegram";
@@ -215,12 +199,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_DifferentUsers_ShouldCreateSeparateConversations()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        await SeedTestData(ivanPersonality);
+        // Arrange - Use consistent Ivan seeding  
+        await EnsureCleanDatabaseWithIvan();
 
         var user1Request = new ChatRequestDto
         {
@@ -267,12 +247,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_DifferentPlatforms_ShouldCreateSeparateConversations()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        await SeedTestData(ivanPersonality);
+        // Arrange - Use consistent Ivan seeding
+        await EnsureCleanDatabaseWithIvan();
 
         var userId = "multiplatformuser";
 
@@ -321,12 +297,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_WithEmptyMessage_ShouldProcessSuccessfully()
     {
-        // Ensure clean database state
-        await ClearDatabase();
-        
-        // Arrange
-        var ivanPersonality = PersonalityProfileBuilder.ForIvan().Build();
-        await SeedTestData(ivanPersonality);
+        // Arrange - Use consistent Ivan seeding
+        await EnsureCleanDatabaseWithIvan();
 
         var chatRequest = new ChatRequestDto
         {
@@ -352,32 +324,4 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         messageDto.Content.Should().NotBeNull(); // Agent should handle empty input gracefully
     }
 
-    private async Task SeedTestData(PersonalityProfile personality, PersonalityTrait[]? traits = null)
-    {
-        using var scope = _factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
-        // Ensure database is clean
-        await context.Database.EnsureDeletedAsync();
-        await context.Database.EnsureCreatedAsync();
-
-        personality.Id = Guid.NewGuid();
-        personality.CreatedAt = DateTime.UtcNow;
-        personality.UpdatedAt = DateTime.UtcNow;
-
-        context.PersonalityProfiles.Add(personality);
-
-        if (traits != null)
-        {
-            foreach (var trait in traits)
-            {
-                trait.Id = Guid.NewGuid();
-                trait.PersonalityProfileId = personality.Id;
-                trait.CreatedAt = DateTime.UtcNow;
-                context.PersonalityTraits.Add(trait);
-            }
-        }
-
-        await context.SaveChangesAsync();
-    }
 }

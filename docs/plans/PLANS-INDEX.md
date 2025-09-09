@@ -26,6 +26,13 @@
   - Slack + ClickUp + GitHub Enhanced integrations
   - Foundation fixes → New integrations → Quality optimization
 
+### 🧪 **Testing Strategy (NEW)**
+- **[CORRECTED-TEST-STRATEGY.md](CORRECTED-TEST-STRATEGY.md)** 
+  - Исправленная стратегия тестирования (4 недели)
+  - Стандартные Microsoft паттерны вместо велосипедов
+  - Unit tests: 81% → 95%, Integration tests: 0% → 70%
+  - Замена проблемного QUICK-WIN-TEST-FIXES.md
+
 ### 🔄 **Git Workflow**  
 - **[README-GIT-FLOW.md](../README-GIT-FLOW.md)**
   - develop vs master branch strategy
