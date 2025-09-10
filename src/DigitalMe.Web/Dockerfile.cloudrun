@@ -18,12 +18,12 @@ RUN dotnet restore "src/DigitalMe.Web/DigitalMe.Web.csproj" \
     --runtime linux-musl-x64 \
     --locked-mode
 
-# Copy source and build with optimizations  
+# Copy source (.dockerignore will exclude conflicting configs)
 COPY . .
 WORKDIR "/src/src/DigitalMe.Web"
 RUN dotnet build "./DigitalMe.Web.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/build \
+    --configuration Release \
+    --output /app/build \
     --runtime linux-musl-x64 \
     --self-contained false \
     --no-restore
@@ -31,15 +31,11 @@ RUN dotnet build "./DigitalMe.Web.csproj" \
 # Publish with ReadyToRun and trimming
 FROM build AS publish
 RUN dotnet publish "./DigitalMe.Web.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/publish \
+    --configuration Release \
+    --output /app/publish \
     --runtime linux-musl-x64 \
     --self-contained false \
-    --no-restore \
-    /p:UseAppHost=false \
-    /p:PublishReadyToRun=true \
-    /p:PublishSingleFile=false \
-    /p:PublishTrimmed=false
+    --no-restore
 
 # Final stage with minimal runtime
 FROM base AS final

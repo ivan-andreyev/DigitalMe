@@ -42,3 +42,8 @@ backups/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Google Cloud Service Account keys - NEVER commit these!
+*.json
+github-actions-key.json
+trigger.yaml

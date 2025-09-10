@@ -30,6 +30,9 @@ public class DemoDataSeeder
             // Seed demo user profile for Ivan
             var demoUser = await SeedDemoUserProfileAsync();
 
+            // Seed main user account (mr.red.404@gmail.com)
+            await SeedMainUserAccountAsync();
+
             // Seed demo chat session with realistic conversation
             await SeedDemoConversationAsync(demoUser);
 
@@ -284,6 +287,54 @@ public class DemoDataSeeder
         };
 
         return summary;
+    }
+
+    private async Task SeedMainUserAccountAsync()
+    {
+        _logger.LogInformation("Seeding main user account (mr.red.404@gmail.com)");
+
+        // Check if user already exists
+        var existingUser = await _context.UserProfiles
+            .FirstOrDefaultAsync(u => u.Email == "mr.red.404@gmail.com");
+
+        if (existingUser != null)
+        {
+            _logger.LogInformation("Main user account already exists");
+            return;
+        }
+
+        var mainUser = new UserProfile
+        {
+            Id = Guid.NewGuid(),
+            Email = "mr.red.404@gmail.com",
+            UserName = "Ivan Petrov",
+            FirstName = "Ivan",
+            LastName = "Petrov", 
+            DisplayName = "Ivan",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            LastLoginAt = null,
+            ProfileData = """
+            {
+                "role": "Head of R&D",
+                "company": "EllyAnalytics",
+                "experience": "10+ years in enterprise software development",
+                "specialization": "C# .NET, Enterprise Architecture, AI Integration",
+                "leadership_style": "Technical mentoring and architectural guidance",
+                "key_traits": {
+                    "technical_expertise": "Advanced .NET, Microservices, DDD",
+                    "problem_solving": "Systematic TDD approach",
+                    "communication": "Direct, solution-oriented",
+                    "innovation": "R&D focus, cutting-edge technologies"
+                }
+            }
+            """
+        };
+
+        _context.UserProfiles.Add(mainUser);
+        await _context.SaveChangesAsync();
+        
+        _logger.LogInformation("✅ Seeded main user account: {Email}", mainUser.Email);
     }
 }
 

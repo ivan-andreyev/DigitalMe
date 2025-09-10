@@ -1,88 +1,14 @@
-# Docker ignore file for DigitalMe
-# Optimizes build context and reduces image size
+# Ignore API project config files to prevent conflicts in Web builds
+DigitalMe/appsettings*.json
+DigitalMe/web.config
+DigitalMe/Dockerfile*
 
-# Binaries and build artifacts
+# Standard .NET ignores
 **/bin/
 **/obj/
-**/out/
-**/TestResults/
-
-# Dependencies
-**/packages/
-**/.nuget/
-
-# IDE and editor files
 **/.vs/
+**/TestResults/
 **/.vscode/
 **/.idea/
-**/*.user
-**/*.suo
-**/*.sln.docstates
-**/*.userprefs
-
-# OS files
-**/.DS_Store
-**/Thumbs.db
-**/*.tmp
-**/*.temp
-
-# Logs
-**/logs/
-**/*.log
-**/npm-debug.log*
-
-# Runtime files
-**/appsettings.Development.json
-**/appsettings.Local.json
-
-# Documentation and markdown
-**/*.md
-**/docs/
-**/README*
-
-# Git files
-**/.git/
-**/.gitignore
-**/.gitattributes
-
-# CI/CD files
-**/.github/
-**/azure-pipelines.yml
-**/.azure/
-
-# MAUI project (excluded from CI builds)
-**/src/DigitalMe.MAUI/
-
-# Test files and coverage
-**/TestResults/
-**/coverage/
-**/*.trx
-**/*.coverage
-
-# Node.js dependencies (if any)
 **/node_modules/
-**/package-lock.json
-**/yarn.lock
-
-# Backup and temporary files
-**/*.bak
-**/*.backup
-**/*.old
-**/*.orig
-
-# Docker files (avoid recursion)
-**/Dockerfile*
-**/.dockerignore
-
-# Environment files with secrets
-**/.env
-**/.env.local
-**/.env.production
-
-# Emergency backup directories
-**/emergency-backup/
-
-# Planning and documentation directories
-**/plans/
-**/analysis/
-**/review/
+**/logs/
