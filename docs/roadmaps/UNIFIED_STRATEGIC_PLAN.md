@@ -1,11 +1,11 @@
 # UNIFIED STRATEGIC PLAN
 ## Integrated Technical & Business Roadmap for DigitalMe Platform
 
-**Document Version**: 1.0  
+**Document Version**: 2.0  
 **Plan Date**: September 10, 2025  
-**Planning Horizon**: 4 Phases over 24+ months  
+**Planning Horizon**: Phase 0 + 4 Strategic Phases over 24+ months  
 **Strategic Objective**: Synchronized technical development and business growth for market leadership  
-**Platform Vision**: Transform $400K MVP into $15M+ market-leading AI integration platform
+**Platform Vision**: Transform current codebase → Ivan-Level Agent → $15M+ market-leading AI integration platform
 
 ---
 
@@ -33,8 +33,12 @@ This unified plan directly addresses the 6 critical gaps identified in the Techn
 
 ### Strategic Phases Summary
 ```
+Phase 0: Ivan-Level Agent (6-8 weeks) - $3K Investment → $50K Proof Value
+├── Technical: Advanced reactive agent with human-level capabilities
+└── Business: Working demo of digital Ivan clone
+
 Phase 1: Foundation Consolidation (8 months) - $800K Investment → $1.5M Value
-├── Technical: Architecture transformation + enterprise features
+├── Technical: Multi-user architecture + enterprise features
 └── Business: Market validation + pilot customer acquisition
 
 Phase 2: Market Entry Excellence (12 months) - $1.2M Investment → $4M Value  
@@ -54,10 +58,67 @@ Phase 4: Strategic Dominance (24+ months) - $3M+ Investment → $15M+ Value
 | Phase | Technical Investment | Business Investment | Total Investment | Platform Value | ROI |
 |-------|---------------------|-------------------|------------------|----------------|-----|
 | **Current** | $47K (completed) | $0 | $47K | $400K | 751% |
+| **Phase 0** | $3K | $0 | $3K | $50K | 1567% |
 | **Phase 1** | $500K | $300K | $800K | $1.5M | 88% |
 | **Phase 2** | $700K | $500K | $1.2M | $4M | 233% |
 | **Phase 3** | $1.2M | $800K | $2M | $8M | 300% |
 | **Phase 4** | $2M+ | $1M+ | $3M+ | $15M+ | 400%+ |
+
+---
+
+## 🧠 PHASE 0: IVAN-LEVEL AGENT (PROLOGUE)
+**Duration**: 6-8 weeks (September-November 2025)  
+**Investment**: $3K operational costs  
+**Objective**: Create advanced reactive agent with human-level capabilities
+**Philosophy**: "Всё, что может Иван - может агент (пусть и за деньги)"
+
+### 🎯 Critical Success Criteria
+**Агент считается "Ivan-level", если может выполнить без помощи человека:**
+- Проанализировать GitHub issue и предложить техническое решение
+- Написать, оттестировать и задеплоить простую фичу  
+- Провести code review с развернутыми комментариями
+- Заполнить сложную веб-форму с капчей
+- Создать техническую документацию или презентацию
+
+### 📋 Technical Implementation (6-8 weeks)
+
+#### Week 1-2: Enhanced Cognitive Core
+- **Advanced Personality Engine**: Глубокая персонализация с реальными данными Ивана
+- **Enhanced AgentBehaviorEngine**: Multi-step reasoning, context-aware responses
+- **Memory System**: Conversation history с semantic search, context continuity
+
+#### Week 3-4: Advanced Tool Capabilities  
+- **Web Navigation**: Playwright интеграция для complex sites, form filling
+- **CAPTCHA Bypass**: 2captcha.com integration, anti-bot measures
+- **File Processing**: Office documents, PDF, image/video processing
+
+#### Week 5-6: Professional Tools
+- **Development Tools**: Git automation, CI/CD management, Docker operations
+- **Communication**: Email APIs, calendar management, meeting scheduling
+- **Data Analysis**: SQL queries, data visualization, report generation
+
+#### Week 7-8: Quality & Polish
+- **Advanced Problem Solving**: Root cause analysis, solution brainstorming
+- **Quality Assurance**: Self-review mechanisms, output validation
+- **Performance Optimization**: Response time, cost efficiency
+
+### 💰 Investment Breakdown
+- **Claude API**: $200/month × 2 months = $400
+- **External Services**: 2captcha ($50/month), proxies ($30/month), APIs ($100/month) = $360
+- **Development Tools**: Office 365 API, misc services = $240
+- **Total**: ~$3K for proof-of-concept phase
+
+### 🎯 Expected Outcomes
+- **Technical**: Working digital clone capable of Ivan-level tasks
+- **Business**: Convincing demo for stakeholders and potential customers  
+- **Strategic**: Solid foundation for multi-user platform (Phase 1)
+- **Risk Mitigation**: Validates core concept before major investments
+
+### 📈 Success Metrics
+- **Accuracy**: 95%+ correct solutions for straightforward tasks
+- **Completeness**: 90%+ task completion without human intervention
+- **Speed**: Response time ≤ 2x Ivan's manual execution time
+- **Reliability**: 99%+ uptime with graceful failure handling
 
 ---
 
