@@ -12,9 +12,45 @@ env:
   REGION: us-central1
 
 jobs:
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies (excluding MAUI)
+      run: |
+        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
+    
+    - name: Build (excluding MAUI)
+      run: |
+        dotnet build DigitalMe/DigitalMe.csproj --no-restore --configuration Release
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --no-restore --configuration Release
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --no-restore --configuration Release
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --no-restore --configuration Release
+    
+    - name: Run Unit Tests
+      run: dotnet test tests/DigitalMe.Tests.Unit --no-build --configuration Release --verbosity normal
+    
+    - name: Run Integration Tests
+      run: dotnet test tests/DigitalMe.Tests.Integration --no-build --configuration Release --verbosity normal
+      env:
+        ASPNETCORE_ENVIRONMENT: Testing
+
   deploy:
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
+    needs: test
     
     permissions:
       contents: read
