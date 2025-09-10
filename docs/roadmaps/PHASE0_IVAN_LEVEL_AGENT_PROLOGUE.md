@@ -5,7 +5,7 @@
 **Статус**: Пролог перед основными фазами стратегического плана  
 **Цель**: Создать working proof-of-concept - цифрового клона Ивана  
 **Философия**: "Всё, что может сделать Иван лично - может сделать агент (пусть и за деньги)"  
-**Timeline**: 6-8 недель ДО начала Phase 1 (Foundation Consolidation)  
+**Timeline**: 9-10 недель ДО начала Phase 1 (Foundation Consolidation)  
 
 ---
 
@@ -135,22 +135,49 @@
   - [ ] Data visualization
   - [ ] Report generation
 
-### 🎨 PHASE 3: Advanced Reasoning & Quality (1-2 weeks)
-**Goal**: Агент принимает решения как Иван
+### 🌐 PHASE 2.5: Human-Like Internet & Communication (2-3 weeks)
+**Goal**: Агент действует в интернете как человек
 
-#### Week 7-8: Intelligence Enhancements
-- [ ] Advanced Problem Solving
-  - [ ] Root cause analysis
-  - [ ] Solution brainstorming
-  - [ ] Implementation planning
-- [ ] Quality Assurance
-  - [ ] Self-review mechanisms
-  - [ ] Output validation
-  - [ ] Continuous improvement
-- [ ] Performance Optimization
+#### Week 6-7: Internet Navigation Skills
+- [ ] **Human-Like Web Browsing**
+  - [ ] Site exploration and understanding functionality
+  - [ ] Service registration and account verification  
+  - [ ] Content creation (posts, profiles, reviews, file uploads)
+  - [ ] Pricing research and trial/demo discovery
+- [ ] **Complex Web Operations**
+  - [ ] Multi-step processes (order → payment → tracking)
+  - [ ] Form filling with dynamic validation
+  - [ ] E-commerce navigation and comparison shopping
+  - [ ] Service subscription and cancellation flows
+
+#### Week 7-8: Communication & Social Skills  
+- [ ] **Advanced Text Communication**
+  - [ ] Style adaptation to conversation partner
+  - [ ] Professional correspondence and negotiations
+  - [ ] Multi-party chat coordination
+  - [ ] Forum and community participation
+- [ ] **Voice & Audio Communication**
+  - [ ] Voice message generation with proper intonation
+  - [ ] Text-to-speech integration for phone calls
+  - [ ] Audio message processing and responses
+  - [ ] Basic phone conversation capabilities
+
+### 🎨 PHASE 3: Quality & Polish (1-2 weeks)
+**Goal**: Производственная готовность агента
+
+#### Week 9-10: Final Integration & Testing
+- [ ] **End-to-End Testing**
+  - [ ] Complete Ivan-level task scenarios
+  - [ ] Performance benchmarking vs success criteria
+  - [ ] Error handling and recovery testing
+- [ ] **Production Readiness**
   - [ ] Response time optimization
-  - [ ] Cost efficiency
-  - [ ] Resource management
+  - [ ] Cost efficiency analysis  
+  - [ ] Reliability and uptime testing
+- [ ] **Documentation & Demo Preparation**
+  - [ ] User guides and API documentation
+  - [ ] Demo scenarios for stakeholders
+  - [ ] Deployment automation
 
 ---
 
@@ -194,12 +221,14 @@
 - [ ] **Телефонные звонки**: Провести деловой разговор по телефону (через voice synthesis)
 - [ ] **Многосторонние дискуссии**: Участие в групповых чатах, форумах, координация команды
 
-#### Advanced Cognitive Tasks:
-- [ ] **Обучение на лету**: Быстро освоить новый инструмент/API/сервис по документации
-- [ ] **Творческое решение проблем**: Найти нестандартный подход когда обычные методы не работают
-- [ ] **Контекстная адаптация**: Менять стиль работы в зависимости от аудитории и ситуации
-- [ ] **Multi-tasking management**: Вести несколько проектов параллельно, переключаться между контекстами
-- [ ] **Этическое принятие решений**: Отказаться от сомнительных запросов, предложить альтернативы
+#### Advanced Cognitive Tasks (Phase 1+ - Future):
+- [ ] **Обучение на лету**: Быстро освоить новый инструмент/API/сервис → Phase 1 (Self-Learning)
+- [ ] **Творческое решение проблем**: Нестандартные подходы → Phase 1 (Advanced AI)
+- [ ] **Контекстная адаптация**: Стиль под аудиторию → Phase 1 (Autonomy)
+- [ ] **Multi-tasking management**: Параллельные проекты → Phase 1 (Multi-User)
+- [ ] **Этическое принятие решений**: Моральные дилеммы → Phase 1 (Advanced Reasoning)
+
+> **Примечание**: Эти навыки относятся к автономности и самообучению - переносятся в основной план после Phase 0
 
 ### Quality Benchmarks:
 - **Accuracy**: 95%+ правильных решений простых задач
@@ -217,11 +246,12 @@
 - **2captcha.com**: ~$50/month  
 - **Proxy services**: ~$30/month
 - **Office 365 API**: ~$20/month
+- **Voice/TTS APIs**: ~$30/month (NEW - для голосовых возможностей)
 - **Various APIs**: ~$100/month
-- **Total**: ~$400/month operational cost
+- **Total**: ~$430/month operational cost
 
 ### Development Resources:
-- **Timeline**: 6-8 weeks full development
+- **Timeline**: 9-10 weeks full development (updated with Phase 2.5)
 - **Focus**: Quality over quantity - лучше меньше, но идеально
 - **Testing**: Extensive testing with real Ivan tasks
 
