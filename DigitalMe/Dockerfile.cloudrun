@@ -21,25 +21,16 @@ RUN dotnet restore "DigitalMe/DigitalMe.csproj" \
 # Copy source and build with optimizations
 COPY . .
 WORKDIR "/src/DigitalMe"
-RUN dotnet build "./DigitalMe.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/build \
-    --runtime linux-musl-x64 \
-    --self-contained false \
-    --no-restore
+RUN dotnet build "./DigitalMe.csproj" -c Release -o /app/build --runtime linux-musl-x64 --self-contained false --no-restore
 
 # Publish with ReadyToRun and trimming
 FROM build AS publish
 RUN dotnet publish "./DigitalMe.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/publish \
+    --configuration Release \
+    --output /app/publish \
     --runtime linux-musl-x64 \
     --self-contained false \
-    --no-restore \
-    /p:UseAppHost=false \
-    /p:PublishReadyToRun=true \
-    /p:PublishSingleFile=false \
-    /p:PublishTrimmed=false
+    --no-restore
 
 # Final stage with minimal runtime
 FROM base AS final

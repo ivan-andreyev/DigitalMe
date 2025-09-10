@@ -1,0 +1,50 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ master ]
+  
+  # Allow manual runs
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: digitalme-470613
+  REGION: us-central1
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker gcr.io
+
+    - name: Build and Deploy with Cloud Build
+      run: |
+        gcloud builds submit \
+          --config=cloudbuild.yaml \
+          --project=$PROJECT_ID \
+          --substitutions=COMMIT_SHA=${GITHUB_SHA}
+
+    - name: Show deployment URLs
+      run: |
+        echo "🚀 Deployment completed successfully!"
+        echo "API URL: https://digitalme-api-llig7ks2ca-uc.a.run.app"  
+        echo "Web URL: https://digitalme-web-llig7ks2ca-uc.a.run.app"
+        echo "Commit: ${GITHUB_SHA}"
