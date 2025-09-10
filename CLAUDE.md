@@ -1,5 +1,18 @@
 # CLAUDE.md - Проект DigitalMe
 
+# ⚠️⚠️⚠️ КРИТИЧЕСКИ ВАЖНО: GIT WORKFLOW ⚠️⚠️⚠️
+## 🚫🚫🚫 НИКОГДА НЕ КОММИТИМ В MASTER НАПРЯМУЮ! 🚫🚫🚫
+## ✅✅✅ ВСЕГДА ТОЛЬКО ЧЕРЕЗ DEVELOP → MASTER MERGE! ✅✅✅
+
+**ПРАВИЛО GIT WORKFLOW:**
+1. 🔄 Все изменения делаем в ветке `develop`
+2. 🧪 Тестируем в `develop` 
+3. ✅ Только после проверки мержим `develop` в `master`
+4. 🚫 **ЗАПРЕЩЕНО**: `git commit` напрямую в `master`
+5. ✅ **ПРАВИЛЬНО**: `git checkout develop` → работа → `git merge develop` в `master`
+
+---
+
 ## Текущий проект: Создание цифрового клона Ивана
 
 ### Цель
