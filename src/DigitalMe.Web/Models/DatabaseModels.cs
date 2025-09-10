@@ -14,6 +14,9 @@ public class UserProfile
     public string UserName { get; set; } = string.Empty;
     
     public string? DisplayName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? ProfileData { get; set; } // JSON for demo purposes
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAt { get; set; }
     public bool IsActive { get; set; } = true;

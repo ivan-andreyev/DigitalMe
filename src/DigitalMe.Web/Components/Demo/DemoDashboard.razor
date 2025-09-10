@@ -106,7 +106,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- System Health Insights -->
         <div class="metric-section">
             <h3>🔍 System Insights</h3>
@@ -472,7 +472,7 @@
     gap: 12px;
 }
 
-@media (min-width: 1200px) {
+@@media (min-width: 1200px) {
     .business-stats {
         grid-template-columns: 1fr 1fr 1fr;
     }
@@ -587,7 +587,7 @@
     margin: 0;
 }
 
-@keyframes spin {
+@@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
@@ -663,11 +663,11 @@
     .metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .business-metrics {
         grid-template-columns: 1fr;
     }
-    
+
     .business-card.large {
         grid-row: span 1;
     }
@@ -677,7 +677,7 @@
 @code {
     private bool isConnected = true;
     private Timer? refreshTimer;
-    
+
     private SystemHealthMetrics systemHealth = new();
     private List<IntegrationStatus> integrationStatus = new();
     private AiMetrics aiMetrics = new();
@@ -688,7 +688,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadInitialData();
-        
+
         // Set up auto-refresh timer
         refreshTimer = new Timer(async _ => await RefreshData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
     }
@@ -698,22 +698,22 @@
         try
         {
             isLoading = true;
-            
+
             // Load real metrics from service
             var healthTask = MetricsService.GetSystemHealthAsync();
             var integrationTask = MetricsService.GetIntegrationStatusAsync();
             var aiTask = MetricsService.GetAiMetricsAsync();
             var businessTask = MetricsService.GetBusinessMetricsAsync();
             var activitiesTask = MetricsService.GetRecentActivitiesAsync();
-            
+
             await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
-            
+
             systemHealth = await healthTask;
             integrationStatus = await integrationTask;
             aiMetrics = await aiTask;
             businessMetrics = await businessTask;
             recentActivities = await activitiesTask;
-            
+
             isLoading = false;
         }
         catch (Exception ex)
@@ -733,15 +733,15 @@
             var aiTask = MetricsService.GetAiMetricsAsync();
             var businessTask = MetricsService.GetBusinessMetricsAsync();
             var activitiesTask = MetricsService.GetRecentActivitiesAsync();
-            
+
             await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
-            
+
             systemHealth = await healthTask;
             integrationStatus = await integrationTask;
             aiMetrics = await aiTask;
             businessMetrics = await businessTask;
             recentActivities = await activitiesTask;
-            
+
             isConnected = systemHealth.IsHealthy;
 
             await InvokeAsync(StateHasChanged);
@@ -772,49 +772,5 @@
     public void Dispose()
     {
         refreshTimer?.Dispose();
-    }
-
-    private class SystemHealthMetrics
-    {
-        public int ApiResponseTime { get; set; }
-        public int ActiveConnections { get; set; }
-        public int MemoryUsage { get; set; }
-        public string ApiTrend { get; set; } = "";
-        public string ConnectionTrend { get; set; } = "";
-        public string MemoryTrend { get; set; } = "";
-    }
-
-    private class IntegrationStatus
-    {
-        public string Name { get; set; } = "";
-        public string Icon { get; set; } = "";
-        public string Status { get; set; } = "";
-        public int LastResponseTime { get; set; }
-        public int RequestsToday { get; set; }
-    }
-
-    private class AiMetrics
-    {
-        public int PersonalityAccuracy { get; set; }
-        public double ResponseQuality { get; set; }
-        public int LearningProgress { get; set; }
-    }
-
-    private class BusinessMetrics
-    {
-        public int PlatformValue { get; set; }
-        public int ComponentsBuilt { get; set; }
-        public int IntegrationsReady { get; set; }
-        public int TimeToMarket { get; set; }
-        public string TechnicalDebt { get; set; } = "";
-    }
-
-    private class ActivityLog
-    {
-        public DateTime Time { get; set; }
-        public string Type { get; set; } = "";
-        public string Icon { get; set; } = "";
-        public string Message { get; set; } = "";
-        public string Metric { get; set; } = "";
     }
 }
