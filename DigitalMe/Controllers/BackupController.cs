@@ -40,9 +40,9 @@ public class BackupController : ControllerBase
         try
         {
             _logger.LogInformation("Manual backup requested by user");
-            
+
             var result = await _schedulerService.TriggerBackupAsync(cancellationToken);
-            
+
             if (result.Success)
             {
                 return Ok(result);
@@ -55,7 +55,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Manual backup request failed");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Backup operation failed", message = ex.Message });
         }
     }
@@ -76,7 +76,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to retrieve backup list");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Failed to retrieve backups", message = ex.Message });
         }
     }
@@ -97,7 +97,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to retrieve backup health status");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Failed to retrieve backup health", message = ex.Message });
         }
     }
@@ -112,7 +112,7 @@ public class BackupController : ControllerBase
     [ProducesResponseType(typeof(BackupValidationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BackupValidationResult>> ValidateBackup(
-        string backupFileName, 
+        string backupFileName,
         CancellationToken cancellationToken = default)
     {
         try
@@ -120,7 +120,7 @@ public class BackupController : ControllerBase
             // Get available backups to find the full path
             var backups = await _backupService.GetAvailableBackupsAsync();
             var backup = backups.FirstOrDefault(b => b.FileName.Equals(backupFileName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (backup == null)
             {
                 return NotFound(new { error = "Backup file not found", fileName = backupFileName });
@@ -132,7 +132,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Backup validation failed for {BackupFileName}", backupFileName);
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Backup validation failed", message = ex.Message });
         }
     }
@@ -153,20 +153,20 @@ public class BackupController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Backup cleanup requested by user. RetentionDays: {RetentionDays}, MaxBackups: {MaxBackups}", 
+            _logger.LogInformation("Backup cleanup requested by user. RetentionDays: {RetentionDays}, MaxBackups: {MaxBackups}",
                 retentionDays, maxBackups);
 
             var result = await _backupService.CleanupBackupsAsync(
-                retentionDays ?? 7, 
-                maxBackups ?? 30, 
+                retentionDays ?? 7,
+                maxBackups ?? 30,
                 cancellationToken);
-            
+
             return Ok(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Backup cleanup failed");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Backup cleanup failed", message = ex.Message });
         }
     }
@@ -187,7 +187,7 @@ public class BackupController : ControllerBase
             // Get available backups to find the full path
             var backups = await _backupService.GetAvailableBackupsAsync();
             var backup = backups.FirstOrDefault(b => b.FileName.Equals(backupFileName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (backup == null)
             {
                 return NotFound(new { error = "Backup file not found", fileName = backupFileName });
@@ -203,13 +203,13 @@ public class BackupController : ControllerBase
 
             var fileStream = new FileStream(backup.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var contentType = "application/vnd.sqlite3";
-            
+
             return File(fileStream, contentType, backupFileName, enableRangeProcessing: true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to download backup: {BackupFileName}", backupFileName);
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Failed to download backup", message = ex.Message });
         }
     }
@@ -243,10 +243,10 @@ public class BackupController : ControllerBase
                     .GroupBy(b => b.CreatedAt.Date)
                     .OrderByDescending(g => g.Key)
                     .Take(30) // Last 30 days
-                    .Select(g => new 
-                    { 
-                        Date = g.Key, 
-                        Count = g.Count(), 
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        Count = g.Count(),
                         TotalSize = g.Sum(b => b.SizeBytes),
                         FormattedTotalSize = FormatBytes(g.Sum(b => b.SizeBytes))
                     })
@@ -257,7 +257,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to retrieve backup statistics");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Failed to retrieve backup statistics", message = ex.Message });
         }
     }
@@ -283,7 +283,7 @@ public class BackupController : ControllerBase
             // Get available backups to find the full path
             var backups = await _backupService.GetAvailableBackupsAsync();
             var backup = backups.FirstOrDefault(b => b.FileName.Equals(backupFileName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (backup == null)
             {
                 return NotFound(new { error = "Backup file not found", fileName = backupFileName });
@@ -295,7 +295,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Recovery test failed for {BackupFileName}", backupFileName);
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Recovery test failed", message = ex.Message });
         }
     }
@@ -322,9 +322,9 @@ public class BackupController : ControllerBase
         {
             if (!confirmRestore)
             {
-                return BadRequest(new 
-                { 
-                    error = "Confirmation required", 
+                return BadRequest(new
+                {
+                    error = "Confirmation required",
                     message = "Set confirmRestore=true to confirm database restore operation",
                     warning = "This operation will replace the current database with the backup"
                 });
@@ -335,7 +335,7 @@ public class BackupController : ControllerBase
             // Get available backups to find the full path
             var backups = await _backupService.GetAvailableBackupsAsync();
             var backup = backups.FirstOrDefault(b => b.FileName.Equals(backupFileName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (backup == null)
             {
                 return NotFound(new { error = "Backup file not found", fileName = backupFileName });
@@ -345,16 +345,16 @@ public class BackupController : ControllerBase
             var testResult = await _backupService.TestRecoveryAsync(backup.FilePath, cancellationToken);
             if (!testResult.CanRecover)
             {
-                return BadRequest(new 
-                { 
-                    error = "Recovery test failed", 
+                return BadRequest(new
+                {
+                    error = "Recovery test failed",
                     message = testResult.ErrorMessage,
                     testResult = testResult
                 });
             }
 
             var result = await _backupService.RestoreFromBackupAsync(backup.FilePath, cancellationToken);
-            
+
             if (result.Success)
             {
                 _logger.LogWarning("DATABASE RESTORE COMPLETED SUCCESSFULLY - Backup: {BackupFileName}", backupFileName);
@@ -369,7 +369,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Database restore operation failed for {BackupFileName}", backupFileName);
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Database restore failed", message = ex.Message });
         }
     }
@@ -387,9 +387,9 @@ public class BackupController : ControllerBase
         try
         {
             _logger.LogInformation("Pre-recovery backup requested by user");
-            
+
             var result = await _backupService.CreatePreRecoveryBackupAsync(cancellationToken);
-            
+
             if (result.Success)
             {
                 return Ok(result);
@@ -402,7 +402,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Pre-recovery backup request failed");
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Pre-recovery backup failed", message = ex.Message });
         }
     }
@@ -425,14 +425,14 @@ public class BackupController : ControllerBase
             // Get available backups to find the full path
             var backups = await _backupService.GetAvailableBackupsAsync();
             var backup = backups.FirstOrDefault(b => b.FileName.Equals(backupFileName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (backup == null)
             {
                 return NotFound(new { error = "Backup file not found", fileName = backupFileName });
             }
 
             var testResult = await _backupService.TestRecoveryAsync(backup.FilePath, cancellationToken);
-            
+
             var recoveryInfo = new
             {
                 BackupInfo = backup,
@@ -455,7 +455,7 @@ public class BackupController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get recovery info for {BackupFileName}", backupFileName);
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { error = "Failed to get recovery information", message = ex.Message });
         }
     }

@@ -90,9 +90,9 @@ public record BackupInfo
     public long SizeBytes { get; init; }
     public DateTime CreatedAt { get; init; }
     public bool IsValid { get; init; } = true;
-    
+
     public string FormattedSize => FormatBytes(SizeBytes);
-    
+
     private static string FormatBytes(long bytes)
     {
         return bytes switch
@@ -140,9 +140,9 @@ public record BackupHealthStatus
     public long TotalBackupSizeBytes { get; init; }
     public TimeSpan? TimeSinceLastBackup { get; init; }
     public IEnumerable<string> Issues { get; init; } = Enumerable.Empty<string>();
-    
+
     public string FormattedTotalSize => FormatBytes(TotalBackupSizeBytes);
-    
+
     private static string FormatBytes(long bytes)
     {
         return bytes switch

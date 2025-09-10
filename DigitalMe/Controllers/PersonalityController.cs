@@ -51,7 +51,7 @@ public class PersonalityController : ControllerBase
             return NotFound($"Personality '{name}' not found");
 
         var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
-        
+
         return Ok(new PersonalityProfileDto
         {
             Id = personality.Id,
@@ -75,7 +75,7 @@ public class PersonalityController : ControllerBase
     public async Task<ActionResult<PersonalityProfileDto>> CreatePersonality([FromBody] CreatePersonalityProfileDto dto)
     {
         var personality = await _personalityService.CreatePersonalityAsync(dto.Name, dto.Description);
-        
+
         return CreatedAtAction(nameof(GetPersonality), new { name = personality.Name }, new PersonalityProfileDto
         {
             Id = personality.Id,
@@ -94,7 +94,7 @@ public class PersonalityController : ControllerBase
         {
             var personality = await _personalityService.UpdatePersonalityAsync(id, dto.Description);
             var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
-            
+
             return Ok(new PersonalityProfileDto
             {
                 Id = personality.Id,
@@ -123,7 +123,7 @@ public class PersonalityController : ControllerBase
     public async Task<ActionResult<PersonalityTraitDto>> AddTrait(Guid personalityId, [FromBody] CreatePersonalityTraitDto dto)
     {
         var trait = await _personalityService.AddTraitAsync(personalityId, dto.Category, dto.Name, dto.Description, dto.Weight);
-        
+
         return Ok(new PersonalityTraitDto
         {
             Id = trait.Id,

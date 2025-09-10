@@ -10,22 +10,22 @@ public interface IHealthCheckService
     /// Gets comprehensive system health status including all components.
     /// </summary>
     Task<SystemHealthStatus> GetSystemHealthAsync();
-    
+
     /// <summary>
     /// Gets health status for a specific component.
     /// </summary>
     Task<ComponentHealthStatus> GetComponentHealthAsync(string componentName);
-    
+
     /// <summary>
     /// Gets readiness status (can the system handle requests).
     /// </summary>
     Task<ReadinessStatus> GetReadinessAsync();
-    
+
     /// <summary>
     /// Gets liveness status (is the system running).
     /// </summary>
     Task<LivenessStatus> GetLivenessAsync();
-    
+
     /// <summary>
     /// Registers a custom health check.
     /// </summary>

@@ -63,13 +63,13 @@ public class BackupSchedulerService : BackgroundService
             try
             {
                 var now = DateTime.Now;
-                
+
                 if (now >= _nextRun)
                 {
                     _logger.LogInformation("Starting scheduled backup");
-                    
+
                     await PerformScheduledBackupAsync(stoppingToken);
-                    
+
                     // Calculate next run time
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                     _logger.LogInformation("Next scheduled backup: {NextRun}", _nextRun);
@@ -87,7 +87,7 @@ public class BackupSchedulerService : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in backup scheduler service");
-                
+
                 // Wait before retrying
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
@@ -97,17 +97,17 @@ public class BackupSchedulerService : BackgroundService
     private async Task PerformScheduledBackupAsync(CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+
         try
         {
             // Create backup
             var backupResult = await _backupService.CreateBackupAsync(cancellationToken);
-            
+
             if (backupResult.Success)
             {
                 _logger.LogInformation("Scheduled backup completed successfully. " +
-                    "File: {BackupPath}, Size: {Size}, Duration: {Duration}ms", 
-                    backupResult.BackupPath, 
+                    "File: {BackupPath}, Size: {Size}, Duration: {Duration}ms",
+                    backupResult.BackupPath,
                     FormatBytes(backupResult.BackupSizeBytes),
                     backupResult.Duration.TotalMilliseconds);
 
@@ -141,8 +141,8 @@ public class BackupSchedulerService : BackgroundService
         try
         {
             var cleanupResult = await _backupService.CleanupBackupsAsync(
-                _config.RetentionDays, 
-                _config.MaxBackups, 
+                _config.RetentionDays,
+                _config.MaxBackups,
                 cancellationToken);
 
             if (cleanupResult.Success)
@@ -169,7 +169,7 @@ public class BackupSchedulerService : BackgroundService
         try
         {
             var healthStatus = await _backupService.GetBackupHealthAsync();
-            
+
             if (healthStatus.IsHealthy)
             {
                 _logger.LogInformation("Backup system healthy. " +
@@ -180,7 +180,7 @@ public class BackupSchedulerService : BackgroundService
             }
             else
             {
-                _logger.LogWarning("Backup system health issues detected: {Issues}", 
+                _logger.LogWarning("Backup system health issues detected: {Issues}",
                     string.Join(", ", healthStatus.Issues));
             }
         }
@@ -196,28 +196,28 @@ public class BackupSchedulerService : BackgroundService
     public async Task<BackupResult> TriggerBackupAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Manual backup triggered");
-        
+
         try
         {
             var result = await _backupService.CreateBackupAsync(cancellationToken);
-            
+
             if (result.Success)
             {
                 _logger.LogInformation("Manual backup completed successfully");
-                
+
                 // Perform cleanup if enabled
                 if (_config.AutoCleanup)
                 {
                     await PerformBackupCleanupAsync(cancellationToken);
                 }
             }
-            
+
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Manual backup failed");
-            
+
             return new BackupResult
             {
                 Success = false,

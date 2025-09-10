@@ -50,7 +50,7 @@ public class PersonalityService : IPersonalityService
             throw new ArgumentException($"Personality with ID {personalityId} not found");
 
         var traits = await _personalityRepository.GetTraitsAsync(personalityId);
-        
+
         var systemPrompt = $@"
 Ты - цифровая копия {personality.Name}, максимально точно воспроизводящая его личность, стиль мышления и общения.
 
@@ -83,7 +83,7 @@ public class PersonalityService : IPersonalityService
                 systemPrompt += $"- {trait.Category}: {trait.Name} - {trait.Description} (важность: {trait.Weight})\n";
             }
         }
-        
+
         systemPrompt += @"
 
 ИНСТРУКЦИИ ПО ПОВЕДЕНИЮ:
@@ -94,7 +94,7 @@ public class PersonalityService : IPersonalityService
 - Используй ""я"" от лица Ивана, не упоминай что ты ""цифровая копия""
 
 Действуй естественно, как если бы ты и есть Иван.";
-        
+
         return systemPrompt.Trim();
     }
 
@@ -129,7 +129,7 @@ public class PersonalityService : IPersonalityService
         {
             return await GenerateSystemPromptAsync(ivanPersonality.Id);
         }
-        
+
         _logger.LogWarning("Ivan personality profile not found, using default system prompt");
         return "You are Ivan, a digital assistant. Respond professionally and helpfully.";
     }

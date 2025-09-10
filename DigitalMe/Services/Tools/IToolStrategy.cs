@@ -12,17 +12,17 @@ public interface IToolStrategy
     /// Уникальное имя инструмента
     /// </summary>
     string ToolName { get; }
-    
+
     /// <summary>
     /// Описание инструмента для отображения пользователю
     /// </summary>
     string Description { get; }
-    
+
     /// <summary>
     /// Приоритет инструмента (выше = важнее при конфликтах)
     /// </summary>
     int Priority { get; }
-    
+
     /// <summary>
     /// Определяет, должен ли данный инструмент сработать на основе сообщения и контекста
     /// </summary>
@@ -30,7 +30,7 @@ public interface IToolStrategy
     /// <param name="context">Контекст личности с историей сообщений</param>
     /// <returns>True если инструмент должен сработать</returns>
     Task<bool> ShouldTriggerAsync(string message, PersonalityContext context);
-    
+
     /// <summary>
     /// Выполняет инструмент с указанными параметрами
     /// </summary>

@@ -37,7 +37,7 @@ public class MVPMessageProcessor : IMVPMessageProcessor
 
             // Step 1: Get Ivan's personality context - используем интерфейсный метод для SOLID compliance
             var systemPrompt = await _personalityService.GenerateIvanSystemPromptAsync();
-            
+
             if (string.IsNullOrWhiteSpace(systemPrompt))
             {
                 _logger.LogError("❌ Failed to generate system prompt - personality service returned empty result");
@@ -48,7 +48,7 @@ public class MVPMessageProcessor : IMVPMessageProcessor
 
             // Step 2: Call Claude API with personality context
             var response = await _claudeApiService.GenerateResponseAsync(systemPrompt, userMessage);
-            
+
             if (string.IsNullOrWhiteSpace(response))
             {
                 _logger.LogError("❌ Claude API returned empty response");
@@ -72,7 +72,7 @@ public class MVPMessageProcessor : IMVPMessageProcessor
         catch (Exception ex)
         {
             _logger.LogError(ex, "💥 Unexpected error while processing user message");
-            throw new MessageProcessingException("Failed to process user message", ex, 
+            throw new MessageProcessingException("Failed to process user message", ex,
                 new { userMessageLength = userMessage.Length });
         }
     }

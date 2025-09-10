@@ -172,19 +172,19 @@ public class CreatePullRequestRequest
 {
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("body")]
     public string Body { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("head")]
     public string Head { get; set; } = string.Empty; // branch name
-    
+
     [JsonPropertyName("base")]
     public string Base { get; set; } = string.Empty; // target branch
-    
+
     [JsonPropertyName("draft")]
     public bool Draft { get; set; } = false;
-    
+
     [JsonPropertyName("maintainer_can_modify")]
     public bool MaintainerCanModify { get; set; } = true;
 }
@@ -193,16 +193,16 @@ public class UpdatePullRequestRequest
 {
     [JsonPropertyName("title")]
     public string? Title { get; set; }
-    
+
     [JsonPropertyName("body")]
     public string? Body { get; set; }
-    
+
     [JsonPropertyName("state")]
     public string? State { get; set; } // open, closed
-    
+
     [JsonPropertyName("base")]
     public string? Base { get; set; }
-    
+
     [JsonPropertyName("maintainer_can_modify")]
     public bool? MaintainerCanModify { get; set; }
 }
@@ -211,16 +211,16 @@ public class CreateIssueRequest
 {
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("body")]
     public string Body { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("assignees")]
     public List<string> Assignees { get; set; } = new();
-    
+
     [JsonPropertyName("milestone")]
     public int? Milestone { get; set; }
-    
+
     [JsonPropertyName("labels")]
     public List<string> Labels { get; set; } = new();
 }
@@ -229,22 +229,22 @@ public class UpdateIssueRequest
 {
     [JsonPropertyName("title")]
     public string? Title { get; set; }
-    
+
     [JsonPropertyName("body")]
     public string? Body { get; set; }
-    
+
     [JsonPropertyName("state")]
     public string? State { get; set; } // open, closed
-    
+
     [JsonPropertyName("state_reason")]
     public string? StateReason { get; set; } // completed, not_planned, reopened
-    
+
     [JsonPropertyName("assignees")]
     public List<string>? Assignees { get; set; }
-    
+
     [JsonPropertyName("milestone")]
     public int? Milestone { get; set; }
-    
+
     [JsonPropertyName("labels")]
     public List<string>? Labels { get; set; }
 }
@@ -253,10 +253,10 @@ public class CreateReviewRequest
 {
     [JsonPropertyName("body")]
     public string? Body { get; set; }
-    
+
     [JsonPropertyName("event")]
     public string Event { get; set; } = string.Empty; // APPROVE, REQUEST_CHANGES, COMMENT
-    
+
     [JsonPropertyName("comments")]
     public List<ReviewComment>? Comments { get; set; }
 }
@@ -265,16 +265,16 @@ public class ReviewComment
 {
     [JsonPropertyName("path")]
     public string Path { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("position")]
     public int? Position { get; set; }
-    
+
     [JsonPropertyName("body")]
     public string Body { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("line")]
     public int? Line { get; set; }
-    
+
     [JsonPropertyName("side")]
     public string Side { get; set; } = "RIGHT"; // RIGHT, LEFT
 }
@@ -283,7 +283,7 @@ public class TriggerWorkflowRequest
 {
     [JsonPropertyName("ref")]
     public string Ref { get; set; } = string.Empty; // branch or tag
-    
+
     [JsonPropertyName("inputs")]
     public Dictionary<string, object>? Inputs { get; set; }
 }

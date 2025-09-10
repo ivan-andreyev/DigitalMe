@@ -24,14 +24,14 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     public async Task ApplyMigrationsAsync(DigitalMeDbContext context)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));
-        
+
         _logger.LogInformation("🔍 Starting database migration check...");
-        
+
         // Check database provider type
         _logger.LogInformation("🔍 Checking database provider...");
         var isInMemory = context.Database.ProviderName?.Contains("InMemory") == true;
         _logger.LogInformation("🔍 Database provider is InMemory: {IsInMemory}", isInMemory);
-        
+
         // Handle InMemory database
         if (isInMemory)
         {
@@ -45,13 +45,13 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         _logger.LogInformation("🔍 Checking database connection...");
         var canConnect = context.Database.CanConnect();
         _logger.LogInformation("🔍 Database connection check result: {CanConnect}", canConnect);
-        
+
         if (!canConnect)
         {
             await HandleDatabaseCreationAsync(context);
             return;
         }
-        
+
         await HandleMigrationSyncAsync(context);
     }
 
@@ -61,7 +61,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     public async Task HandleDatabaseCreationAsync(DigitalMeDbContext context)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));
-        
+
         _logger.LogWarning("⚠️ Cannot connect to database - attempting to create...");
         try
         {
@@ -81,17 +81,17 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     public bool ValidateMigrationConsistency(DigitalMeDbContext context)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));
-        
+
         try
         {
             var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
             var pendingMigrations = context.Database.GetPendingMigrations().ToList();
             var allMigrations = context.Database.GetMigrations().ToList();
-            
+
             _logger.LogInformation("Applied migrations: [{Applied}]", string.Join(", ", appliedMigrations));
             _logger.LogInformation("Pending migrations: [{Pending}]", string.Join(", ", pendingMigrations));
             _logger.LogInformation("All available migrations: [{All}]", string.Join(", ", allMigrations));
-            
+
             return CheckMigrationConsistency(appliedMigrations, pendingMigrations, allMigrations);
         }
         catch (Exception ex)
@@ -111,16 +111,16 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         {
             var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
             var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-            
+
             _logger.LogInformation("🔍 Applied migrations: [{Applied}]", string.Join(", ", appliedMigrations));
             _logger.LogInformation("🔍 Pending migrations: [{Pending}]", string.Join(", ", pendingMigrations));
-            
+
             var allMigrations = context.Database.GetMigrations().ToList();
             if (!CheckMigrationConsistency(appliedMigrations, pendingMigrations, allMigrations))
             {
                 throw new InvalidOperationException("Migration consistency check failed");
             }
-            
+
             if (!pendingMigrations.Any())
             {
                 _logger.LogInformation("✅ Database is up to date - no migrations to apply");
@@ -145,7 +145,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         {
             return true;
         }
-        
+
         // Check for stale migration entries - migrations applied in DB but no longer exist in codebase
         var staleMigrations = appliedMigrations.Where(applied => !allMigrations.Contains(applied)).ToList();
         if (staleMigrations.Any())
@@ -158,15 +158,15 @@ public class DatabaseMigrationService : IDatabaseMigrationService
             _logger.LogError("🔧 CRITICAL: Database must be recreated or migration history manually cleaned");
             return false;
         }
-        
+
         var hasGapInHistory = appliedMigrations.Count + pendingMigrations.Count != allMigrations.Count;
         if (hasGapInHistory)
         {
             _logger.LogWarning("⚠️ Migration history gap detected - some migrations may have been skipped");
-            _logger.LogWarning("Applied: {AppliedCount}, Pending: {PendingCount}, Total: {TotalCount}", 
+            _logger.LogWarning("Applied: {AppliedCount}, Pending: {PendingCount}, Total: {TotalCount}",
                 appliedMigrations.Count, pendingMigrations.Count, allMigrations.Count);
         }
-        
+
         return true;
     }
 
@@ -184,7 +184,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
                 _logger.LogInformation("✅ Schema synchronized with migration history");
                 return;
             }
-            
+
             await context.Database.MigrateAsync();
             _logger.LogInformation("✅ Successfully applied {Count} migrations", pendingMigrations.Count);
         }
@@ -194,7 +194,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
             throw;
         }
     }
-    
+
     /// <summary>
     /// Handles scenario where database schema exists but migration history is empty
     /// This commonly occurs when database is created outside of EF Core migrations
@@ -205,30 +205,30 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         {
             _logger.LogInformation("🔧 BLOCKER #1 FIX: Checking existing schema synchronization...");
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-            
+
             _logger.LogInformation("🔧 Applied migrations count: {AppliedCount}", appliedMigrations.Count());
-            
+
             // Only proceed if migration history is completely empty
             if (appliedMigrations.Any())
             {
                 _logger.LogInformation("🔧 Migration history not empty, skipping sync");
                 return false;
             }
-            
+
             // Check if key tables exist (indicating database was created outside migrations)
             _logger.LogInformation("🔧 Checking for existing core schema...");
             bool hasExistingTables = await CheckForExistingCoreSchema(context);
             _logger.LogInformation("🔧 Has existing tables: {HasTables}", hasExistingTables);
-            
+
             if (!hasExistingTables)
             {
                 _logger.LogInformation("🔧 Fresh database detected, proceeding with normal migration");
                 return false; // Fresh database, proceed with normal migration
             }
-            
+
             _logger.LogInformation("🔍 Detected existing database schema with empty migration history");
             _logger.LogInformation("🔄 Synchronizing migration history with existing schema...");
-            
+
             // For each pending migration, add it to migration history without executing
             foreach (var migration in pendingMigrations)
             {
@@ -237,10 +237,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
                     migration,
                     "8.0.0" // EF Core version
                 );
-                
+
                 _logger.LogInformation("📝 Marked migration as applied: {Migration}", migration);
             }
-            
+
             _logger.LogInformation("✅ Successfully synchronized {Count} migrations with existing schema", pendingMigrations.Count);
             return true;
         }
@@ -250,7 +250,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
             return false; // Fall back to normal migration process
         }
     }
-    
+
     /// <summary>
     /// Checks if core database tables exist
     /// </summary>
@@ -259,10 +259,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         try
         {
             _logger.LogInformation("🔧 BLOCKER #1 FIX: Attempting to query AspNetRoles table...");
-            
+
             // Check for AspNetRoles table by trying to query it directly
             var roleCount = await context.Set<IdentityRole>().CountAsync();
-            
+
             _logger.LogInformation("🔧 SUCCESS: AspNetRoles table exists with {Count} roles", roleCount);
             _logger.LogInformation("🔧 BLOCKER #1 FIX: Core schema detected - should trigger sync");
             return true; // If we can query the table, it exists
@@ -280,7 +280,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     private async Task AttemptRecoveryAsync(DigitalMeDbContext context, Exception originalException)
     {
         _logger.LogWarning("🔄 Attempting SQLite recovery from migration failure...");
-        
+
         // In development, we can be more aggressive with recovery
         if (_environment.IsDevelopment())
         {
@@ -297,7 +297,7 @@ public class DatabaseMigrationService : IDatabaseMigrationService
                 _logger.LogError(recoveryEx, "❌ Database recreation failed: {ErrorMessage}", recoveryEx.Message);
             }
         }
-        
+
         _logger.LogError("❌ Recovery failed - manual intervention required");
         throw new InvalidOperationException("Database migration failed and recovery unsuccessful", originalException);
     }

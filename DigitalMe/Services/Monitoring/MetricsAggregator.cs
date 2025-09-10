@@ -40,7 +40,7 @@ public class MetricsAggregator
             P95ResponseTime = TimeSpan.FromMilliseconds(values[p95Index])
         };
 
-        _logger.LogDebug("Aggregated {Count} data points for operation {Operation}: Avg={Avg}ms, P95={P95}ms", 
+        _logger.LogDebug("Aggregated {Count} data points for operation {Operation}: Avg={Avg}ms, P95={P95}ms",
             dataList.Count, operationName, metric.AverageResponseTime.TotalMilliseconds, metric.P95ResponseTime.TotalMilliseconds);
 
         return metric;
@@ -67,7 +67,7 @@ public class MetricsAggregator
         {
             ActiveConnections = activeConnections,
             TotalConnections = eventsList.Select(e => e.ConnectionId).Distinct().Count(),
-            MessagesPerMinute = timeWindow.TotalMinutes > 0 
+            MessagesPerMinute = timeWindow.TotalMinutes > 0
                 ? (int)(eventsList.Count(e => e.EventType == "MessageSent") / timeWindow.TotalMinutes)
                 : 0,
             AverageMessageDeliveryTime = averageDeliveryTime
@@ -77,7 +77,7 @@ public class MetricsAggregator
     /// <summary>
     /// Aggregates agent response events into business metrics.
     /// </summary>
-    public BusinessMetrics AggregateBusinessMetrics(IEnumerable<AgentResponseEvent> agentEvents, 
+    public BusinessMetrics AggregateBusinessMetrics(IEnumerable<AgentResponseEvent> agentEvents,
         IEnumerable<UserEngagementEvent> engagementEvents, TimeSpan timeWindow)
     {
         var agentEventsList = agentEvents.ToList();
@@ -86,8 +86,8 @@ public class MetricsAggregator
         var businessMetrics = new BusinessMetrics
         {
             AgentResponsesPerMinute = (int)(agentEventsList.Count / timeWindow.TotalMinutes),
-            AgentSuccessRate = agentEventsList.Count > 0 
-                ? (double)agentEventsList.Count(e => e.Success) / agentEventsList.Count 
+            AgentSuccessRate = agentEventsList.Count > 0
+                ? (double)agentEventsList.Count(e => e.Success) / agentEventsList.Count
                 : 1.0,
             ActiveUsers = engagementEventsList.Select(e => e.UserId).Distinct().Count(),
             ConversationsStarted = engagementEventsList.Count(e => e.Action == "conversation_started"),
@@ -97,7 +97,7 @@ public class MetricsAggregator
                 .ToDictionary(g => g.Key, g => g.Count())
         };
 
-        _logger.LogDebug("Aggregated business metrics: {Responses} responses/min, {Success:P1} success rate, {Users} active users", 
+        _logger.LogDebug("Aggregated business metrics: {Responses} responses/min, {Success:P1} success rate, {Users} active users",
             businessMetrics.AgentResponsesPerMinute, businessMetrics.AgentSuccessRate, businessMetrics.ActiveUsers);
 
         return businessMetrics;
@@ -117,7 +117,7 @@ public class MetricsAggregator
     private static int CalculatePercentileIndex(int count, double percentile)
     {
         if (count == 0) return 0;
-        
+
         var index = (int)Math.Ceiling(count * percentile) - 1;
         return Math.Max(0, Math.Min(index, count - 1));
     }

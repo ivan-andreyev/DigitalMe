@@ -8,7 +8,7 @@ public static class ConversationTestFixtures
     public static Conversation CreateCompleteConversationWithMessages()
     {
         var conversationId = Guid.NewGuid();
-        
+
         var conversation = ConversationBuilder.Create()
             .WithId(conversationId)
             .WithTitle("Technical Discussion - SOLID Principles")
@@ -87,7 +87,7 @@ public static class ConversationTestFixtures
             .Build();
 
         var messages = new List<Message>();
-        
+
         for (int i = 0; i < 20; i++)
         {
             messages.Add(MessageBuilder.Create()
@@ -108,7 +108,7 @@ public static class ConversationTestFixtures
         yield return CreateCompleteConversationWithMessages();
         yield return CreateSimpleConversation();
         yield return CreateLongRunningConversation();
-        
+
         yield return ConversationBuilder.CompletedConversation();
         yield return ConversationBuilder.WebChat();
         yield return ConversationBuilder.TelegramChat();

@@ -61,7 +61,7 @@ public static class IvanDataSeeder
                 Id = Guid.NewGuid(),
                 PersonalityProfileId = ivanProfile.Id,
                 Name = "Избегание потолка",
-                Category = "CoreValues", 
+                Category = "CoreValues",
                 Description = "Стремление избежать застоя в карьере, постоянный поиск роста и развития",
                 Weight = 9.0,
                 CreatedAt = DateTime.UtcNow,

@@ -61,26 +61,26 @@ public class MCPClient : IMCPClient, IDisposable
             };
 
             var response = await SendRequestAsync(initRequest);
-            
+
             if (response.Error == null)
             {
                 _isConnected = true;
                 _logger.LogInformation("✅ MCP connection initialized successfully");
-                
+
                 // Send initialized notification (no response expected)
                 var initializedNotification = new MCPRequest
                 {
                     Method = "notifications/initialized",
                     Params = new { }
                 };
-                
+
                 await SendNotificationAsync(initializedNotification);
-                
+
                 return true;
             }
             else
             {
-                _logger.LogError("❌ MCP initialization failed: {ErrorCode} - {ErrorMessage}", 
+                _logger.LogError("❌ MCP initialization failed: {ErrorCode} - {ErrorMessage}",
                     response.Error.Code, response.Error.Message);
                 return false;
             }
@@ -102,30 +102,30 @@ public class MCPClient : IMCPClient, IDisposable
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var httpResponse = await _httpClient.PostAsync("/mcp", content);
-            
+
             if (httpResponse.IsSuccessStatusCode)
             {
                 var responseText = await httpResponse.Content.ReadAsStringAsync();
                 var mcpResponse = JsonSerializer.Deserialize<MCPResponse>(responseText);
 
                 _logger.LogDebug("📥 Received MCP response for ID: {RequestId}", request.Id);
-                
-                return mcpResponse ?? new MCPResponse 
-                { 
+
+                return mcpResponse ?? new MCPResponse
+                {
                     Error = new MCPError { Code = -32700, Message = "Parse error: Invalid response format" }
                 };
             }
             else
             {
-                _logger.LogWarning("⚠️ HTTP error from MCP server: {StatusCode} - {ReasonPhrase}", 
+                _logger.LogWarning("⚠️ HTTP error from MCP server: {StatusCode} - {ReasonPhrase}",
                     httpResponse.StatusCode, httpResponse.ReasonPhrase);
-                
-                return new MCPResponse 
-                { 
-                    Error = new MCPError 
-                    { 
-                        Code = (int)httpResponse.StatusCode, 
-                        Message = $"HTTP {httpResponse.StatusCode}: {httpResponse.ReasonPhrase}" 
+
+                return new MCPResponse
+                {
+                    Error = new MCPError
+                    {
+                        Code = (int)httpResponse.StatusCode,
+                        Message = $"HTTP {httpResponse.StatusCode}: {httpResponse.ReasonPhrase}"
                     }
                 };
             }
@@ -133,13 +133,13 @@ public class MCPClient : IMCPClient, IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "💥 Failed to send MCP request: {Method}", request.Method);
-            
-            return new MCPResponse 
-            { 
-                Error = new MCPError 
-                { 
-                    Code = -32603, 
-                    Message = $"Internal error: {ex.Message}" 
+
+            return new MCPResponse
+            {
+                Error = new MCPError
+                {
+                    Code = -32603,
+                    Message = $"Internal error: {ex.Message}"
                 }
             };
         }
@@ -154,10 +154,10 @@ public class MCPClient : IMCPClient, IDisposable
         };
 
         var response = await SendRequestAsync(request);
-        
+
         if (response.Error != null)
         {
-            _logger.LogError("Failed to list MCP tools: {ErrorCode} - {ErrorMessage}", 
+            _logger.LogError("Failed to list MCP tools: {ErrorCode} - {ErrorMessage}",
                 response.Error.Code, response.Error.Message);
             return new List<MCPTool>();
         }
@@ -178,11 +178,11 @@ public class MCPClient : IMCPClient, IDisposable
             }
         };
 
-        _logger.LogInformation("🔧 Calling MCP tool: {ToolName} with {ParameterCount} parameters", 
+        _logger.LogInformation("🔧 Calling MCP tool: {ToolName} with {ParameterCount} parameters",
             toolName, parameters.Count);
 
         var response = await SendRequestAsync(request);
-        
+
         if (response.Error != null)
         {
             _logger.LogError("Tool call failed: {ToolName} - {ErrorMessage}", toolName, response.Error.Message);
@@ -204,7 +204,7 @@ public class MCPClient : IMCPClient, IDisposable
 
             // Notifications don't expect responses, so we don't wait for success
             await _httpClient.PostAsync("/mcp/notify", content);
-            
+
             _logger.LogDebug("📢 Sent MCP notification: {Method}", notification.Method);
         }
         catch (Exception ex)
@@ -218,11 +218,11 @@ public class MCPClient : IMCPClient, IDisposable
         if (_isConnected)
         {
             _logger.LogInformation("🔌 Disconnecting from MCP server");
-            
+
             // Send disconnect notification if needed
             _isConnected = false;
         }
-        
+
         return Task.CompletedTask;
     }
 

@@ -39,33 +39,33 @@ public class SecurityHeadersMiddleware
     private static void AddSecurityHeaders(HttpContext context)
     {
         var response = context.Response;
-        
+
         // Only add headers if they don't already exist (avoid duplicates)
-        
+
         // X-Frame-Options: Prevent the page from being displayed in a frame
         if (!response.Headers.ContainsKey("X-Frame-Options"))
         {
             response.Headers["X-Frame-Options"] = "DENY";
         }
-        
+
         // X-Content-Type-Options: Prevent MIME type sniffing
         if (!response.Headers.ContainsKey("X-Content-Type-Options"))
         {
             response.Headers["X-Content-Type-Options"] = "nosniff";
         }
-        
+
         // X-XSS-Protection: Enable XSS filtering
         if (!response.Headers.ContainsKey("X-XSS-Protection"))
         {
             response.Headers["X-XSS-Protection"] = "1; mode=block";
         }
-        
+
         // Referrer-Policy: Control referrer information
         if (!response.Headers.ContainsKey("Referrer-Policy"))
         {
             response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         }
-        
+
         // Content-Security-Policy: Define valid sources for content
         if (!response.Headers.ContainsKey("Content-Security-Policy"))
         {
@@ -78,10 +78,10 @@ public class SecurityHeadersMiddleware
                           "media-src 'self'; " +
                           "object-src 'none'; " +
                           "frame-src 'none'";
-            
+
             response.Headers["Content-Security-Policy"] = cspPolicy;
         }
-        
+
         // Permissions-Policy: Control browser features
         if (!response.Headers.ContainsKey("Permissions-Policy"))
         {
@@ -93,10 +93,10 @@ public class SecurityHeadersMiddleware
                                   "magnetometer=(), " +
                                   "gyroscope=(), " +
                                   "accelerometer=()";
-            
+
             response.Headers["Permissions-Policy"] = permissionsPolicy;
         }
-        
+
         // Remove server information headers for security
         response.Headers.Remove("Server");
         response.Headers.Remove("X-Powered-By");

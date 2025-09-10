@@ -26,11 +26,11 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
+
         // Ensure database is clean and recreated with Ivan
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
-        
+
         // Seed Ivan personality using the same logic as BaseTestWithDatabase
         var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
         ivan.Name = "Ivan";
@@ -49,10 +49,10 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var statusResponse = JsonSerializer.Deserialize<JsonElement>(content);
-        
+
         statusResponse.GetProperty("personalityLoaded").GetBoolean().Should().BeTrue();
         // Note: mcpConnected might be false in test environment due to external dependencies
         statusResponse.GetProperty("timestamp").ValueKind.Should().Be(JsonValueKind.String);
@@ -73,10 +73,10 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var statusResponse = JsonSerializer.Deserialize<JsonElement>(content);
-        
+
         statusResponse.GetProperty("personalityLoaded").GetBoolean().Should().BeFalse();
         statusResponse.GetProperty("status").GetString().Should().Be("Not Ready");
     }
@@ -90,7 +90,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
         // Don't seed Ivan - this is the test case
-        
+
         // Arrange
         var chatRequest = new ChatRequestDto
         {
@@ -104,7 +104,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("Ivan's personality profile not found");
     }
@@ -127,7 +127,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var messageDto = JsonSerializer.Deserialize<MessageDto>(content, new JsonSerializerOptions
         {
@@ -139,7 +139,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         messageDto.Content.Should().NotBeNullOrEmpty();
         messageDto.ConversationId.Should().NotBeEmpty();
         messageDto.Timestamp.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
-        
+
         // Verify metadata contains expected fields
         messageDto.Metadata.Should().ContainKey("mood");
         messageDto.Metadata.Should().ContainKey("confidence");
@@ -312,7 +312,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var messageDto = JsonSerializer.Deserialize<MessageDto>(content, new JsonSerializerOptions
         {

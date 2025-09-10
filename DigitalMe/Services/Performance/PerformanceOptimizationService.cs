@@ -15,13 +15,13 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     private readonly IMemoryCache _cache;
     private readonly ILogger<PerformanceOptimizationService> _logger;
     private readonly IntegrationSettings _settings;
-    
+
     // Rate limiting tracking
     private readonly ConcurrentDictionary<string, RateLimitBucket> _rateLimitBuckets;
-    
+
     // Performance metrics
     private readonly ConcurrentDictionary<string, RequestMetrics> _requestMetrics;
-    
+
     public PerformanceOptimizationService(
         IMemoryCache cache,
         ILogger<PerformanceOptimizationService> logger,
@@ -45,7 +45,7 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
                 _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
                 return result;
             }
-            
+
             _logger.LogDebug("Cache miss for key: {CacheKey}", cacheKey);
             return null;
         }
@@ -68,7 +68,7 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
             };
 
             _cache.Set(cacheKey, value, options);
-            _logger.LogDebug("Cached response for key: {CacheKey}, expiration: {Expiration}", 
+            _logger.LogDebug("Cached response for key: {CacheKey}, expiration: {Expiration}",
                 cacheKey, expiration ?? TimeSpan.FromMinutes(15));
         }
         catch (Exception ex)
@@ -111,7 +111,7 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
-        
+
         return Task.FromResult(bucket.ShouldRateLimit());
     }
 
@@ -119,15 +119,15 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
-        
+
         bucket.RecordUsage();
-        
+
         // Update metrics
         var metricsKey = $"{serviceName}_requests";
-        _requestMetrics.AddOrUpdate(metricsKey, 
+        _requestMetrics.AddOrUpdate(metricsKey,
             new RequestMetrics { TotalRequests = 1 },
             (k, v) => { v.TotalRequests++; return v; });
-            
+
         return Task.CompletedTask;
     }
 
@@ -135,7 +135,7 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     {
         var key = $"{serviceName}:{identifier}";
         var bucket = _rateLimitBuckets.GetOrAdd(key, _ => new RateLimitBucket(serviceName, identifier, _settings));
-        
+
         return Task.FromResult(bucket.GetStatus());
     }
 
@@ -144,14 +144,14 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     #region Bulk Operations
 
     public async Task<IEnumerable<TResult>> BatchOperationsAsync<TInput, TResult>(
-        IEnumerable<TInput> inputs, 
-        Func<IEnumerable<TInput>, Task<IEnumerable<TResult>>> batchProcessor, 
+        IEnumerable<TInput> inputs,
+        Func<IEnumerable<TInput>, Task<IEnumerable<TResult>>> batchProcessor,
         int batchSize = 50)
     {
         var results = new List<TResult>();
         var inputList = inputs.ToList();
-        
-        _logger.LogInformation("Processing {TotalItems} items in batches of {BatchSize}", 
+
+        _logger.LogInformation("Processing {TotalItems} items in batches of {BatchSize}",
             inputList.Count, batchSize);
 
         for (int i = 0; i < inputList.Count; i += batchSize)
@@ -159,14 +159,14 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
             var batch = inputList.Skip(i).Take(batchSize);
             var batchNumber = (i / batchSize) + 1;
             var totalBatches = (int)Math.Ceiling((double)inputList.Count / batchSize);
-            
+
             _logger.LogDebug("Processing batch {BatchNumber}/{TotalBatches}", batchNumber, totalBatches);
-            
+
             try
             {
                 var batchResults = await batchProcessor(batch);
                 results.AddRange(batchResults);
-                
+
                 // Small delay between batches to be respectful to APIs
                 if (i + batchSize < inputList.Count)
                 {
@@ -175,15 +175,15 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing batch {BatchNumber}/{TotalBatches}", 
+                _logger.LogError(ex, "Error processing batch {BatchNumber}/{TotalBatches}",
                     batchNumber, totalBatches);
                 throw;
             }
         }
-        
-        _logger.LogInformation("Completed processing {TotalItems} items, got {ResultCount} results", 
+
+        _logger.LogInformation("Completed processing {TotalItems} items, got {ResultCount} results",
             inputList.Count, results.Count);
-        
+
         return results;
     }
 
@@ -194,33 +194,33 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     public async Task<HttpClientPoolStats> GetHttpClientPoolStatsAsync()
     {
         var stats = new HttpClientPoolStats();
-        
+
         // Aggregate metrics from our tracking
         foreach (var kvp in _requestMetrics)
         {
             var serviceName = kvp.Key.Replace("_requests", "");
             var metrics = kvp.Value;
-            
+
             stats.TotalRequests[serviceName] = metrics.TotalRequests;
             stats.FailedRequests[serviceName] = metrics.FailedRequests;
             stats.AverageResponseTime[serviceName] = metrics.AverageResponseTime;
         }
-        
+
         return stats;
     }
 
     public void RecordRequestMetrics(string serviceName, TimeSpan responseTime, bool success)
     {
         var key = $"{serviceName}_requests";
-        _requestMetrics.AddOrUpdate(key, 
-            new RequestMetrics 
-            { 
-                TotalRequests = 1, 
+        _requestMetrics.AddOrUpdate(key,
+            new RequestMetrics
+            {
+                TotalRequests = 1,
                 FailedRequests = success ? 0 : 1,
                 TotalResponseTime = responseTime,
                 AverageResponseTime = responseTime
             },
-            (k, v) => 
+            (k, v) =>
             {
                 v.TotalRequests++;
                 if (!success) v.FailedRequests++;
@@ -243,7 +243,7 @@ internal class RateLimitBucket
     private readonly int _maxTokens;
     private readonly TimeSpan _refillInterval;
     private readonly object _lock = new object();
-    
+
     private int _currentTokens;
     private DateTime _lastRefill;
 
@@ -251,7 +251,7 @@ internal class RateLimitBucket
     {
         _serviceName = serviceName;
         _identifier = identifier;
-        
+
         // Get service-specific rate limits
         _maxTokens = GetServiceRateLimit(serviceName, settings);
         _refillInterval = TimeSpan.FromMinutes(1);
@@ -285,7 +285,7 @@ internal class RateLimitBucket
         lock (_lock)
         {
             RefillTokens();
-            
+
             var nextRefill = _lastRefill.Add(_refillInterval);
             return new RateLimitStatus
             {
@@ -304,7 +304,7 @@ internal class RateLimitBucket
     {
         var now = DateTime.UtcNow;
         var timeSinceLastRefill = now - _lastRefill;
-        
+
         if (timeSinceLastRefill >= _refillInterval)
         {
             _currentTokens = _maxTokens;

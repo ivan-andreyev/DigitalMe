@@ -13,19 +13,19 @@ public abstract class BaseEntity : IEntity
     /// </summary>
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
-    
+
     /// <summary>
     /// Timestamp when the entity was created (UTC).
     /// Set automatically on construction, immutable thereafter.
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
     /// <summary>
     /// Timestamp when the entity was last updated (UTC).
     /// Updated automatically by EF Core SaveChanges override.
     /// </summary>
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    
+
     /// <summary>
     /// Protected constructor for Entity Framework and derived classes.
     /// Ensures consistent initialization of base properties.
@@ -43,17 +43,17 @@ public abstract class AuditableBaseEntity : BaseEntity, IAuditableEntity
     /// Identifier of the user who created this entity.
     /// </summary>
     public string? CreatedBy { get; set; }
-    
+
     /// <summary>
     /// Identifier of the user who last updated this entity.
     /// </summary>
     public string? UpdatedBy { get; set; }
-    
+
     /// <summary>
     /// Optional reason for the last update (for audit purposes).
     /// </summary>
     public string? ChangeReason { get; set; }
-    
+
     protected AuditableBaseEntity() : base() { }
 }
 

@@ -9,12 +9,12 @@ public class IntegrationSettings
     /// Slack integration configuration
     /// </summary>
     public SlackSettings Slack { get; set; } = new();
-    
+
     /// <summary>
     /// ClickUp integration configuration  
     /// </summary>
     public ClickUpSettings ClickUp { get; set; } = new();
-    
+
     /// <summary>
     /// Existing integrations
     /// </summary>
@@ -142,22 +142,22 @@ public abstract class BaseIntegrationSettings
     /// Whether this integration is enabled
     /// </summary>
     public bool Enabled { get; set; } = true;
-    
+
     /// <summary>
     /// API endpoint override (optional)
     /// </summary>
     public string? BaseUrl { get; set; }
-    
+
     /// <summary>
     /// Timeout in seconds for API calls
     /// </summary>
     public int TimeoutSeconds { get; set; } = 30;
-    
+
     /// <summary>
     /// Max retries for failed requests
     /// </summary>
     public int MaxRetries { get; set; } = 3;
-    
+
     /// <summary>
     /// Rate limiting - requests per minute
     /// </summary>

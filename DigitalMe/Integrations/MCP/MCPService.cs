@@ -24,15 +24,15 @@ public class MCPService : IMcpService
 
     public async Task<string> SendMessageAsync(string message, PersonalityContext context)
     {
-        try 
+        try
         {
             _logger.LogInformation("Отправляем сообщение через MCP (Anthropic): {MessageLength} символов", message.Length);
-            
+
             // Use the real Anthropic service
             var response = await _anthropicService.SendMessageAsync(message, context.Profile);
-            
+
             _logger.LogInformation("Получен ответ от Anthropic: {ResponseLength} символов", response.Length);
-            
+
             return response;
         }
         catch (Exception ex)
@@ -57,10 +57,10 @@ public class MCPService : IMcpService
         try
         {
             var result = await _toolExecutor.ExecuteToolAsync(toolName, parameters);
-            return new MCPResponse 
-            { 
-                Result = new MCPResult 
-                { 
+            return new MCPResponse
+            {
+                Result = new MCPResult
+                {
                     Content = result?.ToString() ?? "No result",
                     ToolCalls = new List<MCPToolCall>()
                 }
@@ -69,12 +69,12 @@ public class MCPService : IMcpService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing tool {ToolName}", toolName);
-            return new MCPResponse 
-            { 
-                Error = new MCPError 
-                { 
-                    Code = -1, 
-                    Message = $"Tool execution failed: {ex.Message}" 
+            return new MCPResponse
+            {
+                Error = new MCPError
+                {
+                    Code = -1,
+                    Message = $"Tool execution failed: {ex.Message}"
                 }
             };
         }

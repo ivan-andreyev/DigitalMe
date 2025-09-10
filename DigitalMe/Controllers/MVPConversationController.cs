@@ -45,7 +45,7 @@ public class MVPConversationController : ControllerBase
                 return BadRequest(new { error = "Message cannot be empty" });
             }
 
-            _logger.LogInformation("📨 Processing chat request (message length: {MessageLength})", 
+            _logger.LogInformation("📨 Processing chat request (message length: {MessageLength})",
                 request.Message.Length);
 
             var response = await _messageProcessor.ProcessMessageAsync(request.Message);
@@ -56,7 +56,7 @@ public class MVPConversationController : ControllerBase
                 Timestamp = DateTime.UtcNow
             };
 
-            _logger.LogInformation("✅ Chat response generated successfully (response length: {ResponseLength})", 
+            _logger.LogInformation("✅ Chat response generated successfully (response length: {ResponseLength})",
                 response.Length);
 
             return Ok(result);
@@ -96,8 +96,8 @@ public class MVPConversationController : ControllerBase
     {
         try
         {
-            return Ok(new 
-            { 
+            return Ok(new
+            {
                 status = "healthy",
                 service = "MVPConversationController",
                 timestamp = DateTime.UtcNow

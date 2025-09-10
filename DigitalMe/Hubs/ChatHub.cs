@@ -23,8 +23,8 @@ public class ChatHub : Hub
     {
         var groupName = $"chat_{userId}";
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        
-        _logger.LogInformation("👋 User {UserId} joined chat from {Platform} (Connection: {ConnectionId})", 
+
+        _logger.LogInformation("👋 User {UserId} joined chat from {Platform} (Connection: {ConnectionId})",
             userId, platform, Context.ConnectionId);
 
         await Clients.Caller.SendAsync("JoinedChat", new
@@ -39,9 +39,9 @@ public class ChatHub : Hub
     // TEST METHOD - Remove after debugging
     public async Task TestMessage(string message)
     {
-        _logger.LogInformation("🧪 TEST MESSAGE RECEIVED: '{TestMessage}' from connection {ConnectionId}", 
+        _logger.LogInformation("🧪 TEST MESSAGE RECEIVED: '{TestMessage}' from connection {ConnectionId}",
             message, Context.ConnectionId);
-        
+
         await Clients.Caller.SendAsync("TestResponse", new
         {
             Message = $"Test received: {message}",
@@ -59,10 +59,10 @@ public class ChatHub : Hub
 
             // Process user message through MessageProcessor
             var result = await _messageProcessor.ProcessUserMessageAsync(request);
-            
-            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message", 
+
+            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
                 result.GroupName);
-                
+
             await Clients.Group(result.GroupName).SendAsync("MessageReceived", new MessageDto
             {
                 Id = result.UserMessage.Id,
@@ -78,7 +78,7 @@ public class ChatHub : Hub
             });
 
             // Show typing indicator
-            _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}", 
+            _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
                 result.GroupName);
             await Clients.Group(result.GroupName).SendAsync("TypingIndicator", new
             {
@@ -89,15 +89,15 @@ public class ChatHub : Hub
 
             // Process agent response synchronously for integration tests reliability
             await ProcessAgentResponseAsync(request, result.Conversation.Id, result.GroupName);
-            
-            _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}", 
+
+            _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}",
                 request.UserId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "💥 ChatHub.SendMessage FAILED for user {UserId}: {ErrorMessage}", 
+            _logger.LogError(ex, "💥 ChatHub.SendMessage FAILED for user {UserId}: {ErrorMessage}",
                 request.UserId, ex.Message);
-            
+
             await Clients.Caller.SendAsync("Error", new
             {
                 Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
@@ -123,7 +123,7 @@ public class ChatHub : Hub
             });
 
             // Send agent response to all clients in group
-            _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}", 
+            _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
                 groupName);
             await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
             {
@@ -142,13 +142,13 @@ public class ChatHub : Hub
                     ["backgroundProcessed"] = true
                 }
             });
-            
-            _logger.LogInformation("🎉 Background processing COMPLETED SUCCESSFULLY for user {UserId}", 
+
+            _logger.LogInformation("🎉 Background processing COMPLETED SUCCESSFULLY for user {UserId}",
                 request.UserId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "💥 Background processing FAILED for user {UserId}: {ErrorMessage}", 
+            _logger.LogError(ex, "💥 Background processing FAILED for user {UserId}: {ErrorMessage}",
                 request.UserId, ex.Message);
 
             // Hide typing indicator on error
@@ -157,7 +157,7 @@ public class ChatHub : Hub
                 IsTyping = false,
                 User = "Ivan"
             });
-            
+
             await Clients.Group(groupName).SendAsync("Error", new
             {
                 Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
@@ -171,8 +171,8 @@ public class ChatHub : Hub
     {
         var groupName = $"chat_{userId}";
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-        
-        _logger.LogInformation("User {UserId} left chat (Connection: {ConnectionId})", 
+
+        _logger.LogInformation("User {UserId} left chat (Connection: {ConnectionId})",
             userId, Context.ConnectionId);
 
         await Clients.Group(groupName).SendAsync("UserLeft", new

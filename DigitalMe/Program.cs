@@ -24,7 +24,7 @@ else if (builder.Environment.IsProduction())
     // In production, rely on environment variables
     // Note: AddEnvironmentVariables() is already included by default in WebApplicationBuilder
     builder.Configuration.AddEnvironmentVariables();
-    
+
     // For Azure/cloud deployments, add Key Vault configuration here
     // Example: builder.Configuration.AddAzureKeyVault(...);
 }
@@ -34,15 +34,15 @@ if (builder.Environment.IsProduction())
 {
     // Configure runtime optimizations
     var runtimeConfig = builder.Configuration.GetSection("RuntimeOptimizations");
-    
+
     if (runtimeConfig.GetValue<bool>("GCServer"))
     {
         Environment.SetEnvironmentVariable("DOTNET_gcServer", "1");
     }
-    
+
     var minWorkerThreads = runtimeConfig.GetValue<int>("ThreadPoolMinWorkerThreads");
     var minCompletionPortThreads = runtimeConfig.GetValue<int>("ThreadPoolMinCompletionPortThreads");
-    
+
     if (minWorkerThreads > 0 && minCompletionPortThreads > 0)
     {
         ThreadPool.SetMinThreads(minWorkerThreads, minCompletionPortThreads);
@@ -94,9 +94,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // }
 // else
 // {
-    // Force SQLite for all environments until CloudSQL is properly configured
-    builder.Services.AddDbContext<DigitalMeDbContext>(options => 
-        options.UseSqlite("Data Source=digitalme.db"));
+// Force SQLite for all environments until CloudSQL is properly configured
+builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+    options.UseSqlite("Data Source=digitalme.db"));
 // }
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
@@ -126,10 +126,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         // Securely get JWT key with environment variable fallback
         var jwtKey = builder.Configuration["JWT:Key"];
         var envJwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-        
+
         // Use environment variable if available, otherwise use config
         var secureJwtKey = !string.IsNullOrWhiteSpace(envJwtKey) ? envJwtKey : jwtKey;
-        
+
         // Validate key strength
         if (string.IsNullOrWhiteSpace(secureJwtKey) || secureJwtKey.Length < 32)
         {
@@ -137,17 +137,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 throw new InvalidOperationException("JWT key must be at least 32 characters in production. Set JWT_KEY environment variable.");
             }
-            
+
             // Generate secure key for development
             using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
             var keyBytes = new byte[64];
             rng.GetBytes(keyBytes);
             secureJwtKey = Convert.ToBase64String(keyBytes);
-            
+
             var logger = builder.Services.BuildServiceProvider().GetService<ILogger<Program>>();
             logger?.LogWarning("Generated temporary JWT key for development. For production, set JWT_KEY environment variable.");
         }
-        
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -158,7 +158,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["JWT:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secureJwtKey))
         };
-        
+
         // Configure for API - return JSON responses instead of redirects
         options.Events = new JwtBearerEvents
         {
@@ -173,14 +173,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Secrets Management Service - Must be registered before other services that need secrets
-builder.Services.AddSingleton<DigitalMe.Services.Configuration.ISecretsManagementService, 
+builder.Services.AddSingleton<DigitalMe.Services.Configuration.ISecretsManagementService,
                                DigitalMe.Services.Configuration.SecretsManagementService>();
 
 // DigitalMe Services - Standardized Registration
 builder.Services.AddDigitalMeServices(builder.Configuration);
 
 // Database Migration Service
-builder.Services.AddScoped<DigitalMe.Services.Database.IDatabaseMigrationService, 
+builder.Services.AddScoped<DigitalMe.Services.Database.IDatabaseMigrationService,
                            DigitalMe.Services.Database.DatabaseMigrationService>();
 
 // Configure Security settings
@@ -194,11 +194,11 @@ builder.Services.Configure<DigitalMe.Configuration.JwtSettings>(
 // Health Checks - Standard ASP.NET Core as required by MVP Phase 6 plan
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<DigitalMeDbContext>()
-    .AddCheck("claude-api", () => 
+    .AddCheck("claude-api", () =>
     {
         var apiKey = builder.Configuration["Anthropic:ApiKey"];
-        return !string.IsNullOrEmpty(apiKey) 
-            ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy() 
+        return !string.IsNullOrEmpty(apiKey)
+            ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy()
             : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Claude API key not configured");
     });
 
@@ -293,7 +293,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
                 QueueLimit = 10
             }));
-    
+
     // Strict rate limiter for authentication endpoints (10 requests per minute per IP)
     options.AddPolicy("auth", httpContext =>
         System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
@@ -305,7 +305,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
                 QueueLimit = 2
             }));
-    
+
     // Sliding window rate limiter for chat endpoints (50 requests per minute per IP)
     options.AddPolicy("chat", httpContext =>
         System.Threading.RateLimiting.RateLimitPartition.GetSlidingWindowLimiter(
@@ -318,7 +318,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
                 QueueLimit = 5
             }));
-    
+
     // Strict rate limiter for webhook endpoints (30 requests per minute per IP)
     options.AddPolicy("webhook", httpContext =>
         System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
@@ -330,7 +330,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst,
                 QueueLimit = 5
             }));
-    
+
     // Global rejection response
     options.OnRejected = async (context, cancellationToken) =>
     {
@@ -363,12 +363,12 @@ try
     using var toolScope = app.Services.CreateScope();
     var toolRegistry = toolScope.ServiceProvider.GetRequiredService<DigitalMe.Services.Tools.IToolRegistry>();
     var toolStrategies = toolScope.ServiceProvider.GetServices<DigitalMe.Services.Tools.IToolStrategy>();
-    
+
     foreach (var strategy in toolStrategies)
     {
         toolRegistry.RegisterTool(strategy);
     }
-    
+
     var appLogger = app.Services.GetService<ILogger<Program>>();
     appLogger?.LogInformation("🔧 TOOL REGISTRY INITIALIZED with {Count} strategies", toolStrategies.Count());
 }
@@ -386,52 +386,52 @@ migrationLogger?.LogInformation("🚀 APPLICATION BUILD COMPLETED - Starting mig
 await Task.Run(async () =>
 {
     try
-{
-    migrationLogger?.LogInformation("🔍 STEP 1: Creating service scope for migrations");
-    using (var scope = app.Services.CreateScope())
     {
-        migrationLogger?.LogInformation("🔍 STEP 2: Service scope created successfully");
-        
-        migrationLogger?.LogInformation("🔍 STEP 3: Getting DigitalMeDbContext from services");
-        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        migrationLogger?.LogInformation("🔍 STEP 4: DbContext retrieved successfully");
-        
-        migrationLogger?.LogInformation("🔍 STEP 5: Getting logger from services");
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        migrationLogger?.LogInformation("🔍 STEP 6: Logger retrieved successfully");
-        
-        try
+        migrationLogger?.LogInformation("🔍 STEP 1: Creating service scope for migrations");
+        using (var scope = app.Services.CreateScope())
         {
-            // Use DatabaseMigrationService for better separation of concerns
-            var migrationService = scope.ServiceProvider.GetRequiredService<DigitalMe.Services.Database.IDatabaseMigrationService>();
-            await migrationService.ApplyMigrationsAsync(context);
-                
-            // Seed Ivan's personality data for MVP (skip in Test environment for test isolation)
-            if (app.Environment.EnvironmentName != "Testing")
+            migrationLogger?.LogInformation("🔍 STEP 2: Service scope created successfully");
+
+            migrationLogger?.LogInformation("🔍 STEP 3: Getting DigitalMeDbContext from services");
+            var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+            migrationLogger?.LogInformation("🔍 STEP 4: DbContext retrieved successfully");
+
+            migrationLogger?.LogInformation("🔍 STEP 5: Getting logger from services");
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            migrationLogger?.LogInformation("🔍 STEP 6: Logger retrieved successfully");
+
+            try
             {
-                logger.LogInformation("🌱 STEP 16: Seeding Ivan's personality data...");
-                DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
-                logger.LogInformation("✅ STEP 17: Ivan's personality data seeded successfully!");
+                // Use DatabaseMigrationService for better separation of concerns
+                var migrationService = scope.ServiceProvider.GetRequiredService<DigitalMe.Services.Database.IDatabaseMigrationService>();
+                await migrationService.ApplyMigrationsAsync(context);
+
+                // Seed Ivan's personality data for MVP (skip in Test environment for test isolation)
+                if (app.Environment.EnvironmentName != "Testing")
+                {
+                    logger.LogInformation("🌱 STEP 16: Seeding Ivan's personality data...");
+                    DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
+                    logger.LogInformation("✅ STEP 17: Ivan's personality data seeded successfully!");
+                }
+                else
+                {
+                    logger.LogInformation("🧪 STEP 16: Skipping Ivan's personality seeding in Test environment for test isolation");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                logger.LogInformation("🧪 STEP 16: Skipping Ivan's personality seeding in Test environment for test isolation");
+                logger.LogError(ex, "❌ MIGRATION ERROR - Failed to apply database migrations. Error: {ErrorMessage}. Inner: {InnerException}. StackTrace: {StackTrace}",
+                    ex.Message, ex.InnerException?.Message, ex.StackTrace);
+                // Don't throw - let app start to see migration errors in logs
             }
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "❌ MIGRATION ERROR - Failed to apply database migrations. Error: {ErrorMessage}. Inner: {InnerException}. StackTrace: {StackTrace}", 
-                ex.Message, ex.InnerException?.Message, ex.StackTrace);
-            // Don't throw - let app start to see migration errors in logs
-        }
+        migrationLogger?.LogInformation("✅ MIGRATION SCOPE DISPOSED - Migration check completed");
     }
-    migrationLogger?.LogInformation("✅ MIGRATION SCOPE DISPOSED - Migration check completed");
-}
-catch (Exception scopeEx)
-{
-    migrationLogger?.LogError(scopeEx, "❌ CRITICAL ERROR - Failed to create service scope for migrations. Error: {ErrorMessage}", scopeEx.Message);
-    migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
-}
+    catch (Exception scopeEx)
+    {
+        migrationLogger?.LogError(scopeEx, "❌ CRITICAL ERROR - Failed to create service scope for migrations. Error: {ErrorMessage}", scopeEx.Message);
+        migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
+    }
 });
 
 migrationLogger?.LogInformation("✅ MIGRATION SECTION COMPLETED - Proceeding to secrets validation and middleware");
@@ -441,34 +441,34 @@ try
 {
     var secretsLogger = app.Services.GetService<ILogger<Program>>();
     secretsLogger?.LogInformation("🔐 SECRETS VALIDATION: Starting configuration validation...");
-    
+
     using (var secretsScope = app.Services.CreateScope())
     {
         var secretsService = secretsScope.ServiceProvider.GetRequiredService<DigitalMe.Services.Configuration.ISecretsManagementService>();
         var validation = secretsService.ValidateSecrets();
-        
+
         if (!validation.IsValid)
         {
-            secretsLogger?.LogError("❌ SECRETS VALIDATION FAILED: {MissingCount} missing secrets, {WeakCount} weak secrets", 
+            secretsLogger?.LogError("❌ SECRETS VALIDATION FAILED: {MissingCount} missing secrets, {WeakCount} weak secrets",
                 validation.MissingSecrets.Count, validation.WeakSecrets.Count);
-            
+
             foreach (var missing in validation.MissingSecrets)
             {
                 secretsLogger?.LogError("   Missing: {Secret}", missing);
             }
-            
+
             foreach (var weak in validation.WeakSecrets)
             {
                 secretsLogger?.LogWarning("   Weak: {Secret}", weak);
             }
-            
+
             // In production, fail fast for critical secrets (but allow Testing environment)
             var isSecure = secretsService.IsSecureEnvironment();
             var isTest = secretsService.IsTestEnvironment();
             var hasMissing = validation.MissingSecrets.Any();
-            
+
             secretsLogger?.LogInformation("Environment check: IsSecure={IsSecure}, IsTest={IsTest}, HasMissing={HasMissing}", isSecure, isTest, hasMissing);
-            
+
             if (isSecure && !isTest && hasMissing)
             {
                 throw new InvalidOperationException($"Critical secrets validation failed in production environment. Missing: {string.Join(", ", validation.MissingSecrets)}");
@@ -478,13 +478,13 @@ try
         {
             secretsLogger?.LogInformation("✅ SECRETS VALIDATION: All critical secrets configured correctly");
         }
-        
+
         // Log warnings and recommendations
         foreach (var warning in validation.Warnings)
         {
             secretsLogger?.LogWarning("⚠️ SECRETS: {Warning}", warning);
         }
-        
+
         foreach (var recommendation in validation.SecurityRecommendations)
         {
             secretsLogger?.LogInformation("💡 SECURITY: {Recommendation}", recommendation);
@@ -495,7 +495,7 @@ catch (Exception secretsEx)
 {
     var secretsLogger = app.Services.GetService<ILogger<Program>>();
     secretsLogger?.LogError(secretsEx, "❌ CRITICAL ERROR: Secrets validation failed");
-    
+
     // In production, fail fast for secrets issues
     if (app.Environment.IsProduction())
     {
@@ -624,7 +624,7 @@ app.MapGet("/security/secrets-validation", (DigitalMe.Services.Configuration.ISe
     {
         return Results.NotFound();
     }
-    
+
     var validation = secretsService.ValidateSecrets();
     return Results.Ok(new
     {
@@ -661,7 +661,7 @@ app.MapGet("/runtime/threadpool", () =>
     ThreadPool.GetMinThreads(out int minWorkerThreads, out int minCompletionPortThreads);
     ThreadPool.GetMaxThreads(out int maxWorkerThreads, out int maxCompletionPortThreads);
     ThreadPool.GetAvailableThreads(out int availableWorkerThreads, out int availableCompletionPortThreads);
-    
+
     return Results.Ok(new
     {
         minWorkerThreads,
@@ -691,21 +691,21 @@ using (var scope = app.Services.CreateScope())
         startupLogger?.LogInformation("🔍 TELEGRAM BOT: Creating service scope...");
         var telegramService = scope.ServiceProvider.GetRequiredService<DigitalMe.Integrations.External.Telegram.ITelegramService>();
         startupLogger?.LogInformation("🔍 TELEGRAM BOT: TelegramService resolved successfully");
-        
+
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         startupLogger?.LogInformation("🔍 TELEGRAM BOT: Configuration resolved successfully");
-        
+
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         startupLogger?.LogInformation("🔍 TELEGRAM BOT: Logger resolved successfully");
-        
+
         var botToken = configuration.GetSection("Telegram:BotToken").Value;
         startupLogger?.LogInformation("🔍 TELEGRAM BOT: Bot token retrieved: {HasToken}", !string.IsNullOrEmpty(botToken));
-        
+
         if (!string.IsNullOrEmpty(botToken) && botToken.Trim() != "" && botToken != "YOUR_BOT_TOKEN_HERE")
         {
             logger.LogInformation("🤖 TELEGRAM BOT: Initializing with configured token...");
             var initialized = telegramService.InitializeAsync(botToken).GetAwaiter().GetResult();
-            
+
             if (initialized)
             {
                 logger.LogInformation("✅ TELEGRAM BOT: Successfully initialized and connected");

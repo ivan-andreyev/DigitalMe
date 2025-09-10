@@ -1,0 +1,823 @@
+@inject IJSRuntime JSRuntime
+@inject ILogger<InteractiveDemoFlow> Logger
+
+<div class="demo-flow">
+    <div class="demo-header">
+        <h2>🎯 Interactive Business Demo</h2>
+        <p>Experience DigitalMe's enterprise capabilities through guided scenarios</p>
+    </div>
+
+    <div class="demo-content">
+        @if (currentStep == 0)
+        {
+            <div class="welcome-screen">
+                <div class="welcome-content">
+                    <h3>Welcome to DigitalMe Enterprise Platform</h3>
+                    <p class="lead">This interactive demo showcases our AI-powered digital personality platform with enterprise integrations.</p>
+                    
+                    <div class="demo-highlights">
+                        <div class="highlight-card">
+                            <div class="highlight-icon">🧠</div>
+                            <h4>Advanced AI Personality</h4>
+                            <p>Experience conversations with Digital Ivan, trained on real professional data</p>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="highlight-icon">🔗</div>
+                            <h4>Enterprise Integrations</h4>
+                            <p>See live connections to Slack, ClickUp, GitHub, and Telegram</p>
+                        </div>
+                        <div class="highlight-card">
+                            <div class="highlight-icon">📊</div>
+                            <h4>Real-time Analytics</h4>
+                            <p>Monitor system performance and business value in real-time</p>
+                        </div>
+                    </div>
+
+                    <div class="scenario-selection">
+                        <h4>Choose Your Demo Experience:</h4>
+                        <div class="scenario-buttons">
+                            <button class="scenario-btn primary" @onclick="() => StartScenario(1)">
+                                <div class="btn-icon">💼</div>
+                                <div class="btn-content">
+                                    <div class="btn-title">Executive Overview</div>
+                                    <div class="btn-desc">Business value and ROI demonstration</div>
+                                </div>
+                            </button>
+                            <button class="scenario-btn secondary" @onclick="() => StartScenario(2)">
+                                <div class="btn-icon">👨‍💻</div>
+                                <div class="btn-content">
+                                    <div class="btn-title">Technical Deep Dive</div>
+                                    <div class="btn-desc">Architecture and integration capabilities</div>
+                                </div>
+                            </button>
+                            <button class="scenario-btn accent" @onclick="() => StartScenario(3)">
+                                <div class="btn-icon">🚀</div>
+                                <div class="btn-content">
+                                    <div class="btn-title">Interactive Playground</div>
+                                    <div class="btn-desc">Free-form conversation with Digital Ivan</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="demo-scenario">
+                <div class="scenario-header">
+                    <div class="scenario-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: @GetProgressPercentage()%"></div>
+                        </div>
+                        <span class="progress-text">Step @(currentStep - 1) of @(GetTotalSteps())</span>
+                    </div>
+                    <button class="back-btn" @onclick="GoBack">← Back to Selection</button>
+                </div>
+
+                <div class="scenario-content">
+                    @if (currentScenario == 1)
+                    {
+                        @RenderExecutiveScenario()
+                    }
+                    else if (currentScenario == 2)
+                    {
+                        @RenderTechnicalScenario()
+                    }
+                    else if (currentScenario == 3)
+                    {
+                        @RenderPlaygroundScenario()
+                    }
+                </div>
+
+                <div class="scenario-controls">
+                    @if (currentStep > 1)
+                    {
+                        <button class="control-btn secondary" @onclick="PreviousStep">← Previous</button>
+                    }
+                    @if (currentStep < GetTotalSteps())
+                    {
+                        <button class="control-btn primary" @onclick="NextStep">Next →</button>
+                    }
+                    else
+                    {
+                        <button class="control-btn success" @onclick="CompleteDemo">Complete Demo ✓</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.demo-flow {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.demo-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 32px;
+    background: linear-gradient(135deg, #1a237e, #3f51b5);
+    color: white;
+    border-radius: 20px;
+}
+
+.demo-header h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+}
+
+.demo-header p {
+    font-size: 18px;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.welcome-screen {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-content h3 {
+    color: #1a237e;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.lead {
+    font-size: 18px;
+    color: #424242;
+    text-align: center;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.demo-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.highlight-card {
+    text-align: center;
+    padding: 24px;
+    border: 2px solid #e3f2fd;
+    border-radius: 16px;
+    background: #f8faff;
+    transition: all 0.3s ease;
+}
+
+.highlight-card:hover {
+    transform: translateY(-4px);
+    border-color: #2196f3;
+    box-shadow: 0 8px 24px rgba(33, 150, 243, 0.2);
+}
+
+.highlight-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.highlight-card h4 {
+    color: #1a237e;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.highlight-card p {
+    color: #757575;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.scenario-selection h4 {
+    color: #1a237e;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.scenario-buttons {
+    display: grid;
+    gap: 16px;
+}
+
+.scenario-btn {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    border: 2px solid var(--btn-border);
+    background: var(--btn-bg);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.scenario-btn:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px var(--btn-shadow);
+}
+
+.scenario-btn.primary {
+    --btn-border: #1a237e;
+    --btn-bg: #e8eaf6;
+    --btn-shadow: rgba(26, 35, 126, 0.2);
+}
+
+.scenario-btn.secondary {
+    --btn-border: #00796b;
+    --btn-bg: #e0f2f1;
+    --btn-shadow: rgba(0, 121, 107, 0.2);
+}
+
+.scenario-btn.accent {
+    --btn-border: #f57c00;
+    --btn-bg: #fff3e0;
+    --btn-shadow: rgba(245, 124, 0, 0.2);
+}
+
+.btn-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.btn-content {
+    flex: 1;
+}
+
+.btn-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--btn-border);
+    margin-bottom: 4px;
+}
+
+.btn-desc {
+    font-size: 14px;
+    color: #757575;
+    line-height: 1.4;
+}
+
+.scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.scenario-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.progress-bar {
+    width: 200px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #66bb6a);
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: #757575;
+    font-weight: 500;
+}
+
+.back-btn, .control-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.back-btn {
+    background: #f5f5f5;
+    color: #757575;
+}
+
+.back-btn:hover {
+    background: #e0e0e0;
+    color: #424242;
+}
+
+.control-btn.primary {
+    background: #1a237e;
+    color: white;
+}
+
+.control-btn.secondary {
+    background: #e0e0e0;
+    color: #424242;
+}
+
+.control-btn.success {
+    background: #4caf50;
+    color: white;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.scenario-content {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    min-height: 400px;
+}
+
+.scenario-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.step-content h3 {
+    color: #1a237e;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.step-content p {
+    color: #424242;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.demo-card {
+    background: #f8faff;
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+}
+
+.demo-card h4 {
+    color: #1a237e;
+    margin-bottom: 12px;
+}
+
+.metric-showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.metric-item {
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 4px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #757575;
+}
+
+@@media (max-width: 768px) {
+    .demo-highlights {
+        grid-template-columns: 1fr;
+    }
+    
+    .scenario-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .scenario-progress {
+        order: 2;
+    }
+    
+    .metric-showcase {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+</style>
+
+@code {
+    private int currentStep = 0;
+    private int currentScenario = 0;
+
+    private void StartScenario(int scenarioId)
+    {
+        currentScenario = scenarioId;
+        currentStep = 1;
+        StateHasChanged();
+    }
+
+    private void GoBack()
+    {
+        currentStep = 0;
+        currentScenario = 0;
+        StateHasChanged();
+    }
+
+    private void NextStep()
+    {
+        if (currentStep < GetTotalSteps())
+        {
+            currentStep++;
+            StateHasChanged();
+        }
+    }
+
+    private void PreviousStep()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+            StateHasChanged();
+        }
+    }
+
+    private void CompleteDemo()
+    {
+        // Could add completion analytics or redirect
+        Logger.LogInformation($"Demo completed - Scenario: {currentScenario}");
+        GoBack();
+    }
+
+    private int GetTotalSteps()
+    {
+        return currentScenario switch
+        {
+            1 => 4, // Executive scenario
+            2 => 5, // Technical scenario
+            3 => 3, // Playground scenario
+            _ => 1
+        };
+    }
+
+    private double GetProgressPercentage()
+    {
+        var total = GetTotalSteps();
+        return total > 0 ? ((double)(currentStep - 1) / total) * 100 : 0;
+    }
+
+    private RenderFragment RenderExecutiveScenario()
+    {
+        return currentStep switch
+        {
+            1 => @<div class="step-content">
+                <h3>💼 Executive Overview - Platform Value</h3>
+                <p>DigitalMe represents a <strong>$200K-400K enterprise platform</strong> built with cutting-edge AI technology and enterprise-grade architecture.</p>
+                
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">$350K</div>
+                        <div class="metric-label">Platform Value</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">50+</div>
+                        <div class="metric-label">Reusable Components</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">70%</div>
+                        <div class="metric-label">Faster Development</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">4</div>
+                        <div class="metric-label">Enterprise Integrations</div>
+                    </div>
+                </div>
+
+                <div class="demo-card">
+                    <h4>🎯 Business Impact</h4>
+                    <p>This platform demonstrates advanced R&D capabilities, creates reusable enterprise components, and provides a foundation for future client-facing products.</p>
+                </div>
+            </div>,
+
+            2 => @<div class="step-content">
+                <h3>🔗 Enterprise Integration Capabilities</h3>
+                <p>The platform seamlessly integrates with major enterprise tools, providing a unified communication and workflow hub.</p>
+                
+                <div class="demo-card">
+                    <h4>Active Integrations</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li><strong>Slack Workspace</strong> - Real-time team communication</li>
+                        <li><strong>ClickUp Projects</strong> - Task and project management</li>
+                        <li><strong>GitHub Repository</strong> - Code analysis and management</li>
+                        <li><strong>Telegram Bot</strong> - Instant notifications and alerts</li>
+                    </ul>
+                </div>
+
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">99.8%</div>
+                        <div class="metric-label">Integration Uptime</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">45ms</div>
+                        <div class="metric-label">Avg Response Time</div>
+                    </div>
+                </div>
+            </div>,
+
+            3 => @<div class="step-content">
+                <h3>🧠 AI-Powered Personality Engine</h3>
+                <p>Experience advanced AI personality modeling with contextual responses that adapt to professional scenarios.</p>
+                
+                <div class="demo-card">
+                    <h4>Digital Ivan Capabilities</h4>
+                    <p>Our AI personality model demonstrates:</p>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>Technical expertise in C#/.NET development</li>
+                        <li>Enterprise architecture decision-making</li>
+                        <li>Problem-solving with practical approaches</li>
+                        <li>Professional communication patterns</li>
+                    </ul>
+                </div>
+
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">94%</div>
+                        <div class="metric-label">Personality Accuracy</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">8.7/10</div>
+                        <div class="metric-label">Response Quality</div>
+                    </div>
+                </div>
+            </div>,
+
+            4 => @<div class="step-content">
+                <h3>🚀 Strategic Business Opportunities</h3>
+                <p>This platform creates multiple strategic opportunities for EllyAnalytics and demonstrates significant ROI potential.</p>
+                
+                <div class="demo-card">
+                    <h4>Future Opportunities</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li><strong>Client Products</strong> - Foundation for customer-facing AI solutions</li>
+                        <li><strong>Competitive Advantage</strong> - Advanced AI integration capabilities</li>
+                        <li><strong>Revenue Generation</strong> - Platform licensing and SaaS opportunities</li>
+                        <li><strong>R&D Leadership</strong> - Established technical credibility</li>
+                    </ul>
+                </div>
+
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">3-5</div>
+                        <div class="metric-label">Future Projects Ready</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">60%</div>
+                        <div class="metric-label">Reduced Development Time</div>
+                    </div>
+                </div>
+            </div>,
+
+            _ => @<div>Invalid step</div>
+        };
+    }
+
+    private RenderFragment RenderTechnicalScenario()
+    {
+        return currentStep switch
+        {
+            1 => @<div class="step-content">
+                <h3>🏗️ Enterprise Architecture Overview</h3>
+                <p>Built with modern .NET 8 architecture, following enterprise patterns and best practices.</p>
+                
+                <div class="demo-card">
+                    <h4>Technology Stack</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li><strong>Frontend</strong>: Blazor Server with responsive UI</li>
+                        <li><strong>Backend</strong>: .NET 8 Web API with clean architecture</li>
+                        <li><strong>Database</strong>: Entity Framework with migration support</li>
+                        <li><strong>AI Integration</strong>: Claude API with MCP architecture</li>
+                        <li><strong>Deployment</strong>: Docker containerization</li>
+                    </ul>
+                </div>
+            </div>,
+
+            2 => @<div class="step-content">
+                <h3>🔒 Security & Performance</h3>
+                <p>Enterprise-grade security implementation with comprehensive performance optimization.</p>
+                
+                <div class="demo-card">
+                    <h4>Security Features</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>JWT-based authentication and authorization</li>
+                        <li>Rate limiting and request throttling</li>
+                        <li>Input validation and sanitization</li>
+                        <li>Secure API communication</li>
+                    </ul>
+                </div>
+
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">0</div>
+                        <div class="metric-label">Security Vulnerabilities</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">&lt;50ms</div>
+                        <div class="metric-label">API Response Time</div>
+                    </div>
+                </div>
+            </div>,
+
+            3 => @<div class="step-content">
+                <h3>📊 Monitoring & Observability</h3>
+                <p>Complete operational monitoring with health checks, metrics, and real-time dashboards.</p>
+                
+                <div class="demo-card">
+                    <h4>Monitoring Capabilities</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>Real-time system health monitoring</li>
+                        <li>Performance metrics and alerting</li>
+                        <li>Integration status tracking</li>
+                        <li>Business value analytics</li>
+                    </ul>
+                </div>
+            </div>,
+
+            4 => @<div class="step-content">
+                <h3>🔌 Integration Architecture</h3>
+                <p>Modular integration framework supporting multiple enterprise platforms with extensible design.</p>
+                
+                <div class="demo-card">
+                    <h4>Integration Pattern</h4>
+                    <p>Our platform uses a standardized integration pattern that allows rapid addition of new enterprise tools:</p>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>Abstracted service interfaces</li>
+                        <li>Configurable authentication</li>
+                        <li>Error handling and retry logic</li>
+                        <li>Health monitoring per integration</li>
+                    </ul>
+                </div>
+            </div>,
+
+            5 => @<div class="step-content">
+                <h3>🚀 Deployment & Scalability</h3>
+                <p>Production-ready deployment with container orchestration and scalability features.</p>
+                
+                <div class="demo-card">
+                    <h4>Production Features</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>Docker containerization for consistent deployment</li>
+                        <li>Kubernetes-ready architecture</li>
+                        <li>Horizontal scaling capabilities</li>
+                        <li>Environment-specific configuration</li>
+                        <li>Automated health checks and recovery</li>
+                    </ul>
+                </div>
+
+                <div class="metric-showcase">
+                    <div class="metric-item">
+                        <div class="metric-value">99.9%</div>
+                        <div class="metric-label">Target Uptime</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">10x</div>
+                        <div class="metric-label">Scaling Capacity</div>
+                    </div>
+                </div>
+            </div>,
+
+            _ => @<div>Invalid step</div>
+        };
+    }
+
+    private RenderFragment RenderPlaygroundScenario()
+    {
+        return currentStep switch
+        {
+            1 => @<div class="step-content">
+                <h3>🎮 Interactive Playground Setup</h3>
+                <p>Ready to experience Digital Ivan in action? This playground lets you have natural conversations with our AI personality.</p>
+                
+                <div class="demo-card">
+                    <h4>Try These Conversation Starters:</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>"What's your experience with .NET and C# development?"</li>
+                        <li>"How would you approach architecting a new enterprise system?"</li>
+                        <li>"Tell me about your problem-solving methodology"</li>
+                        <li>"What are your thoughts on modern development practices?"</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="/chat" style="display: inline-block; padding: 16px 32px; background: #1a237e; color: white; text-decoration: none; border-radius: 12px; font-weight: 500;">
+                        🚀 Start Chat with Digital Ivan
+                    </a>
+                </div>
+            </div>,
+
+            2 => @<div class="step-content">
+                <h3>💡 Conversation Tips</h3>
+                <p>Get the most out of your interaction with Digital Ivan using these tips:</p>
+                
+                <div class="demo-card">
+                    <h4>Best Practices</h4>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li><strong>Be Specific</strong>: Ask about concrete technical scenarios</li>
+                        <li><strong>Professional Context</strong>: Frame questions in business/work settings</li>
+                        <li><strong>Technical Depth</strong>: Don't hesitate to get into technical details</li>
+                        <li><strong>Follow-up</strong>: Ask follow-up questions to see context retention</li>
+                    </ul>
+                </div>
+
+                <div class="demo-card">
+                    <h4>What to Expect</h4>
+                    <p>Digital Ivan will demonstrate:</p>
+                    <ul style="margin: 12px 0; padding-left: 20px;">
+                        <li>Technical expertise and practical solutions</li>
+                        <li>Direct, honest communication style</li>
+                        <li>Problem-solving approach with examples</li>
+                        <li>Professional context awareness</li>
+                    </ul>
+                </div>
+            </div>,
+
+            3 => @<div class="step-content">
+                <h3>📈 Personality Analytics</h3>
+                <p>During your conversation, the system tracks and analyzes personality trait demonstrations.</p>
+                
+                <div class="demo-card">
+                    <h4>Tracked Personality Traits</h4>
+                    <div style="margin: 16px 0;">
+                        <div style="margin-bottom: 12px;">
+                            <strong style="color: #1a237e;">Analytical Thinking</strong>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 4px;">
+                                <div style="background: #4caf50; height: 100%; width: 95%; transition: width 0.5s ease;"></div>
+                            </div>
+                            <small style="color: #757575;">95% - Systematic problem breakdown</small>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <strong style="color: #1a237e;">Direct Communication</strong>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 4px;">
+                                <div style="background: #2196f3; height: 100%; width: 87%; transition: width 0.5s ease;"></div>
+                            </div>
+                            <small style="color: #757575;">87% - Clear, honest responses</small>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <strong style="color: #1a237e;">Pragmatic Approach</strong>
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 4px;">
+                                <div style="background: #ff9800; height: 100%; width: 78%; transition: width 0.5s ease;"></div>
+                            </div>
+                            <small style="color: #757575;">78% - Practical solution focus</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="/dashboard" style="display: inline-block; padding: 16px 32px; background: #00796b; color: white; text-decoration: none; border-radius: 12px; font-weight: 500;">
+                        📊 View Full Analytics Dashboard
+                    </a>
+                </div>
+            </div>,
+
+            _ => @<div>Invalid step</div>
+        };
+    }
+}

@@ -49,8 +49,8 @@ public class ClickUpWebhookService : IClickUpWebhookService
             }
 
             // Remove 'sha256=' prefix if present
-            var cleanSignature = signature.StartsWith("sha256=") 
-                ? signature.Substring("sha256=".Length) 
+            var cleanSignature = signature.StartsWith("sha256=")
+                ? signature.Substring("sha256=".Length)
                 : signature;
 
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_settings.WebhookSecret));
@@ -86,7 +86,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
                 return false;
             }
 
-            _logger.LogInformation("Processing ClickUp webhook event: {EventType} for TaskId: {TaskId}", 
+            _logger.LogInformation("Processing ClickUp webhook event: {EventType} for TaskId: {TaskId}",
                 webhookEvent.Event, webhookEvent.TaskId);
 
             await HandleWebhookEventAsync(webhookEvent);
@@ -147,7 +147,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Task Created: {TaskId} - {TaskName}", 
+        _logger.LogInformation("ClickUp Task Created: {TaskId} - {TaskName}",
             webhookEvent.TaskId, webhookEvent.Task?.Name);
 
         // TODO: Implement business logic for task creation
@@ -162,7 +162,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskUpdatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Task Updated: {TaskId} - {TaskName}", 
+        _logger.LogInformation("ClickUp Task Updated: {TaskId} - {TaskName}",
             webhookEvent.TaskId, webhookEvent.Task?.Name);
 
         // TODO: Implement business logic for task updates
@@ -191,7 +191,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskStatusChangedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Task Status Changed: {TaskId} - Status: {Status}", 
+        _logger.LogInformation("ClickUp Task Status Changed: {TaskId} - Status: {Status}",
             webhookEvent.TaskId, webhookEvent.Task?.Status?.Status);
 
         // TODO: Implement business logic for status changes
@@ -206,7 +206,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskAssigneeChangedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Task Assignee Changed: {TaskId} - Assignees: {AssigneeCount}", 
+        _logger.LogInformation("ClickUp Task Assignee Changed: {TaskId} - Assignees: {AssigneeCount}",
             webhookEvent.TaskId, webhookEvent.Task?.Assignees?.Count ?? 0);
 
         // TODO: Implement business logic for assignee changes
@@ -221,7 +221,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskTimeTrackedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Time Tracked: {TaskId} - Duration recorded", 
+        _logger.LogInformation("ClickUp Time Tracked: {TaskId} - Duration recorded",
             webhookEvent.TaskId);
 
         // TODO: Implement business logic for time tracking
@@ -236,7 +236,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleTaskCommentPostedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Comment Posted: {TaskId} - New comment added", 
+        _logger.LogInformation("ClickUp Comment Posted: {TaskId} - New comment added",
             webhookEvent.TaskId);
 
         // TODO: Implement business logic for comments
@@ -251,7 +251,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleListCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp List Created: {ListName} in Space: {SpaceName}", 
+        _logger.LogInformation("ClickUp List Created: {ListName} in Space: {SpaceName}",
             webhookEvent.List?.Name, webhookEvent.Space?.Name);
 
         // TODO: Implement business logic for list creation
@@ -266,7 +266,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleFolderCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Folder Created: {FolderName} in Space: {SpaceName}", 
+        _logger.LogInformation("ClickUp Folder Created: {FolderName} in Space: {SpaceName}",
             webhookEvent.Folder?.Name, webhookEvent.Space?.Name);
 
         // TODO: Implement business logic for folder creation
@@ -281,7 +281,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleSpaceCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Space Created: {SpaceName}", 
+        _logger.LogInformation("ClickUp Space Created: {SpaceName}",
             webhookEvent.Space?.Name);
 
         // TODO: Implement business logic for space creation
@@ -296,7 +296,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleGoalCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Goal Created for Task: {TaskId}", 
+        _logger.LogInformation("ClickUp Goal Created for Task: {TaskId}",
             webhookEvent.TaskId);
 
         // TODO: Implement business logic for goal creation
@@ -311,7 +311,7 @@ public class ClickUpWebhookService : IClickUpWebhookService
 
     public async Task HandleKeyResultCreatedAsync(ClickUpWebhookEvent webhookEvent)
     {
-        _logger.LogInformation("ClickUp Key Result Created for Task: {TaskId}", 
+        _logger.LogInformation("ClickUp Key Result Created for Task: {TaskId}",
             webhookEvent.TaskId);
 
         // TODO: Implement business logic for key result creation

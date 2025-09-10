@@ -114,7 +114,7 @@ public class AgentBehaviorEngineTests
             new Message { Role = "user", Content = "Previous user message", Timestamp = DateTime.UtcNow.AddMinutes(-5) },
             new Message { Role = "assistant", Content = "Previous Ivan response", Timestamp = DateTime.UtcNow.AddMinutes(-4) }
         };
-        
+
         var personalityContext = new PersonalityContext
         {
             Profile = personality,
@@ -131,11 +131,11 @@ public class AgentBehaviorEngineTests
         // Assert
         result.Should().NotBeNull();
         result.Content.Should().Contain("previous", "should reference conversation history");
-        
+
         // Verify MCP service was called with contextual information
         _mockMcpService.Verify(x => x.SendMessageAsync(
-            It.Is<string>(msg => msg.Contains(message)), 
-            It.IsAny<PersonalityContext>()), 
+            It.Is<string>(msg => msg.Contains(message)),
+            It.IsAny<PersonalityContext>()),
             Times.Once);
     }
 

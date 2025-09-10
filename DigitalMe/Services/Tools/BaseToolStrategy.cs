@@ -102,7 +102,7 @@ public abstract class BaseToolStrategy : IToolStrategy, IParameterizedTool
             throw new ArgumentNullException(nameof(parameters));
 
         var missingKeys = requiredKeys.Where(key => !parameters.ContainsKey(key) || parameters[key] == null).ToList();
-        
+
         if (missingKeys.Any())
             throw new ArgumentException($"Missing required parameters: {string.Join(", ", missingKeys)}");
     }

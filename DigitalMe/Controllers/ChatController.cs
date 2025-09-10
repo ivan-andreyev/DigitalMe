@@ -112,7 +112,7 @@ public class ChatController : ControllerBase
     {
         var ivanProfile = await _personalityService.GetIvanProfileAsync();
         var personalityLoaded = ivanProfile != null;
-        
+
         return Ok(new
         {
             McpConnected = true, // MVP: Always true for simplicity

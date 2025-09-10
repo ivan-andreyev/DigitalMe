@@ -25,7 +25,7 @@ public class CalendarToolStrategy : BaseToolStrategy
     public override Task<bool> ShouldTriggerAsync(string message, PersonalityContext context)
     {
         var messageLower = message.ToLower();
-        
+
         // Триггеры для создания событий календаря
         var shouldTrigger = ContainsWords(messageLower,
             "создай событие", "добавь в календарь", "meeting", "встреча",
@@ -36,13 +36,13 @@ public class CalendarToolStrategy : BaseToolStrategy
         // Дополнительная проверка на временные выражения
         if (!shouldTrigger)
         {
-            shouldTrigger = MatchesPattern(messageLower, 
+            shouldTrigger = MatchesPattern(messageLower,
                 @"\b(в|на|завтра|послезавтра|\d{1,2}:\d{2}|\d{1,2}\.\d{1,2})\b.*\b(встреча|событие|собрание)\b") ||
-                MatchesPattern(messageLower, 
+                MatchesPattern(messageLower,
                 @"\b(напомни|reminder)\b.*\b(в|на|завтра)\b");
         }
 
-        Logger.LogDebug("Calendar trigger check for message '{Message}': {Result}", 
+        Logger.LogDebug("Calendar trigger check for message '{Message}': {Result}",
             message.Length > 50 ? message[..50] + "..." : message, shouldTrigger);
 
         return Task.FromResult(shouldTrigger);
@@ -93,17 +93,18 @@ public class CalendarToolStrategy : BaseToolStrategy
                 tool_name = ToolName
             };
 
-            Logger.LogInformation("Successfully created calendar event '{Title}' from {StartTime} to {EndTime}", 
+            Logger.LogInformation("Successfully created calendar event '{Title}' from {StartTime} to {EndTime}",
                 title, startTime, endTime);
             return result;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to create calendar event");
-            return new { 
-                success = false, 
+            return new
+            {
+                success = false,
                 error = ex.Message,
-                tool_name = ToolName 
+                tool_name = ToolName
             };
         }
     }
@@ -115,21 +116,25 @@ public class CalendarToolStrategy : BaseToolStrategy
             type = "object",
             properties = new
             {
-                title = new { 
-                    type = "string", 
-                    description = "Название события" 
+                title = new
+                {
+                    type = "string",
+                    description = "Название события"
                 },
-                start_time = new { 
-                    type = "string", 
-                    description = "Время начала события в формате ISO 8601 (например: 2025-09-02T14:00:00Z)" 
+                start_time = new
+                {
+                    type = "string",
+                    description = "Время начала события в формате ISO 8601 (например: 2025-09-02T14:00:00Z)"
                 },
-                end_time = new { 
-                    type = "string", 
-                    description = "Время окончания события в формате ISO 8601 (например: 2025-09-02T15:00:00Z)" 
+                end_time = new
+                {
+                    type = "string",
+                    description = "Время окончания события в формате ISO 8601 (например: 2025-09-02T15:00:00Z)"
                 },
-                description = new { 
-                    type = "string", 
-                    description = "Описание события (опционально)" 
+                description = new
+                {
+                    type = "string",
+                    description = "Описание события (опционально)"
                 }
             },
             required = new[] { "title", "start_time", "end_time" }

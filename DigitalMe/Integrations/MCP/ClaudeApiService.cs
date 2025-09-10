@@ -41,7 +41,7 @@ public class ClaudeApiService : IClaudeApiService
         _logger = logger;
 
         // Initialize Anthropic client
-        var apiKey = _configuration["Anthropic:ApiKey"] 
+        var apiKey = _configuration["Anthropic:ApiKey"]
             ?? Environment.GetEnvironmentVariable(_configuration["Anthropic:ApiKeyEnvironmentVariable"] ?? "ANTHROPIC_API_KEY")
             ?? throw new ArgumentException("Claude API key not configured");
 
@@ -60,8 +60,8 @@ public class ClaudeApiService : IClaudeApiService
     /// DigitalMe.Data.Entities.Message and Anthropic.SDK.Messaging.Message
     /// </summary>
     public async Task<string> GenerateResponseAsync(
-        string systemPrompt, 
-        string userMessage, 
+        string systemPrompt,
+        string userMessage,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(systemPrompt))
@@ -74,15 +74,15 @@ public class ClaudeApiService : IClaudeApiService
 
         try
         {
-            _logger.LogDebug("Generating Claude response for message: {Message}", 
+            _logger.LogDebug("Generating Claude response for message: {Message}",
                 userMessage.Substring(0, Math.Min(userMessage.Length, 100)));
 
             // TODO: Implement proper Anthropic SDK integration with correct API mapping
             // The issue: namespace conflict between our domain Message entity and Anthropic SDK Message
             // Solution: Create proper mapping layer between domain and transport
-            
+
             await Task.Delay(100, cancellationToken); // Simulate API delay
-            
+
             var responseText = $@"[ANTHROPIC SDK INTEGRATION TEMPORARILY DISABLED]
 
 This is a placeholder response from ClaudeApiService.
@@ -98,8 +98,8 @@ The actual integration requires proper mapping between:
 
 This separation ensures clean architecture where domain entities
 don't leak into external API concerns.";
-            
-            _logger.LogDebug("Generated placeholder Claude response with {CharCount} characters", 
+
+            _logger.LogDebug("Generated placeholder Claude response with {CharCount} characters",
                 responseText.Length);
 
             return responseText;
@@ -121,14 +121,14 @@ don't leak into external API concerns.";
             {
                 await Task.Delay(_rateLimitDelay, cancellationToken);
             }
-            
+
             _rateLimitSemaphore.Release();
         }
     }
 
     public async Task<string> GeneratePersonalityResponseAsync(
-        Guid personalityId, 
-        string userMessage, 
+        Guid personalityId,
+        string userMessage,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Generating personality-aware response for profile: {PersonalityId}", personalityId);
@@ -155,12 +155,12 @@ don't leak into external API concerns.";
             var testSystemPrompt = "Respond with 'Connection successful'";
 
             var response = await GenerateResponseAsync(testSystemPrompt, testMessage);
-            
+
             var isValid = !string.IsNullOrWhiteSpace(response);
-            
-            _logger.LogInformation("Claude API connection validation: {Status}", 
+
+            _logger.LogInformation("Claude API connection validation: {Status}",
                 isValid ? "SUCCESS" : "FAILED");
-                
+
             return isValid;
         }
         catch (Exception ex)

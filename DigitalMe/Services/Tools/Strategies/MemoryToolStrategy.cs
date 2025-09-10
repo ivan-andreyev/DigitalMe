@@ -21,7 +21,7 @@ public class MemoryToolStrategy : BaseToolStrategy
     public override Task<bool> ShouldTriggerAsync(string message, PersonalityContext context)
     {
         var messageLower = message.ToLower();
-        
+
         // Триггеры для сохранения в память
         var shouldTrigger = ContainsWords(messageLower,
             "запомни", "сохрани", "это важно", "не забудь",
@@ -37,7 +37,7 @@ public class MemoryToolStrategy : BaseToolStrategy
                           ContainsWords(messageLower, "помни", "знай", "учти");
         }
 
-        Logger.LogDebug("Memory trigger check for message '{Message}': {Result}", 
+        Logger.LogDebug("Memory trigger check for message '{Message}': {Result}",
             message.Length > 50 ? message[..50] + "..." : message, shouldTrigger);
 
         return Task.FromResult(shouldTrigger);
@@ -69,7 +69,7 @@ public class MemoryToolStrategy : BaseToolStrategy
 
             // TODO: Реальная интеграция с системой памяти когда будет готова
             // Сейчас только логирование для демонстрации функциональности
-            Logger.LogInformation("Storing memory: {Key} = {Value} (importance: {Importance}, category: {Category})", 
+            Logger.LogInformation("Storing memory: {Key} = {Value} (importance: {Importance}, category: {Category})",
                 key, value, importance, category);
 
             // Генерируем уникальный ID для записи в памяти
@@ -95,17 +95,18 @@ public class MemoryToolStrategy : BaseToolStrategy
                 tool_name = ToolName
             };
 
-            Logger.LogInformation("Successfully stored memory entry {MemoryId} with key '{Key}' and importance {Importance}", 
+            Logger.LogInformation("Successfully stored memory entry {MemoryId} with key '{Key}' and importance {Importance}",
                 memoryId, key, importance);
             return Task.FromResult<object>(result);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to store memory");
-            return Task.FromResult<object>(new { 
-                success = false, 
+            return Task.FromResult<object>(new
+            {
+                success = false,
                 error = ex.Message,
-                tool_name = ToolName 
+                tool_name = ToolName
             });
         }
     }
@@ -117,33 +118,39 @@ public class MemoryToolStrategy : BaseToolStrategy
             type = "object",
             properties = new
             {
-                key = new { 
-                    type = "string", 
-                    description = "Ключ для идентификации сохраняемой информации" 
+                key = new
+                {
+                    type = "string",
+                    description = "Ключ для идентификации сохраняемой информации"
                 },
-                value = new { 
-                    type = "string", 
-                    description = "Значение или информация для сохранения" 
+                value = new
+                {
+                    type = "string",
+                    description = "Значение или информация для сохранения"
                 },
-                importance = new { 
-                    type = "number", 
+                importance = new
+                {
+                    type = "number",
                     description = "Важность информации от 1 (низкая) до 10 (критичная), по умолчанию 5",
                     minimum = 1,
                     maximum = 10,
                     @default = 5
                 },
-                category = new { 
-                    type = "string", 
+                category = new
+                {
+                    type = "string",
                     description = "Категория памяти: 'personal', 'work', 'technical', 'general' (по умолчанию 'general')",
                     @enum = new[] { "personal", "work", "technical", "general", "preferences", "contacts" },
                     @default = "general"
                 },
-                tags = new { 
-                    type = "string", 
-                    description = "Теги для поиска, разделенные запятыми (опционально)" 
+                tags = new
+                {
+                    type = "string",
+                    description = "Теги для поиска, разделенные запятыми (опционально)"
                 },
-                expires_in_days = new { 
-                    type = "number", 
+                expires_in_days = new
+                {
+                    type = "number",
                     description = "Через сколько дней запись истекает (опционально, для важности >= 8 не истекает)",
                     minimum = 1,
                     maximum = 365

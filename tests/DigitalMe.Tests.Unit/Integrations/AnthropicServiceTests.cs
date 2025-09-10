@@ -24,7 +24,7 @@ public class AnthropicServiceTests
         _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         _mockLogger = new Mock<ILogger<AnthropicServiceSimple>>();
         _mockPersonalityService = new Mock<IIvanPersonalityService>();
-        
+
         // Setup mock to return test personality data
         var testPersonality = CreateTestPersonality();
         _mockPersonalityService
@@ -43,8 +43,8 @@ public class AnthropicServiceTests
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", "test-api-key-sk-ant-test");
 
         var mockConfig = new Mock<IOptions<AnthropicConfiguration>>();
-        mockConfig.Setup(x => x.Value).Returns(new AnthropicConfiguration 
-        { 
+        mockConfig.Setup(x => x.Value).Returns(new AnthropicConfiguration
+        {
             ApiKey = "test-api-key",
             Model = "claude-3-5-sonnet-20241022"
         });
@@ -265,7 +265,7 @@ public class AnthropicServiceTests
 
         // Assert
         result.Should().NotBeNullOrEmpty();
-        
+
         capturedRequestBody.Should().NotBeNull("should send request body");
         capturedRequestBody.Should().Contain("Ivan", "should include personality name in request");
         capturedRequestBody.Should().Contain("Direct", "should include personality traits");
@@ -280,15 +280,15 @@ public class AnthropicServiceTests
     {
         // Arrange
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", apiKey);
-        
+
         var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
         var mockConfig = new Mock<IOptions<AnthropicConfiguration>>();
-        mockConfig.Setup(x => x.Value).Returns(new AnthropicConfiguration 
-        { 
+        mockConfig.Setup(x => x.Value).Returns(new AnthropicConfiguration
+        {
             ApiKey = apiKey ?? "",
             Model = "claude-3-5-sonnet-20241022"
         });
-        
+
         var service = new AnthropicServiceSimple(httpClient, mockConfig.Object, _mockLogger.Object, _mockPersonalityService.Object);
         var message = "Test with missing API key";
         var personality = CreateTestPersonality();

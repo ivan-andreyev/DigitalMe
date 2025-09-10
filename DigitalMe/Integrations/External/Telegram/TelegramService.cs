@@ -28,13 +28,13 @@ public class TelegramService : ITelegramService
         {
             _logger.LogInformation("Initializing Telegram Bot connection...");
             _botToken = botToken;
-            
+
             _botClient = new TelegramBotClient(_botToken);
-            
+
             // Test the connection by getting bot information
             var me = await _botClient.GetMe();
             _isConnected = true;
-            
+
             _logger.LogInformation("Telegram Bot connection established: @{Username} ({Name})", me.Username, me.FirstName);
             return _isConnected;
         }
@@ -94,7 +94,7 @@ public class TelegramService : ITelegramService
             // This would typically be handled through webhook updates or polling for updates
             // For now, we'll return empty list and log a warning
             _logger.LogWarning("GetRecentMessagesAsync: Telegram Bot API doesn't support retrieving chat history directly. Use webhooks or polling instead.");
-            
+
             return Task.FromResult(Enumerable.Empty<TelegramMessage>());
         }
         catch (ApiRequestException ex)
@@ -126,11 +126,11 @@ public class TelegramService : ITelegramService
     public async Task DisconnectAsync()
     {
         _logger.LogInformation("Disconnecting from Telegram Bot API...");
-        
+
         _isConnected = false;
         _botToken = string.Empty;
         _botClient = null;
-        
+
         await Task.CompletedTask;
     }
 
@@ -154,7 +154,7 @@ public class TelegramService : ITelegramService
         }
         catch (ApiRequestException ex)
         {
-            _logger.LogError(ex, "Telegram API error setting webhook: {Url}. Error: {ErrorCode} - {Description}", 
+            _logger.LogError(ex, "Telegram API error setting webhook: {Url}. Error: {ErrorCode} - {Description}",
                 url, ex.ErrorCode, ex.Message);
             throw;
         }
@@ -174,7 +174,7 @@ public class TelegramService : ITelegramService
         }
         catch (ApiRequestException ex)
         {
-            _logger.LogError(ex, "Telegram API error deleting webhook. Error: {ErrorCode} - {Description}", 
+            _logger.LogError(ex, "Telegram API error deleting webhook. Error: {ErrorCode} - {Description}",
                 ex.ErrorCode, ex.Message);
             throw;
         }
@@ -190,13 +190,13 @@ public class TelegramService : ITelegramService
         try
         {
             var webhookInfo = await _botClient.GetWebhookInfo();
-            _logger.LogInformation("Retrieved webhook info - URL: {Url}, HasCustomCert: {HasCustomCert}, PendingUpdates: {PendingUpdates}", 
+            _logger.LogInformation("Retrieved webhook info - URL: {Url}, HasCustomCert: {HasCustomCert}, PendingUpdates: {PendingUpdates}",
                 webhookInfo.Url, webhookInfo.HasCustomCertificate, webhookInfo.PendingUpdateCount);
             return webhookInfo;
         }
         catch (ApiRequestException ex)
         {
-            _logger.LogError(ex, "Telegram API error getting webhook info. Error: {ErrorCode} - {Description}", 
+            _logger.LogError(ex, "Telegram API error getting webhook info. Error: {ErrorCode} - {Description}",
                 ex.ErrorCode, ex.Message);
             throw;
         }

@@ -15,9 +15,9 @@ public class GitHubService : IGitHubService
     {
         _config = config.Value;
         _logger = logger;
-        
+
         _client = new GitHubClient(new ProductHeaderValue("DigitalMe", "1.0"));
-        
+
         if (!string.IsNullOrEmpty(_config.PersonalAccessToken))
         {
             _client.Credentials = new Credentials(_config.PersonalAccessToken);
@@ -29,19 +29,19 @@ public class GitHubService : IGitHubService
         try
         {
             _logger.LogInformation("Initializing GitHub API connection...");
-            
+
             if (!string.IsNullOrEmpty(accessToken))
             {
                 _client.Credentials = new Credentials(accessToken);
             }
-            
+
             if (_client.Credentials == null && string.IsNullOrEmpty(_config.PersonalAccessToken))
             {
                 _logger.LogWarning("No GitHub credentials configured. API rate limits will apply.");
                 _isConnected = false;
                 return false;
             }
-            
+
             // Test connection by getting current user
             try
             {
@@ -79,7 +79,7 @@ public class GitHubService : IGitHubService
             };
 
             var searchResult = await _client.Search.SearchRepo(searchRequest);
-            
+
             return searchResult.Items.Select(repo => new GitHubRepository
             {
                 Id = repo.Id,
@@ -155,7 +155,7 @@ public class GitHubService : IGitHubService
         try
         {
             var repository = await _client.Repository.Get(owner, repo);
-            
+
             return new GitHubRepository
             {
                 Id = repository.Id,
@@ -195,7 +195,7 @@ public class GitHubService : IGitHubService
                 PageSize = limit,
                 PageCount = 1
             });
-            
+
             return commits.Select(commit => new GitHubCommit
             {
                 Sha = commit.Sha,

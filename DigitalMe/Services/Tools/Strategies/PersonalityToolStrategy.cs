@@ -25,7 +25,7 @@ public class PersonalityToolStrategy : BaseToolStrategy
     public override Task<bool> ShouldTriggerAsync(string message, PersonalityContext context)
     {
         var messageLower = message.ToLower();
-        
+
         // Триггеры для получения информации о личности
         var shouldTrigger = ContainsWords(messageLower,
             "расскажи о себе", "твои черты", "какой ты", "твоя личность",
@@ -42,7 +42,7 @@ public class PersonalityToolStrategy : BaseToolStrategy
                           ContainsWords(messageLower, "твой", "твои", "your", "расскажи");
         }
 
-        Logger.LogDebug("Personality trigger check for message '{Message}': {Result}", 
+        Logger.LogDebug("Personality trigger check for message '{Message}': {Result}",
             message.Length > 50 ? message[..50] + "..." : message, shouldTrigger);
 
         return Task.FromResult(shouldTrigger);
@@ -60,10 +60,11 @@ public class PersonalityToolStrategy : BaseToolStrategy
             if (personality == null)
             {
                 Logger.LogWarning("Ivan's personality not found in database");
-                return new { 
-                    success = false, 
+                return new
+                {
+                    success = false,
                     error = "Ivan's personality not found",
-                    tool_name = ToolName 
+                    tool_name = ToolName
                 };
             }
 
@@ -97,17 +98,18 @@ public class PersonalityToolStrategy : BaseToolStrategy
                 tool_name = ToolName
             };
 
-            Logger.LogInformation("Successfully retrieved {Count} personality traits for Ivan (category: {Category})", 
+            Logger.LogInformation("Successfully retrieved {Count} personality traits for Ivan (category: {Category})",
                 traitsList.Count, string.IsNullOrWhiteSpace(category) ? "all" : category);
             return result;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to retrieve personality traits");
-            return new { 
-                success = false, 
+            return new
+            {
+                success = false,
                 error = ex.Message,
-                tool_name = ToolName 
+                tool_name = ToolName
             };
         }
     }
@@ -119,12 +121,14 @@ public class PersonalityToolStrategy : BaseToolStrategy
             type = "object",
             properties = new
             {
-                category = new { 
-                    type = "string", 
-                    description = "Категория черт личности для фильтрации (опционально). Например: 'professional', 'personal', 'technical'" 
+                category = new
+                {
+                    type = "string",
+                    description = "Категория черт личности для фильтрации (опционально). Например: 'professional', 'personal', 'technical'"
                 },
-                detail_level = new { 
-                    type = "string", 
+                detail_level = new
+                {
+                    type = "string",
                     description = "Уровень детализации: 'brief', 'detailed', 'full' (по умолчанию 'detailed')",
                     @enum = new[] { "brief", "detailed", "full" },
                     @default = "detailed"

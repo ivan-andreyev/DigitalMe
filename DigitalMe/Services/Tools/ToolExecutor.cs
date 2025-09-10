@@ -27,7 +27,7 @@ public class ToolExecutor
     /// <returns>Результат выполнения инструмента</returns>
     public async Task<object> ExecuteToolAsync(string toolName, Dictionary<string, object> parameters, PersonalityContext context)
     {
-        _logger.LogInformation("Executing tool {ToolName} with parameters {Parameters}", 
+        _logger.LogInformation("Executing tool {ToolName} with parameters {Parameters}",
             toolName, string.Join(", ", parameters.Keys));
 
         if (string.IsNullOrWhiteSpace(toolName))
@@ -44,26 +44,26 @@ public class ToolExecutor
             {
                 var error = $"Tool '{toolName}' not found in registry";
                 _logger.LogWarning(error);
-                
+
                 // Возвращаем информацию о доступных инструментах
                 var availableTools = _toolRegistry.GetAllTools().Select(t => t.ToolName).ToList();
-                return new 
-                { 
-                    success = false, 
+                return new
+                {
+                    success = false,
                     error,
                     tool_name = toolName,
                     available_tools = availableTools
                 };
             }
 
-            _logger.LogDebug("Found tool strategy: {ToolName} - {Description}", 
+            _logger.LogDebug("Found tool strategy: {ToolName} - {Description}",
                 toolStrategy.ToolName, toolStrategy.Description);
 
             var startTime = DateTime.UtcNow;
             var result = await toolStrategy.ExecuteAsync(parameters, context);
             var executionTime = DateTime.UtcNow - startTime;
 
-            _logger.LogInformation("Successfully executed tool {ToolName} in {ExecutionTime}ms", 
+            _logger.LogInformation("Successfully executed tool {ToolName} in {ExecutionTime}ms",
                 toolName, executionTime.TotalMilliseconds);
 
             // Добавляем метаданные о выполнении, если результат является object
@@ -84,9 +84,9 @@ public class ToolExecutor
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to execute tool {ToolName}", toolName);
-            return new 
-            { 
-                success = false, 
+            return new
+            {
+                success = false,
                 error = ex.Message,
                 tool_name = toolName,
                 error_type = ex.GetType().Name
@@ -106,8 +106,8 @@ public class ToolExecutor
             return null;
 
         var toolStrategy = _toolRegistry.GetTool(toolName);
-        return toolStrategy is IParameterizedTool parameterizedTool 
-            ? parameterizedTool.GetParameterSchema() 
+        return toolStrategy is IParameterizedTool parameterizedTool
+            ? parameterizedTool.GetParameterSchema()
             : null;
     }
 
@@ -125,8 +125,8 @@ public class ToolExecutor
                 name = tool.ToolName,
                 description = tool.Description,
                 priority = tool.Priority,
-                parameter_schema = tool is IParameterizedTool parameterizedTool 
-                    ? parameterizedTool.GetParameterSchema() 
+                parameter_schema = tool is IParameterizedTool parameterizedTool
+                    ? parameterizedTool.GetParameterSchema()
                     : null,
                 has_parameters = tool is IParameterizedTool
             }).ToList();

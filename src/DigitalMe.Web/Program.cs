@@ -106,12 +106,18 @@ builder.Services.AddScoped<IQueryPerformanceMonitorService, QueryPerformanceMoni
     sp.GetRequiredService<QueryPerformanceMonitorService>());
 builder.Services.AddScoped<IQueryOptimizationValidator, QueryOptimizationValidator>();
 
+// Add Demo Services for Business Showcase
+builder.Services.AddScoped<DemoEnvironmentService>();
+builder.Services.AddScoped<DemoDataSeeder>();
+builder.Services.AddScoped<IDemoMetricsService, DemoMetricsService>();
+builder.Services.AddScoped<IBackupDemoScenariosService, BackupDemoScenariosService>();
+
 // Add Read Replica Connection Service
 builder.Services.AddScoped<IDatabaseConnectionService, DatabaseConnectionService>();
 
 // Add Health Checks with database pool monitoring and auto-scaling metrics
 builder.Services.AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!, name: "database")
+    .AddDbContextCheck<DigitalMeDbContext>("database")
     .AddCheck<DatabasePoolHealthCheck>("database-pool")
     .AddCheck<AutoScalingHealthCheck>("autoscaling");
 
@@ -210,6 +216,93 @@ app.MapGet("/health/database", async (IDatabaseConnectionMonitor monitor) =>
         efficiency = metrics.PoolEfficiency,
         issue = "Pool efficiency below 90% requirement"
     }, statusCode: 503);
+});
+
+// Add demo metrics endpoint for dashboard testing
+app.MapGet("/api/demo/metrics", async (IDemoMetricsService metricsService) =>
+{
+    try 
+    {
+        var health = await metricsService.GetSystemHealthAsync();
+        var integrations = await metricsService.GetIntegrationStatusAsync();
+        var ai = await metricsService.GetAiMetricsAsync();
+        var business = await metricsService.GetBusinessMetricsAsync();
+        var activities = await metricsService.GetRecentActivitiesAsync();
+        
+        return Results.Ok(new 
+        {
+            systemHealth = health,
+            integrations = integrations,
+            aiMetrics = ai,
+            businessMetrics = business,
+            recentActivities = activities.Take(5),
+            timestamp = DateTime.Now,
+            status = "success"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message, status = "error" }, statusCode: 500);
+    }
+});
+
+// Add backup demo scenarios API endpoints
+app.MapGet("/api/demo/backup/scenarios", async (IBackupDemoScenariosService backupService) =>
+{
+    try
+    {
+        var scenarios = await backupService.GetAvailableScenariosAsync();
+        var isActive = await backupService.IsBackupModeActiveAsync();
+        
+        return Results.Ok(new
+        {
+            scenarios = scenarios,
+            backupModeActive = isActive,
+            timestamp = DateTime.Now,
+            status = "success"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message, status = "error" }, statusCode: 500);
+    }
+});
+
+app.MapPost("/api/demo/backup/activate", async (IBackupDemoScenariosService backupService, BackupMode mode) =>
+{
+    try
+    {
+        await backupService.ActivateBackupModeAsync(mode);
+        return Results.Ok(new 
+        { 
+            message = $"Backup mode '{mode}' activated successfully",
+            mode = mode.ToString(),
+            status = "success"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message, status = "error" }, statusCode: 500);
+    }
+});
+
+app.MapGet("/api/demo/backup/response/{scenario}", async (IBackupDemoScenariosService backupService, string scenario, string? context) =>
+{
+    try
+    {
+        var response = await backupService.GetBackupResponseAsync(scenario, context ?? "demo");
+        return Results.Ok(new
+        {
+            response = response,
+            scenario = scenario,
+            timestamp = DateTime.Now,
+            status = "success"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message, status = "error" }, statusCode: 500);
+    }
 });
 
 // Add query performance monitoring endpoints

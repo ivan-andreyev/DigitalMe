@@ -21,18 +21,18 @@ public class ToolRegistry : IToolRegistry
     {
         if (toolStrategy == null)
             throw new ArgumentNullException(nameof(toolStrategy));
-            
+
         if (string.IsNullOrWhiteSpace(toolStrategy.ToolName))
             throw new ArgumentException("Tool name cannot be null or empty", nameof(toolStrategy));
 
         if (_tools.ContainsKey(toolStrategy.ToolName))
         {
-            _logger.LogWarning("Tool {ToolName} is already registered, replacing with new implementation", 
+            _logger.LogWarning("Tool {ToolName} is already registered, replacing with new implementation",
                 toolStrategy.ToolName);
         }
 
         _tools[toolStrategy.ToolName] = toolStrategy;
-        _logger.LogInformation("Registered tool: {ToolName} - {Description}", 
+        _logger.LogInformation("Registered tool: {ToolName} - {Description}",
             toolStrategy.ToolName, toolStrategy.Description);
     }
 
@@ -45,7 +45,7 @@ public class ToolRegistry : IToolRegistry
     {
         if (string.IsNullOrWhiteSpace(toolName))
             return null;
-            
+
         return _tools.TryGetValue(toolName, out var tool) ? tool : null;
     }
 
@@ -63,7 +63,7 @@ public class ToolRegistry : IToolRegistry
                 if (await tool.ShouldTriggerAsync(message, context))
                 {
                     triggeredTools.Add(tool);
-                    _logger.LogDebug("Tool {ToolName} triggered for message: {MessagePreview}", 
+                    _logger.LogDebug("Tool {ToolName} triggered for message: {MessagePreview}",
                         tool.ToolName, message.Length > 50 ? message[..50] + "..." : message);
                 }
             }

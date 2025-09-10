@@ -21,7 +21,7 @@ public class DatabaseBackupService : IDatabaseBackupService
     {
         _logger = logger;
         _config = config.Value;
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Database connection string not configured");
     }
 
@@ -60,7 +60,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 Duration = stopwatch.Elapsed
             };
 
-            _logger.LogInformation("Database backup completed successfully. Size: {Size}, Duration: {Duration}ms", 
+            _logger.LogInformation("Database backup completed successfully. Size: {Size}, Duration: {Duration}ms",
                 FormatBytes(result.BackupSizeBytes), stopwatch.ElapsedMilliseconds);
 
             return result;
@@ -126,7 +126,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to get info for backup file: {FilePath}", file.FullName);
-                    
+
                     backupInfos.Add(new BackupInfo
                     {
                         FilePath = file.FullName,
@@ -177,14 +177,14 @@ public class DatabaseBackupService : IDatabaseBackupService
 
             // Test SQLite database integrity
             var connectionString = $"Data Source={backupPath};Mode=ReadOnly";
-            
+
             await using var connection = new SqliteConnection(connectionString);
             await connection.OpenAsync(cancellationToken);
 
             // Run PRAGMA integrity_check
             await using var command = connection.CreateCommand();
             command.CommandText = "PRAGMA integrity_check";
-            
+
             var result = await command.ExecuteScalarAsync(cancellationToken);
             var integrityCheckPassed = result?.ToString() == "ok";
 
@@ -264,7 +264,7 @@ public class DatabaseBackupService : IDatabaseBackupService
 
             var remainingBackups = Directory.GetFiles(_config.BackupDirectory, "digitalme_*.db").Length;
 
-            _logger.LogInformation("Backup cleanup completed. Removed: {Removed}, Retained: {Retained}, Space freed: {Space}", 
+            _logger.LogInformation("Backup cleanup completed. Removed: {Removed}, Retained: {Retained}, Space freed: {Space}",
                 filesToDelete.Count, remainingBackups, FormatBytes(spaceToFree));
 
             return new BackupCleanupResult
@@ -379,7 +379,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             var connectionString = $"Data Source={backupPath};Mode=ReadOnly";
             await using var connection = new SqliteConnection(connectionString);
             await connection.OpenAsync();
-            
+
             // Simple query to verify it's a valid SQLite database
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' LIMIT 1";
@@ -438,7 +438,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             steps.Add("Restoring database from backup");
             var builder = new SqliteConnectionStringBuilder(_connectionString);
             var targetPath = builder.DataSource;
-            
+
             // Create backup of current database if pre-recovery backup failed
             if (preRecoveryBackupPath == null && File.Exists(targetPath))
             {
@@ -463,7 +463,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             }
 
             var fileInfo = new FileInfo(targetPath);
-            
+
             var result = new RecoveryResult
             {
                 Success = true,
@@ -484,7 +484,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 }
             };
 
-            _logger.LogInformation("Database recovery completed successfully. Size: {Size}, Duration: {Duration}ms", 
+            _logger.LogInformation("Database recovery completed successfully. Size: {Size}, Duration: {Duration}ms",
                 FormatBytes(result.RestoredDataSizeBytes), stopwatch.ElapsedMilliseconds);
 
             return result;
@@ -518,7 +518,7 @@ public class DatabaseBackupService : IDatabaseBackupService
         {
             // Test 1: Backup file validation
             var validation = await ValidateBackupAsync(backupPath, cancellationToken);
-            
+
             if (!validation.IsValid)
             {
                 return new RecoveryTestResult
@@ -535,7 +535,7 @@ public class DatabaseBackupService : IDatabaseBackupService
             var builder = new SqliteConnectionStringBuilder(_connectionString);
             var targetPath = builder.DataSource;
             var targetDrive = new DriveInfo(Path.GetPathRoot(targetPath) ?? "C:");
-            
+
             var requiredSpace = backupInfo.Length * 2; // Need space for current DB + backup
             var availableSpace = targetDrive.AvailableFreeSpace;
 
@@ -625,7 +625,7 @@ public class DatabaseBackupService : IDatabaseBackupService
                 Duration = stopwatch.Elapsed
             };
 
-            _logger.LogInformation("Pre-recovery backup completed successfully. Size: {Size}", 
+            _logger.LogInformation("Pre-recovery backup completed successfully. Size: {Size}",
                 FormatBytes(result.BackupSizeBytes));
 
             return result;
@@ -661,12 +661,12 @@ public class DatabaseBackupService : IDatabaseBackupService
     {
         // Wait a bit to allow active connections to finish
         await Task.Delay(1000);
-        
+
         // Force garbage collection to release any cached connections
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        
+
         _logger.LogDebug("Database prepared for recovery");
     }
 

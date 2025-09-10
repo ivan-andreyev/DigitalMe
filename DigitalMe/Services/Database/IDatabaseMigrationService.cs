@@ -12,14 +12,14 @@ public interface IDatabaseMigrationService
     /// </summary>
     /// <param name="context">Database context for migration operations</param>
     Task ApplyMigrationsAsync(DigitalMeDbContext context);
-    
+
     /// <summary>
     /// Validates database migration consistency and detects sync issues
     /// </summary>
     /// <param name="context">Database context for validation</param>
     /// <returns>True if migrations are consistent, false otherwise</returns>
     bool ValidateMigrationConsistency(DigitalMeDbContext context);
-    
+
     /// <summary>
     /// Handles database creation when connection fails
     /// </summary>

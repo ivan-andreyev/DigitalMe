@@ -32,7 +32,7 @@ public class ClickUpWebhookController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Received ClickUp webhook request from {RemoteAddress}", 
+            _logger.LogInformation("Received ClickUp webhook request from {RemoteAddress}",
                 HttpContext.Connection.RemoteIpAddress);
 
             // Read the request body
@@ -45,7 +45,7 @@ public class ClickUpWebhookController : ControllerBase
 
             // Get signature header for validation
             var signature = Request.Headers["X-Signature"].FirstOrDefault();
-            
+
             // Validate webhook signature
             var isValid = await _webhookService.ValidateWebhookAsync(signature ?? string.Empty, body);
             if (!isValid)
@@ -80,7 +80,7 @@ public class ClickUpWebhookController : ControllerBase
     public IActionResult VerifyWebhook()
     {
         _logger.LogInformation("ClickUp webhook verification request received");
-        
+
         // Return challenge parameter if provided (for webhook setup verification)
         var challenge = Request.Query["challenge"].FirstOrDefault();
         if (!string.IsNullOrEmpty(challenge))
@@ -89,8 +89,9 @@ public class ClickUpWebhookController : ControllerBase
             return Ok(challenge);
         }
 
-        return Ok(new { 
-            status = "active", 
+        return Ok(new
+        {
+            status = "active",
             service = "DigitalMe ClickUp Integration",
             timestamp = DateTime.UtcNow
         });
@@ -131,7 +132,8 @@ public class ClickUpWebhookController : ControllerBase
             var json = System.Text.Json.JsonSerializer.Serialize(testPayload);
             var processed = await _webhookService.ProcessWebhookAsync(json);
 
-            return Ok(new { 
+            return Ok(new
+            {
                 status = processed ? "success" : "failed",
                 message = processed ? "Test webhook processed successfully" : "Failed to process test webhook",
                 payload = testPayload

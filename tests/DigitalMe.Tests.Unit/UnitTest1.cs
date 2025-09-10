@@ -9,20 +9,20 @@ public class FrameworkValidationTests : TestBase
     {
         // Arrange
         var expectedValue = "test";
-        
+
         // Act
         var result = expectedValue;
-        
+
         // Assert
         result.Should().Be("test");
     }
-    
+
     [Fact]
     public void MockRepository_Should_BeAvailable()
     {
         // Arrange & Act
         var mock = MockRepository.Create<IDisposable>();
-        
+
         // Assert
         mock.Should().NotBeNull();
     }
