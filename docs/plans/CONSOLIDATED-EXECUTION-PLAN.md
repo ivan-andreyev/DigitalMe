@@ -8,15 +8,15 @@
 
 ## ✅ СТРАТЕГИЧЕСКОЕ РЕШЕНИЕ ПРИНЯТО
 
-**SELECTED:** **Phase B - Ivan-Level Agent Completion** (6 недель)
+**SELECTED:** **Phase B - Ivan-Level Agent Proof-of-Concept** (6 недель)
 
 ### Обоснование выбора:
-- **Maximum Business Value:** Полнофункциональный Ivan-Level Agent
-- **Competitive Advantage:** Уникальные capabilities недоступные конкурентам
-- **Foundation Strength:** 89% готовность платформы позволяет фокус на enhancement
-- **Long-term ROI:** Ivan-Level capabilities = core differentiator
+- **Business Value:** Proof-of-concept demonstrating Ivan-Level capabilities
+- **Technical Focus:** 4 core services extending existing platform
+- **Foundation Strength:** 89% ready platform enables targeted enhancement
+- **Budget Realistic:** $500/month operational costs within constraints
 
-**🎯 ФОКУС:** Missing tools → Personality integration → Advanced capabilities**
+**🎯 ФОКУС:** 4 missing services → Basic personality integration → Proof-of-concept demo**
 
 ---
 
@@ -93,74 +93,65 @@ public interface IVoiceService
 
 ## 🎯 IVAN-LEVEL EXECUTION PATH
 
-### PHASE B: Ivan-Level Agent Completion (6 недель)
-**Primary Goal:** Полнофункциональный Ivan-Level Agent  
-**Success Criteria:** "Всё, что может сделать Иван лично - может сделать агент"
+### PHASE B: Ivan-Level Agent Proof-of-Concept (6 недель)
+**Primary Goal:** Working proof-of-concept with 4 core services  
+**Success Criteria:** "Основные Ivan-Level возможности демонстрируемы через 4 сервиса"
 
 #### Week 1-2: Core Missing Tools Implementation
 ```bash
-# Priority 1: Web Navigation Capabilities
-- Playwright service integration (5 days)
-  * Browser automation framework
-  * Form filling and interaction
-  * Content extraction and navigation
-  * Cookie/session management
+# Service 1: Web Navigation (3 days)
+- Simple Playwright wrapper service
+  * Basic browser automation
+  * Form filling capabilities
+  * Content extraction
+  * Integration with existing DI
 
-# Priority 2: CAPTCHA Solving Service (3 days)
-- 2captcha API integration
-  * Image CAPTCHA solving
-  * reCAPTCHA v2/v3 support
-  * Service failover handling
-  * Cost optimization logic
+# Service 2: CAPTCHA Solving (2 days)
+- Direct 2captcha.com API integration
+  * Image CAPTCHA solving ($50/month budget)
+  * Basic error handling
+  * Simple configuration
 
-# Priority 3: Voice Services Foundation (2 days)  
-- Text-to-Speech integration
-  * OpenAI TTS API
-  * Voice selection and quality
-- Speech-to-Text basic setup
-  * OpenAI Whisper integration
-  * Audio format handling
+# Service 3: File Processing (2 days)  
+- Standard .NET library integration
+  * PDF processing with PdfSharp
+  * Excel handling with EPPlus
+  * Basic file operations
+
+# Service 4: Voice Services (3 days)
+- OpenAI TTS/STT API integration
+  * Text-to-speech conversion
+  * Speech-to-text processing
+  * Audio file handling
 ```
 
 #### Week 3-4: Advanced Ivan-Level Capabilities
 ```bash
-# Advanced Web Interactions
-- Complex workflow automation (3 days)
-  * Multi-step form processes
-  * File upload/download handling
-  * Dynamic content interaction
-  * JavaScript execution support
+# Ivan Personality Integration (1 week)
+- Profile data integration (3 days)
+  * Import data from IVAN_PROFILE_DATA.md
+  * Basic response style matching
+  * Technical preference modeling
 
-# Email and Communication (2 days)
-- SMTP/IMAP integration
-  * Email sending/receiving
-  * Attachment handling
-  * Email parsing and classification
-
-# Document Processing (2 days)
-- Advanced file handling
-  * PDF generation/parsing
-  * Excel/CSV manipulation
-  * Document conversion services
+# Service Integration Testing (2 days)
+- End-to-end integration
+  * All 4 services working together
+  * Basic error handling
+  * Configuration validation
 ```
 
 #### Week 5-6: Personality Integration & Testing
 ```bash
-# Ivan Personality Integration (1 week)
-- Advanced context awareness (2 days)
-  * Profile data deep integration
-  * Historical decision patterns
-  * Personal preference modeling
+# Demo Preparation & Testing (1 week)
+- Proof-of-concept validation (3 days)
+  * All 4 services operational
+  * Basic personality traits visible
+  * Budget compliance verification
 
-- Response style matching (2 days)
-  * Communication patterns
-  * Technical explanation style
-  * Decision-making approach
-
-- Comprehensive testing (3 days)
-  * End-to-end Ivan-Level scenarios
-  * Personality consistency validation
-  * Performance optimization
+- Integration testing (2 days)
+  * Service coordination through DI
+  * Error handling validation
+  * Performance basic checks
 ```
 
 ---
@@ -233,46 +224,44 @@ public interface IVoiceService
 
 ## 📊 IVAN-LEVEL SUCCESS METRICS
 
-### Week 2 Checkpoint: Core Tools Ready
-- [ ] **WebNavigation**: Can automate any browser task Ivan can do manually
-  * Form filling success rate >95%
-  * File download/upload working
-  * JavaScript execution support
-- [ ] **CAPTCHA**: Can solve standard CAPTCHAs with >90% success rate  
-- [ ] **Voice**: Can generate speech from text and transcribe audio
+### Week 2 Checkpoint: Core Services Ready
+- [ ] **WebNavigationService**: Basic browser automation working
+- [ ] **CaptchaSolvingService**: 2captcha integration functional ($50/month)
+- [ ] **FileProcessingService**: PDF and Excel processing with standard libraries
+- [ ] **VoiceService**: OpenAI TTS/STT integration working
 
-### Week 4 Checkpoint: Advanced Capabilities  
-- [ ] **Complex Workflows**: Can execute multi-step web processes
-- [ ] **Email**: Can send/receive/parse emails programmatically  
-- [ ] **Documents**: Can generate PDFs, process Excel files
-- [ ] **Quality**: StyleCop compliance achieved (47 → ≤10 violations)
+### Week 4 Checkpoint: Personality Integration  
+- [ ] **Ivan Profile Data**: Integrated from IVAN_PROFILE_DATA.md
+- [ ] **Response Style**: Basic matching of Ivan's communication patterns
+- [ ] **Technical Preferences**: Shows C#/.NET preferences in responses
 
-### Week 6 Final: Ivan-Level Agent Complete
-- [ ] **Personality Integration**: Responds in Ivan's style and approach
-- [ ] **Decision Making**: Makes choices consistent with Ivan's patterns  
-- [ ] **Task Execution**: Can perform any task Ivan does personally
-- [ ] **End-to-end Validation**: 10+ Ivan-Level scenarios working
-- [ ] **Production Ready**: All services deployed and stable
+### Week 6 Final: Proof-of-Concept Ready
+- [ ] **Service Integration**: All 4 services coordinated through existing DI
+- [ ] **Budget Compliance**: Operational costs exactly $500/month
+- [ ] **Basic Personality**: Ivan traits recognizable in agent responses
+- [ ] **Demo Ready**: Proof-of-concept demonstrations prepared
+- [ ] **Platform Integration**: Services work with existing 89% complete platform
 
 ---
 
 ## 🚀 IMMEDIATE NEXT ACTIONS
 
-### Today: Ivan-Level Foundation Setup
-1. **WebNavigation Service Design:** Architecture for Playwright integration
-2. **Service Contracts:** Define IWebNavigationService, ICaptchaSolvingService interfaces  
-3. **Development Environment:** Playwright NuGet package, 2captcha account setup
+### Today: Proof-of-Concept Foundation Setup
+1. **Service Design:** Simple interfaces for 4 core services
+2. **Budget Planning:** Confirm $500/month operational cost allocation  
+3. **Development Environment:** Basic package installations and API account setup
 
-### This Week: Core Missing Tools Implementation
-1. **Day 1:** WebNavigation service foundation and basic browser automation
-2. **Day 2-3:** Advanced web interaction capabilities (forms, files, JS execution)
-3. **Day 4:** CAPTCHA solving service integration and testing
-4. **Day 5:** Voice services foundation (TTS/STT basic functionality)
+### This Week: Core 4 Services Implementation
+1. **Day 1:** WebNavigationService basic Playwright wrapper
+2. **Day 2:** CaptchaSolvingService direct 2captcha integration
+3. **Day 3:** FileProcessingService standard library wrapper
+4. **Day 4:** VoiceService OpenAI API integration
+5. **Day 5:** Service registration in existing DI container
 
-### Week 2: Tool Integration & Testing
-1. **Integration:** Connect new services to existing ToolRegistry
-2. **Testing:** Unit and integration tests for all new capabilities  
-3. **Documentation:** Service usage examples and configuration guides
+### Week 2: Integration & Basic Testing
+1. **Integration:** Connect services to existing architecture
+2. **Testing:** Basic functionality testing for each service
+3. **Documentation:** Simple usage examples and configuration
 
 ---
 
@@ -294,4 +283,4 @@ public interface IVoiceService
 
 ---
 
-**🎯 FINAL STATUS: Strategic decision required. Upon approval, immediate execution ready with clear 6-week roadmap delivering both business demo capability and Ivan-Level agent completion.**
+**🎯 FINAL STATUS: Proof-of-concept plan ready. 6-week focused roadmap delivering 4 core Ivan-Level services with $500/month budget compliance.**

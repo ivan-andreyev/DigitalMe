@@ -64,6 +64,16 @@ public static class ServiceCollectionExtensions
         // Performance metrics services
         services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
 
+        // Ivan-Level capability services - Phase B Week 1
+        services.AddScoped<DigitalMe.Services.FileProcessing.IFileProcessingService, DigitalMe.Services.FileProcessing.FileProcessingService>();
+        
+        // Ivan-Level capability services - Phase B Week 2
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebNavigationService, DigitalMe.Services.WebNavigation.WebNavigationService>();
+        
+        // Ivan-Level capability services - Phase B Week 3
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaSolvingService, DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>();
+        services.AddScoped<DigitalMe.Services.Voice.IVoiceService, DigitalMe.Services.Voice.VoiceService>();
+
         return services;
     }
 
@@ -91,6 +101,10 @@ public static class ServiceCollectionExtensions
         services.Configure<AnthropicConfiguration>(
             configuration.GetSection("Anthropic"));
         services.AddScoped<IClaudeApiService, ClaudeApiService>();
+
+        // Ivan-Level service configurations - Phase B Week 3
+        services.Configure<DigitalMe.Services.Voice.VoiceServiceConfig>(configuration.GetSection("Voice"));
+        services.Configure<DigitalMe.Services.CaptchaSolving.CaptchaSolvingServiceConfig>(configuration.GetSection("TwoCaptcha"));
 
         return services;
     }
@@ -208,6 +222,24 @@ public static class ServiceCollectionExtensions
                 return resilienceService?.GetCombinedPolicy("clickup") ??
                        HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3,
                            _ => TimeSpan.FromSeconds(2));
+            });
+
+        // CaptchaSolvingService HTTP client for 2captcha.com API - Phase B Week 3
+        services.AddHttpClient<DigitalMe.Services.CaptchaSolving.ICaptchaSolvingService, DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(120); // CAPTCHA solving can take time
+                client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = 5, // Conservative for 2captcha rate limits
+            })
+            .AddPolicyHandler((serviceProvider, request) =>
+            {
+                var resilienceService = serviceProvider.GetService<IResiliencePolicyService>();
+                return resilienceService?.GetCombinedPolicy("captcha") ??
+                       HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(3,
+                           _ => TimeSpan.FromSeconds(5)); // Longer delay for CAPTCHA retries
             });
 
         return services;

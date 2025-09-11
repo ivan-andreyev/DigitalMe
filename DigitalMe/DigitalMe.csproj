@@ -35,6 +35,13 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.8" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.8" />
         <PackageReference Include="NCrontab" Version="3.3.3" />
+        <!-- File Processing packages for Ivan-Level capabilities -->
+        <PackageReference Include="EPPlus" Version="7.4.0" />
+        <PackageReference Include="PdfSharpCore" Version="1.3.65" />
+        <!-- Web Navigation packages for Ivan-Level capabilities -->
+        <PackageReference Include="Microsoft.Playwright" Version="1.48.0" />
+        <!-- Voice Service packages for Ivan-Level TTS/STT capabilities -->
+        <PackageReference Include="OpenAI" Version="2.0.0" />
     </ItemGroup>
 
     <ItemGroup>

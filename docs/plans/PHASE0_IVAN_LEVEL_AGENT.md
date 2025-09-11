@@ -5,7 +5,7 @@
 **Статус**: Пролог перед основными фазами стратегического плана  
 **Цель**: Создать working proof-of-concept - цифрового клона Ивана  
 **Философия**: "Всё, что может сделать Иван лично - может сделать агент (пусть и за деньги)"  
-**Timeline**: 9-10 недель ДО начала Phase 1 (Foundation Consolidation)  
+**Timeline**: 6 недель ДО начала Phase 1 (Foundation Consolidation)  
 
 ---
 
@@ -76,8 +76,8 @@
 - Claude Integration ✅
 - Basic Tool System ✅
 
-### 🧠 PHASE 1: Advanced Cognitive Core (2-3 weeks)
-**Goal**: Агент мыслит как Иван
+### 🧠 PHASE 1: Core Services Development (2 weeks)
+**Goal**: 4 основных сервиса функционируют
 
 #### Week 1-2: Enhanced Personality Engine
 - [ ] Глубокая персонализация `IvanPersonalityService`
@@ -103,8 +103,8 @@
   - [ ] Fallback strategies
   - [ ] Cost-benefit analysis
 
-### 🛠️ PHASE 2: Advanced Tool Capabilities (2-3 weeks)
-**Goal**: Агент может делать всё, что умеет Иван
+### 🛠️ PHASE 2: Ivan Personality Integration (2 weeks)
+**Goal**: Агент отвечает как Иван
 
 #### Week 4-5: Web & Automation Tools
 - [ ] Advanced Web Navigation
@@ -121,24 +121,14 @@
   - [ ] Image/video processing
   - [ ] Code file operations
 
-#### Week 6: Professional Tools
-- [ ] Development Environment Control
-  - [ ] Git operations automation
-  - [ ] CI/CD pipeline management
-  - [ ] Docker container operations
-- [ ] Communication Automation
-  - [ ] Email composition & sending
-  - [ ] Calendar management
-  - [ ] Meeting scheduling
-- [ ] Data Analysis Tools
-  - [ ] SQL query execution
-  - [ ] Data visualization
-  - [ ] Report generation
+### 🌐 PHASE 3: Final Week - Integration, Demo & Testing (1 week)
+**Goal**: Complete Ivan-level agent ready for demonstration
 
-### 🌐 PHASE 2.5: Human-Like Internet & Communication (2-3 weeks)
-**Goal**: Агент действует в интернете как человек
-
-#### Week 6-7: Internet Navigation Skills
+#### Week 6: All-in-One Final Integration
+- [ ] **Professional Tools Completion**
+  - [ ] Development Environment Control (Git, CI/CD, Docker)
+  - [ ] Communication Automation (Email, Calendar, Scheduling)
+  - [ ] Data Analysis Tools (SQL, Visualization, Reports)
 - [ ] **Human-Like Web Browsing**
   - [ ] Site exploration and understanding functionality
   - [ ] Service registration and account verification  
@@ -149,35 +139,21 @@
   - [ ] Form filling with dynamic validation
   - [ ] E-commerce navigation and comparison shopping
   - [ ] Service subscription and cancellation flows
-
-#### Week 7-8: Communication & Social Skills  
-- [ ] **Advanced Text Communication**
+- [ ] **Advanced Communication Skills**
   - [ ] Style adaptation to conversation partner
   - [ ] Professional correspondence and negotiations
-  - [ ] Multi-party chat coordination
-  - [ ] Forum and community participation
-- [ ] **Voice & Audio Communication**
+  - [ ] Multi-party chat coordination and forum participation
   - [ ] Voice message generation with proper intonation
-  - [ ] Text-to-speech integration for phone calls
-  - [ ] Audio message processing and responses
-  - [ ] Basic phone conversation capabilities
-
-### 🎨 PHASE 3: Quality & Polish (1-2 weeks)
-**Goal**: Производственная готовность агента
-
-#### Week 9-10: Final Integration & Testing
-- [ ] **End-to-End Testing**
+  - [ ] Text-to-speech integration for basic phone calls
+- [ ] **End-to-End Integration & Testing**
   - [ ] Complete Ivan-level task scenarios
   - [ ] Performance benchmarking vs success criteria
   - [ ] Error handling and recovery testing
-- [ ] **Production Readiness**
-  - [ ] Response time optimization
-  - [ ] Cost efficiency analysis  
+- [ ] **Production Readiness & Demo Preparation**
+  - [ ] Response time optimization and cost efficiency analysis
   - [ ] Reliability and uptime testing
-- [ ] **Documentation & Demo Preparation**
-  - [ ] User guides and API documentation
-  - [ ] Demo scenarios for stakeholders
-  - [ ] Deployment automation
+  - [ ] User guides, API documentation, and demo scenarios
+  - [ ] Deployment automation for stakeholder demonstration
 
 ---
 
@@ -249,10 +225,10 @@
 - **Office 365 API**: ~$20/month
 - **Voice/TTS APIs**: ~$30/month (NEW - для голосовых возможностей)
 - **Various APIs**: ~$100/month
-- **Total**: ~$430/month operational cost
+- **Total**: ~$500/month operational cost
 
 ### Development Resources:
-- **Timeline**: 9-10 weeks full development (updated with Phase 2.5)
+- **Timeline**: 6 weeks full development (updated with Phase 2.5)
 - **Focus**: Quality over quantity - лучше меньше, но идеально
 - **Testing**: Extensive testing with real Ivan tasks
 
