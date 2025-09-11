@@ -33,7 +33,7 @@ This unified plan directly addresses the 6 critical gaps identified in the Techn
 
 ### Strategic Phases Summary
 ```
-Phase 0: Ivan-Level Agent (6-8 weeks) - $3K Investment → $50K Proof Value
+Phase 0: Ivan-Level Agent (9-10 weeks) - $1.1K Investment → $50K Proof Value
 ├── Technical: Advanced reactive agent with human-level capabilities
 └── Business: Working demo of digital Ivan clone
 
@@ -58,7 +58,7 @@ Phase 4: Strategic Dominance (24+ months) - $3M+ Investment → $15M+ Value
 | Phase | Technical Investment | Business Investment | Total Investment | Platform Value | ROI |
 |-------|---------------------|-------------------|------------------|----------------|-----|
 | **Current** | $47K (completed) | $0 | $47K | $400K | 751% |
-| **Phase 0** | $3K | $0 | $3K | $50K | 1567% |
+| **Phase 0** | $1.1K | $0 | $1.1K | $50K | 4445% |
 | **Phase 1** | $500K | $300K | $800K | $1.5M | 88% |
 | **Phase 2** | $700K | $500K | $1.2M | $4M | 233% |
 | **Phase 3** | $1.2M | $800K | $2M | $8M | 300% |
@@ -67,8 +67,8 @@ Phase 4: Strategic Dominance (24+ months) - $3M+ Investment → $15M+ Value
 ---
 
 ## 🧠 PHASE 0: IVAN-LEVEL AGENT (PROLOGUE)
-**Duration**: 6-8 weeks (September-November 2025)  
-**Investment**: $3K operational costs  
+**Duration**: 9-10 weeks (September-November 2025)  
+**Investment**: $1.1K operational costs (~$430/month × 2.5 months)  
 **Objective**: Create advanced reactive agent with human-level capabilities
 **Philosophy**: "Всё, что может Иван - может агент (пусть и за деньги)"
 
@@ -80,7 +80,8 @@ Phase 4: Strategic Dominance (24+ months) - $3M+ Investment → $15M+ Value
 - Заполнить сложную веб-форму с капчей
 - Создать техническую документацию или презентацию
 
-### 📋 Technical Implementation (6-8 weeks)
+### 📋 Technical Implementation (9-10 weeks)
+**Technical roadmap**: See [Master Technical Plan](../plans/MASTER_TECHNICAL_PLAN.md) for comprehensive technical architecture and implementation details
 
 #### Week 1-2: Enhanced Cognitive Core
 - **Advanced Personality Engine**: Глубокая персонализация с реальными данными Ивана
@@ -103,10 +104,10 @@ Phase 4: Strategic Dominance (24+ months) - $3M+ Investment → $15M+ Value
 - **Performance Optimization**: Response time, cost efficiency
 
 ### 💰 Investment Breakdown
-- **Claude API**: $200/month × 2 months = $400
-- **External Services**: 2captcha ($50/month), proxies ($30/month), APIs ($100/month) = $360
-- **Development Tools**: Office 365 API, misc services = $240
-- **Total**: ~$3K for proof-of-concept phase
+- **Claude API**: $200/month × 2.5 months = $500
+- **External Services**: 2captcha ($50/month), proxies ($30/month), APIs ($100/month) × 2.5 = $450
+- **Development Tools**: Office 365 API, Voice/TTS APIs, misc = $150
+- **Total**: ~$1.1K for proof-of-concept phase
 
 ### 🎯 Expected Outcomes
 - **Technical**: Working digital clone capable of Ivan-level tasks

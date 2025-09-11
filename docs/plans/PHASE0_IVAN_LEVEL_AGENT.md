@@ -221,14 +221,15 @@
 - [ ] **Телефонные звонки**: Провести деловой разговор по телефону (через voice synthesis)
 - [ ] **Многосторонние дискуссии**: Участие в групповых чатах, форумах, координация команды
 
-#### Advanced Cognitive Tasks (Phase 1+ - Future):
-- [ ] **Обучение на лету**: Быстро освоить новый инструмент/API/сервис → Phase 1 (Self-Learning)
-- [ ] **Творческое решение проблем**: Нестандартные подходы → Phase 1 (Advanced AI)
-- [ ] **Контекстная адаптация**: Стиль под аудиторию → Phase 1 (Autonomy)
-- [ ] **Multi-tasking management**: Параллельные проекты → Phase 1 (Multi-User)
-- [ ] **Этическое принятие решений**: Моральные дилеммы → Phase 1 (Advanced Reasoning)
+#### Advanced Cognitive Tasks (Phase 1 - Future):
+- [ ] **Обучение на лету**: Быстро освоить новый инструмент/API/сервис → [Phase 1 Advanced Cognitive Tasks](PHASE1_ADVANCED_COGNITIVE_TASKS.md)
+- [ ] **Творческое решение проблем**: Нестандартные подходы → [Phase 1 Advanced Cognitive Tasks](PHASE1_ADVANCED_COGNITIVE_TASKS.md)
+- [ ] **Контекстная адаптация**: Стиль под аудиторию → [Phase 1 Advanced Cognitive Tasks](PHASE1_ADVANCED_COGNITIVE_TASKS.md)
+- [ ] **Multi-tasking management**: Параллельные проекты → [Phase 1 Advanced Cognitive Tasks](PHASE1_ADVANCED_COGNITIVE_TASKS.md)
+- [ ] **Этическое принятие решений**: Моральные дилеммы → [Phase 1 Advanced Cognitive Tasks](PHASE1_ADVANCED_COGNITIVE_TASKS.md)
 
-> **Примечание**: Эти навыки относятся к автономности и самообучению - переносятся в основной план после Phase 0
+> **Примечание**: Эти навыки детализированы в [PHASE1_ADVANCED_COGNITIVE_TASKS.md](PHASE1_ADVANCED_COGNITIVE_TASKS.md) - выполняются ПОСЛЕ завершения Phase 0  
+> **Общая техническая архитектура**: [Master Technical Plan](MASTER_TECHNICAL_PLAN.md)
 
 ### Quality Benchmarks:
 - **Accuracy**: 95%+ правильных решений простых задач
