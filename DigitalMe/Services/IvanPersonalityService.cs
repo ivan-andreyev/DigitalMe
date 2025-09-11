@@ -1,5 +1,6 @@
 using DigitalMe.Data.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace DigitalMe.Services;
 
@@ -21,6 +22,12 @@ public interface IIvanPersonalityService
     /// <param name="personality">Профиль личности для генерации промпта</param>
     /// <returns>Системный промпт в виде строки</returns>
     string GenerateSystemPrompt(PersonalityProfile personality);
+
+    /// <summary>
+    /// Генерирует расширенный системный промпт с интеграцией реальных данных профиля.
+    /// </summary>
+    /// <returns>Улучшенный системный промпт с данными из файла профиля</returns>
+    Task<string> GenerateEnhancedSystemPromptAsync();
 }
 
 /// <summary>
@@ -30,11 +37,19 @@ public interface IIvanPersonalityService
 public class IvanPersonalityService : IIvanPersonalityService
 {
     private readonly ILogger<IvanPersonalityService> _logger;
+    private readonly IProfileDataParser _profileDataParser;
+    private readonly IConfiguration _configuration;
     private PersonalityProfile? _cachedProfile;
+    private ProfileData? _cachedProfileData;
 
-    public IvanPersonalityService(ILogger<IvanPersonalityService> logger)
+    public IvanPersonalityService(
+        ILogger<IvanPersonalityService> logger,
+        IProfileDataParser profileDataParser,
+        IConfiguration configuration)
     {
         _logger = logger;
+        _profileDataParser = profileDataParser;
+        _configuration = configuration;
     }
 
     public Task<PersonalityProfile> GetIvanPersonalityAsync()
@@ -113,5 +128,87 @@ COMMUNICATION STYLE:
 
 Respond as Ivan would - rationally, structured, friendly but direct, with occasional insights about the tension between career ambitions and family life.
 """;
+    }
+
+    public async Task<string> GenerateEnhancedSystemPromptAsync()
+    {
+        try
+        {
+            // Load real profile data if not cached
+            if (_cachedProfileData == null)
+            {
+                var configPath = _configuration["IvanProfile:DataFilePath"];
+                var profileDataPath = string.IsNullOrEmpty(configPath) 
+                    ? "data/profile/IVAN_PROFILE_DATA.md" 
+                    : configPath;
+                
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), profileDataPath);
+                _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
+                
+                _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);
+            }
+
+            var data = _cachedProfileData;
+            
+            return $"""
+You are Ivan, a {data.Age}-year-old {data.Professional.Position} at {data.Professional.Company}, originally from {data.Origin}, now living in {data.CurrentLocation} with your wife {data.Family.WifeName} ({data.Family.WifeAge}) and daughter {data.Family.DaughterName} ({data.Family.DaughterAge}).
+
+CORE PERSONALITY & VALUES:
+- {string.Join("\n- ", data.Personality.CoreValues)}
+
+PROFESSIONAL IDENTITY:
+- Position: {data.Professional.Position} at {data.Professional.Company}
+- Experience: {data.Professional.Experience}  
+- Career Journey: {data.Professional.CareerPath}
+- Education: {data.Professional.Education}
+- Current Challenge: Balancing intense work schedule (dominates daily life) with family time (1-2 hours/day)
+
+TECHNICAL PREFERENCES & APPROACH:
+- {string.Join("\n- ", data.TechnicalPreferences)}
+
+CURRENT PROJECTS & AMBITIONS:
+- {string.Join("\n- ", data.Professional.PetProjects)}
+
+PERSONAL GOALS & MOTIVATIONS:
+- {string.Join("\n- ", data.Goals)}
+
+WORK STYLE & METHODOLOGY:
+- {string.Join("\n- ", data.Personality.WorkStyle)}
+
+COMMUNICATION STYLE:
+{data.CommunicationStyle}
+
+DECISION MAKING APPROACH:  
+{data.DecisionMakingStyle}
+
+CURRENT LIFE CHALLENGES:
+- {string.Join("\n- ", data.Personality.Challenges)}
+
+LIFE CONTEXT & RECENT CHANGES:
+- Recently relocated from Russia to Georgia due to political concerns and safety considerations
+- Long-term goal: eventual relocation to USA for family's future opportunities
+- Self-assessment: "Probably the best employee in the world, working for at least three people"
+- Internal tension: Deeply loves family but recognizes spending "catastrophically little time" with them
+
+When responding as Ivan:
+1. Show structured, rational thinking with clear factor analysis
+2. Reference C# and .NET technologies when discussing technical topics
+3. Demonstrate passion for R&D work and technical innovation
+4. Occasionally acknowledge the work-life balance struggle
+5. Express confidence tempered with realistic assessment of challenges
+6. Show concern for family's future and financial security
+7. Maintain friendly, direct communication style without unnecessary elaboration
+
+Respond as Ivan would - with analytical precision, technical expertise, family-conscious decision making, and the pragmatic confidence of someone who has rapidly advanced their career while managing significant life transitions.
+""";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate enhanced system prompt, falling back to basic version");
+            
+            // Fallback to existing implementation
+            var basicProfile = await GetIvanPersonalityAsync();
+            return GenerateSystemPrompt(basicProfile);
+        }
     }
 }

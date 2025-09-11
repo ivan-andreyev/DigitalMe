@@ -44,9 +44,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMVPPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
+        services.AddScoped<IProfileDataParser, ProfileDataParser>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();
         services.AddScoped<IMVPMessageProcessor, MVPMessageProcessor>();
         services.AddScoped<IHealthChecker, HealthChecker>();
+        services.AddScoped<IIvanLevelHealthCheckService, IvanLevelHealthCheckService>();
 
         // Resilience services
         services.AddSingleton<IResiliencePolicyService, ResiliencePolicyService>();
