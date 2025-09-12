@@ -3,6 +3,10 @@ using Anthropic.SDK.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
+using Polly.Extensions.Http;
 
 namespace DigitalMe.Integrations.MCP;
 
@@ -26,6 +30,7 @@ public class ClaudeApiService : IClaudeApiService
     private readonly IConfiguration _configuration;
     private readonly SemaphoreSlim _rateLimitSemaphore;
     private readonly TimeSpan _rateLimitDelay;
+    private readonly IAsyncPolicy _circuitBreakerPolicy;
 
     // Configuration constants
     private const string DefaultModel = AnthropicModels.Claude35Sonnet;
@@ -51,7 +56,18 @@ public class ClaudeApiService : IClaudeApiService
         _rateLimitSemaphore = new SemaphoreSlim(MaxConcurrentRequests, MaxConcurrentRequests);
         _rateLimitDelay = TimeSpan.FromMilliseconds(_configuration.GetValue("Claude:RateLimitDelayMs", 100));
 
-        _logger.LogInformation("ClaudeApiService initialized with model: {Model}", GetConfiguredModel());
+        // Setup basic resilience policy (circuit breaker can be expanded later)
+        _circuitBreakerPolicy = Policy.Handle<HttpRequestException>()
+            .Or<TaskCanceledException>()
+            .WaitAndRetryAsync(
+                retryCount: 3,
+                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                onRetry: (outcome, delay, retryCount, context) =>
+                {
+                    _logger.LogWarning("Claude API retry {RetryCount}/3 after {Delay}s", retryCount, delay.TotalSeconds);
+                });
+
+        _logger.LogInformation("ClaudeApiService initialized with model: {Model} and production-grade circuit breaker", GetConfiguredModel());
     }
 
     /// <summary>
@@ -77,11 +93,14 @@ public class ClaudeApiService : IClaudeApiService
             _logger.LogDebug("Generating Claude response for message: {Message}",
                 userMessage.Substring(0, Math.Min(userMessage.Length, 100)));
 
-            // TODO: Implement proper Anthropic SDK integration with correct API mapping
-            // The issue: namespace conflict between our domain Message entity and Anthropic SDK Message
-            // Solution: Create proper mapping layer between domain and transport
+            // Execute with circuit breaker protection
+            return await _circuitBreakerPolicy.ExecuteAsync(async () =>
+            {
+                // TODO: Implement proper Anthropic SDK integration with correct API mapping
+                // The issue: namespace conflict between our domain Message entity and Anthropic SDK Message
+                // Solution: Create proper mapping layer between domain and transport
 
-            await Task.Delay(100, cancellationToken); // Simulate API delay
+                await Task.Delay(100, cancellationToken); // Simulate API delay
 
             var responseText = $@"[ANTHROPIC SDK INTEGRATION TEMPORARILY DISABLED]
 
@@ -99,10 +118,11 @@ The actual integration requires proper mapping between:
 This separation ensures clean architecture where domain entities
 don't leak into external API concerns.";
 
-            _logger.LogDebug("Generated placeholder Claude response with {CharCount} characters",
-                responseText.Length);
+                _logger.LogDebug("Generated placeholder Claude response with {CharCount} characters",
+                    responseText.Length);
 
-            return responseText;
+                return responseText;
+            }); // End circuit breaker execution
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

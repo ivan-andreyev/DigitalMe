@@ -132,8 +132,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         result.Data.Should().NotBeNull();
 
         // Verify page info contains expected data
-        var pageInfo = result.Data as dynamic;
-        pageInfo.Should().NotBeNull();
+        result.Data.Should().NotBeNull();
     }
 
     [Fact]
@@ -383,7 +382,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         // Arrange
         await _service.InitializeBrowserAsync();
         await _service.NavigateToAsync("https://example.com");
-        var script = "return document.title;";
+        var script = "document.title";
 
         // Act
         var result = await _service.ExecuteScriptAsync(script);

@@ -76,6 +76,25 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaSolvingService, DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>();
         services.AddScoped<DigitalMe.Services.Voice.IVoiceService, DigitalMe.Services.Voice.VoiceService>();
 
+        // Application Services layer - Clean Architecture compliance
+        services.AddScoped<DigitalMe.Services.ApplicationServices.Workflows.IIvanLevelWorkflowService, DigitalMe.Services.ApplicationServices.Workflows.IvanLevelWorkflowService>();
+
+        // Orchestrators - Clean Architecture Application Services
+        services.AddScoped<DigitalMe.Services.ApplicationServices.Orchestrators.IWorkflowOrchestrator, DigitalMe.Services.ApplicationServices.Orchestrators.WorkflowOrchestrator>();
+
+        // Use Cases - Clean Architecture Application Services
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.FileProcessing.IFileProcessingUseCase, DigitalMe.Services.ApplicationServices.UseCases.FileProcessing.FileProcessingUseCase>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.WebNavigation.IWebNavigationUseCase, DigitalMe.Services.ApplicationServices.UseCases.WebNavigation.WebNavigationUseCase>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability.IServiceAvailabilityUseCase, DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability.ServiceAvailabilityUseCase>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.IHealthCheckUseCase, DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.HealthCheckUseCase>();
+
+        // Backup Services - Refactored following SRP (Single Responsibility Principle)
+        services.AddScoped<DigitalMe.Services.Backup.IBackupExecutor, DigitalMe.Services.Backup.BackupExecutor>();
+        services.AddScoped<DigitalMe.Services.Backup.IBackupValidator, DigitalMe.Services.Backup.BackupValidator>();
+        services.AddScoped<DigitalMe.Services.Backup.IBackupCleanup, DigitalMe.Services.Backup.BackupCleanup>();
+        services.AddScoped<DigitalMe.Services.Backup.IDatabaseBackupService, DigitalMe.Services.Backup.BackupOrchestrator>();
+        services.AddScoped<DigitalMe.Services.Backup.BackupSchedulerService>();
+
         return services;
     }
 

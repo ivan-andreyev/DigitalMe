@@ -1,0 +1,79 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using DigitalMe.Data;
+using DigitalMe.Extensions;
+
+namespace DigitalMe.Tests.Integration;
+
+/// <summary>
+/// Test fixture for integration tests that sets up a full DI container
+/// with all Ivan-Level services registered as they would be in production.
+/// </summary>
+public class IntegrationTestFixture : IDisposable
+{
+    public IServiceProvider ServiceProvider { get; private set; }
+    public IConfiguration Configuration { get; private set; }
+
+    public IntegrationTestFixture()
+    {
+        ServiceProvider = CreateServiceProvider();
+    }
+
+    private IServiceProvider CreateServiceProvider()
+    {
+        var services = new ServiceCollection();
+        
+        // Create test configuration
+        var configBuilder = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["ConnectionStrings:DefaultConnection"] = "Host=localhost;Database=digitalme_test;Username=test;Password=test",
+                ["Anthropic:ApiKey"] = "test-api-key",
+                ["OpenAI:ApiKey"] = "test-openai-key",
+                ["TwoCaptcha:ApiKey"] = "test-2captcha-key",
+                ["IvanProfile:DataFilePath"] = "C:\\Sources\\DigitalMe\\data\\profile\\IVAN_PROFILE_DATA.md",
+                ["Voice:OpenAI:ApiKey"] = "test-openai-key",
+                ["Voice:DefaultVoice"] = "alloy",
+                ["Voice:DefaultFormat"] = "mp3",
+                ["Voice:DefaultSpeed"] = "1.0",
+                ["TwoCaptcha:DefaultTimeoutSeconds"] = "120",
+                ["TwoCaptcha:DefaultPollingIntervalSeconds"] = "5"
+            });
+
+        Configuration = configBuilder.Build();
+        services.AddSingleton(Configuration);
+
+        // Add logging
+        services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+
+        // Add Entity Framework with in-memory database for testing
+        services.AddDbContext<DigitalMeDbContext>(options =>
+            options.UseInMemoryDatabase($"DigitalMeIntegrationTest_{Guid.NewGuid()}"));
+
+        // Add all DigitalMe services using the extension method
+        services.AddDigitalMeServices(Configuration);
+
+        // Build service provider
+        var serviceProvider = services.BuildServiceProvider();
+        
+        // Initialize database and seed Ivan's profile data
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        context.Database.EnsureCreated();
+        
+        // Seed Ivan's personality data for integration tests
+        DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
+
+        return serviceProvider;
+    }
+
+    public void Dispose()
+    {
+        if (ServiceProvider is IDisposable disposableProvider)
+        {
+            disposableProvider.Dispose();
+        }
+    }
+}

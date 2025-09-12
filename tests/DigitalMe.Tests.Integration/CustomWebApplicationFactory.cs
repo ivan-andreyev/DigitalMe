@@ -319,36 +319,28 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             appLogger?.LogError(ex, "❌ Failed to initialize Test Tool Registry");
         }
         
-        // Seed Ivan personality for integration tests (except for error handling tests that expect missing personality)
+        // Seed Ivan personality for integration tests using the same seeder as main application
         try
         {
             using var dbScope = host.Services.CreateScope();
             var context = dbScope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
             
-            // Check if Ivan personality already exists
-            var existingIvan = context.PersonalityProfiles.FirstOrDefault(p => p.Name == "Ivan");
-            if (existingIvan == null)
+            // Ensure database is created first
+            context.Database.EnsureCreated();
+            
+            // Use the same seeder as main application for consistency
+            var shouldSeed = Environment.GetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY") != "false";
+            if (shouldSeed)
             {
-                // Only seed if this is not a test that expects missing personality
-                // Use environment variable or some other indicator to control seeding
-                var shouldSeed = Environment.GetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY") != "false";
+                DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
                 
-                if (shouldSeed)
-                {
-                    var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
-                    ivan.Name = "Ivan";
-                    
-                    context.PersonalityProfiles.Add(ivan);
-                    context.SaveChanges();
-                    
-                    var appLogger = host.Services.GetService<ILogger<CustomWebApplicationFactory<TStartup>>>();
-                    appLogger?.LogInformation("🧑‍💻 IVAN PERSONALITY SEEDED for integration tests");
-                }
-                else
-                {
-                    var appLogger = host.Services.GetService<ILogger<CustomWebApplicationFactory<TStartup>>>();
-                    appLogger?.LogInformation("🧪 IVAN PERSONALITY SEEDING SKIPPED - test expects missing personality");
-                }
+                var appLogger = host.Services.GetService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+                appLogger?.LogInformation("🧑‍💻 IVAN PERSONALITY SEEDED for integration tests using IvanDataSeeder");
+            }
+            else
+            {
+                var appLogger = host.Services.GetService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+                appLogger?.LogInformation("🧪 IVAN PERSONALITY SEEDING SKIPPED - test expects missing personality");
             }
         }
         catch (Exception ex)

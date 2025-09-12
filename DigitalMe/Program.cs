@@ -179,6 +179,9 @@ builder.Services.AddSingleton<DigitalMe.Services.Configuration.ISecretsManagemen
 // DigitalMe Services - Standardized Registration
 builder.Services.AddDigitalMeServices(builder.Configuration);
 
+// Clean Architecture Services - Use Cases and Orchestrators
+builder.Services.AddCleanArchitectureServices();
+
 // Database Migration Service
 builder.Services.AddScoped<DigitalMe.Services.Database.IDatabaseMigrationService,
                            DigitalMe.Services.Database.DatabaseMigrationService>();

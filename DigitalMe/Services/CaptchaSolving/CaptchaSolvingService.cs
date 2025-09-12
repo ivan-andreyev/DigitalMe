@@ -15,7 +15,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     private readonly ILogger<CaptchaSolvingService> _logger;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
-    private readonly string _apiKey;
+    private readonly string? _apiKey;
     private const string BaseUrl = "https://2captcha.com";
 
     public CaptchaSolvingService(ILogger<CaptchaSolvingService> logger, HttpClient httpClient, IConfiguration configuration)
@@ -23,7 +23,24 @@ public class CaptchaSolvingService : ICaptchaSolvingService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _apiKey = _configuration["TwoCaptcha:ApiKey"] ?? throw new InvalidOperationException("2captcha API key not configured");
+        // Try to get API key from configuration first, then from environment variable
+        _apiKey = _configuration["TwoCaptcha:ApiKey"];
+        if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            var envVarName = _configuration["TwoCaptcha:ApiKeyEnvironmentVariable"] ?? "TWOCAPTCHA_API_KEY";
+            _apiKey = Environment.GetEnvironmentVariable(envVarName);
+            _logger.LogInformation($"Attempting to get 2captcha API key from environment variable: {envVarName}");
+        }
+        
+        if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            _logger.LogError("2captcha API key not configured - this is required for service operation");
+            throw new InvalidOperationException("TwoCaptcha API key is required but not configured. Please set TwoCaptcha:ApiKey in configuration or TWOCAPTCHA_API_KEY environment variable.");
+        }
+        else
+        {
+            _logger.LogInformation("2captcha API key configured successfully");
+        }
         
         // Set default timeout for HTTP client
         _httpClient.Timeout = TimeSpan.FromMinutes(10);
@@ -34,6 +51,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     {
         if (string.IsNullOrWhiteSpace(imageBase64))
             return CaptchaSolvingResult.ErrorResult("Base64 image data cannot be null or empty");
+
+        if (!IsConfigured())
+            return CaptchaSolvingResult.ErrorResult("2captcha API key not configured");
 
         try
         {
@@ -407,6 +427,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     /// <inheritdoc />
     public async Task<CaptchaSolvingResult> GetBalanceAsync()
     {
+        if (!IsConfigured())
+            return CaptchaSolvingResult.ErrorResult("2captcha API key not configured");
+
         try
         {
             _logger.LogInformation("Getting 2captcha account balance");
@@ -481,6 +504,12 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     /// <inheritdoc />
     public async Task<bool> IsServiceAvailableAsync()
     {
+        if (!IsConfigured())
+        {
+            _logger.LogWarning("2captcha API key not configured - service unavailable");
+            return false;
+        }
+        
         try
         {
             var response = await _httpClient.GetAsync($"{BaseUrl}/res.php?key={_apiKey}&action=getbalance");
@@ -518,6 +547,11 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             return CaptchaSolvingResult.ErrorResult($"Stats retrieval failed: {ex.Message}", ex.ToString());
         }
     }
+
+    /// <summary>
+    /// Check if the service is properly configured with an API key
+    /// </summary>
+    private bool IsConfigured() => !string.IsNullOrWhiteSpace(_apiKey);
 
     #region Private Helper Methods
 
