@@ -95,6 +95,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.Backup.IDatabaseBackupService, DigitalMe.Services.Backup.BackupOrchestrator>();
         services.AddScoped<DigitalMe.Services.Backup.BackupSchedulerService>();
 
+        // Learning Services - Phase 1 Advanced Cognitive Capabilities
+        services.AddScoped<DigitalMe.Services.Learning.IAutoDocumentationParser, DigitalMe.Services.Learning.AutoDocumentationParser>();
+        services.AddScoped<DigitalMe.Services.Learning.ISelfTestingFramework, DigitalMe.Services.Learning.SelfTestingFramework>();
+
         return services;
     }
 
