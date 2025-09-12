@@ -11,7 +11,7 @@ namespace DigitalMe.Tests.Integration;
 /// Test fixture for integration tests that sets up a full DI container
 /// with all Ivan-Level services registered as they would be in production.
 /// </summary>
-public class IntegrationTestFixture : IDisposable
+public class IntegrationTestFixture : IAsyncDisposable, IDisposable
 {
     public IServiceProvider ServiceProvider { get; private set; }
     public IConfiguration Configuration { get; private set; }
@@ -31,13 +31,12 @@ public class IntegrationTestFixture : IDisposable
             {
                 ["ConnectionStrings:DefaultConnection"] = "Host=localhost;Database=digitalme_test;Username=test;Password=test",
                 ["Anthropic:ApiKey"] = "test-api-key",
-                ["OpenAI:ApiKey"] = "test-openai-key",
-                ["TwoCaptcha:ApiKey"] = "test-2captcha-key",
+                ["OpenAI:ApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                ["TwoCaptcha:ApiKey"] = "0123456789abcdef0123456789abcdef",
                 ["IvanProfile:DataFilePath"] = "C:\\Sources\\DigitalMe\\data\\profile\\IVAN_PROFILE_DATA.md",
-                ["Voice:OpenAI:ApiKey"] = "test-openai-key",
-                ["Voice:DefaultVoice"] = "alloy",
-                ["Voice:DefaultFormat"] = "mp3",
-                ["Voice:DefaultSpeed"] = "1.0",
+                ["Voice:OpenAiApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                ["Voice:DefaultTimeout"] = "30000",
+                ["Voice:EnableDetailedLogging"] = "true",
                 ["TwoCaptcha:DefaultTimeoutSeconds"] = "120",
                 ["TwoCaptcha:DefaultPollingIntervalSeconds"] = "5"
             });
@@ -69,11 +68,24 @@ public class IntegrationTestFixture : IDisposable
         return serviceProvider;
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        if (ServiceProvider is IAsyncDisposable asyncDisposableProvider)
+        {
+            await asyncDisposableProvider.DisposeAsync();
+        }
+        else if (ServiceProvider is IDisposable disposableProvider)
+        {
+            disposableProvider.Dispose();
+        }
+    }
+
     public void Dispose()
     {
         if (ServiceProvider is IDisposable disposableProvider)
         {
             disposableProvider.Dispose();
         }
+        GC.SuppressFinalize(this);
     }
 }
