@@ -53,6 +53,12 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddTransient<DigitalMe.Services.Learning.IAutoDocumentationParser, DigitalMe.Services.Learning.AutoDocumentationParser>();
         services.AddTransient<DigitalMe.Services.Learning.ISelfTestingFramework, DigitalMe.Services.Learning.SelfTestingFramework>();
         
+        // AutoDocumentationParser SOLID refactored services - Phase 2
+        services.AddTransient<DigitalMe.Services.Learning.Documentation.HttpContentFetching.IDocumentationFetcher, DigitalMe.Services.Learning.Documentation.HttpContentFetching.DocumentationFetcher>();
+        services.AddTransient<DigitalMe.Services.Learning.Documentation.ContentParsing.IDocumentationParser, DigitalMe.Services.Learning.Documentation.ContentParsing.DocumentationParser>();
+        services.AddTransient<DigitalMe.Services.Learning.Documentation.PatternAnalysis.IUsagePatternAnalyzer, DigitalMe.Services.Learning.Documentation.PatternAnalysis.UsagePatternAnalyzer>();
+        services.AddTransient<DigitalMe.Services.Learning.Documentation.TestGeneration.IApiTestCaseGenerator, DigitalMe.Services.Learning.Documentation.TestGeneration.ApiTestCaseGenerator>();
+        
         // Test Infrastructure Components - T2.7 additions (extracted from SelfTestingFramework god class)
         services.AddTransient<DigitalMe.Services.Learning.Testing.TestGeneration.ITestCaseGenerator, DigitalMe.Services.Learning.Testing.TestGeneration.TestCaseGenerator>();
         

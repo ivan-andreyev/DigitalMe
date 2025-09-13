@@ -4,6 +4,10 @@ using Moq.Protected;
 using System.Net;
 using System.Text;
 using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.Documentation.HttpContentFetching;
+using DigitalMe.Services.Learning.Documentation.ContentParsing;
+using DigitalMe.Services.Learning.Documentation.PatternAnalysis;
+using DigitalMe.Services.Learning.Documentation.TestGeneration;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -16,6 +20,10 @@ public class AutoDocumentationParserTests
     private readonly Mock<ILogger<AutoDocumentationParser>> _mockLogger;
     private readonly Mock<HttpMessageHandler> _mockHttpHandler;
     private readonly HttpClient _httpClient;
+    private readonly Mock<IDocumentationFetcher> _mockDocumentationFetcher;
+    private readonly Mock<IDocumentationParser> _mockDocumentationParser;
+    private readonly Mock<IUsagePatternAnalyzer> _mockUsagePatternAnalyzer;
+    private readonly Mock<IApiTestCaseGenerator> _mockApiTestCaseGenerator;
     private readonly AutoDocumentationParser _parser;
 
     public AutoDocumentationParserTests()
@@ -23,7 +31,17 @@ public class AutoDocumentationParserTests
         _mockLogger = new Mock<ILogger<AutoDocumentationParser>>();
         _mockHttpHandler = new Mock<HttpMessageHandler>();
         _httpClient = new HttpClient(_mockHttpHandler.Object);
-        _parser = new AutoDocumentationParser(_mockLogger.Object, _httpClient);
+        _mockDocumentationFetcher = new Mock<IDocumentationFetcher>();
+        _mockDocumentationParser = new Mock<IDocumentationParser>();
+        _mockUsagePatternAnalyzer = new Mock<IUsagePatternAnalyzer>();
+        _mockApiTestCaseGenerator = new Mock<IApiTestCaseGenerator>();
+        
+        _parser = new AutoDocumentationParser(
+            _mockLogger.Object, 
+            _mockDocumentationFetcher.Object,
+            _mockDocumentationParser.Object,
+            _mockUsagePatternAnalyzer.Object,
+            _mockApiTestCaseGenerator.Object);
     }
 
     [Fact]
@@ -356,15 +374,15 @@ public class AutoDocumentationParserTests
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() => 
-            new AutoDocumentationParser(null!, _httpClient));
+            new AutoDocumentationParser(null!, _mockDocumentationFetcher.Object, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
     }
 
     [Fact]
-    public void Constructor_WithNullHttpClient_ThrowsArgumentNullException()
+    public void Constructor_WithNullDocumentationFetcher_ThrowsArgumentNullException()
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() => 
-            new AutoDocumentationParser(_mockLogger.Object, null!));
+            new AutoDocumentationParser(_mockLogger.Object, null!, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
     }
 
     protected virtual void Dispose(bool disposing)
