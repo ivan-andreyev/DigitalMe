@@ -37,6 +37,11 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Executes file processing workflow including PDF creation and text extraction
+    /// </summary>
+    /// <param name="request">File processing workflow request parameters</param>
+    /// <returns>Result of file processing workflow execution</returns>
     public async Task<FileProcessingWorkflowResult> ExecuteFileProcessingWorkflowAsync(FileProcessingWorkflowRequest request)
     {
         try
@@ -104,11 +109,20 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
         }
     }
 
+    /// <summary>
+    /// Executes web navigation workflow with browser automation capabilities
+    /// </summary>
+    /// <returns>Result of web navigation workflow execution</returns>
     public async Task<WebNavigationWorkflowResult> ExecuteWebNavigationWorkflowAsync()
     {
         return await _webNavigationWorkflowService.ExecuteWebNavigationWorkflowAsync();
     }
 
+    /// <summary>
+    /// Executes service availability check workflow for specified service
+    /// </summary>
+    /// <param name="serviceName">Name of the service to check availability for</param>
+    /// <returns>Result of service availability workflow execution</returns>
     public async Task<ServiceAvailabilityWorkflowResult> ExecuteServiceAvailabilityWorkflowAsync(string serviceName)
     {
         try
@@ -136,6 +150,11 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
         }
     }
 
+    /// <summary>
+    /// Executes comprehensive test workflow covering all Ivan-Level services
+    /// </summary>
+    /// <param name="request">Comprehensive test workflow request parameters</param>
+    /// <returns>Result of comprehensive test workflow execution</returns>
     public async Task<ComprehensiveTestWorkflowResult> ExecuteComprehensiveTestWorkflowAsync(ComprehensiveTestWorkflowRequest request)
     {
         try
@@ -155,7 +174,10 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
                     score = healthStatus.OverallHealth,
                     details = healthStatus.ServiceStatuses.Select(s => new { s.ServiceName, s.IsHealthy, s.ErrorMessage })
                 };
-                if (!healthStatus.IsHealthy) overallSuccess = false;
+                if (!healthStatus.IsHealthy)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {
@@ -177,7 +199,10 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
                     textExtracted = fileWorkflowResult.TextExtracted
                 };
                 
-                if (!fileWorkflowResult.Success) overallSuccess = false;
+                if (!fileWorkflowResult.Success)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {
@@ -196,7 +221,10 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
                     enhancedPromptGenerated = personalityResult.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false)
                 };
                 
-                if (!personalityResult.Success) overallSuccess = false;
+                if (!personalityResult.Success)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {

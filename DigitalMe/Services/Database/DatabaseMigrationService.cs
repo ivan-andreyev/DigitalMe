@@ -23,7 +23,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     /// </summary>
     public async Task ApplyMigrationsAsync(DigitalMeDbContext context)
     {
-        if (context == null) throw new ArgumentNullException(nameof(context));
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
 
         _logger.LogInformation("🔍 Starting database migration check...");
 
@@ -60,7 +63,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     /// </summary>
     public async Task HandleDatabaseCreationAsync(DigitalMeDbContext context)
     {
-        if (context == null) throw new ArgumentNullException(nameof(context));
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
 
         _logger.LogWarning("⚠️ Cannot connect to database - attempting to create...");
         try
@@ -80,7 +86,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     /// </summary>
     public bool ValidateMigrationConsistency(DigitalMeDbContext context)
     {
-        if (context == null) throw new ArgumentNullException(nameof(context));
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
 
         try
         {

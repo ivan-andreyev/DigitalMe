@@ -77,7 +77,10 @@ public class FileConversionService : IFileConversionService
             
             foreach (var line in lines)
             {
-                if (yPosition > page.Height - 50) break;
+                if (yPosition > page.Height - 50)
+                {
+                    break;
+                }
                 gfx.DrawString(line, font, XBrushes.Black, new XRect(50, yPosition, page.Width - 100, 20), XStringFormats.TopLeft);
                 yPosition += 20;
             }

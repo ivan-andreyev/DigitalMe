@@ -604,7 +604,10 @@ public class ClickUpService : IClickUpService
 
     private string BuildTaskFilterQuery(TaskFilters? filters)
     {
-        if (filters == null) return string.Empty;
+        if (filters == null)
+        {
+            return string.Empty;
+        }
 
         var queryParams = new List<string>();
 

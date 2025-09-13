@@ -311,9 +311,18 @@ public class LearningController : ControllerBase
         var baseConfidence = 0.5; // Start with 50% base confidence
 
         // Increase confidence based on parsed information
-        if (parseResult.Endpoints.Any()) baseConfidence += 0.2;
-        if (parseResult.Examples.Any()) baseConfidence += 0.1;
-        if (parseResult.Configuration.Any()) baseConfidence += 0.1;
+        if (parseResult.Endpoints.Any())
+        {
+            baseConfidence += 0.2;
+        }
+        if (parseResult.Examples.Any())
+        {
+            baseConfidence += 0.1;
+        }
+        if (parseResult.Configuration.Any())
+        {
+            baseConfidence += 0.1;
+        }
 
         // Adjust based on validation results if available
         if (validationResult != null)

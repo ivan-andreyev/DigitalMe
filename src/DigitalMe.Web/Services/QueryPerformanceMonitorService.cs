@@ -232,10 +232,22 @@ public class QueryPerformanceMonitorService : IQueryPerformanceMonitorService
     private string DetermineQueryType(string sql)
     {
         var sqlUpper = sql.ToUpperInvariant().Trim();
-        if (sqlUpper.StartsWith("SELECT")) return "SELECT";
-        if (sqlUpper.StartsWith("INSERT")) return "INSERT";
-        if (sqlUpper.StartsWith("UPDATE")) return "UPDATE";
-        if (sqlUpper.StartsWith("DELETE")) return "DELETE";
+        if (sqlUpper.StartsWith("SELECT"))
+        {
+            return "SELECT";
+        }
+        if (sqlUpper.StartsWith("INSERT"))
+        {
+            return "INSERT";
+        }
+        if (sqlUpper.StartsWith("UPDATE"))
+        {
+            return "UPDATE";
+        }
+        if (sqlUpper.StartsWith("DELETE"))
+        {
+            return "DELETE";
+        }
         return "OTHER";
     }
     

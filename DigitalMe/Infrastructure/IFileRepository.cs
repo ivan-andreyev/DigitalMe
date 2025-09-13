@@ -37,6 +37,13 @@ public interface IFileRepository
     Task<string> ReadAllTextAsync(string filePath);
 
     /// <summary>
+    /// Read all bytes from a file
+    /// </summary>
+    /// <param name="filePath">Path to the file</param>
+    /// <returns>File content as byte array</returns>
+    Task<byte[]> ReadAllBytesAsync(string filePath);
+
+    /// <summary>
     /// Check if file is accessible for processing (exists and has content)
     /// </summary>
     /// <param name="filePath">Path to the file</param>

@@ -50,10 +50,14 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     public async Task<CaptchaSolvingResult> SolveImageCaptchaAsync(string imageBase64, ImageCaptchaOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(imageBase64))
+        {
             return CaptchaSolvingResult.ErrorResult("Base64 image data cannot be null or empty");
+        }
 
         if (!IsConfigured())
+        {
             return CaptchaSolvingResult.ErrorResult("2captcha API key not configured");
+        }
 
         try
         {
@@ -73,11 +77,17 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (options.MinLength > 0)
+            {
                 submitParams["min_len"] = options.MinLength.ToString();
+            }
             if (options.MaxLength > 0)
+            {
                 submitParams["max_len"] = options.MaxLength.ToString();
+            }
             if (!string.IsNullOrEmpty(options.Instructions))
+            {
                 submitParams["textinstructions"] = options.Instructions;
+            }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
@@ -110,7 +120,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     public async Task<CaptchaSolvingResult> SolveImageCaptchaFromUrlAsync(string imageUrl, ImageCaptchaOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
+        {
             return CaptchaSolvingResult.ErrorResult("Image URL cannot be null or empty");
+        }
 
         try
         {
@@ -130,11 +142,17 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (options.MinLength > 0)
+            {
                 submitParams["min_len"] = options.MinLength.ToString();
+            }
             if (options.MaxLength > 0)
+            {
                 submitParams["max_len"] = options.MaxLength.ToString();
+            }
             if (!string.IsNullOrEmpty(options.Instructions))
+            {
                 submitParams["textinstructions"] = options.Instructions;
+            }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
@@ -167,10 +185,14 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     public async Task<CaptchaSolvingResult> SolveRecaptchaV2Async(string siteKey, string pageUrl, RecaptchaOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(siteKey))
+        {
             return CaptchaSolvingResult.ErrorResult("Site key cannot be null or empty");
+        }
 
         if (string.IsNullOrWhiteSpace(pageUrl))
+        {
             return CaptchaSolvingResult.ErrorResult("Page URL cannot be null or empty");
+        }
 
         try
         {
@@ -190,20 +212,30 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (!string.IsNullOrEmpty(options.Data))
+            {
                 submitParams["data"] = options.Data;
+            }
             if (!string.IsNullOrEmpty(options.Cookies))
+            {
                 submitParams["cookies"] = options.Cookies;
+            }
             if (!string.IsNullOrEmpty(options.UserAgent))
+            {
                 submitParams["userAgent"] = options.UserAgent;
+            }
 
             if (options.Proxy != null)
             {
                 submitParams["proxy"] = $"{options.Proxy.Host}:{options.Proxy.Port}";
                 submitParams["proxytype"] = options.Proxy.Type.ToString().ToUpper();
                 if (!string.IsNullOrEmpty(options.Proxy.Username))
+                {
                     submitParams["proxylogin"] = options.Proxy.Username;
+                }
                 if (!string.IsNullOrEmpty(options.Proxy.Password))
+                {
                     submitParams["proxypassword"] = options.Proxy.Password;
+                }
             }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
@@ -237,16 +269,24 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     public async Task<CaptchaSolvingResult> SolveRecaptchaV3Async(string siteKey, string pageUrl, string action, double minScore = 0.3, RecaptchaOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(siteKey))
+        {
             return CaptchaSolvingResult.ErrorResult("Site key cannot be null or empty");
+        }
 
         if (string.IsNullOrWhiteSpace(pageUrl))
+        {
             return CaptchaSolvingResult.ErrorResult("Page URL cannot be null or empty");
+        }
 
         if (string.IsNullOrWhiteSpace(action))
+        {
             return CaptchaSolvingResult.ErrorResult("Action cannot be null or empty");
+        }
 
         if (minScore < 0.1 || minScore > 0.9)
+        {
             return CaptchaSolvingResult.ErrorResult("Min score must be between 0.1 and 0.9");
+        }
 
         try
         {
@@ -268,20 +308,30 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (!string.IsNullOrEmpty(options.Data))
+            {
                 submitParams["data"] = options.Data;
+            }
             if (!string.IsNullOrEmpty(options.Cookies))
+            {
                 submitParams["cookies"] = options.Cookies;
+            }
             if (!string.IsNullOrEmpty(options.UserAgent))
+            {
                 submitParams["userAgent"] = options.UserAgent;
+            }
 
             if (options.Proxy != null)
             {
                 submitParams["proxy"] = $"{options.Proxy.Host}:{options.Proxy.Port}";
                 submitParams["proxytype"] = options.Proxy.Type.ToString().ToUpper();
                 if (!string.IsNullOrEmpty(options.Proxy.Username))
+                {
                     submitParams["proxylogin"] = options.Proxy.Username;
+                }
                 if (!string.IsNullOrEmpty(options.Proxy.Password))
+                {
                     submitParams["proxypassword"] = options.Proxy.Password;
+                }
             }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
@@ -332,20 +382,30 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (!string.IsNullOrEmpty(options.Data))
+            {
                 submitParams["data"] = options.Data;
+            }
             if (!string.IsNullOrEmpty(options.Cookies))
+            {
                 submitParams["cookies"] = options.Cookies;
+            }
             if (!string.IsNullOrEmpty(options.UserAgent))
+            {
                 submitParams["userAgent"] = options.UserAgent;
+            }
 
             if (options.Proxy != null)
             {
                 submitParams["proxy"] = $"{options.Proxy.Host}:{options.Proxy.Port}";
                 submitParams["proxytype"] = options.Proxy.Type.ToString().ToUpper();
                 if (!string.IsNullOrEmpty(options.Proxy.Username))
+                {
                     submitParams["proxylogin"] = options.Proxy.Username;
+                }
                 if (!string.IsNullOrEmpty(options.Proxy.Password))
+                {
                     submitParams["proxypassword"] = options.Proxy.Password;
+                }
             }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
@@ -395,7 +455,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             };
 
             if (!string.IsNullOrEmpty(options.Instructions))
+            {
                 submitParams["textinstructions"] = options.Instructions;
+            }
 
             var captchaId = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
@@ -428,7 +490,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     public async Task<CaptchaSolvingResult> GetBalanceAsync()
     {
         if (!IsConfigured())
+        {
             return CaptchaSolvingResult.ErrorResult("2captcha API key not configured");
+        }
 
         try
         {
@@ -631,9 +695,28 @@ public class CaptchaSolvingService : ICaptchaSolvingService
 /// </summary>
 public class CaptchaSolvingServiceConfig
 {
+    /// <summary>
+    /// API key for 2captcha.com service authentication
+    /// </summary>
     public string ApiKey { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Base URL for 2captcha.com API endpoints
+    /// </summary>
     public string BaseUrl { get; set; } = "http://2captcha.com/";
+    
+    /// <summary>
+    /// Default timeout in seconds for CAPTCHA solving operations
+    /// </summary>
     public int DefaultTimeout { get; set; } = 300;
+    
+    /// <summary>
+    /// Polling interval in seconds to check CAPTCHA solution status
+    /// </summary>
     public int PollingInterval { get; set; } = 5;
+    
+    /// <summary>
+    /// Enable detailed logging for CAPTCHA solving operations
+    /// </summary>
     public bool EnableDetailedLogging { get; set; } = true;
 }

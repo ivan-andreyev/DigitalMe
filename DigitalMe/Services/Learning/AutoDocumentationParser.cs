@@ -92,10 +92,16 @@ public class AutoDocumentationParser : IAutoDocumentationParser
                 var language = match.Groups[1].Value.ToLowerInvariant();
                 var code = match.Groups[2].Value.Trim();
 
-                if (string.IsNullOrEmpty(code)) continue;
+                if (string.IsNullOrEmpty(code))
+                {
+                    continue;
+                }
 
                 // Skip if it's not a relevant programming language
-                if (!IsRelevantLanguage(language) && !ContainsApiCall(code)) continue;
+                if (!IsRelevantLanguage(language) && !ContainsApiCall(code))
+                {
+                    continue;
+                }
 
                 var example = new CodeExample
                 {

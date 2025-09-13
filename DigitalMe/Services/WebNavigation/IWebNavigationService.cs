@@ -3,97 +3,20 @@ using Microsoft.Extensions.Logging;
 namespace DigitalMe.Services.WebNavigation;
 
 /// <summary>
-/// Service for web navigation and automation capabilities
-/// Provides Ivan-Level web interaction including page navigation, element interaction, and content extraction
-/// Following Clean Architecture patterns with dependency injection
+/// Comprehensive web navigation service interface.
+/// Composes focused interfaces following Interface Segregation Principle.
+/// Provides backward compatibility for existing consumers.
 /// </summary>
-public interface IWebNavigationService
+public interface IWebNavigationService : 
+    IWebBrowserManager,
+    IWebNavigator,
+    IWebElementInteractor,
+    IWebContentExtractor,
+    IWebScriptExecutor
 {
-    /// <summary>
-    /// Navigates to a specified URL and waits for page load
-    /// </summary>
-    /// <param name="url">Target URL to navigate to</param>
-    /// <param name="waitForSelector">Optional CSS selector to wait for before considering navigation complete</param>
-    /// <param name="timeout">Navigation timeout in milliseconds (default: 30000)</param>
-    /// <returns>Navigation result with page metadata</returns>
-    Task<WebNavigationResult> NavigateToAsync(string url, string? waitForSelector = null, int timeout = 30000);
-
-    /// <summary>
-    /// Clicks an element on the current page
-    /// </summary>
-    /// <param name="selector">CSS selector of the element to click</param>
-    /// <param name="options">Click options including modifiers and position</param>
-    /// <returns>Click operation result</returns>
-    Task<WebNavigationResult> ClickElementAsync(string selector, ClickOptions? options = null);
-
-    /// <summary>
-    /// Fills text input fields on the current page
-    /// </summary>
-    /// <param name="selector">CSS selector of the input element</param>
-    /// <param name="text">Text to fill into the input</param>
-    /// <param name="options">Fill options including clear behavior</param>
-    /// <returns>Fill operation result</returns>
-    Task<WebNavigationResult> FillInputAsync(string selector, string text, FillOptions? options = null);
-
-    /// <summary>
-    /// Extracts text content from specified elements
-    /// </summary>
-    /// <param name="selector">CSS selector of elements to extract text from</param>
-    /// <param name="multiple">Whether to extract from multiple matching elements</param>
-    /// <returns>Extracted text content</returns>
-    Task<WebNavigationResult> ExtractTextAsync(string selector, bool multiple = false);
-
-    /// <summary>
-    /// Takes a screenshot of the current page or specific element
-    /// </summary>
-    /// <param name="selector">Optional CSS selector to screenshot specific element</param>
-    /// <param name="options">Screenshot options including format and quality</param>
-    /// <returns>Screenshot data as byte array</returns>
-    Task<WebNavigationResult> TakeScreenshotAsync(string? selector = null, ScreenshotOptions? options = null);
-
-    /// <summary>
-    /// Waits for a specific element or condition on the page
-    /// </summary>
-    /// <param name="selector">CSS selector to wait for</param>
-    /// <param name="state">Element state to wait for (visible, hidden, attached, etc.)</param>
-    /// <param name="timeout">Wait timeout in milliseconds (default: 30000)</param>
-    /// <returns>Wait operation result</returns>
-    Task<WebNavigationResult> WaitForElementAsync(string selector, ElementState state = ElementState.Visible, int timeout = 30000);
-
-    /// <summary>
-    /// Executes JavaScript code in the browser context
-    /// </summary>
-    /// <param name="script">JavaScript code to execute</param>
-    /// <param name="args">Arguments to pass to the script</param>
-    /// <returns>Script execution result</returns>
-    Task<WebNavigationResult> ExecuteScriptAsync(string script, params object[] args);
-
-    /// <summary>
-    /// Gets current page information including URL, title, and metadata
-    /// </summary>
-    /// <returns>Current page information</returns>
-    Task<WebNavigationResult> GetPageInfoAsync();
-
-    /// <summary>
-    /// Initializes browser instance for web navigation
-    /// Should be called before using other navigation methods
-    /// </summary>
-    /// <param name="options">Browser launch options</param>
-    /// <returns>Initialization result</returns>
-    Task<WebNavigationResult> InitializeBrowserAsync(BrowserOptions? options = null);
-
-    /// <summary>
-    /// Disposes browser resources and closes all browser instances
-    /// Should be called when navigation is no longer needed
-    /// </summary>
-    /// <returns>Disposal result</returns>
-    Task<WebNavigationResult> DisposeBrowserAsync();
-
-    /// <summary>
-    /// Checks if browser is currently initialized and ready for navigation
-    /// </summary>
-    /// <returns>True if browser is ready, false otherwise</returns>
-    Task<bool> IsBrowserReadyAsync();
+    // All methods inherited from focused interfaces
+    // This maintains backward compatibility while allowing clients
+    // to depend only on the specific capabilities they need
 }
 
 /// <summary>

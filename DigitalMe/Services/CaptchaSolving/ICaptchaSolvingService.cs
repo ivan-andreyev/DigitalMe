@@ -3,89 +3,18 @@ using Microsoft.Extensions.Logging;
 namespace DigitalMe.Services.CaptchaSolving;
 
 /// <summary>
-/// Service for CAPTCHA solving capabilities using 2captcha.com API
-/// Provides Ivan-Level CAPTCHA solving including image recognition and audio processing
-/// Following Clean Architecture patterns with dependency injection
+/// Comprehensive CAPTCHA solving service interface.
+/// Composes focused interfaces following Interface Segregation Principle.
+/// Provides backward compatibility for existing consumers.
 /// </summary>
-public interface ICaptchaSolvingService
+public interface ICaptchaSolvingService : 
+    ICaptchaImageSolver,
+    ICaptchaInteractiveSolver,
+    ICaptchaAccountManager
 {
-    /// <summary>
-    /// Solves image-based CAPTCHA using 2captcha service
-    /// </summary>
-    /// <param name="imageBase64">Base64 encoded CAPTCHA image</param>
-    /// <param name="options">CAPTCHA solving options</param>
-    /// <returns>CAPTCHA solution result</returns>
-    Task<CaptchaSolvingResult> SolveImageCaptchaAsync(string imageBase64, ImageCaptchaOptions? options = null);
-
-    /// <summary>
-    /// Solves image-based CAPTCHA from URL
-    /// </summary>
-    /// <param name="imageUrl">URL of the CAPTCHA image</param>
-    /// <param name="options">CAPTCHA solving options</param>
-    /// <returns>CAPTCHA solution result</returns>
-    Task<CaptchaSolvingResult> SolveImageCaptchaFromUrlAsync(string imageUrl, ImageCaptchaOptions? options = null);
-
-    /// <summary>
-    /// Solves reCAPTCHA v2 challenge
-    /// </summary>
-    /// <param name="siteKey">reCAPTCHA site key</param>
-    /// <param name="pageUrl">URL of the page with reCAPTCHA</param>
-    /// <param name="options">reCAPTCHA solving options</param>
-    /// <returns>CAPTCHA solution result with response token</returns>
-    Task<CaptchaSolvingResult> SolveRecaptchaV2Async(string siteKey, string pageUrl, RecaptchaOptions? options = null);
-
-    /// <summary>
-    /// Solves reCAPTCHA v3 challenge
-    /// </summary>
-    /// <param name="siteKey">reCAPTCHA site key</param>
-    /// <param name="pageUrl">URL of the page with reCAPTCHA</param>
-    /// <param name="action">Action parameter for reCAPTCHA v3</param>
-    /// <param name="minScore">Minimum score required (0.1-0.9)</param>
-    /// <param name="options">reCAPTCHA solving options</param>
-    /// <returns>CAPTCHA solution result with response token</returns>
-    Task<CaptchaSolvingResult> SolveRecaptchaV3Async(string siteKey, string pageUrl, string action, double minScore = 0.3, RecaptchaOptions? options = null);
-
-    /// <summary>
-    /// Solves hCaptcha challenge
-    /// </summary>
-    /// <param name="siteKey">hCaptcha site key</param>
-    /// <param name="pageUrl">URL of the page with hCaptcha</param>
-    /// <param name="options">hCaptcha solving options</param>
-    /// <returns>CAPTCHA solution result with response token</returns>
-    Task<CaptchaSolvingResult> SolveHCaptchaAsync(string siteKey, string pageUrl, HCaptchaOptions? options = null);
-
-    /// <summary>
-    /// Solves text-based CAPTCHA
-    /// </summary>
-    /// <param name="text">CAPTCHA text to solve</param>
-    /// <param name="options">Text CAPTCHA solving options</param>
-    /// <returns>CAPTCHA solution result</returns>
-    Task<CaptchaSolvingResult> SolveTextCaptchaAsync(string text, TextCaptchaOptions? options = null);
-
-    /// <summary>
-    /// Gets account balance from 2captcha service
-    /// </summary>
-    /// <returns>Current account balance in USD</returns>
-    Task<CaptchaSolvingResult> GetBalanceAsync();
-
-    /// <summary>
-    /// Reports incorrect CAPTCHA solution to improve service quality
-    /// </summary>
-    /// <param name="captchaId">ID of the solved CAPTCHA</param>
-    /// <returns>Report operation result</returns>
-    Task<CaptchaSolvingResult> ReportIncorrectCaptchaAsync(string captchaId);
-
-    /// <summary>
-    /// Checks if CAPTCHA solving service is available and properly configured
-    /// </summary>
-    /// <returns>True if service is ready, false otherwise</returns>
-    Task<bool> IsServiceAvailableAsync();
-
-    /// <summary>
-    /// Gets service statistics including solve rates and response times
-    /// </summary>
-    /// <returns>Service statistics data</returns>
-    Task<CaptchaSolvingResult> GetServiceStatsAsync();
+    // All methods inherited from focused interfaces
+    // This maintains backward compatibility while allowing clients
+    // to depend only on the specific capabilities they need
 }
 
 /// <summary>

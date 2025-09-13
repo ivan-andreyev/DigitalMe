@@ -9,8 +9,9 @@ namespace DigitalMe.Services.Voice;
 /// Implementation of IVoiceService providing Ivan-Level voice capabilities
 /// Using OpenAI API for Text-to-Speech and Speech-to-Text operations
 /// Following Clean Architecture patterns with dependency injection
+/// Implements segregated interfaces following Interface Segregation Principle
 /// </summary>
-public class VoiceService : IVoiceService
+public class VoiceService : IVoiceService, ISpeechToTextService, ISpeechToTextConfigurationService
 {
     private readonly ILogger<VoiceService> _logger;
     private readonly OpenAIClient _openAiClient;

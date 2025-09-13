@@ -9,7 +9,7 @@ namespace DigitalMe.Services.WebNavigation;
 /// Provides Ivan-Level web interaction capabilities with robust error handling
 /// Following Clean Architecture patterns with dependency injection
 /// </summary>
-public class WebNavigationService : IWebNavigationService, IAsyncDisposable
+public class WebNavigationService : IWebNavigationService, IAsyncDisposable, IDisposable
 {
     private readonly ILogger<WebNavigationService> _logger;
     private IPlaywright? _playwright;
@@ -152,10 +152,22 @@ public class WebNavigationService : IWebNavigationService, IAsyncDisposable
             if (options.Modifiers != KeyModifiers.None)
             {
                 var modifiers = new List<KeyboardModifier>();
-                if (options.Modifiers.HasFlag(KeyModifiers.Alt)) modifiers.Add(KeyboardModifier.Alt);
-                if (options.Modifiers.HasFlag(KeyModifiers.Control)) modifiers.Add(KeyboardModifier.Control);
-                if (options.Modifiers.HasFlag(KeyModifiers.Meta)) modifiers.Add(KeyboardModifier.Meta);
-                if (options.Modifiers.HasFlag(KeyModifiers.Shift)) modifiers.Add(KeyboardModifier.Shift);
+                if (options.Modifiers.HasFlag(KeyModifiers.Alt))
+                {
+                    modifiers.Add(KeyboardModifier.Alt);
+                }
+                if (options.Modifiers.HasFlag(KeyModifiers.Control))
+                {
+                    modifiers.Add(KeyboardModifier.Control);
+                }
+                if (options.Modifiers.HasFlag(KeyModifiers.Meta))
+                {
+                    modifiers.Add(KeyboardModifier.Meta);
+                }
+                if (options.Modifiers.HasFlag(KeyModifiers.Shift))
+                {
+                    modifiers.Add(KeyboardModifier.Shift);
+                }
                 clickOptions.Modifiers = modifiers;
             }
 
@@ -483,5 +495,24 @@ public class WebNavigationService : IWebNavigationService, IAsyncDisposable
             await DisposeBrowserAsync();
             _disposed = true;
         }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            // For sync disposal, use async-over-sync pattern
+            // This is not ideal but necessary for IDisposable contract
+            try
+            {
+                DisposeBrowserAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error during synchronous disposal of WebNavigationService");
+            }
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
     }
 }

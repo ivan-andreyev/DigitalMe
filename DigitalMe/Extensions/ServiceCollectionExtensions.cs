@@ -67,14 +67,59 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
 
         // Ivan-Level capability services - Phase B Week 1
-        services.AddScoped<DigitalMe.Services.FileProcessing.IFileProcessingService, DigitalMe.Services.FileProcessing.FileProcessingService>();
+        services.AddScoped<DigitalMe.Services.FileProcessing.FileProcessingService>();
+        services.AddScoped<DigitalMe.Services.FileProcessing.IFileProcessingService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.FileProcessing.FileProcessingService>());
+        
+        // Focused file processing interfaces following ISP
+        services.AddScoped<DigitalMe.Services.FileProcessing.IDocumentProcessor>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.FileProcessing.FileProcessingService>());
+        services.AddScoped<DigitalMe.Services.FileProcessing.IFileUtilities>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.FileProcessing.FileProcessingService>());
         
         // Ivan-Level capability services - Phase B Week 2
-        services.AddScoped<DigitalMe.Services.WebNavigation.IWebNavigationService, DigitalMe.Services.WebNavigation.WebNavigationService>();
+        services.AddScoped<DigitalMe.Services.WebNavigation.WebNavigationService>();
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebNavigationService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
+        
+        // Focused web navigation interfaces following ISP
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebBrowserManager>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebNavigator>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebElementInteractor>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebContentExtractor>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
+        services.AddScoped<DigitalMe.Services.WebNavigation.IWebScriptExecutor>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.WebNavigation.WebNavigationService>());
         
         // Ivan-Level capability services - Phase B Week 3
-        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaSolvingService, DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>();
-        services.AddScoped<DigitalMe.Services.Voice.IVoiceService, DigitalMe.Services.Voice.VoiceService>();
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>();
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaSolvingService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>());
+        
+        // Focused CAPTCHA solving interfaces following ISP
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaImageSolver>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>());
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaInteractiveSolver>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>());
+        services.AddScoped<DigitalMe.Services.CaptchaSolving.ICaptchaAccountManager>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.CaptchaSolving.CaptchaSolvingService>());
+        
+        services.AddScoped<DigitalMe.Services.Voice.VoiceService>();
+        services.AddScoped<DigitalMe.Services.Voice.IVoiceService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
+        
+        // Focused voice interfaces following ISP
+        services.AddScoped<DigitalMe.Services.Voice.ITextToSpeechService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
+        services.AddScoped<DigitalMe.Services.Voice.ISpeechToTextService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
+        services.AddScoped<DigitalMe.Services.Voice.ISpeechToTextConfigurationService>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
+        services.AddScoped<DigitalMe.Services.Voice.IVoiceServiceManager>(provider => 
+            provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
 
         // Application Services layer - Clean Architecture compliance
         services.AddScoped<DigitalMe.Services.ApplicationServices.Workflows.IIvanLevelWorkflowService, DigitalMe.Services.ApplicationServices.Workflows.IvanLevelWorkflowService>();
@@ -95,9 +140,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.Backup.IDatabaseBackupService, DigitalMe.Services.Backup.BackupOrchestrator>();
         services.AddScoped<DigitalMe.Services.Backup.BackupSchedulerService>();
 
-        // Learning Services - Phase 1 Advanced Cognitive Capabilities
-        services.AddScoped<DigitalMe.Services.Learning.IAutoDocumentationParser, DigitalMe.Services.Learning.AutoDocumentationParser>();
-        services.AddScoped<DigitalMe.Services.Learning.ISelfTestingFramework, DigitalMe.Services.Learning.SelfTestingFramework>();
+        // Learning Services - Moved to CleanArchitectureServiceCollectionExtensions for proper layering
+        // Registrations are now in AddLearningInfrastructureServices() method
 
         return services;
     }

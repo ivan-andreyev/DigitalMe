@@ -85,6 +85,20 @@ public class FileSystemFileRepository : IFileRepository
     }
 
     /// <inheritdoc />
+    public async Task<byte[]> ReadAllBytesAsync(string filePath)
+    {
+        try
+        {
+            return await File.ReadAllBytesAsync(filePath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reading file bytes: {FilePath}", filePath);
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<bool> IsAccessibleAsync(string filePath)
     {
         try

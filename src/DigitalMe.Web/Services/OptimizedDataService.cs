@@ -649,10 +649,16 @@ public class QueryPerformanceTracker
     
     private double CalculateCacheHitRatio(List<QueryMetric> metrics)
     {
-        if (!metrics.Any()) return 0;
+        if (!metrics.Any())
+        {
+            return 0;
+        }
         
         var cacheableQueries = metrics.Where(m => m.Tags.ContainsKey("cache_hit")).ToList();
-        if (!cacheableQueries.Any()) return 0;
+        if (!cacheableQueries.Any())
+        {
+            return 0;
+        }
         
         var hits = cacheableQueries.Count(m => m.Tags["cache_hit"] == "true");
         return (double)hits / cacheableQueries.Count * 100;

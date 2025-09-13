@@ -8,15 +8,16 @@ using DigitalMe.Extensions;
 namespace DigitalMe.Tests.Integration;
 
 /// <summary>
-/// Test fixture for integration tests that sets up a full DI container
-/// with all Ivan-Level services registered as they would be in production.
+/// Test fixture specifically for service-level integration tests (non-HTTP).
+/// Sets up a lightweight DI container with all Ivan-Level services 
+/// without the overhead of WebApplicationFactory.
 /// </summary>
-public class IntegrationTestFixture : IAsyncDisposable, IDisposable
+public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
 {
     public IServiceProvider ServiceProvider { get; private set; }
     public IConfiguration Configuration { get; private set; }
 
-    public IntegrationTestFixture()
+    public ServiceIntegrationTestFixture()
     {
         ServiceProvider = CreateServiceProvider();
     }
@@ -49,10 +50,13 @@ public class IntegrationTestFixture : IAsyncDisposable, IDisposable
 
         // Add Entity Framework with in-memory database for testing
         services.AddDbContext<DigitalMeDbContext>(options =>
-            options.UseInMemoryDatabase($"DigitalMeIntegrationTest_{Guid.NewGuid()}"));
+            options.UseInMemoryDatabase($"DigitalMeServiceTest_{Guid.NewGuid()}"));
 
         // Add all DigitalMe services using the extension method
         services.AddDigitalMeServices(Configuration);
+
+        // Add Clean Architecture services (contains Learning Infrastructure Services)
+        services.AddCleanArchitectureServices();
 
         // Build service provider
         var serviceProvider = services.BuildServiceProvider();

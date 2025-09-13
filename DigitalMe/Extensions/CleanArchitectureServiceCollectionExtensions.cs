@@ -37,6 +37,38 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<ICaptchaWorkflowService, CaptchaWorkflowService>();
         services.AddScoped<IIvanLevelWorkflowService, IvanLevelWorkflowService>();
         
+        // Learning Infrastructure Services - Phase 1.1 refactored architecture
+        services.AddLearningInfrastructureServices();
+        
+        return services;
+    }
+
+    /// <summary>
+    /// Registers Learning Infrastructure services following Clean Architecture principles.
+    /// All learning-related services with proper dependency injection.
+    /// </summary>
+    public static IServiceCollection AddLearningInfrastructureServices(this IServiceCollection services)
+    {
+        // Learning Infrastructure Services - Core interfaces
+        services.AddTransient<DigitalMe.Services.Learning.IAutoDocumentationParser, DigitalMe.Services.Learning.AutoDocumentationParser>();
+        services.AddTransient<DigitalMe.Services.Learning.ISelfTestingFramework, DigitalMe.Services.Learning.SelfTestingFramework>();
+        
+        // Test Infrastructure Components - T2.7 additions (extracted from SelfTestingFramework god class)
+        services.AddTransient<DigitalMe.Services.Learning.Testing.TestGeneration.ITestCaseGenerator, DigitalMe.Services.Learning.Testing.TestGeneration.TestCaseGenerator>();
+        
+        // FIXED: Circular dependency resolved by separating single vs parallel execution
+        services.AddTransient<DigitalMe.Services.Learning.Testing.TestExecution.ISingleTestExecutor, DigitalMe.Services.Learning.Testing.TestExecution.SingleTestExecutor>();
+        services.AddTransient<DigitalMe.Services.Learning.Testing.TestExecution.ITestExecutor, DigitalMe.Services.Learning.Testing.TestExecution.TestExecutor>();
+        services.AddTransient<DigitalMe.Services.Learning.Testing.ParallelProcessing.IParallelTestRunner, DigitalMe.Services.Learning.Testing.ParallelProcessing.ParallelTestRunner>();
+        
+        services.AddTransient<DigitalMe.Services.Learning.Testing.ResultsAnalysis.IResultsAnalyzer, DigitalMe.Services.Learning.Testing.ResultsAnalysis.ResultsAnalyzer>();
+        services.AddTransient<DigitalMe.Services.Learning.Testing.Statistics.IStatisticalAnalyzer, DigitalMe.Services.Learning.Testing.Statistics.StatisticalAnalyzer>();
+
+        // Focused ISP-compliant interfaces for orchestrator pattern
+        services.AddTransient<DigitalMe.Services.Learning.Testing.ITestOrchestrator, DigitalMe.Services.Learning.Testing.TestOrchestratorService>();
+        services.AddTransient<DigitalMe.Services.Learning.Testing.ICapabilityValidator, DigitalMe.Services.Learning.Testing.CapabilityValidatorService>();
+        services.AddTransient<DigitalMe.Services.Learning.Testing.ITestAnalyzer, DigitalMe.Services.Learning.Testing.TestAnalyzerService>();
+
         return services;
     }
 }

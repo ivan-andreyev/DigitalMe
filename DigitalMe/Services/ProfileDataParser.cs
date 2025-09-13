@@ -248,12 +248,30 @@ public class ProfileDataParser : IProfileDataParser
     private int CountNonEmptySections(ProfileData data)
     {
         int count = 0;
-        if (!string.IsNullOrEmpty(data.Name)) count++;
-        if (data.Age > 0) count++;
-        if (!string.IsNullOrEmpty(data.Professional.Position)) count++;
-        if (data.Family.WifeName != string.Empty) count++;
-        if (data.TechnicalPreferences.Any()) count++;
-        if (data.Goals.Any()) count++;
+        if (!string.IsNullOrEmpty(data.Name))
+        {
+            count++;
+        }
+        if (data.Age > 0)
+        {
+            count++;
+        }
+        if (!string.IsNullOrEmpty(data.Professional.Position))
+        {
+            count++;
+        }
+        if (data.Family.WifeName != string.Empty)
+        {
+            count++;
+        }
+        if (data.TechnicalPreferences.Any())
+        {
+            count++;
+        }
+        if (data.Goals.Any())
+        {
+            count++;
+        }
         return count;
     }
 }

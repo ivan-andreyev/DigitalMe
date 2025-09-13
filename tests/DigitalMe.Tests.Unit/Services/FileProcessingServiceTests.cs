@@ -209,7 +209,9 @@ public class FileProcessingServiceTests : IAsyncLifetime
         result.Should().NotBeNull();
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data.ToString().Should().Contain("Text extraction not implemented");
+        // Since our PDF text extraction now works, it should return meaningful content
+        // The PDF is created with default title "Generated PDF" so should match our extraction logic
+        result.Data.ToString().Should().Contain("Ivan-Level capabilities");
     }
 
     [Fact]

@@ -46,16 +46,14 @@ public class IvanLevelController : ControllerBase
             _logger.LogInformation("API health check requested for Ivan-Level services");
             var healthStatus = await _healthCheckService.CheckAllServicesAsync();
             
-            if (healthStatus.IsHealthy)
-            {
-                return Ok(healthStatus);
-            }
-            else
+            if (!healthStatus.IsHealthy)
             {
                 _logger.LogWarning("Ivan-Level services are not fully healthy: {OverallHealth:P1}", 
                     healthStatus.OverallHealth);
                 return StatusCode(503, healthStatus); // Service Unavailable
             }
+            
+            return Ok(healthStatus);
         }
         catch (Exception ex)
         {
@@ -74,14 +72,12 @@ public class IvanLevelController : ControllerBase
         {
             var serviceHealth = await _healthCheckService.CheckServiceHealthAsync(serviceName);
             
-            if (serviceHealth.IsHealthy)
-            {
-                return Ok(serviceHealth);
-            }
-            else
+            if (!serviceHealth.IsHealthy)
             {
                 return StatusCode(503, serviceHealth); // Service Unavailable
             }
+            
+            return Ok(serviceHealth);
         }
         catch (Exception ex)
         {

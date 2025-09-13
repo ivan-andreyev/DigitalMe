@@ -1,43 +1,19 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DigitalMe.Services.Learning.Testing;
 
 namespace DigitalMe.Services.Learning;
 
+
 /// <summary>
-/// Interface for self-testing framework - Phase 1 Advanced Cognitive Capabilities
-/// Enables agent to automatically generate and execute tests for learned capabilities
+/// Legacy interface for backward compatibility - Phase 1 Advanced Cognitive Capabilities
+/// Combines all focused interfaces for consumers that need full functionality
+/// Will be phased out in favor of focused interfaces
 /// </summary>
-public interface ISelfTestingFramework
+[Obsolete("Use focused interfaces ITestOrchestrator, ICapabilityValidator, and ITestAnalyzer instead")]
+public interface ISelfTestingFramework : ITestOrchestrator, ICapabilityValidator, ITestAnalyzer
 {
-    /// <summary>
-    /// Generate test cases based on learned patterns and API documentation
-    /// </summary>
-    Task<List<SelfGeneratedTestCase>> GenerateTestCasesAsync(DocumentationParseResult apiDocumentation);
-
-    /// <summary>
-    /// Execute a single test case and validate results
-    /// </summary>
-    Task<TestExecutionResult> ExecuteTestCaseAsync(SelfGeneratedTestCase testCase);
-
-    /// <summary>
-    /// Execute multiple test cases and provide comprehensive results
-    /// </summary>
-    Task<TestSuiteResult> ExecuteTestSuiteAsync(List<SelfGeneratedTestCase> testCases);
-
-    /// <summary>
-    /// Validate learned capabilities by running comprehensive tests
-    /// </summary>
-    Task<CapabilityValidationResult> ValidateLearnedCapabilityAsync(string apiName, LearnedCapability capability);
-
-    /// <summary>
-    /// Generate performance benchmarks for new skills
-    /// </summary>
-    Task<PerformanceBenchmarkResult> BenchmarkNewSkillAsync(string skillName, List<TestExecutionResult> testResults);
-
-    /// <summary>
-    /// Analyze test failures and suggest improvements
-    /// </summary>
-    Task<TestAnalysisResult> AnalyzeTestFailuresAsync(List<TestExecutionResult> failedTests);
+    // All methods inherited from focused interfaces
 }
 
 /// <summary>
@@ -113,9 +89,9 @@ public class TestSuiteResult
 {
     public string SuiteName { get; set; } = string.Empty;
     public List<TestExecutionResult> TestResults { get; set; } = new();
-    public int TotalTests => TestResults.Count;
-    public int PassedTests => TestResults.Count(r => r.Success);
-    public int FailedTests => TestResults.Count(r => !r.Success);
+    public int TotalTests => TestResults?.Count ?? 0;
+    public int PassedTests => TestResults?.Count(r => r.Success) ?? 0;
+    public int FailedTests => TestResults?.Count(r => !r.Success) ?? 0;
     public double SuccessRate => TotalTests > 0 ? (double)PassedTests / TotalTests * 100 : 0;
     public TimeSpan TotalExecutionTime { get; set; }
     public DateTime ExecutedAt { get; set; } = DateTime.UtcNow;
@@ -306,6 +282,62 @@ public enum SuggestionPriority
     Medium,
     High,
     Urgent
+}
+
+/// <summary>
+/// Analysis result from parallel test execution
+/// </summary>
+public class ParallelExecutionAnalysis
+{
+    /// <summary>
+    /// Concurrency level used for execution
+    /// </summary>
+    public int ConcurrencyLevel { get; set; }
+
+    /// <summary>
+    /// Total execution time for all tests
+    /// </summary>
+    public TimeSpan TotalExecutionTime { get; set; }
+
+    /// <summary>
+    /// Average execution time per test
+    /// </summary>
+    public TimeSpan AverageExecutionTime { get; set; }
+
+    /// <summary>
+    /// Estimated serial execution time (for comparison)
+    /// </summary>
+    public TimeSpan EstimatedSerialTime { get; set; }
+
+    /// <summary>
+    /// Performance improvement ratio (serial time / parallel time)
+    /// </summary>
+    public double SpeedupRatio { get; set; }
+
+    /// <summary>
+    /// Efficiency of parallel execution (0.0 to 1.0)
+    /// </summary>
+    public double ParallelEfficiency { get; set; }
+
+    /// <summary>
+    /// Resource utilization metrics
+    /// </summary>
+    public Dictionary<string, double> ResourceUtilization { get; set; } = new();
+
+    /// <summary>
+    /// Recommendations for optimizing parallel execution
+    /// </summary>
+    public List<string> Recommendations { get; set; } = new();
+
+    /// <summary>
+    /// Optimal concurrency level recommendation
+    /// </summary>
+    public int RecommendedConcurrency { get; set; }
+
+    /// <summary>
+    /// Thread coordination statistics
+    /// </summary>
+    public Dictionary<string, object> ThreadCoordinationStats { get; set; } = new();
 }
 
 #endregion

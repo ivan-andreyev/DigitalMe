@@ -223,7 +223,10 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
             (k, v) =>
             {
                 v.TotalRequests++;
-                if (!success) v.FailedRequests++;
+                if (!success)
+                {
+                    v.FailedRequests++;
+                }
                 v.TotalResponseTime = v.TotalResponseTime.Add(responseTime);
                 v.AverageResponseTime = TimeSpan.FromTicks(v.TotalResponseTime.Ticks / v.TotalRequests);
                 return v;

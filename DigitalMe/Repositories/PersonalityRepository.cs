@@ -45,7 +45,10 @@ public class PersonalityRepository : IPersonalityRepository
     public async Task<bool> DeleteProfileAsync(Guid id)
     {
         var profile = await _context.PersonalityProfiles.FindAsync(id);
-        if (profile == null) return false;
+        if (profile == null)
+        {
+            return false;
+        }
 
         _context.PersonalityProfiles.Remove(profile);
         await _context.SaveChangesAsync();
@@ -78,7 +81,10 @@ public class PersonalityRepository : IPersonalityRepository
     public async Task<bool> DeleteTraitAsync(Guid traitId)
     {
         var trait = await _context.PersonalityTraits.FindAsync(traitId);
-        if (trait == null) return false;
+        if (trait == null)
+        {
+            return false;
+        }
 
         _context.PersonalityTraits.Remove(trait);
         await _context.SaveChangesAsync();

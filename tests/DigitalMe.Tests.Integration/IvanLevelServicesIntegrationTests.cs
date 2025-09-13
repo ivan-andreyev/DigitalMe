@@ -17,27 +17,28 @@ namespace DigitalMe.Tests.Integration;
 /// Integration tests for Ivan-Level services coordination and workflow.
 /// Tests end-to-end scenarios combining multiple services as Ivan would use them.
 /// </summary>
-public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFixture>
+public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegrationTestFixture>
 {
-    private readonly IntegrationTestFixture _fixture;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ServiceIntegrationTestFixture _fixture;
 
-    public IvanLevelServicesIntegrationTests(IntegrationTestFixture fixture)
+    public IvanLevelServicesIntegrationTests(ServiceIntegrationTestFixture fixture)
     {
         _fixture = fixture;
-        _serviceProvider = fixture.ServiceProvider;
     }
 
     [Fact]
     public async Task IvanLevelServices_ShouldAllBeRegisteredInDI()
     {
         // Arrange & Act - Get all Ivan-Level services from DI container
-        var fileProcessingService = _serviceProvider.GetService<IFileProcessingService>();
-        var webNavigationService = _serviceProvider.GetService<IWebNavigationService>();
-        var captchaSolvingService = _serviceProvider.GetService<ICaptchaSolvingService>();
-        var voiceService = _serviceProvider.GetService<IVoiceService>();
-        var ivanPersonalityService = _serviceProvider.GetService<IIvanPersonalityService>();
-        var profileDataParser = _serviceProvider.GetService<IProfileDataParser>();
+        using var scope = _fixture.ServiceProvider.CreateScope();
+        var services = scope.ServiceProvider;
+        
+        var fileProcessingService = services.GetService<IFileProcessingService>();
+        var webNavigationService = services.GetService<IWebNavigationService>();
+        var captchaSolvingService = services.GetService<ICaptchaSolvingService>();
+        var voiceService = services.GetService<IVoiceService>();
+        var ivanPersonalityService = services.GetService<IIvanPersonalityService>();
+        var profileDataParser = services.GetService<IProfileDataParser>();
 
         // Assert - All services should be available
         Assert.NotNull(fileProcessingService);
@@ -52,7 +53,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task IvanPersonality_WithProfileData_ShouldGenerateContextualResponses()
     {
         // Arrange
-        var ivanService = _serviceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
 
         // Act
         var personality = await ivanService.GetIvanPersonalityAsync();
@@ -76,7 +77,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task VoiceService_Integration_ShouldHandleBasicOperations()
     {
         // Arrange
-        var voiceService = _serviceProvider.GetRequiredService<IVoiceService>();
+        var voiceService = _fixture.ServiceProvider.GetRequiredService<IVoiceService>();
 
         // Act
         var isAvailable = await voiceService.IsServiceAvailableAsync();
@@ -96,7 +97,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task FileProcessing_Integration_ShouldCreateAndProcessFiles()
     {
         // Arrange
-        var fileService = _serviceProvider.GetRequiredService<IFileProcessingService>();
+        var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
         var testContent = "Ivan's technical documentation - Phase B Week 5 Integration Testing";
 
         // Act
@@ -120,7 +121,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task WebNavigation_Integration_ShouldInitializeBrowser()
     {
         // Arrange
-        var webService = _serviceProvider.GetRequiredService<IWebNavigationService>();
+        var webService = _fixture.ServiceProvider.GetRequiredService<IWebNavigationService>();
 
         // Act & Assert
         try
@@ -143,7 +144,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task CaptchaSolving_Integration_ShouldSupportImageFormats(string imageFormat)
     {
         // Arrange
-        var captchaService = _serviceProvider.GetRequiredService<ICaptchaSolvingService>();
+        var captchaService = _fixture.ServiceProvider.GetRequiredService<ICaptchaSolvingService>();
 
         // Act
         var isAvailable = await captchaService.IsServiceAvailableAsync();
@@ -158,8 +159,8 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task IvanLevelWorkflow_DocumentCreationWithPersonality_ShouldWork()
     {
         // Arrange
-        var fileService = _serviceProvider.GetRequiredService<IFileProcessingService>();
-        var ivanService = _serviceProvider.GetRequiredService<IIvanPersonalityService>();
+        var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
 
         // Act - Create a document that reflects Ivan's personality
         var personality = await ivanService.GetIvanPersonalityAsync();
@@ -200,12 +201,12 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
         // Arrange
         var services = new Dictionary<string, object>
         {
-            ["FileProcessing"] = _serviceProvider.GetRequiredService<IFileProcessingService>(),
-            ["WebNavigation"] = _serviceProvider.GetRequiredService<IWebNavigationService>(),
-            ["CaptchaSolving"] = _serviceProvider.GetRequiredService<ICaptchaSolvingService>(),
-            ["Voice"] = _serviceProvider.GetRequiredService<IVoiceService>(),
-            ["IvanPersonality"] = _serviceProvider.GetRequiredService<IIvanPersonalityService>(),
-            ["ProfileDataParser"] = _serviceProvider.GetRequiredService<IProfileDataParser>()
+            ["FileProcessing"] = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>(),
+            ["WebNavigation"] = _fixture.ServiceProvider.GetRequiredService<IWebNavigationService>(),
+            ["CaptchaSolving"] = _fixture.ServiceProvider.GetRequiredService<ICaptchaSolvingService>(),
+            ["Voice"] = _fixture.ServiceProvider.GetRequiredService<IVoiceService>(),
+            ["IvanPersonality"] = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>(),
+            ["ProfileDataParser"] = _fixture.ServiceProvider.GetRequiredService<IProfileDataParser>()
         };
 
         // Act & Assert
@@ -243,7 +244,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
     public async Task ErrorHandling_ServiceFailures_ShouldDegradeGracefully()
     {
         // Arrange
-        var ivanService = _serviceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
 
         // Act & Assert - Test fallback behavior
         try
@@ -267,11 +268,11 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<IntegrationTestFi
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         // Act - Test service instantiation performance
-        var fileService = _serviceProvider.GetRequiredService<IFileProcessingService>();
-        var webService = _serviceProvider.GetRequiredService<IWebNavigationService>();
-        var captchaService = _serviceProvider.GetRequiredService<ICaptchaSolvingService>();
-        var voiceService = _serviceProvider.GetRequiredService<IVoiceService>();
-        var ivanService = _serviceProvider.GetRequiredService<IIvanPersonalityService>();
+        var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
+        var webService = _fixture.ServiceProvider.GetRequiredService<IWebNavigationService>();
+        var captchaService = _fixture.ServiceProvider.GetRequiredService<ICaptchaSolvingService>();
+        var voiceService = _fixture.ServiceProvider.GetRequiredService<IVoiceService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
 
         stopwatch.Stop();
 

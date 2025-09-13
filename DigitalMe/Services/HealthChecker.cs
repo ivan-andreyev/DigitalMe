@@ -74,7 +74,10 @@ public class HealthChecker : IHealthChecker
 
     private static string ExtractInstanceName(string? connectionString)
     {
-        if (string.IsNullOrEmpty(connectionString)) return "Unknown";
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            return "Unknown";
+        }
 
         // Extract instance name from Cloud SQL connection string
         // Format: Host=/cloudsql/PROJECT:REGION:INSTANCE;...
@@ -95,7 +98,10 @@ public class HealthChecker : IHealthChecker
 
     private static string ExtractHostFromConnectionString(string? connectionString)
     {
-        if (string.IsNullOrEmpty(connectionString)) return "Unknown";
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            return "Unknown";
+        }
 
         // Try PostgreSQL format first: Host=...
         var hostMatch = Regex.Match(connectionString, @"Host=([^;]+)");
@@ -116,7 +122,10 @@ public class HealthChecker : IHealthChecker
 
     private static string ExtractDatabaseFromConnectionString(string? connectionString)
     {
-        if (string.IsNullOrEmpty(connectionString)) return "Unknown";
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            return "Unknown";
+        }
 
         // Try PostgreSQL format first: Database=...
         var dbMatch = Regex.Match(connectionString, @"Database=([^;]+)");

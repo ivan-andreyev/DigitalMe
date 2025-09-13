@@ -5,6 +5,7 @@ using Xunit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using DigitalMe.Data;
+using DigitalMe.Extensions;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -33,6 +34,9 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
                 {
                     options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
                 });
+
+                // Add Clean Architecture services that were missing
+                services.AddCleanArchitectureServices();
 
                 // Reduce logging noise during tests
                 services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Warning));

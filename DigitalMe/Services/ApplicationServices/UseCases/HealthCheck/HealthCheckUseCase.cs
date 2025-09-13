@@ -47,7 +47,10 @@ public class HealthCheckUseCase : IHealthCheckUseCase
                     score = healthStatus.OverallHealth,
                     details = healthStatus.ServiceStatuses.Select(s => new { s.ServiceName, s.IsHealthy, s.ErrorMessage })
                 };
-                if (!healthStatus.IsHealthy) overallSuccess = false;
+                if (!healthStatus.IsHealthy)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {
@@ -69,7 +72,10 @@ public class HealthCheckUseCase : IHealthCheckUseCase
                     textExtracted = fileResult.TextExtracted
                 };
                 
-                if (!fileResult.Success) overallSuccess = false;
+                if (!fileResult.Success)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {
@@ -89,7 +95,10 @@ public class HealthCheckUseCase : IHealthCheckUseCase
                     enhancedPromptGenerated = personalityResult.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false)
                 };
                 
-                if (!personalityResult.Success) overallSuccess = false;
+                if (!personalityResult.Success)
+                {
+                    overallSuccess = false;
+                }
             }
             catch (Exception ex)
             {

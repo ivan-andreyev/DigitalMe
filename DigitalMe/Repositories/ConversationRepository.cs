@@ -52,7 +52,10 @@ public class ConversationRepository : IConversationRepository
     public async Task<bool> DeleteConversationAsync(Guid id)
     {
         var conversation = await _context.Conversations.FindAsync(id);
-        if (conversation == null) return false;
+        if (conversation == null)
+        {
+            return false;
+        }
 
         _context.Conversations.Remove(conversation);
         await _context.SaveChangesAsync();
