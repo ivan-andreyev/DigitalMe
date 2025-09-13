@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using DigitalMe.Models;
 using DigitalMe.Data.Entities;
 using DigitalMe.Data.ValueConverters;
+using DigitalMe.Services.Learning.ErrorLearning.Models;
 
 namespace DigitalMe.Data;
 
@@ -19,6 +20,11 @@ public class DigitalMeDbContext : IdentityDbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<TelegramMessage> TelegramMessages { get; set; }
     public DbSet<CalendarEvent> CalendarEvents { get; set; }
+    
+    // Error Learning System entities
+    public DbSet<ErrorPattern> ErrorPatterns { get; set; }
+    public DbSet<LearningHistoryEntry> LearningHistoryEntries { get; set; }
+    public DbSet<OptimizationSuggestion> OptimizationSuggestions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -165,6 +171,9 @@ public class DigitalMeDbContext : IdentityDbContext
 
         // Enhanced indexing strategy for performance optimization
         ConfigurePerformanceIndexes(modelBuilder);
+        
+        // Error Learning System configuration
+        ConfigureErrorLearningSystem(modelBuilder);
     }
 
     /// <summary>
@@ -267,5 +276,98 @@ public class DigitalMeDbContext : IdentityDbContext
                 auditableEntityUpdate.UpdatedBy = "system";
             }
         }
+    }
+
+    /// <summary>
+    /// Configures Error Learning System entities with proper relationships and PostgreSQL optimizations
+    /// </summary>
+    private void ConfigureErrorLearningSystem(ModelBuilder modelBuilder)
+    {
+        // ErrorPattern configuration
+        modelBuilder.Entity<ErrorPattern>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Ensure PatternHash is unique for pattern deduplication
+            entity.HasIndex(e => e.PatternHash)
+                .IsUnique();
+            
+            // Performance indexes
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => new { e.Category, e.Subcategory });
+            entity.HasIndex(e => e.ApiEndpoint);
+            entity.HasIndex(e => e.LastObserved);
+            entity.HasIndex(e => e.SeverityLevel);
+            entity.HasIndex(e => e.OccurrenceCount);
+            
+            // PostgreSQL specific configurations
+            entity.Property(e => e.FirstObserved)
+                .HasColumnType("timestamptz");
+            entity.Property(e => e.LastObserved)
+                .HasColumnType("timestamptz");
+            entity.Property(e => e.Context)
+                .HasColumnType("jsonb");
+            entity.Property(e => e.SuggestedSolutions)
+                .HasColumnType("jsonb");
+        });
+
+        // LearningHistoryEntry configuration
+        modelBuilder.Entity<LearningHistoryEntry>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Foreign key relationship
+            entity.HasOne(e => e.ErrorPattern)
+                .WithMany(ep => ep.LearningHistory)
+                .HasForeignKey(e => e.ErrorPatternId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // Performance indexes
+            entity.HasIndex(e => e.ErrorPatternId);
+            entity.HasIndex(e => e.Timestamp);
+            entity.HasIndex(e => e.Source);
+            entity.HasIndex(e => e.ApiName);
+            entity.HasIndex(e => new { e.IsAnalyzed, e.ContributedToPattern });
+            
+            // PostgreSQL specific configurations
+            entity.Property(e => e.Timestamp)
+                .HasColumnType("timestamptz");
+            entity.Property(e => e.RequestDetails)
+                .HasColumnType("jsonb");
+            entity.Property(e => e.ResponseDetails)
+                .HasColumnType("jsonb");
+            entity.Property(e => e.EnvironmentContext)
+                .HasColumnType("jsonb");
+            entity.Property(e => e.Metadata)
+                .HasColumnType("jsonb");
+        });
+
+        // OptimizationSuggestion configuration
+        modelBuilder.Entity<OptimizationSuggestion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Foreign key relationship
+            entity.HasOne(e => e.ErrorPattern)
+                .WithMany(ep => ep.OptimizationSuggestions)
+                .HasForeignKey(e => e.ErrorPatternId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // Performance indexes
+            entity.HasIndex(e => e.ErrorPatternId);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.Priority);
+            entity.HasIndex(e => e.GeneratedAt);
+            entity.HasIndex(e => new { e.IsReviewed, e.Status });
+            
+            // PostgreSQL specific configurations
+            entity.Property(e => e.GeneratedAt)
+                .HasColumnType("timestamptz");
+            entity.Property(e => e.ReviewedAt)
+                .HasColumnType("timestamptz");
+            entity.Property(e => e.ImplementationDetails)
+                .HasColumnType("jsonb");
+        });
     }
 }

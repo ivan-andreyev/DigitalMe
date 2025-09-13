@@ -75,6 +75,9 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddTransient<DigitalMe.Services.Learning.Testing.ICapabilityValidator, DigitalMe.Services.Learning.Testing.CapabilityValidatorService>();
         services.AddTransient<DigitalMe.Services.Learning.Testing.ITestAnalyzer, DigitalMe.Services.Learning.Testing.TestAnalyzerService>();
 
+        // Error Learning System - Phase 3 (T3.1-T3.3)
+        services.AddErrorLearningSystem();
+
         return services;
     }
 }
