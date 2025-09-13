@@ -33,6 +33,7 @@ backups/
 .vscode/
 *.swp
 *.swo
+*.DotSettings.user
 
 # OS generated files
 .DS_Store
