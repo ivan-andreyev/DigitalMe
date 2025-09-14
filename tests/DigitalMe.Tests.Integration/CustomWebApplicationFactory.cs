@@ -44,13 +44,13 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             services.AddScoped<IToolStrategy, MemoryToolStrategy>();
             
             // Configure test database - Remove existing DbContext registrations
-            var dbContextDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>));
-            if (dbContextDescriptor != null)
-                services.Remove(dbContextDescriptor);
+            var dbContextDescriptors = services.Where(d => d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>)).ToList();
+            foreach (var descriptor in dbContextDescriptors)
+                services.Remove(descriptor);
 
-            var dbContextServiceDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMeDbContext));
-            if (dbContextServiceDescriptor != null)
-                services.Remove(dbContextServiceDescriptor);
+            var dbContextServiceDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMeDbContext)).ToList();
+            foreach (var descriptor in dbContextServiceDescriptors)
+                services.Remove(descriptor);
 
             // Add in-memory database for testing - use shared database name
             services.AddDbContext<DigitalMeDbContext>(options =>
@@ -59,9 +59,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             }, ServiceLifetime.Scoped);
 
             // Mock IMcpService for proper integration testing
-            var mcpServiceDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMe.Services.IMcpService));
-            if (mcpServiceDescriptor != null)
-                services.Remove(mcpServiceDescriptor);
+            var mcpServiceDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.IMcpService)).ToList();
+            foreach (var descriptor in mcpServiceDescriptors)
+                services.Remove(descriptor);
 
             services.AddScoped<DigitalMe.Services.IMcpService>(provider =>
             {
@@ -101,9 +101,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             });
 
             // Mock IClaudeApiService for proper API response testing
-            var claudeApiDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IClaudeApiService));
-            if (claudeApiDescriptor != null)
-                services.Remove(claudeApiDescriptor);
+            var claudeApiDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IClaudeApiService)).ToList();
+            foreach (var descriptor in claudeApiDescriptors)
+                services.Remove(descriptor);
 
             services.AddScoped<DigitalMe.Integrations.MCP.IClaudeApiService>(provider =>
             {
@@ -137,9 +137,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             });
 
             // Mock IMCPClient for MCP integration testing
-            var mcpClientDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IMCPClient));
-            if (mcpClientDescriptor != null)
-                services.Remove(mcpClientDescriptor);
+            var mcpClientDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IMCPClient)).ToList();
+            foreach (var descriptor in mcpClientDescriptors)
+                services.Remove(descriptor);
 
             services.AddScoped<DigitalMe.Integrations.MCP.IMCPClient>(provider =>
             {
@@ -182,9 +182,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
 
 
             // Mock IIvanPersonalityService for personality testing - DATABASE-AWARE for error tests
-            var ivanServiceDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMe.Services.IIvanPersonalityService));
-            if (ivanServiceDescriptor != null)
-                services.Remove(ivanServiceDescriptor);
+            var ivanServiceDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.IIvanPersonalityService)).ToList();
+            foreach (var descriptor in ivanServiceDescriptors)
+                services.Remove(descriptor);
 
             services.AddScoped<DigitalMe.Services.IIvanPersonalityService>(provider =>
             {
@@ -217,9 +217,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             });
 
             // Mock IAgentBehaviorEngine for agent response testing
-            var agentBehaviorEngineDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DigitalMe.Services.AgentBehavior.IAgentBehaviorEngine));
-            if (agentBehaviorEngineDescriptor != null)
-                services.Remove(agentBehaviorEngineDescriptor);
+            var agentBehaviorEngineDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.AgentBehavior.IAgentBehaviorEngine)).ToList();
+            foreach (var descriptor in agentBehaviorEngineDescriptors)
+                services.Remove(descriptor);
 
             services.AddScoped<DigitalMe.Services.AgentBehavior.IAgentBehaviorEngine>(provider =>
             {

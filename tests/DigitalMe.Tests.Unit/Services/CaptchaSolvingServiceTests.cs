@@ -361,7 +361,7 @@ public class CaptchaSolvingServiceTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Contains("Failed to submit CAPTCHA for solving", result.Message);
+        Assert.Contains("Network error", result.Message);
         if (!string.IsNullOrEmpty(result.ErrorDetails))
         {
             Assert.Contains("Network error", result.ErrorDetails);

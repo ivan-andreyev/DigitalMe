@@ -43,7 +43,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
         services.AddScoped<IMVPPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
         services.AddScoped<IConversationService, ConversationService>();
-        services.AddScoped<IIvanPersonalityService, IvanPersonalityService>();
         services.AddScoped<IProfileDataParser, ProfileDataParser>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();
         services.AddScoped<IMVPMessageProcessor, MVPMessageProcessor>();

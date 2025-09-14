@@ -89,10 +89,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 submitParams["textinstructions"] = options.Instructions;
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit CAPTCHA for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit CAPTCHA for solving");
             }
 
             // Wait for solution
@@ -154,10 +154,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 submitParams["textinstructions"] = options.Instructions;
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit CAPTCHA for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit CAPTCHA for solving");
             }
 
             // Wait for solution
@@ -238,10 +238,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 }
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit reCAPTCHA for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit reCAPTCHA for solving");
             }
 
             // Wait for solution
@@ -334,10 +334,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 }
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit reCAPTCHA v3 for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit reCAPTCHA v3 for solving");
             }
 
             // Wait for solution
@@ -408,10 +408,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 }
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit hCaptcha for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit hCaptcha for solving");
             }
 
             // Wait for solution
@@ -459,10 +459,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 submitParams["textinstructions"] = options.Instructions;
             }
 
-            var captchaId = await SubmitCaptchaAsync(submitParams);
+            var (captchaId, submitError) = await SubmitCaptchaAsync(submitParams);
             if (string.IsNullOrEmpty(captchaId))
             {
-                return CaptchaSolvingResult.ErrorResult("Failed to submit text CAPTCHA for solving");
+                return CaptchaSolvingResult.ErrorResult(submitError ?? "Failed to submit text CAPTCHA for solving");
             }
 
             // Wait for solution
@@ -619,7 +619,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
 
     #region Private Helper Methods
 
-    private async Task<string?> SubmitCaptchaAsync(Dictionary<string, string> parameters)
+    private async Task<(string? captchaId, string? errorMessage)> SubmitCaptchaAsync(Dictionary<string, string> parameters)
     {
         try
         {
@@ -628,21 +628,37 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             response.EnsureSuccessStatusCode();
 
             var responseText = await response.Content.ReadAsStringAsync();
-            
+
             if (responseText.StartsWith("OK|"))
             {
-                return responseText.Substring(3);
+                return (responseText.Substring(3), null);
             }
             else
             {
                 _logger.LogWarning("CAPTCHA submission failed: {Response}", responseText);
-                return null;
+
+                // Handle specific API errors with user-friendly messages
+                var errorMessage = responseText switch
+                {
+                    "ERROR_NO_SLOT_AVAILABLE" => "No available slots for solving CAPTCHA",
+                    "ERROR_WRONG_USER_KEY" => "Invalid API key",
+                    "ERROR_KEY_DOES_NOT_EXIST" => "API key does not exist",
+                    "ERROR_ZERO_BALANCE" => "Insufficient balance",
+                    "ERROR_PAGEURL" => "Invalid page URL",
+                    "ERROR_NO_SUCH_METHOD" => "Unsupported CAPTCHA method",
+                    "ERROR_TOO_BIG" => "Image file too large",
+                    "ERROR_IMAGE_TYPE_NOT_SUPPORTED" => "Unsupported image format",
+                    "ERROR_IP_NOT_ALLOWED" => "IP address not allowed",
+                    _ => $"API error: {responseText}"
+                };
+
+                return (null, errorMessage);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to submit CAPTCHA");
-            return null;
+            return (null, $"Network error: {ex.Message}");
         }
     }
 
