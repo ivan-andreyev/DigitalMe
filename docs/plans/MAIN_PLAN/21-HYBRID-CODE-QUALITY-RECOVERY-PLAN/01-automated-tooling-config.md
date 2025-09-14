@@ -2,7 +2,7 @@
 
 **⬅️ Back to:** [MAIN_PLAN.md](../../MAIN_PLAN.md) - Central entry point for all plans
 
-**📋 Parent Plan:** [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](../08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Architecture diagram
+**📋 Parent Plan:** [21-HYBRID-CODE-QUALITY-RECOVERY-PLAN.md](../21-HYBRID-CODE-QUALITY-RECOVERY-PLAN.md) - Coordinator
 
 **📋 Related Files:**
 - [02-manual-refactoring-specs.md](02-manual-refactoring-specs.md) - Manual refactoring specs

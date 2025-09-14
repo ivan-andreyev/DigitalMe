@@ -79,37 +79,122 @@
 **Goal**: Создать базу для самообучения
 
 #### Week 1-2: Learning Infrastructure
-- [ ] **Auto-Documentation Parser**
-  - [ ] API documentation analysis and understanding
-  - [ ] Code example extraction and interpretation
-  - [ ] Usage pattern recognition from documentation
-- [ ] **Self-Testing Framework**
-  - [ ] Automatic test case generation
-  - [ ] Self-validation of learned capabilities
-  - [ ] Performance benchmarking for new skills
+- [ ] **Auto-Documentation Parser** (10 days)
+  - **Day 1-2**: Setup documentation parsing pipeline
+    - [ ] Create DocParser.cs service with basic HTML/Markdown parsing
+    - [ ] Add RegEx patterns for API endpoint extraction
+    - [ ] Implement basic schema detection (REST/GraphQL/SOAP)
+  - **Day 3-4**: Code example extraction engine
+    - [ ] Build CodeExtractor.cs for example code parsing
+    - [ ] Implement syntax highlighting detection (C#, JS, Python, etc.)
+    - [ ] Create executable example validation
+  - **Day 5-6**: Usage pattern recognition
+    - [ ] Develop PatternAnalyzer.cs for common usage analysis
+    - [ ] Build frequency analysis for method combinations
+    - [ ] Create confidence scoring for pattern reliability
+  - **Day 7-8**: Integration and testing
+    - [ ] Connect DocParser to existing personality service
+    - [ ] Add real API documentation testing (GitHub, Slack APIs)
+    - [ ] Performance optimization and error handling
+  - **Day 9-10**: Auto-learning validation
+    - [ ] Test learning speed benchmarks (target: new API in 2-4 hours)
+    - [ ] Validate extraction accuracy (>85% correct patterns)
+    - [ ] Document learning pipeline and success metrics
+
+- [ ] **Self-Testing Framework** (8 days)
+  - **Day 1-2**: Test case generation foundation
+    - [ ] Create TestGenerator.cs with basic test template engine
+    - [ ] Implement parameter variation algorithms
+    - [ ] Add assertion generation from API contracts
+  - **Day 3-4**: Capability validation system
+    - [ ] Build CapabilityValidator.cs for skill assessment
+    - [ ] Create benchmark test suites for each learned skill
+    - [ ] Implement regression testing for previously learned APIs
+  - **Day 5-6**: Performance benchmarking
+    - [ ] Develop BenchmarkRunner.cs for speed/accuracy metrics
+    - [ ] Add memory usage and response time tracking
+    - [ ] Create performance comparison baselines
+  - **Day 7-8**: Self-validation integration
+    - [ ] Connect testing framework to learning pipeline
+    - [ ] Add automated pass/fail criteria
+    - [ ] Implement continuous improvement feedback loop
 
 #### Week 3-4: Error Analysis & Adaptation
-- [ ] **Error Learning System**
-  - [ ] Error categorization and pattern analysis
-  - [ ] Strategy adaptation based on failures
-  - [ ] Success/failure correlation analysis
-- [ ] **Knowledge Graph Building**
-  - [ ] Dynamic knowledge representation
-  - [ ] Skill relationship mapping
-  - [ ] Transfer learning capabilities
+- [ ] **Error Learning System** (8 days)
+  - **Day 1-2**: Error categorization foundation
+    - [ ] Create ErrorAnalyzer.cs with error type classification
+    - [ ] Implement error severity scoring (critical/major/minor)
+    - [ ] Add error frequency tracking and pattern detection
+  - **Day 3-4**: Strategy adaptation engine
+    - [ ] Build StrategyAdapter.cs for approach modification
+    - [ ] Create fallback strategy ranking system
+    - [ ] Implement adaptive retry mechanisms with backoff
+  - **Day 5-6**: Success/failure correlation analysis
+    - [ ] Develop CorrelationAnalyzer.cs for outcome pattern detection
+    - [ ] Add success factor identification algorithms
+    - [ ] Create predictive success scoring for new attempts
+  - **Day 7-8**: Integration and optimization
+    - [ ] Connect error learning to main learning pipeline
+    - [ ] Add real-time strategy adjustment during execution
+    - [ ] Validate error recovery effectiveness (>75% improvement)
+
+- [ ] **Knowledge Graph Building** (10 days)
+  - **Day 1-3**: Dynamic knowledge representation
+    - [ ] Create KnowledgeGraph.cs with node/edge structure
+    - [ ] Implement skill nodes with metadata (difficulty, dependencies)
+    - [ ] Add relationship types (requires, enables, conflicts, similar)
+  - **Day 4-5**: Skill relationship mapping
+    - [ ] Build RelationshipMapper.cs for skill connection detection
+    - [ ] Create similarity scoring between different skills/APIs
+    - [ ] Implement prerequisite chain analysis
+  - **Day 6-8**: Transfer learning capabilities
+    - [ ] Develop TransferLearner.cs for cross-domain knowledge application
+    - [ ] Add analogy-based learning from similar APIs/patterns
+    - [ ] Create confidence scoring for transfer applicability
+  - **Day 9-10**: Graph optimization and validation
+    - [ ] Implement graph pruning for performance optimization
+    - [ ] Add learning path recommendation algorithms
+    - [ ] Test knowledge transfer accuracy (target: >70% successful transfers)
 
 ### 🎨 PHASE 1.2: Creative & Contextual Intelligence (4-5 weeks)
 **Goal**: Добавить творческое и контекстное мышление
 
 #### Week 5-6: Creative Problem Solving
-- [ ] **Multiple Solution Generation**
-  - [ ] Brainstorming algorithms
-  - [ ] Solution diversity maximization
-  - [ ] Creative constraint relaxation
-- [ ] **Lateral Thinking Engine**
-  - [ ] Analogy-based reasoning
-  - [ ] Cross-domain pattern transfer
-  - [ ] Unexpected connection discovery
+- [ ] **Multiple Solution Generation** (7 days)
+  - **Day 1-2**: Brainstorming algorithms foundation
+    - [ ] Create BrainstormEngine.cs with divergent thinking algorithms
+    - [ ] Implement solution seed generation from problem analysis
+    - [ ] Add variation generation through parameter modification
+  - **Day 3-4**: Solution diversity maximization
+    - [ ] Build DiversityAnalyzer.cs for solution uniqueness scoring
+    - [ ] Create approach categorization (technical, creative, conventional)
+    - [ ] Implement diversity-driven solution filtering and ranking
+  - **Day 5**: Creative constraint relaxation
+    - [ ] Develop ConstraintRelaxer.cs for assumption questioning
+    - [ ] Add "what if" scenario generation for constraint removal
+    - [ ] Create feasibility re-assessment for relaxed constraints
+  - **Day 6-7**: Integration and validation
+    - [ ] Connect solution generation to main problem-solving pipeline
+    - [ ] Test solution diversity metrics (target: >5 distinct approaches)
+    - [ ] Validate creative solution effectiveness in real scenarios
+
+- [ ] **Lateral Thinking Engine** (8 days)
+  - **Day 1-2**: Analogy-based reasoning foundation
+    - [ ] Create AnalogyEngine.cs with cross-domain mapping algorithms
+    - [ ] Build analogy database with common problem-solution patterns
+    - [ ] Implement similarity scoring for analogous situations
+  - **Day 3-4**: Cross-domain pattern transfer
+    - [ ] Develop PatternTransfer.cs for mapping solutions across domains
+    - [ ] Add abstraction layer for generalizing domain-specific solutions
+    - [ ] Create applicability validation for transferred patterns
+  - **Day 5-6**: Unexpected connection discovery
+    - [ ] Build ConnectionDiscoverer.cs for non-obvious relationship detection
+    - [ ] Implement semantic distance analysis for surprising connections
+    - [ ] Add serendipity algorithms for creative insight generation
+  - **Day 7-8**: Lateral thinking validation
+    - [ ] Connect lateral thinking to creative problem solving pipeline
+    - [ ] Test unexpected connection quality (measure surprise + usefulness)
+    - [ ] Validate cross-domain transfer success rate (target: >60%)
 
 #### Week 7-8: Contextual Adaptation
 - [ ] **Audience Analysis System**
