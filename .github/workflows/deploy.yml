@@ -24,14 +24,14 @@ jobs:
     
     - name: Restore dependencies (excluding MAUI)
       run: |
-        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore src/DigitalMe/DigitalMe.csproj
         dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
         dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
         dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
     
     - name: Build (excluding MAUI)
       run: |
-        dotnet build DigitalMe/DigitalMe.csproj --no-restore --configuration Release
+        dotnet build src/DigitalMe/DigitalMe.csproj --no-restore --configuration Release
         dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --no-restore --configuration Release
         dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --no-restore --configuration Release
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --no-restore --configuration Release

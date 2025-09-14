@@ -11,7 +11,7 @@ WORKDIR /src
 
 # Copy solution and project files
 COPY DigitalMe.sln .
-COPY DigitalMe/DigitalMe.csproj ./DigitalMe/
+COPY src/DigitalMe/DigitalMe.csproj ./src/DigitalMe/
 COPY src/DigitalMe.Web/DigitalMe.Web.csproj ./src/DigitalMe.Web/
 COPY tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj ./tests/DigitalMe.Tests.Unit/
 COPY tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj ./tests/DigitalMe.Tests.Integration/
@@ -30,7 +30,7 @@ RUN dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
     --configuration Release --no-build --verbosity normal
 
 # Publish application
-RUN dotnet publish DigitalMe/DigitalMe.csproj \
+RUN dotnet publish src/DigitalMe/DigitalMe.csproj \
     --configuration Release \
     --no-build \
     --output /app/publish \

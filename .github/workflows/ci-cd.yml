@@ -63,7 +63,7 @@ jobs:
 
     - name: 🔄 Restore Dependencies (excluding MAUI)
       run: |
-        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore src/DigitalMe/DigitalMe.csproj
         dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
         dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
         dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
@@ -71,7 +71,7 @@ jobs:
     - name: 🔍 Build Projects (excluding MAUI)
       run: |
         echo "Building projects with warnings suppressed..."
-        dotnet build DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
+        dotnet build src/DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal  
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
@@ -130,14 +130,14 @@ jobs:
 
     - name: 🔄 Restore Dependencies (excluding MAUI)
       run: |
-        dotnet restore DigitalMe/DigitalMe.csproj
+        dotnet restore src/DigitalMe/DigitalMe.csproj
         dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
         dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
         dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
     - name: 🔍 Build for Analysis (excluding MAUI)
       run: |
-        dotnet build DigitalMe/DigitalMe.csproj --configuration Debug --no-restore
+        dotnet build src/DigitalMe/DigitalMe.csproj --configuration Debug --no-restore
         dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Debug --no-restore
         dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration Debug --no-restore
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Debug --no-restore

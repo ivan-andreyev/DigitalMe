@@ -126,7 +126,7 @@ jobs:
     - name: 📦 Create Release Artifacts
       run: |
         # Publish main application
-        dotnet publish DigitalMe/DigitalMe.csproj \
+        dotnet publish src/DigitalMe/DigitalMe.csproj \
           --configuration Release \
           --output ./publish/digitalme-api \
           --runtime linux-x64 \

@@ -9,7 +9,7 @@ steps:
       - '-t'
       - 'gcr.io/$PROJECT_ID/digitalme-api:$COMMIT_SHA'
       - '-f'
-      - 'DigitalMe/Dockerfile.cloudrun'
+      - 'src/DigitalMe/Dockerfile.cloudrun'
       - '.'
     id: 'build-api'
 

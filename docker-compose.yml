@@ -5,7 +5,7 @@ services:
   digitalme-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/DigitalMe/Dockerfile
     ports:
       - "5000:8080"  # HTTP - map host 5000 to container 8080
       - "5001:8081"  # HTTPS - map host 5001 to container 8081

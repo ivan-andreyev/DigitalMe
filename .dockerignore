@@ -1,7 +1,7 @@
 # Ignore API project config files to prevent conflicts in Web builds
-DigitalMe/appsettings*.json
-DigitalMe/web.config
-DigitalMe/Dockerfile*
+src/DigitalMe/appsettings*.json
+src/DigitalMe/web.config
+src/DigitalMe/Dockerfile*
 
 # Standard .NET ignores
 **/bin/
