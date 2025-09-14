@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DigitalMe\DigitalMe.csproj" />
+    <ProjectReference Include="..\..\src\DigitalMe\DigitalMe.csproj" />
     <ProjectReference Include="..\..\src\DigitalMe.Web\DigitalMe.Web.csproj" />
     <ProjectReference Include="..\DigitalMe.Tests.Unit\DigitalMe.Tests.Unit.csproj" />
   </ItemGroup>

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DigitalMe\DigitalMe.csproj" />
+    <ProjectReference Include="..\DigitalMe\DigitalMe.csproj" />
   </ItemGroup>
 
 </Project>

@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DigitalMe\DigitalMe.csproj" />
+    <ProjectReference Include="..\..\src\DigitalMe\DigitalMe.csproj" />
   </ItemGroup>
 
 </Project>
