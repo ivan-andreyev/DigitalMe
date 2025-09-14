@@ -44,7 +44,7 @@ public class ParallelTestRunnerTests
     public void Constructor_NullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new ParallelTestRunner(null!, _singleTestExecutorMock.Object));
     }
 
@@ -52,7 +52,7 @@ public class ParallelTestRunnerTests
     public void Constructor_NullTestExecutor_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new ParallelTestRunner(_loggerMock.Object, null!));
     }
 
@@ -431,7 +431,7 @@ public class ParallelTestRunnerTests
     {
         // Arrange
         var testCases = new List<SelfGeneratedTestCase> { CreateTestCase("Test1") };
-        
+
         _singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ThrowsAsync(new InvalidOperationException("Test executor error"));
@@ -474,7 +474,7 @@ public class ParallelTestRunnerTests
         Assert.Equal(20, results.Count);
         // With 5 concurrent tests and 50ms each, should complete in roughly 200ms (4 batches)
         // Allow some tolerance for test environment variations
-        Assert.True(stopwatch.ElapsedMilliseconds < 1000, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 1000,
             $"Execution took {stopwatch.ElapsedMilliseconds}ms, expected less than 1000ms");
     }
 

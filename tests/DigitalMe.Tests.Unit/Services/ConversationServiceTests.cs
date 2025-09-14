@@ -272,7 +272,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         // Arrange
         var nonExistentId = Guid.NewGuid();
 
-        // Act & Assert  
+        // Act & Assert
         await FluentActions.Invoking(() => _service.EndConversationAsync(nonExistentId))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage("*not found*");

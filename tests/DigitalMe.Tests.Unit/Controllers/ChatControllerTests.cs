@@ -199,7 +199,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     [Fact]
     public async Task SendMessage_DifferentUsers_ShouldCreateSeparateConversations()
     {
-        // Arrange - Use consistent Ivan seeding  
+        // Arrange - Use consistent Ivan seeding
         await EnsureCleanDatabaseWithIvan();
 
         var user1Request = new ChatRequestDto

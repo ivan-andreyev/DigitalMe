@@ -20,7 +20,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         _service = new FileProcessingService(_mockLogger.Object);
         _tempDirectory = Path.Combine(Path.GetTempPath(), "DigitalMeTests", Guid.NewGuid().ToString());
         _createdFiles = new List<string>();
-        
+
         Directory.CreateDirectory(_tempDirectory);
     }
 
@@ -195,7 +195,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         var pdfPath = Path.Combine(_tempDirectory, "test-extract.pdf");
         _createdFiles.Add(pdfPath);
         var testContent = "This is test content for extraction";
-        
+
         var createResult = await _service.ProcessPdfAsync("create", pdfPath, new Dictionary<string, object>
         {
             { "content", testContent }
@@ -289,7 +289,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         // Arrange - First create an Excel file
         var excelPath = Path.Combine(_tempDirectory, "test-read.xlsx");
         _createdFiles.Add(excelPath);
-        
+
         var createResult = await _service.ProcessExcelAsync("create", excelPath, new Dictionary<string, object>
         {
             { "worksheetName", "TestSheet" }

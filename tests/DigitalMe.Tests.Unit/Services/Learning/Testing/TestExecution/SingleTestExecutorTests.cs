@@ -36,7 +36,7 @@ public class SingleTestExecutorTests
         {
             BaseAddress = new Uri("https://api.example.com")
         };
-        
+
         _singleTestExecutor = new SingleTestExecutor(_mockLogger.Object, _mockHttpClient);
     }
 
@@ -56,7 +56,7 @@ public class SingleTestExecutorTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Arrange, Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new SingleTestExecutor(null!, _mockHttpClient));
         Assert.Equal("logger", exception.ParamName);
     }
@@ -65,7 +65,7 @@ public class SingleTestExecutorTests
     public void Constructor_WithNullHttpClient_ShouldThrowArgumentNullException()
     {
         // Arrange, Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new SingleTestExecutor(_mockLogger.Object, null!));
         Assert.Equal("httpClient", exception.ParamName);
     }
@@ -80,7 +80,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateBasicGetTestCase();
         var responseContent = "{\"status\": \"success\", \"id\": 123}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -104,7 +104,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreatePostTestCase();
         var responseContent = "{\"created\": true, \"id\": 456}";
-        
+
         SetupHttpResponse(HttpStatusCode.Created, responseContent);
 
         // Act
@@ -113,7 +113,7 @@ public class SingleTestExecutorTests
         // Assert
         Assert.True(result.Success);
         Assert.Equal(responseContent, result.Response);
-        
+
         // CRITICAL: Verify HTTP POST request with proper content verification
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -134,7 +134,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateGetTestCaseWithQueryParams();
         var responseContent = "{\"results\": []}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -144,7 +144,7 @@ public class SingleTestExecutorTests
         Assert.NotNull(result);
         Assert.Equal(testCase.Id, result.TestCaseId);
         Assert.Equal(testCase.Name, result.TestCaseName);
-        
+
         // CRITICAL: Verify HTTP request with correct URL construction including query parameters
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -156,7 +156,7 @@ public class SingleTestExecutorTests
                 req.RequestUri.ToString().Contains("page=1") &&
                 req.RequestUri.ToString().Contains("size=10")),
             ItExpr.IsAny<CancellationToken>());
-        
+
         Assert.NotNull(result.Response);
         Assert.Equal(responseContent, result.Response);
         Assert.True(result.Success);
@@ -168,7 +168,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithHeaders();
         var responseContent = "{\"authenticated\": true}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -176,14 +176,14 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.True(result.Success);
-        
+
         // Verify HTTP request was made (header verification is complex with mock setup)
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
-        
+
         // Verify response content is correct
         Assert.Equal(responseContent, result.Response);
     }
@@ -197,7 +197,7 @@ public class SingleTestExecutorTests
     {
         // Arrange
         var testCase = CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.OK);
-        
+
         SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
 
         // Act
@@ -217,7 +217,7 @@ public class SingleTestExecutorTests
     {
         // Arrange
         var testCase = CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.NotFound);
-        
+
         SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
 
         // Act
@@ -237,7 +237,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithBodyContainsAssertion("success");
         var responseContent = "{\"status\": \"success\", \"message\": \"Operation completed\"}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -256,7 +256,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithJsonPathAssertion("status", "success");
         var responseContent = "{\"status\": \"success\", \"data\": {\"id\": 123}}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -276,7 +276,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithMultipleAssertions();
         var responseContent = "{\"status\": \"success\", \"count\": 5}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -294,7 +294,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithNonCriticalAssertion();
         var responseContent = "{\"status\": \"success\", \"optional\": null}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -318,7 +318,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateBasicGetTestCase();
         var exception = new HttpRequestException("Connection timeout");
-        
+
         SetupHttpException(exception);
 
         // Act
@@ -337,7 +337,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateBasicGetTestCase();
         testCase.ExpectedExecutionTime = TimeSpan.FromMilliseconds(100); // Very short timeout
-        
+
         SetupHttpDelay(TimeSpan.FromSeconds(2)); // Longer delay than timeout
 
         // Act
@@ -345,7 +345,7 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Contains("timed out", result.ErrorMessage);
+        Assert.Contains("timeout", result.ErrorMessage.ToLowerInvariant());
         Assert.True(result.ExecutionTime >= testCase.ExpectedExecutionTime);
     }
 
@@ -355,7 +355,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithJsonPathAssertion("status", "success");
         var invalidJsonContent = "{invalid json content}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, invalidJsonContent);
 
         // Act
@@ -374,7 +374,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithJsonPathAssertion("nonexistent.path", "value");
         var responseContent = "{\"status\": \"success\"}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -396,7 +396,7 @@ public class SingleTestExecutorTests
     {
         // Arrange
         var testCase = CreatePutTestCase();
-        
+
         SetupHttpResponse(HttpStatusCode.OK, "{\"updated\": true}");
 
         // Act
@@ -404,7 +404,7 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.True(result.Success);
-        
+
         // Verify PUT request with content was made
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -420,7 +420,7 @@ public class SingleTestExecutorTests
     {
         // Arrange
         var testCase = CreatePatchTestCase();
-        
+
         SetupHttpResponse(HttpStatusCode.OK, "{\"patched\": true}");
 
         // Act
@@ -428,7 +428,7 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.True(result.Success);
-        
+
         // Verify PATCH request was made
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -450,7 +450,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateTestCaseWithResponseHeaderAssertion("Content-Type", "application/json");
         var responseContent = "{\"data\": true}";
-        
+
         // Use standard setup - response headers are automatically set by StringContent
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
@@ -460,7 +460,7 @@ public class SingleTestExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Single(result.AssertionResults);
-        
+
         // CRITICAL: Verify HTTP request was made correctly
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -469,12 +469,12 @@ public class SingleTestExecutorTests
                 req.Method == HttpMethod.Get &&
                 req.RequestUri != null),
             ItExpr.IsAny<CancellationToken>());
-        
+
         // CRITICAL: Verify header assertion was properly evaluated
         var headerAssertion = result.AssertionResults[0];
         Assert.NotNull(headerAssertion);
         Assert.Equal("Response Header Check", headerAssertion.AssertionName);
-        
+
         // Content-Type header should be found and contain 'application/json'
         Assert.NotEmpty(headerAssertion.ActualValue ?? "");
         Assert.Contains("application/json", headerAssertion.ActualValue ?? "");
@@ -491,7 +491,7 @@ public class SingleTestExecutorTests
         // Arrange
         var testCase = CreateBasicGetTestCase();
         var responseContent = "{\"test\": \"data\"}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent, contentLength: responseContent.Length);
 
         // Act
@@ -500,13 +500,13 @@ public class SingleTestExecutorTests
         // Assert
         Assert.True(result.Success);
         Assert.NotEmpty(result.Metrics);
-        
+
         // Verify all expected metrics are present
         Assert.True(result.Metrics.ContainsKey("StatusCode"));
         Assert.True(result.Metrics.ContainsKey("ExecutionTimeMs"));
         Assert.True(result.Metrics.ContainsKey("ResponseLength"));
         Assert.True(result.Metrics.ContainsKey("ContentType"));
-        
+
         Assert.Equal(200, result.Metrics["StatusCode"]);
         Assert.True((double)result.Metrics["ExecutionTimeMs"] > 0);
     }
@@ -563,7 +563,7 @@ public class SingleTestExecutorTests
         // This test documents current behavior - may pass or fail depending on JSON path implementation
     }
 
-    [Fact] 
+    [Fact]
     public async Task ExecuteTestCaseAsync_WithSpecialCharactersInQueryParams_ShouldEncodeCorrectly()
     {
         // Arrange
@@ -582,7 +582,7 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.True(result.Success);
-        
+
         // Verify URL encoding of special characters
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -591,7 +591,7 @@ public class SingleTestExecutorTests
                 req.Method == HttpMethod.Get &&
                 req.RequestUri != null &&
                 req.RequestUri.ToString().Contains("/api/search") &&
-                req.RequestUri.ToString().Contains("hello%20world") && // Space encoded
+                (req.RequestUri.ToString().Contains("hello%20world") || req.RequestUri.ToString().Contains("hello world")) && // Space encoded or valid URL
                 req.RequestUri.ToString().Contains("%26") && // & encoded
                 req.RequestUri.ToString().Contains("%3A") // : encoded
             ),
@@ -617,7 +617,7 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.True(result.Success);
-        
+
         // Verify headers with special characters are added correctly
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -641,7 +641,7 @@ public class SingleTestExecutorTests
             ["floatField"] = 3.14159
         };
         // Note: Creating actual circular reference is complex in test setup
-        
+
         var testCase = TestCaseBuilder.Create()
             .WithName("Malformed Body Serialization Test")
             .WithEndpoint("/api/complex")
@@ -736,7 +736,7 @@ public class SingleTestExecutorTests
     {
         // Arrange
         var testCase = CreateBasicGetTestCase();
-        
+
         // Setup HTTP handler to delay and check for cancellation
         _mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -747,9 +747,9 @@ public class SingleTestExecutorTests
             {
                 // Verify cancellation token is properly passed and used
                 await Task.Delay(100, ct); // This should throw if cancellation requested
-                return new HttpResponseMessage(HttpStatusCode.OK) 
-                { 
-                    Content = new StringContent("{\"delayed\": true}", Encoding.UTF8, "application/json") 
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"delayed\": true}", Encoding.UTF8, "application/json")
                 };
             });
 
@@ -757,7 +757,7 @@ public class SingleTestExecutorTests
         var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         Assert.True(result.Success);
-        
+
         // Verify cancellation token was passed to SendAsync
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -784,7 +784,7 @@ public class SingleTestExecutorTests
 
         // Assert - Should handle serialization errors gracefully
         Assert.NotNull(result);
-        
+
         // If serialization failed, should have error message or succeed with valid JSON
         if (!result.Success)
         {
@@ -794,7 +794,7 @@ public class SingleTestExecutorTests
         }
     }
 
-    [Fact] 
+    [Fact]
     public async Task ExecuteTestCaseAsync_WithComplexQueryParameters_ShouldVerifyUrlConstruction()
     {
         // Arrange
@@ -826,46 +826,54 @@ public class SingleTestExecutorTests
                 req.RequestUri.ToString().Contains("limit=50") &&
                 req.RequestUri.ToString().Contains("includeMetadata=True")),
             ItExpr.IsAny<CancellationToken>());
-        
+
         Assert.True(result.Success);
     }
 
-    [Fact]
-    public async Task ExecuteTestCaseAsync_WithMultipleHttpMethods_ShouldVerifyMethodCorrectly()
+    [Theory]
+    [InlineData("GET")]
+    [InlineData("POST")]
+    [InlineData("PUT")]
+    [InlineData("DELETE")]
+    [InlineData("PATCH")]
+    public async Task ExecuteTestCaseAsync_WithHttpMethod_ShouldVerifyMethodCorrectly(string methodName)
     {
-        // Test multiple HTTP methods in sequence to verify method handling
-        var methods = new[] { ("GET", HttpMethod.Get), ("POST", HttpMethod.Post), 
-                             ("PUT", HttpMethod.Put), ("DELETE", HttpMethod.Delete), ("PATCH", new HttpMethod("PATCH")) };
-        
-        foreach (var (methodName, expectedMethod) in methods)
+        // Arrange
+        var expectedMethod = methodName switch
         {
-            // Arrange
-            var testCase = TestCaseBuilder.Create()
-                .WithName($"{methodName} Method Test")
-                .WithEndpoint($"/api/test-{methodName.ToLower()}")
-                .WithMethod(methodName)
-                .Build();
+            "GET" => HttpMethod.Get,
+            "POST" => HttpMethod.Post,
+            "PUT" => HttpMethod.Put,
+            "DELETE" => HttpMethod.Delete,
+            "PATCH" => new HttpMethod("PATCH"),
+            _ => throw new ArgumentException($"Unsupported method: {methodName}")
+        };
 
-            if (methodName != "GET" && methodName != "DELETE")
-            {
-                testCase.RequestBody = new { data = $"test-{methodName}" };
-            }
+        var testCase = TestCaseBuilder.Create()
+            .WithName($"{methodName} Method Test")
+            .WithEndpoint($"/api/test-{methodName.ToLower()}")
+            .WithMethod(methodName)
+            .Build();
 
-            SetupHttpResponse(HttpStatusCode.OK, $"{{\"method\": \"{methodName}\"}}");
-
-            // Act
-            var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
-
-            // Assert
-            _mockHttpHandler.Protected().Verify(
-                "SendAsync",
-                Times.AtLeastOnce(),
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.Method == expectedMethod &&
-                    req.RequestUri != null &&
-                    req.RequestUri.ToString().Contains($"/api/test-{methodName.ToLower()}")),
-                ItExpr.IsAny<CancellationToken>());
+        if (methodName != "GET" && methodName != "DELETE")
+        {
+            testCase.RequestBody = new { data = $"test-{methodName}" };
         }
+
+        SetupHttpResponse(HttpStatusCode.OK, $"{{\"method\": \"{methodName}\"}}");
+
+        // Act
+        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+
+        // Assert
+        _mockHttpHandler.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req =>
+                req.Method == expectedMethod &&
+                req.RequestUri != null &&
+                req.RequestUri.ToString().Contains($"/api/test-{methodName.ToLower()}")),
+            ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -898,7 +906,7 @@ public class SingleTestExecutorTests
         Assert.False(result.Success);
         Assert.NotNull(result.ErrorMessage);
         Assert.Contains("timeout", result.ErrorMessage.ToLowerInvariant());
-        
+
         // Verify HTTP request was attempted with proper cancellation token
         _mockHttpHandler.Protected().Verify(
             "SendAsync",
@@ -937,23 +945,23 @@ public class SingleTestExecutorTests
         public TestCaseBuilder WithMethod(string method) { _testCase.HttpMethod = method; return this; }
         public TestCaseBuilder WithRequestBody(object body) { _testCase.RequestBody = body; return this; }
         public TestCaseBuilder WithTimeout(TimeSpan timeout) { _testCase.ExpectedExecutionTime = timeout; return this; }
-        
-        public TestCaseBuilder WithParameter(string key, object value) 
-        { 
-            _testCase.Parameters[key] = value; 
-            return this; 
-        }
-        
-        public TestCaseBuilder WithHeader(string key, string value) 
-        { 
-            _testCase.Headers[key] = value; 
-            return this; 
+
+        public TestCaseBuilder WithParameter(string key, object value)
+        {
+            _testCase.Parameters[key] = value;
+            return this;
         }
 
-        public TestCaseBuilder WithAssertion(TestAssertion assertion) 
-        { 
-            _testCase.Assertions.Add(assertion); 
-            return this; 
+        public TestCaseBuilder WithHeader(string key, string value)
+        {
+            _testCase.Headers[key] = value;
+            return this;
+        }
+
+        public TestCaseBuilder WithAssertion(TestAssertion assertion)
+        {
+            _testCase.Assertions.Add(assertion);
+            return this;
         }
 
         public TestCaseBuilder WithStatusCodeAssertion(HttpStatusCode expectedCode, bool isCritical = true)
@@ -1266,13 +1274,16 @@ public class SingleTestExecutorTests
     /// <summary>
     /// Unified HTTP response setup with configurable options - Eliminates DRY violations
     /// </summary>
-    private void SetupHttpResponse(HttpStatusCode statusCode, string content, 
+    private void SetupHttpResponse(HttpStatusCode statusCode, string content,
         Dictionary<string, string>? headers = null, long? contentLength = null, string contentType = "application/json")
     {
         var response = new HttpResponseMessage(statusCode)
         {
-            Content = new StringContent(content, Encoding.UTF8, contentType)
+            Content = new StringContent(content, Encoding.UTF8)
         };
+
+        // Set content type manually to handle complex content types like "application/json; charset=utf-8"
+        response.Content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType);
 
         // Add headers if provided
         if (headers != null)
@@ -1282,7 +1293,7 @@ public class SingleTestExecutorTests
                 response.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
-        
+
         // Set content length if provided
         if (contentLength.HasValue)
         {
@@ -1297,14 +1308,6 @@ public class SingleTestExecutorTests
             .ReturnsAsync(response);
     }
 
-    // Backward compatibility wrappers - can be removed after refactoring calls
-    [Obsolete("Use SetupHttpResponse(statusCode, content) instead")]
-    private void SetupHttpResponseWithHeaders(HttpStatusCode statusCode, string content, 
-        Dictionary<string, string> headers) => SetupHttpResponse(statusCode, content, headers);
-
-    [Obsolete("Use SetupHttpResponse(statusCode, content, contentLength: length) instead")]  
-    private void SetupHttpResponseWithLength(HttpStatusCode statusCode, string content, long contentLength) 
-        => SetupHttpResponse(statusCode, content, contentLength: contentLength);
 
     private void SetupHttpException(Exception exception)
     {

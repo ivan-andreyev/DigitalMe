@@ -26,12 +26,12 @@ public class ClaudeApiPerformanceTests
         _mockConfiguration.Setup(x => x["Anthropic:ApiKey"]).Returns("test-api-key");
         _mockConfiguration.Setup(x => x["Claude:RateLimitDelayMs"]).Returns("100");
         _mockConfiguration.Setup(x => x["Claude:MaxTokens"]).Returns("2048");
-        
+
         // Setup configuration section mocks for GetValue extension method
         var mockRateLimitSection = new Mock<IConfigurationSection>();
         mockRateLimitSection.Setup(x => x.Value).Returns("100");
         _mockConfiguration.Setup(x => x.GetSection("Claude:RateLimitDelayMs")).Returns(mockRateLimitSection.Object);
-        
+
         var mockMaxTokensSection = new Mock<IConfigurationSection>();
         mockMaxTokensSection.Setup(x => x.Value).Returns("2048");
         _mockConfiguration.Setup(x => x.GetSection("Claude:MaxTokens")).Returns(mockMaxTokensSection.Object);
@@ -55,7 +55,7 @@ public class ClaudeApiPerformanceTests
         // Assert
         Assert.NotNull(response);
         Assert.NotEmpty(response);
-        Assert.True(stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs, 
+        Assert.True(stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs,
             $"Response took {stopwatch.ElapsedMilliseconds}ms, expected < {maxAcceptableTimeMs}ms");
     }
 

@@ -79,10 +79,10 @@ public class IvanLevelHealthCheckServiceTests : IDisposable
     public async Task CheckServiceHealthAsync_FileProcessingService_WithValidService_ShouldReturnHealthy()
     {
         // Arrange
-        var mockResult = new FileProcessingResult 
-        { 
-            Success = true, 
-            Message = "PDF created successfully" 
+        var mockResult = new FileProcessingResult
+        {
+            Success = true,
+            Message = "PDF created successfully"
         };
 
         _mockFileService.Setup(x => x.ProcessPdfAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
@@ -112,10 +112,10 @@ public class IvanLevelHealthCheckServiceTests : IDisposable
     public async Task CheckServiceHealthAsync_FileProcessingService_WithFailure_ShouldReturnUnhealthy()
     {
         // Arrange
-        var mockResult = new FileProcessingResult 
-        { 
-            Success = false, 
-            Message = "PDF creation failed" 
+        var mockResult = new FileProcessingResult
+        {
+            Success = false,
+            Message = "PDF creation failed"
         };
 
         _mockFileService.Setup(x => x.ProcessPdfAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))

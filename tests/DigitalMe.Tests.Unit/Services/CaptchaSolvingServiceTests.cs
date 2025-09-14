@@ -29,7 +29,7 @@ public class CaptchaSolvingServiceTests
         {
             BaseAddress = new Uri("http://2captcha.com/")
         };
-        
+
         _mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
         _mockConfiguration.Setup(x => x["TwoCaptcha:ApiKey"]).Returns("test_api_key");
 
@@ -244,7 +244,7 @@ public class CaptchaSolvingServiceTests
         mockConfig.Setup(x => x["TwoCaptcha:ApiKey"]).Returns((string)null); // null API key
 
         // Act & Assert - This will throw during service construction
-        Assert.Throws<InvalidOperationException>(() => 
+        Assert.Throws<InvalidOperationException>(() =>
             new CaptchaSolvingService(_mockLogger.Object, _httpClient, mockConfig.Object));
     }
 
@@ -348,11 +348,11 @@ public class CaptchaSolvingServiceTests
     {
         // Arrange
         var imageBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes("test_image_data"));
-        
+
         _mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", 
-                ItExpr.IsAny<HttpRequestMessage>(), 
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Network error"));
 
@@ -372,7 +372,7 @@ public class CaptchaSolvingServiceTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new CaptchaSolvingService(null, _httpClient, _mockConfiguration.Object));
     }
 
@@ -380,7 +380,7 @@ public class CaptchaSolvingServiceTests
     public void Constructor_WithNullConfig_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new CaptchaSolvingService(_mockLogger.Object, _httpClient, null));
     }
 
@@ -388,7 +388,7 @@ public class CaptchaSolvingServiceTests
     public void Constructor_WithNullHttpClient_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new CaptchaSolvingService(_mockLogger.Object, null, _mockConfiguration.Object));
     }
 
@@ -398,8 +398,8 @@ public class CaptchaSolvingServiceTests
     {
         _mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", 
-                ItExpr.IsAny<HttpRequestMessage>(), 
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
             {
@@ -411,7 +411,7 @@ public class CaptchaSolvingServiceTests
     private void SetupHttpResponses(string submitResponse, params string[] pollResponses)
     {
         var responses = new Queue<HttpResponseMessage>();
-        
+
         // Add submit response
         responses.Enqueue(new HttpResponseMessage
         {
@@ -431,8 +431,8 @@ public class CaptchaSolvingServiceTests
 
         _mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", 
-                ItExpr.IsAny<HttpRequestMessage>(), 
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(() => responses.Dequeue());
     }

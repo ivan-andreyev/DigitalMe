@@ -23,7 +23,7 @@ public class IvanPersonalityEnhancedServiceTests
         _mockLogger = new Mock<ILogger<IvanPersonalityService>>();
         _mockProfileParser = new Mock<IProfileDataParser>();
         _mockConfiguration = new Mock<IConfiguration>();
-        
+
         _service = new IvanPersonalityService(
             _mockLogger.Object,
             _mockProfileParser.Object,
@@ -52,7 +52,7 @@ public class IvanPersonalityEnhancedServiceTests
         // Assert
         Assert.NotNull(profile.Traits);
         Assert.True(profile.Traits.Count >= 10, "Profile should contain at least 10 personality traits");
-        
+
         // Check for essential traits
         var traitNames = profile.Traits.Select(t => t.Name).ToList();
         Assert.Contains("Age", traitNames);
@@ -98,7 +98,7 @@ public class IvanPersonalityEnhancedServiceTests
         _mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
-        
+
         _mockConfiguration
             .Setup(x => x["IvanProfile:DataFilePath"])
             .Returns("test/path/IVAN_PROFILE_DATA.md");
@@ -114,7 +114,7 @@ public class IvanPersonalityEnhancedServiceTests
         Assert.Contains("Financial independence", enhancedPrompt);
         Assert.Contains("C#/.NET development", enhancedPrompt);
         Assert.Contains("Unity indie game framework", enhancedPrompt);
-        
+
         // Verify parser was called
         _mockProfileParser.Verify(x => x.ParseProfileDataAsync(It.IsAny<string>()), Times.Once);
     }
@@ -153,7 +153,7 @@ public class IvanPersonalityEnhancedServiceTests
         // Should contain basic Ivan characteristics from fallback method
         Assert.Contains("Ivan", result);
         Assert.Contains("Head of R&D", result);
-        
+
         // Verify error was logged
         VerifyLogWasCalled(LogLevel.Error, "Failed to generate enhanced system prompt");
     }
@@ -168,7 +168,7 @@ public class IvanPersonalityEnhancedServiceTests
         _mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
-        
+
         _mockConfiguration
             .Setup(x => x["IvanProfile:DataFilePath"])
             .Returns(configPath);
@@ -178,7 +178,7 @@ public class IvanPersonalityEnhancedServiceTests
 
         // Assert - Should use default path
         _mockProfileParser.Verify(x => x.ParseProfileDataAsync(
-            It.Is<string>(path => path.EndsWith("data/profile/IVAN_PROFILE_DATA.md"))), 
+            It.Is<string>(path => path.EndsWith("data/profile/IVAN_PROFILE_DATA.md"))),
             Times.Once);
     }
 

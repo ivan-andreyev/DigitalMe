@@ -23,7 +23,7 @@ public class VoiceServiceTests
     public VoiceServiceTests()
     {
         _mockLogger = new Mock<ILogger<VoiceService>>();
-        
+
         _config = new VoiceServiceConfig
         {
             OpenAiApiKey = "test_api_key_sk-1234567890abcdef",
@@ -194,7 +194,7 @@ public class VoiceServiceTests
         Assert.True(result.Success);
         var voices = Assert.IsAssignableFrom<IEnumerable<VoiceInfo>>(result.Data);
         var voiceList = voices.ToList();
-        
+
         Assert.Equal(6, voiceList.Count); // OpenAI has 6 voices
         Assert.Contains(voiceList, v => v.Voice == TtsVoice.Alloy);
         Assert.Contains(voiceList, v => v.Voice == TtsVoice.Echo);
@@ -224,7 +224,7 @@ public class VoiceServiceTests
         Assert.True(result.Success);
         var formats = Assert.IsAssignableFrom<IEnumerable<AudioFormat>>(result.Data);
         var formatList = formats.ToList();
-        
+
         Assert.Contains(AudioFormat.Mp3, formatList);
         Assert.Contains(AudioFormat.Mp4, formatList);
         Assert.Contains(AudioFormat.Wav, formatList);
@@ -404,7 +404,7 @@ public class VoiceServiceTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new VoiceService(null, Options.Create(_config)));
     }
 
@@ -412,7 +412,7 @@ public class VoiceServiceTests
     public void Constructor_WithNullConfig_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new VoiceService(_mockLogger.Object, null));
     }
 

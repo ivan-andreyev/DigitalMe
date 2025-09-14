@@ -343,7 +343,7 @@ public class StatisticalAnalyzerTests
         // Arrange
         var baseTime = DateTime.Now.AddDays(-10);
         var metrics = new List<HistoricalMetric>();
-        
+
         for (int i = 0; i < 10; i++)
         {
             metrics.Add(new HistoricalMetric
@@ -371,7 +371,7 @@ public class StatisticalAnalyzerTests
         // Arrange
         var baseTime = DateTime.Now.AddDays(-10);
         var metrics = new List<HistoricalMetric>();
-        
+
         for (int i = 0; i < 10; i++)
         {
             metrics.Add(new HistoricalMetric
@@ -398,7 +398,7 @@ public class StatisticalAnalyzerTests
         var baseTime = DateTime.Now.AddDays(-20);
         var random = new Random(42); // Fixed seed for reproducible tests
         var metrics = new List<HistoricalMetric>();
-        
+
         for (int i = 0; i < 15; i++)
         {
             metrics.Add(new HistoricalMetric

@@ -158,10 +158,18 @@
 **Resolution:** Cherry-pick only integration-relevant architectural patterns  
 
 ### Why Hybrid vs Evolutionary?
-**User requirement:** "не копить слишком большой тех.долг"  
-**Business priority:** Slack, ClickUp, GitHub integration coverage  
-**Time constraint:** Need results in weeks, not months  
+**User requirement:** "не копить слишком большой тех.долг"
+**Business priority:** Slack, ClickUp, GitHub integration coverage
+**Time constraint:** Need results in weeks, not months
 **Resolution:** Balanced approach - minimal architecture fixes + focused integration development
+
+### Minor Technical Debt Backlog (Non-Critical)
+**Added:** 2025-09-14 после армии ревьюеров
+**Контекст:** После успешного исправления критических проблем тестов остались minor improvements
+- ✅ **Приоритет:** Low (не блокирует development)
+- 📝 **XML документация для private методов** в тестах - улучшение читаемости
+- 🏗️ **MockBuilder pattern** для AutoDocumentationParserTests - устранение DRY нарушений
+**Статус:** Включено в backlog для будущих code quality sessions
 
 ### Why Preserve Architectural Vision?
 **User insight:** "не утратить архитектурные идеи, по которым были написаны тесты"  

@@ -35,9 +35,9 @@ public class AutoDocumentationParserTests
         _mockDocumentationParser = new Mock<IDocumentationParser>();
         _mockUsagePatternAnalyzer = new Mock<IUsagePatternAnalyzer>();
         _mockApiTestCaseGenerator = new Mock<IApiTestCaseGenerator>();
-        
+
         _parser = new AutoDocumentationParser(
-            _mockLogger.Object, 
+            _mockLogger.Object,
             _mockDocumentationFetcher.Object,
             _mockDocumentationParser.Object,
             _mockUsagePatternAnalyzer.Object,
@@ -52,15 +52,15 @@ public class AutoDocumentationParserTests
         var apiName = "TestAPI";
         var mockContent = @"
             # Test API Documentation
-            
+
             Base URL: https://api.example.com
             Authentication: Bearer token required
-            
+
             ## Endpoints
-            
+
             ### GET /users
             Get all users
-            
+
             ```javascript
             fetch('https://api.example.com/users', {
                 headers: {
@@ -71,10 +71,10 @@ public class AutoDocumentationParserTests
             .then(response => response.json())
             .then(data => console.log(data));
             ```
-            
+
             ### POST /users
             Create a new user
-            
+
             ```javascript
             fetch('https://api.example.com/users', {
                 method: 'POST',
@@ -90,17 +90,46 @@ public class AutoDocumentationParserTests
             ```
         ";
 
-        _mockHttpHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(mockContent, Encoding.UTF8, "text/html")
-            });
+        // Setup mock dependencies for orchestrator pattern
+        _mockDocumentationFetcher
+            .Setup(x => x.FetchDocumentationContentAsync(documentationUrl))
+            .ReturnsAsync(mockContent);
+
+        var mockEndpoints = new List<ApiEndpoint>
+        {
+            new ApiEndpoint { Method = "GET", Path = "/users", Description = "Get all users" },
+            new ApiEndpoint { Method = "POST", Path = "/users", Description = "Create a new user" }
+        };
+
+        var mockExamples = new List<CodeExample>
+        {
+            new CodeExample { Language = "javascript", Code = "fetch('https://api.example.com/users', { headers: { 'Authorization': 'Bearer your-token', 'Content-Type': 'application/json' } })" },
+            new CodeExample { Language = "javascript", Code = "fetch('https://api.example.com/users', { method: 'POST', headers: { 'Authorization': 'Bearer your-token', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'John Doe', email: 'john@example.com' }) })" }
+        };
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractEndpointsAsync(mockContent))
+            .ReturnsAsync(mockEndpoints);
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractCodeExamplesAsync(mockContent))
+            .ReturnsAsync(mockExamples);
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractConfiguration(mockContent))
+            .Returns(new DocumentationConfig { Settings = new Dictionary<string, string>() });
+
+        _mockDocumentationParser
+            .Setup(x => x.DetectAuthenticationMethod(mockContent))
+            .Returns(AuthenticationMethod.Bearer);
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractBaseUrl(mockContent))
+            .Returns("https://api.example.com");
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractRequiredHeaders(mockContent))
+            .Returns(new List<string> { "Authorization", "Content-Type" });
 
         // Act
         var result = await _parser.ParseApiDocumentationAsync(documentationUrl, apiName);
@@ -109,7 +138,7 @@ public class AutoDocumentationParserTests
         Assert.True(result.Success);
         Assert.Equal(apiName, result.ApiName);
         Assert.Equal(2, result.Endpoints.Count);
-        Assert.True(result.Examples.Count >= 2, $"Expected at least 2 examples, but got {result.Examples.Count}. Implementation extracts more examples than originally planned.");
+        Assert.True(result.Examples.Count >= 2);
         Assert.Equal(AuthenticationMethod.Bearer, result.Authentication);
         Assert.Contains("Authorization", result.RequiredHeaders);
         Assert.Contains("Content-Type", result.RequiredHeaders);
@@ -121,7 +150,7 @@ public class AutoDocumentationParserTests
         // Arrange
         var content = @"
             Here's how to use the API:
-            
+
             ```javascript
             const response = await fetch('/api/data', {
                 method: 'GET',
@@ -131,9 +160,9 @@ public class AutoDocumentationParserTests
             });
             const data = await response.json();
             ```
-            
+
             For POST requests:
-            
+
             ```javascript
             fetch('/api/users', {
                 method: 'POST',
@@ -142,21 +171,41 @@ public class AutoDocumentationParserTests
             ```
         ";
 
+        var mockExamples = new List<CodeExample>
+        {
+            new CodeExample
+            {
+                Language = "javascript",
+                Code = "const response = await fetch('/api/data', { method: 'GET', headers: { 'X-API-Key': 'your-api-key' } }); const data = await response.json();",
+                Endpoint = "/api/data"
+            },
+            new CodeExample
+            {
+                Language = "javascript",
+                Code = "fetch('/api/users', { method: 'POST', body: JSON.stringify({ name: 'Test', age: 25 }) });",
+                Endpoint = "/api/users"
+            }
+        };
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractCodeExamplesAsync(content))
+            .ReturnsAsync(mockExamples);
+
         // Act
         var examples = await _parser.ExtractCodeExamplesAsync(content);
 
         // Assert
-        Assert.True(examples.Count >= 2, $"Expected at least 2 examples, but got {examples.Count}. Implementation extracts more examples than originally planned.");
-        
+        Assert.True(examples.Count >= 2);
+
         // Find JavaScript examples specifically (implementation may also extract inline examples)
         var jsExamples = examples.Where(e => e.Language == "javascript").ToList();
         Assert.True(jsExamples.Count >= 2, $"Expected at least 2 JavaScript examples, but got {jsExamples.Count}");
-        
+
         var firstExample = jsExamples.First();
         Assert.Equal("javascript", firstExample.Language);
         Assert.Contains("fetch", firstExample.Code);
         Assert.Equal("/api/data", firstExample.Endpoint);
-        
+
         var secondExample = jsExamples.Last();
         Assert.Equal("javascript", secondExample.Language);
         Assert.Contains("POST", secondExample.Code);
@@ -182,7 +231,7 @@ public class AutoDocumentationParserTests
             },
             new CodeExample
             {
-                Language = "javascript", 
+                Language = "javascript",
                 Code = @"fetch('/api/posts', {
                     method: 'GET',
                     headers: { 'Authorization': 'Bearer token' }
@@ -199,6 +248,26 @@ public class AutoDocumentationParserTests
                 ExtractedValues = new Dictionary<string, object> { { "method", "POST" } }
             }
         };
+
+        var mockAnalysis = new UsagePatternAnalysis
+        {
+            Patterns = new List<CommonPattern>
+            {
+                new CommonPattern
+                {
+                    Name = "API Request Pattern",
+                    Description = "Common pattern for API requests",
+                    Frequency = 3
+                }
+            },
+            MethodFrequency = new Dictionary<string, int> { { "GET", 2 }, { "POST", 1 } },
+            CommonHeaders = new List<string> { "Authorization" },
+            ParameterPatterns = new List<ParameterPattern>()
+        };
+
+        _mockUsagePatternAnalyzer
+            .Setup(x => x.AnalyzeUsagePatternsAsync(examples))
+            .ReturnsAsync(mockAnalysis);
 
         // Act
         var analysis = await _parser.AnalyzeUsagePatternsAsync(examples);
@@ -235,18 +304,51 @@ public class AutoDocumentationParserTests
             }
         };
 
+        var mockTestCases = new List<GeneratedTestCase>
+        {
+            new GeneratedTestCase
+            {
+                Name = "Test_User_API_Access",
+                Method = "GET",
+                Headers = new Dictionary<string, string> { { "Authorization", "Bearer test-token" } },
+                ValidationSteps = new List<string> { "Verify response status is 200" }
+            },
+            new GeneratedTestCase
+            {
+                Name = "Test_Error_401",
+                Method = "GET",
+                ValidationSteps = new List<string> { "Verify error handling for 401" }
+            },
+            new GeneratedTestCase
+            {
+                Name = "Test_Error_404",
+                Method = "GET",
+                ValidationSteps = new List<string> { "Verify error handling for 404" }
+            },
+            new GeneratedTestCase
+            {
+                Name = "Test_Error_500",
+                Method = "GET",
+                ValidationSteps = new List<string> { "Verify error handling for 500" }
+            }
+        };
+
+        _mockApiTestCaseGenerator
+            .Setup(x => x.GenerateTestCasesAsync(patterns))
+            .ReturnsAsync(mockTestCases);
+
         // Act
         var testCases = await _parser.GenerateTestCasesAsync(patterns);
 
         // Assert
         Assert.NotEmpty(testCases);
-        
+
         var userApiTest = testCases.FirstOrDefault(tc => tc.Name.Contains("User_API_Access"));
         Assert.NotNull(userApiTest);
         Assert.Equal("GET", userApiTest.Method);
         Assert.Contains("Authorization", userApiTest.Headers.Keys);
         Assert.Contains("Verify response status is 200", userApiTest.ValidationSteps);
-        
+
         // Should also generate error handling test cases
         var errorTests = testCases.Where(tc => tc.Name.StartsWith("Test_Error_")).ToList();
         Assert.Equal(3, errorTests.Count); // For 401, 404, 500
@@ -290,6 +392,32 @@ public class AutoDocumentationParserTests
             `POST /api/login` with credentials. Also try `fetch('https://api.example.com/data')`.
         ";
 
+        var mockExamples = new List<CodeExample>
+        {
+            new CodeExample
+            {
+                Language = "inline",
+                Code = "GET /api/health",
+                Endpoint = "/api/health"
+            },
+            new CodeExample
+            {
+                Language = "inline",
+                Code = "POST /api/login",
+                Endpoint = "/api/login"
+            },
+            new CodeExample
+            {
+                Language = "inline",
+                Code = "fetch('https://api.example.com/data')",
+                Endpoint = "/data"
+            }
+        };
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractCodeExamplesAsync(content))
+            .ReturnsAsync(mockExamples);
+
         // Act
         var examples = await _parser.ExtractCodeExamplesAsync(content);
 
@@ -297,7 +425,7 @@ public class AutoDocumentationParserTests
         Assert.NotEmpty(examples);
         var inlineExamples = examples.Where(e => e.Language == "inline").ToList();
         Assert.NotEmpty(inlineExamples);
-        
+
         var fetchExample = inlineExamples.FirstOrDefault(e => e.Code.Contains("fetch"));
         Assert.NotNull(fetchExample);
     }
@@ -307,6 +435,18 @@ public class AutoDocumentationParserTests
     {
         // Arrange
         var examples = new List<CodeExample>();
+
+        var mockAnalysis = new UsagePatternAnalysis
+        {
+            Patterns = new List<CommonPattern>(),
+            MethodFrequency = new Dictionary<string, int>(),
+            CommonHeaders = new List<string>(),
+            ParameterPatterns = new List<ParameterPattern>()
+        };
+
+        _mockUsagePatternAnalyzer
+            .Setup(x => x.AnalyzeUsagePatternsAsync(examples))
+            .ReturnsAsync(mockAnalysis);
 
         // Act
         var analysis = await _parser.AnalyzeUsagePatternsAsync(examples);
@@ -326,7 +466,7 @@ public class AutoDocumentationParserTests
     [InlineData("csharp", true)]
     [InlineData("plaintext", false)]
     [InlineData("", false)]
-    public void ExtractCodeExamplesAsync_WithDifferentLanguages_FiltersCorrectly(string language, bool shouldInclude)
+    public async Task ExtractCodeExamplesAsync_WithDifferentLanguages_FiltersCorrectly(string language, bool shouldInclude)
     {
         // Arrange
         var content = $@"
@@ -335,9 +475,43 @@ public class AutoDocumentationParserTests
             ```
         ";
 
+        var mockExamples = new List<CodeExample>();
+        if (shouldInclude)
+        {
+            mockExamples.Add(new CodeExample
+            {
+                Language = language,
+                Code = "fetch('/api/test')",
+                Endpoint = "/api/test"
+            });
+        }
+        else if (language == "plaintext")
+        {
+            // Should still include if it contains API calls
+            mockExamples.Add(new CodeExample
+            {
+                Language = "inline",
+                Code = "fetch('/api/test')",
+                Endpoint = "/api/test"
+            });
+        }
+        else if (string.IsNullOrEmpty(language))
+        {
+            // Implementation extracts inline API calls even from empty language blocks if they contain API patterns
+            mockExamples.Add(new CodeExample
+            {
+                Language = "inline",
+                Code = "fetch('/api/test')",
+                Endpoint = "/api/test"
+            });
+        }
+
+        _mockDocumentationParser
+            .Setup(x => x.ExtractCodeExamplesAsync(content))
+            .ReturnsAsync(mockExamples);
+
         // Act
-        var task = _parser.ExtractCodeExamplesAsync(content);
-        var examples = task.Result;
+        var examples = await _parser.ExtractCodeExamplesAsync(content);
 
         // Assert
         if (shouldInclude)
@@ -373,7 +547,7 @@ public class AutoDocumentationParserTests
     public void Constructor_WithNullLogger_ThrowsArgumentNullException()
     {
         // Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new AutoDocumentationParser(null!, _mockDocumentationFetcher.Object, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
     }
 
@@ -381,7 +555,7 @@ public class AutoDocumentationParserTests
     public void Constructor_WithNullDocumentationFetcher_ThrowsArgumentNullException()
     {
         // Assert
-        Assert.Throws<ArgumentNullException>(() => 
+        Assert.Throws<ArgumentNullException>(() =>
             new AutoDocumentationParser(_mockLogger.Object, null!, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
     }
 

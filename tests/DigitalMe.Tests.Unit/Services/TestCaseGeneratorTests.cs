@@ -44,9 +44,9 @@ public class TestCaseGeneratorTests : IDisposable
     {
         // Arrange
         var apiDoc = CreateSampleApiDocumentation();
-        var endpoint = new ApiEndpoint 
-        { 
-            Method = "POST", 
+        var endpoint = new ApiEndpoint
+        {
+            Method = "POST",
             Path = "/api/users",
             Parameters = new List<ApiParameter>
             {
@@ -106,9 +106,9 @@ public class TestCaseGeneratorTests : IDisposable
         var apiDoc = CreateSampleApiDocumentation();
         apiDoc.Examples = new List<CodeExample>
         {
-            new CodeExample 
-            { 
-                Language = "javascript", 
+            new CodeExample
+            {
+                Language = "javascript",
                 Code = "fetch('/api/users', { method: 'POST' })",
                 Endpoint = "/api/users",
                 Description = "Create user example"
@@ -141,9 +141,9 @@ public class TestCaseGeneratorTests : IDisposable
             },
             Examples = new List<CodeExample>
             {
-                new CodeExample 
-                { 
-                    Language = "javascript", 
+                new CodeExample
+                {
+                    Language = "javascript",
                     Code = "fetch('/api/users')",
                     Endpoint = "/api/users",
                     Description = "Get users example"

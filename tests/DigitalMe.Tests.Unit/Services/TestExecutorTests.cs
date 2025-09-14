@@ -37,7 +37,7 @@ public class TestExecutorTests
             BaseAddress = new Uri("https://api.example.com")
         };
         _mockSingleTestExecutor = new Mock<ISingleTestExecutor>();
-        
+
         // Setup default successful behavior for any test case
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ReturnsAsync((SelfGeneratedTestCase testCase) => new TestExecutionResult
@@ -50,7 +50,7 @@ public class TestExecutorTests
                 AssertionResults = new List<AssertionResult>(),
                 Metrics = new Dictionary<string, object> { ["executionTime"] = 100 }
             });
-            
+
         _testExecutor = new TestExecutor(_mockLogger.Object, _mockHttpClient, _mockSingleTestExecutor.Object);
     }
 
@@ -97,7 +97,7 @@ public class TestExecutorTests
         // Arrange
         var testCase = CreateValidTestCase();
         var responseContent = "{\"status\": \"success\", \"id\": 123}";
-        
+
         SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
@@ -168,7 +168,7 @@ public class TestExecutorTests
         // Arrange
         var testCase = CreateValidTestCase();
         var expectedException = new HttpRequestException("Network error");
-        
+
         // Override default mock to simulate HTTP exception
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ReturnsAsync(new TestExecutionResult
@@ -183,7 +183,7 @@ public class TestExecutorTests
                 AssertionResults = new List<AssertionResult>(),
                 Metrics = new Dictionary<string, object>()
             });
-        
+
         SetupHttpException(expectedException);
 
         // Act
@@ -203,7 +203,7 @@ public class TestExecutorTests
         // Arrange
         var testCase = CreateValidTestCase();
         testCase.ExpectedExecutionTime = TimeSpan.FromMilliseconds(100); // Very short timeout
-        
+
         // Override default mock to simulate timeout
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ReturnsAsync(new TestExecutionResult
@@ -217,7 +217,7 @@ public class TestExecutorTests
                 AssertionResults = new List<AssertionResult>(),
                 Metrics = new Dictionary<string, object>()
             });
-        
+
         SetupHttpDelayedResponse(TimeSpan.FromSeconds(2)); // Long delay
 
         // Act
@@ -331,11 +331,11 @@ public class TestExecutorTests
 
         // Setup specific failing test mock - override default successful behavior
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.Is<SelfGeneratedTestCase>(tc => tc.Name == "Failing Test")))
-            .ReturnsAsync(new TestExecutionResult 
-            { 
-                TestCaseId = "test2", 
-                TestCaseName = "Failing Test", 
-                Success = false, 
+            .ReturnsAsync(new TestExecutionResult
+            {
+                TestCaseId = "test2",
+                TestCaseName = "Failing Test",
+                Success = false,
                 ExecutionTime = TimeSpan.FromMilliseconds(200),
                 Response = new { StatusCode = 500, Content = "Error" },
                 AssertionResults = new List<AssertionResult>(),
@@ -367,11 +367,11 @@ public class TestExecutorTests
 
         // Setup specific slow test mock - override default execution time
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.Is<SelfGeneratedTestCase>(tc => tc.Name == "Slow Test")))
-            .ReturnsAsync(new TestExecutionResult 
-            { 
-                TestCaseId = "test1", 
-                TestCaseName = "Slow Test", 
-                Success = true, 
+            .ReturnsAsync(new TestExecutionResult
+            {
+                TestCaseId = "test1",
+                TestCaseName = "Slow Test",
+                Success = true,
                 ExecutionTime = TimeSpan.FromMilliseconds(6000),
                 Response = new { StatusCode = 200, Content = "{}" },
                 AssertionResults = new List<AssertionResult>(),
@@ -402,22 +402,22 @@ public class TestExecutorTests
 
         // Setup specific failing test mocks - override default successful behavior
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.Is<SelfGeneratedTestCase>(tc => tc.Name == "Failing Test 1")))
-            .ReturnsAsync(new TestExecutionResult 
-            { 
-                TestCaseId = "test1", 
-                TestCaseName = "Failing Test 1", 
-                Success = false, 
+            .ReturnsAsync(new TestExecutionResult
+            {
+                TestCaseId = "test1",
+                TestCaseName = "Failing Test 1",
+                Success = false,
                 ExecutionTime = TimeSpan.FromMilliseconds(100),
                 Response = new { StatusCode = 500, Content = "Error" },
                 AssertionResults = new List<AssertionResult>(),
                 Metrics = new Dictionary<string, object>()
             });
         _mockSingleTestExecutor.Setup(x => x.ExecuteTestCaseAsync(It.Is<SelfGeneratedTestCase>(tc => tc.Name == "Failing Test 2")))
-            .ReturnsAsync(new TestExecutionResult 
-            { 
-                TestCaseId = "test2", 
-                TestCaseName = "Failing Test 2", 
-                Success = false, 
+            .ReturnsAsync(new TestExecutionResult
+            {
+                TestCaseId = "test2",
+                TestCaseName = "Failing Test 2",
+                Success = false,
                 ExecutionTime = TimeSpan.FromMilliseconds(150),
                 Response = new { StatusCode = 500, Content = "Error" },
                 AssertionResults = new List<AssertionResult>(),

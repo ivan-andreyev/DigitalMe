@@ -81,7 +81,7 @@ public class SingleTestExecutor : ISingleTestExecutor
             stopwatch.Stop();
             result.ExecutionTime = stopwatch.Elapsed;
             result.Success = false;
-            result.ErrorMessage = $"Test timed out after {testCase.ExpectedExecutionTime.TotalSeconds} seconds";
+            result.ErrorMessage = $"Test timeout occurred after {testCase.ExpectedExecutionTime.TotalSeconds} seconds";
             _logger.LogWarning("Test case {TestCaseName} timed out", testCase.Name);
         }
         catch (Exception ex)
@@ -126,14 +126,20 @@ public class SingleTestExecutor : ISingleTestExecutor
         // Add as query parameters for GET requests
         else if (testCase.Parameters.Any())
         {
-            var queryString = string.Join("&", testCase.Parameters.Select(p => 
-                $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value?.ToString() ?? "")}"));
-            
-            var uriBuilder = new UriBuilder(testCase.Endpoint);
-            uriBuilder.Query = string.IsNullOrEmpty(uriBuilder.Query) 
-                ? queryString 
-                : uriBuilder.Query + "&" + queryString;
-            
+            // Handle relative endpoint - construct full URI from base URI and endpoint
+            var baseUri = _httpClient.BaseAddress ?? new Uri("https://localhost");
+            var fullUri = new Uri(baseUri, testCase.Endpoint);
+
+            var uriBuilder = new UriBuilder(fullUri);
+
+            // Build query string with proper escaping for each parameter
+            var queryParams = testCase.Parameters.Select(p =>
+                $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value?.ToString() ?? "")}");
+
+            // Set query without additional processing to preserve encoding
+            var queryString = string.Join("&", queryParams);
+            uriBuilder.Query = queryString;
+
             request.RequestUri = uriBuilder.Uri;
         }
 
@@ -173,7 +179,7 @@ public class SingleTestExecutor : ISingleTestExecutor
         return results;
     }
 
-    private async Task<string> ExtractActualValueAsync(TestAssertion assertion, 
+    private async Task<string> ExtractActualValueAsync(TestAssertion assertion,
         HttpResponseMessage response, string responseBody)
     {
         return assertion.Type switch
@@ -181,7 +187,7 @@ public class SingleTestExecutor : ISingleTestExecutor
             AssertionType.StatusCode => ((int)response.StatusCode).ToString(),
             AssertionType.ResponseTime => "0", // Would need to be passed from calling method
             AssertionType.ResponseBody => responseBody,
-            AssertionType.ResponseHeader => response.Headers.GetValues(assertion.ActualValuePath).FirstOrDefault() ?? "",
+            AssertionType.ResponseHeader => ExtractResponseHeaderValue(response, assertion.ActualValuePath),
             AssertionType.JsonPath => ExtractJsonPathValue(responseBody, assertion.ActualValuePath),
             _ => ""
         };
@@ -201,6 +207,39 @@ public class SingleTestExecutor : ISingleTestExecutor
         };
     }
 
+    private string ExtractResponseHeaderValue(HttpResponseMessage response, string headerName)
+    {
+        try
+        {
+            // First, try to get from response headers
+            if (response.Headers.TryGetValues(headerName, out var responseHeaderValues))
+            {
+                return responseHeaderValues.FirstOrDefault() ?? "";
+            }
+
+            // If not found, try content headers (Content-Type, Content-Length, etc.)
+            if (response.Content?.Headers != null)
+            {
+                if (response.Content.Headers.TryGetValues(headerName, out var contentHeaderValues))
+                {
+                    return contentHeaderValues.FirstOrDefault() ?? "";
+                }
+
+                // Special handling for ContentType which is not directly in TryGetValues
+                if (headerName.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+                {
+                    return response.Content.Headers.ContentType?.ToString() ?? "";
+                }
+            }
+
+            return "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
     private string ExtractJsonPathValue(string json, string jsonPath)
     {
         try
@@ -209,12 +248,12 @@ public class SingleTestExecutor : ISingleTestExecutor
             // Simplified JSON path extraction - in production would use JSONPath library
             var pathParts = jsonPath.Split('.');
             JsonNode? current = jsonNode;
-            
+
             foreach (var part in pathParts)
             {
                 current = current?[part];
             }
-            
+
             return current?.ToString() ?? "";
         }
         catch

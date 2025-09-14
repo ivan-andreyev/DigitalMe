@@ -25,10 +25,10 @@ public class ResultsAnalyzerTests
         _mockLogger = new Mock<ILogger<ResultsAnalyzer>>();
         _mockTestExecutor = new Mock<ITestExecutor>();
         _mockStatisticalAnalyzer = new Mock<IStatisticalAnalyzer>();
-        
+
         // Setup common mock behaviors
         SetupStatisticalAnalyzerMocks();
-        
+
         _resultsAnalyzer = new ResultsAnalyzer(_mockLogger.Object, _mockTestExecutor.Object, _mockStatisticalAnalyzer.Object);
     }
 
@@ -37,19 +37,19 @@ public class ResultsAnalyzerTests
         // Setup default confidence score calculation
         _mockStatisticalAnalyzer
             .Setup(x => x.CalculateConfidenceScore(It.IsAny<double>(), It.IsAny<int>(), It.IsAny<IEnumerable<double>>()))
-            .Returns((double successRate, int totalTests, IEnumerable<double> executionTimes) => 
+            .Returns((double successRate, int totalTests, IEnumerable<double> executionTimes) =>
             {
                 // Simple confidence calculation: base on success rate with sample size adjustment
                 var baseConfidence = successRate / 100.0;
                 var sampleSizeAdjustment = Math.Min(1.0, totalTests / 3.0); // Full confidence with 3+ tests
                 var result = baseConfidence * sampleSizeAdjustment;
-                
+
                 // Ensure perfect success rate with sufficient tests gets high confidence
                 if (successRate >= 100 && totalTests >= 3)
                 {
                     result = Math.Max(result, 0.95);
                 }
-                
+
                 return Math.Min(1.0, result);
             });
 
@@ -77,7 +77,7 @@ public class ResultsAnalyzerTests
     private static double CalculateStandardDeviation(double[] values)
     {
         if (values.Length == 0) return 0;
-        
+
         var average = values.Average();
         var sumOfSquaresOfDifferences = values.Select(val => (val - average) * (val - average)).Sum();
         return Math.Sqrt(sumOfSquaresOfDifferences / values.Length);
@@ -99,9 +99,9 @@ public class ResultsAnalyzerTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new ResultsAnalyzer(null!, _mockTestExecutor.Object, _mockStatisticalAnalyzer.Object));
-        
+
         Assert.Equal("logger", exception.ParamName);
     }
 
@@ -109,9 +109,9 @@ public class ResultsAnalyzerTests
     public void Constructor_WithNullTestExecutor_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new ResultsAnalyzer(_mockLogger.Object, null!, _mockStatisticalAnalyzer.Object));
-        
+
         Assert.Equal("testExecutor", exception.ParamName);
     }
 
@@ -125,7 +125,7 @@ public class ResultsAnalyzerTests
         // Arrange
         var capability = CreateTestCapability();
         var suiteResult = CreateSuccessfulTestSuiteResult();
-        
+
         _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ReturnsAsync(suiteResult);
 
@@ -148,7 +148,7 @@ public class ResultsAnalyzerTests
         // Arrange
         var capability = CreateTestCapability();
         var suiteResult = CreateFailedTestSuiteResult();
-        
+
         _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ReturnsAsync(suiteResult);
 
@@ -169,7 +169,7 @@ public class ResultsAnalyzerTests
     {
         // Arrange
         var capability = CreateTestCapability();
-        
+
         _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ThrowsAsync(new InvalidOperationException("Test exception"));
 
@@ -554,18 +554,18 @@ public class ResultsAnalyzerTests
     private List<TestExecutionResult> CreateMixedTestResults()
     {
         var results = new List<TestExecutionResult>();
-        
+
         // Create exactly 7 successful tests
         for (int i = 1; i <= 7; i++)
         {
             results.Add(CreateSuccessfulTestResult($"SuccessTest{i}"));
         }
-        
-        // Create exactly 3 failed tests  
+
+        // Create exactly 3 failed tests
         results.Add(CreateFailedTestResult("FailedTest1", "500 Internal Server Error"));
         results.Add(CreateFailedTestResult("FailedTest2", "404 Not Found"));
         results.Add(CreateFailedTestResult("FailedTest3", "Request timeout"));
-        
+
         return results; // Exactly 10 tests: 7 success + 3 fail = 70% success rate
     }
 

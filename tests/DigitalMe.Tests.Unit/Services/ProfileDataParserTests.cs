@@ -27,7 +27,7 @@ public class ProfileDataParserTests
         var nonExistentPath = "non-existent-file.md";
 
         // Act & Assert
-        await Assert.ThrowsAsync<FileNotFoundException>(() => 
+        await Assert.ThrowsAsync<FileNotFoundException>(() =>
             _parser.ParseProfileDataAsync(nonExistentPath));
     }
 
@@ -116,14 +116,14 @@ public class ProfileDataParserTests
             Assert.NotEmpty(result.Personality.CoreValues);
             Assert.Contains("Financial independence and career confidence", result.Personality.CoreValues);
             Assert.Contains("Family safety and daughter's opportunities", result.Personality.CoreValues);
-            
+
             Assert.NotEmpty(result.Personality.WorkStyle);
             Assert.Contains("Rational and structured decision making", result.Personality.WorkStyle);
             Assert.Contains("High-intensity work ethic", result.Personality.WorkStyle);
-            
+
             Assert.NotEmpty(result.Personality.Challenges);
             Assert.Contains("Balancing work demands with family time", result.Personality.Challenges);
-            
+
             Assert.NotEmpty(result.Personality.Motivations);
             Assert.Contains("Financial security", result.Personality.Motivations);
             Assert.Contains("Technical innovation and problem-solving", result.Personality.Motivations);
@@ -192,7 +192,7 @@ public class ProfileDataParserTests
             This is not properly formatted profile data.
             **Random:** value
             """;
-        
+
         var tempFilePath = CreateTempProfileFile(invalidContent);
 
         try
@@ -246,9 +246,9 @@ public class ProfileDataParserTests
         var invalidPath = "C:\\invalid\\path\\that\\does\\not\\exist.md";
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FileNotFoundException>(() => 
+        var exception = await Assert.ThrowsAsync<FileNotFoundException>(() =>
             _parser.ParseProfileDataAsync(invalidPath));
-        
+
         // Verify exception message
         Assert.Contains("Profile data file not found", exception.Message);
     }
