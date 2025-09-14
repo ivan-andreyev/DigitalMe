@@ -1,15 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using System.Text;
 using System.Runtime;
-using Serilog;
+using System.Text;
 using DigitalMe.Data;
-using DigitalMe.Services;
-using DigitalMe.Repositories;
 using DigitalMe.Extensions;
+using DigitalMe.Repositories;
+using DigitalMe.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -214,15 +214,15 @@ builder.Services.AddScoped<DigitalMe.Integrations.MCP.Tools.ToolExecutor>();
 builder.Services.AddSingleton<DigitalMe.Integrations.MCP.Tools.ToolRegistry>();
 
 // MCP Client and Proper Service
-builder.Services.AddHttpClient<DigitalMe.Integrations.MCP.MCPClient>();
-builder.Services.AddScoped<DigitalMe.Integrations.MCP.IMCPClient, DigitalMe.Integrations.MCP.MCPClient>(provider =>
+builder.Services.AddHttpClient<DigitalMe.Integrations.MCP.McpClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.MCP.IMcpClient, DigitalMe.Integrations.MCP.McpClient>(provider =>
 {
     var httpClient = provider.GetRequiredService<HttpClient>();
-    var logger = provider.GetRequiredService<ILogger<DigitalMe.Integrations.MCP.MCPClient>>();
+    var logger = provider.GetRequiredService<ILogger<DigitalMe.Integrations.MCP.McpClient>>();
     var mcpServerUrl = builder.Configuration.GetValue<string>("MCP:ServerUrl") ?? "http://localhost:3000";
-    return new DigitalMe.Integrations.MCP.MCPClient(httpClient, logger, mcpServerUrl);
+    return new DigitalMe.Integrations.MCP.McpClient(httpClient, logger, mcpServerUrl);
 });
-builder.Services.AddScoped<IMcpService, DigitalMe.Integrations.MCP.MCPServiceProper>();
+builder.Services.AddScoped<IMcpService, DigitalMe.Integrations.MCP.McpServiceProper>();
 
 // Agent Behavior Engine
 builder.Services.AddScoped<DigitalMe.Services.AgentBehavior.IAgentBehaviorEngine, DigitalMe.Services.AgentBehavior.AgentBehaviorEngine>();

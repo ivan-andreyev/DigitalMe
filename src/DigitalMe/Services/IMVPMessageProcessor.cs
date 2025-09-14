@@ -4,7 +4,7 @@ namespace DigitalMe.Services;
 /// Simple MVP message processor interface
 /// User input → Ivan personality response pipeline
 /// </summary>
-public interface IMVPMessageProcessor
+public interface IMvpMessageProcessor
 {
     /// <summary>
     /// Process user message and return Ivan's personality-aware response

@@ -1,8 +1,8 @@
+using DigitalMe.Data.Entities;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
-using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Integrations.External.Google;
 

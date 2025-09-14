@@ -1,8 +1,8 @@
+using DigitalMe.Infrastructure;
 using Microsoft.Extensions.Logging;
+using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using PdfSharpCore.Drawing;
-using DigitalMe.Infrastructure;
 
 namespace DigitalMe.Services.FileProcessing;
 

@@ -1,12 +1,12 @@
+using System.Net;
+using DigitalMe.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
-using Polly.Extensions.Http;
-using Polly.CircuitBreaker;
-using Polly.Timeout;
 using Polly.Bulkhead;
-using DigitalMe.Configuration;
-using System.Net;
+using Polly.CircuitBreaker;
+using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace DigitalMe.Services.Resilience;
 

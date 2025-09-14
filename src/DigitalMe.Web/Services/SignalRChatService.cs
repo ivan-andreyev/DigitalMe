@@ -1,7 +1,7 @@
+using DigitalMe.DTOs;
+using DigitalMe.Web.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
-using DigitalMe.Web.Models;
-using DigitalMe.DTOs;
 
 namespace DigitalMe.Web.Services;
 

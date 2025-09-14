@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using DigitalMe.Services.Learning.ErrorLearning.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning.ErrorLearning;
 

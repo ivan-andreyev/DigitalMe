@@ -1,11 +1,11 @@
-using FluentAssertions;
-using Moq;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services;
-using DigitalMe.DTOs;
 using DigitalMe.Data.Entities;
+using DigitalMe.DTOs;
 using DigitalMe.Repositories;
+using DigitalMe.Services;
 using DigitalMe.Tests.Unit.Builders;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
@@ -18,14 +18,14 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
 
     public PersonalityServiceTests()
     {
-        _mockLogger = new Mock<ILogger<PersonalityService>>();
-        _personalityRepository = new PersonalityRepository(Context);
-        _personalityService = new PersonalityService(_personalityRepository, _mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<PersonalityService>>();
+        this._personalityRepository = new PersonalityRepository(this.Context);
+        this._personalityService = new PersonalityService(this._personalityRepository, this._mockLogger.Object);
     }
 
     public async Task InitializeAsync()
     {
-        CleanupDatabase();
+        this.CleanupDatabase();
         await Task.CompletedTask;
     }
 
@@ -47,8 +47,8 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
             .WithDescription(description)
             .Build();
 
-        Context.PersonalityProfiles.Add(personality);
-        await Context.SaveChangesAsync();
+        this.Context.PersonalityProfiles.Add(personality);
+        await this.Context.SaveChangesAsync();
         return personality;
     }
 
@@ -79,9 +79,9 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
             traits.Add(trait);
         }
 
-        Context.PersonalityProfiles.Add(personality);
-        Context.PersonalityTraits.AddRange(traits);
-        await Context.SaveChangesAsync();
+        this.Context.PersonalityProfiles.Add(personality);
+        this.Context.PersonalityTraits.AddRange(traits);
+        await this.Context.SaveChangesAsync();
         return personality;
     }
 
@@ -110,9 +110,9 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
                 .Build()
         };
 
-        Context.PersonalityProfiles.Add(personality);
-        Context.PersonalityTraits.AddRange(traits);
-        await Context.SaveChangesAsync();
+        this.Context.PersonalityProfiles.Add(personality);
+        this.Context.PersonalityTraits.AddRange(traits);
+        await this.Context.SaveChangesAsync();
         return personality;
     }
 
@@ -120,11 +120,11 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task GetPersonality_WithExistingPersonality_ShouldReturnPersonalityWithTraits()
     {
         // Arrange
-        var personality = await CreatePersonalityWithTraitsAsync("TestPersonalityWithTraits", "Test personality for trait testing");
+        var personality = await this.CreatePersonalityWithTraitsAsync("TestPersonalityWithTraits", "Test personality for trait testing");
 
         // Act
-        var result = await _personalityService.GetPersonalityAsync(personality.Name);
-        var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
+        var result = await this._personalityService.GetPersonalityAsync(personality.Name);
+        var traits = await this._personalityService.GetPersonalityTraitsAsync(personality.Id);
 
         // Assert
         result.Should().NotBeNull();
@@ -139,7 +139,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task GetPersonality_WithNonExistentPersonality_ShouldReturnNull()
     {
         // Arrange & Act
-        var result = await _personalityService.GetPersonalityAsync("NonExistent");
+        var result = await this._personalityService.GetPersonalityAsync("NonExistent");
 
         // Assert
         result.Should().BeNull();
@@ -153,7 +153,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var description = "A test personality profile";
 
         // Act
-        var result = await _personalityService.CreatePersonalityAsync(name, description);
+        var result = await this._personalityService.CreatePersonalityAsync(name, description);
 
         // Assert
         result.Should().NotBeNull();
@@ -163,7 +163,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
 
         // Verify it was saved to database
-        var savedPersonality = await Context.PersonalityProfiles.FindAsync(result.Id);
+        var savedPersonality = await this.Context.PersonalityProfiles.FindAsync(result.Id);
         savedPersonality.Should().NotBeNull();
         savedPersonality!.Name.Should().Be(name);
     }
@@ -176,7 +176,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var description = "Description without name";
 
         // Act
-        var result = await _personalityService.CreatePersonalityAsync(name, description);
+        var result = await this._personalityService.CreatePersonalityAsync(name, description);
 
         // Assert
         result.Should().NotBeNull();
@@ -188,12 +188,12 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task UpdatePersonality_WithValidData_ShouldUpdateAndReturnPersonality()
     {
         // Arrange
-        var personality = await CreatePersonalityAsync("UpdateTest", "Original description");
+        var personality = await this.CreatePersonalityAsync("UpdateTest", "Original description");
 
         var newDescription = "Updated description with new information";
 
         // Act
-        var result = await _personalityService.UpdatePersonalityAsync(personality.Id, newDescription);
+        var result = await this._personalityService.UpdatePersonalityAsync(personality.Id, newDescription);
 
         // Assert
         result.Should().NotBeNull();
@@ -201,7 +201,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.UpdatedAt.Should().BeAfter(result.CreatedAt);
 
         // Verify in database
-        var updatedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
+        var updatedPersonality = await this.Context.PersonalityProfiles.FindAsync(personality.Id);
         updatedPersonality!.Description.Should().Be(newDescription);
     }
 
@@ -213,7 +213,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var newDescription = "This won't work";
 
         // Act & Assert
-        await FluentActions.Invoking(() => _personalityService.UpdatePersonalityAsync(nonExistentId, newDescription))
+        await FluentActions.Invoking(() => this._personalityService.UpdatePersonalityAsync(nonExistentId, newDescription))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage($"Personality with ID {nonExistentId} not found");
     }
@@ -222,7 +222,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task AddTrait_WithValidData_ShouldAddTraitToPersonality()
     {
         // Arrange
-        var personality = await CreatePersonalityAsync("TraitTest");
+        var personality = await this.CreatePersonalityAsync("TraitTest");
 
         var category = "Cognitive";
         var name = "Creative";
@@ -230,7 +230,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var weight = 0.85;
 
         // Act
-        var result = await _personalityService.AddTraitAsync(personality.Id, category, name, description, weight);
+        var result = await this._personalityService.AddTraitAsync(personality.Id, category, name, description, weight);
 
         // Assert
         result.Should().NotBeNull();
@@ -241,7 +241,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         result.PersonalityProfileId.Should().Be(personality.Id);
 
         // Verify in database
-        var savedTrait = await Context.PersonalityTraits.FindAsync(result.Id);
+        var savedTrait = await this.Context.PersonalityTraits.FindAsync(result.Id);
         savedTrait.Should().NotBeNull();
         savedTrait!.Name.Should().Be(name);
     }
@@ -250,10 +250,10 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task GetSystemPrompt_WithValidPersonalityId_ShouldReturnSystemPrompt()
     {
         // Arrange
-        var personality = await CreateIvanPersonalityAsync();
+        var personality = await this.CreateIvanPersonalityAsync();
 
         // Act
-        var systemPrompt = await _personalityService.GenerateSystemPromptAsync(personality.Id);
+        var systemPrompt = await this._personalityService.GenerateSystemPromptAsync(personality.Id);
 
         // Assert
         systemPrompt.Should().NotBeNullOrEmpty();
@@ -269,7 +269,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var nonExistentId = Guid.NewGuid();
 
         // Act & Assert
-        await FluentActions.Invoking(() => _personalityService.GenerateSystemPromptAsync(nonExistentId))
+        await FluentActions.Invoking(() => this._personalityService.GenerateSystemPromptAsync(nonExistentId))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage($"Personality with ID {nonExistentId} not found");
     }
@@ -278,19 +278,19 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     public async Task DeletePersonality_WithValidId_ShouldDeletePersonality()
     {
         // Arrange
-        var personality = await CreatePersonalityAsync("DeleteTest");
+        var personality = await this.CreatePersonalityAsync("DeleteTest");
 
         // Act
-        var result = await _personalityService.DeletePersonalityAsync(personality.Id);
+        var result = await this._personalityService.DeletePersonalityAsync(personality.Id);
 
         // Assert
         result.Should().BeTrue();
 
         // Verify deletion
-        var deletedPersonality = await Context.PersonalityProfiles.FindAsync(personality.Id);
+        var deletedPersonality = await this.Context.PersonalityProfiles.FindAsync(personality.Id);
         deletedPersonality.Should().BeNull();
 
-        var getPersonality = await _personalityService.GetPersonalityAsync(personality.Name);
+        var getPersonality = await this._personalityService.GetPersonalityAsync(personality.Name);
         getPersonality.Should().BeNull();
     }
 
@@ -301,7 +301,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var nonExistentId = Guid.NewGuid();
 
         // Act
-        var result = await _personalityService.DeletePersonalityAsync(nonExistentId);
+        var result = await this._personalityService.DeletePersonalityAsync(nonExistentId);
 
         // Assert
         result.Should().BeFalse();
@@ -318,7 +318,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         var weight = 0.5;
 
         // Act
-        var result = await _personalityService.AddTraitAsync(nonExistentPersonalityId, category, name, description, weight);
+        var result = await this._personalityService.AddTraitAsync(nonExistentPersonalityId, category, name, description, weight);
 
         // Assert
         result.Should().NotBeNull();

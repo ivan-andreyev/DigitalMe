@@ -1,22 +1,22 @@
-using Xunit;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Integrations.MCP;
-using DigitalMe.Services;
 using DigitalMe.Data.Entities;
+using DigitalMe.Integrations.MCP;
 using DigitalMe.Models;
+using DigitalMe.Services;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 
-public class MCPIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>, IAsyncDisposable
+public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>, IAsyncDisposable
 {
     private readonly CustomWebApplicationFactory<Program> _factory;
 #pragma warning disable CS0414 // Field assigned but never used - intended for future MCP server configuration
     private readonly string _mcpServerUrl = "http://localhost:3000/mcp";
 
-    public MCPIntegrationTests(CustomWebApplicationFactory<Program> factory)
+    public McpIntegrationTests(CustomWebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -26,7 +26,7 @@ public class MCPIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var mcpClient = scope.ServiceProvider.GetRequiredService<IMCPClient>();
+        var mcpClient = scope.ServiceProvider.GetRequiredService<IMcpClient>();
 
         // Act
         var result = await mcpClient.InitializeAsync();
@@ -73,7 +73,7 @@ public class MCPIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var mcpClient = scope.ServiceProvider.GetRequiredService<IMCPClient>();
+        var mcpClient = scope.ServiceProvider.GetRequiredService<IMcpClient>();
         await mcpClient.InitializeAsync();
 
         // Act
@@ -90,7 +90,7 @@ public class MCPIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var mcpClient = scope.ServiceProvider.GetRequiredService<IMCPClient>();
+        var mcpClient = scope.ServiceProvider.GetRequiredService<IMcpClient>();
         await mcpClient.InitializeAsync();
 
         // Act - Call structured_thinking tool

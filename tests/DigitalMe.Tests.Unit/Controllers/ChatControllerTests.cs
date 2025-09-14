@@ -1,13 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using DigitalMe.DTOs;
-using DigitalMe.Data.Entities;
 using DigitalMe.Data;
+using DigitalMe.Data.Entities;
+using DigitalMe.DTOs;
 using DigitalMe.Tests.Unit.Builders;
 using DigitalMe.Tests.Unit.Fixtures;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMe.Tests.Unit.Controllers;
 
@@ -18,13 +18,13 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
 
     public ChatControllerTests(TestWebApplicationFactory<Program> factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
+        this._factory = factory;
+        this._client = factory.CreateClient();
     }
 
     private async Task EnsureCleanDatabaseWithIvan()
     {
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
 
         // Ensure database is clean and recreated with Ivan
@@ -42,10 +42,10 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task GetStatus_WithIvanPersonalityExists_ShouldReturnReadyStatus()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         // Act
-        var response = await _client.GetAsync("/api/chat/status");
+        var response = await this._client.GetAsync("/api/chat/status");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -54,6 +54,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         var statusResponse = JsonSerializer.Deserialize<JsonElement>(content);
 
         statusResponse.GetProperty("personalityLoaded").GetBoolean().Should().BeTrue();
+
         // Note: mcpConnected might be false in test environment due to external dependencies
         statusResponse.GetProperty("timestamp").ValueKind.Should().Be(JsonValueKind.String);
     }
@@ -62,14 +63,15 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task GetStatus_WithoutIvanPersonality_ShouldReturnNotReadyStatus()
     {
         // Arrange - Clean database WITHOUT Ivan seeding
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
+
         // Don't seed Ivan - this is the test case
 
         // Act
-        var response = await _client.GetAsync("/api/chat/status");
+        var response = await this._client.GetAsync("/api/chat/status");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -85,10 +87,11 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_WithoutIvanPersonality_ShouldReturnBadRequest()
     {
         // Arrange - Clean database WITHOUT Ivan seeding
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
+
         // Don't seed Ivan - this is the test case
 
         // Arrange
@@ -100,7 +103,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chat/send", chatRequest);
+        var response = await this._client.PostAsJsonAsync("/api/chat/send", chatRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -113,7 +116,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_WithIvanPersonality_ShouldProcessMessageAndReturnResponse()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         var chatRequest = new ChatRequestDto
         {
@@ -123,7 +126,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chat/send", chatRequest);
+        var response = await this._client.PostAsJsonAsync("/api/chat/send", chatRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -149,7 +152,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_MultipleMessages_ShouldMaintainConversationContext()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         var userId = "contextuser456";
         var platform = "Telegram";
@@ -169,8 +172,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var firstResponse = await _client.PostAsJsonAsync("/api/chat/send", firstRequest);
-        var secondResponse = await _client.PostAsJsonAsync("/api/chat/send", secondRequest);
+        var firstResponse = await this._client.PostAsJsonAsync("/api/chat/send", firstRequest);
+        var secondResponse = await this._client.PostAsJsonAsync("/api/chat/send", secondRequest);
 
         // Assert
         firstResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -200,7 +203,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_DifferentUsers_ShouldCreateSeparateConversations()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         var user1Request = new ChatRequestDto
         {
@@ -217,8 +220,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var user1Response = await _client.PostAsJsonAsync("/api/chat/send", user1Request);
-        var user2Response = await _client.PostAsJsonAsync("/api/chat/send", user2Request);
+        var user1Response = await this._client.PostAsJsonAsync("/api/chat/send", user1Request);
+        var user2Response = await this._client.PostAsJsonAsync("/api/chat/send", user2Request);
 
         // Assert
         user1Response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -248,7 +251,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_DifferentPlatforms_ShouldCreateSeparateConversations()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         var userId = "multiplatformuser";
 
@@ -267,8 +270,8 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var telegramResponse = await _client.PostAsJsonAsync("/api/chat/send", telegramRequest);
-        var discordResponse = await _client.PostAsJsonAsync("/api/chat/send", discordRequest);
+        var telegramResponse = await this._client.PostAsJsonAsync("/api/chat/send", telegramRequest);
+        var discordResponse = await this._client.PostAsJsonAsync("/api/chat/send", discordRequest);
 
         // Assert
         telegramResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -298,7 +301,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
     public async Task SendMessage_WithEmptyMessage_ShouldProcessSuccessfully()
     {
         // Arrange - Use consistent Ivan seeding
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
         var chatRequest = new ChatRequestDto
         {
@@ -308,7 +311,7 @@ public class ChatControllerTests : IClassFixture<TestWebApplicationFactory<Progr
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chat/send", chatRequest);
+        var response = await this._client.PostAsJsonAsync("/api/chat/send", chatRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

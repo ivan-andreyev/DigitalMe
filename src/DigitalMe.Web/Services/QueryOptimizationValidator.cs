@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using DigitalMe.Web.Data;
 using DigitalMe.Web.Models;
-using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace DigitalMe.Web.Services;
 

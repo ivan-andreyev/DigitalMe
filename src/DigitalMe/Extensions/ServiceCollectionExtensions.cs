@@ -1,15 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using DigitalMe.Data;
-using DigitalMe.Services;
-using DigitalMe.Services.Resilience;
-using DigitalMe.Services.Performance;
-using DigitalMe.Services.Security;
-using DigitalMe.Repositories;
-using DigitalMe.Integrations.External.Telegram;
-using DigitalMe.Integrations.External.Google;
-using DigitalMe.Integrations.External.GitHub;
-using DigitalMe.Integrations.MCP;
 using DigitalMe.Configuration;
+using DigitalMe.Data;
+using DigitalMe.Integrations.External.GitHub;
+using DigitalMe.Integrations.External.Google;
+using DigitalMe.Integrations.External.Telegram;
+using DigitalMe.Integrations.MCP;
+using DigitalMe.Repositories;
+using DigitalMe.Services;
+using DigitalMe.Services.Performance;
+using DigitalMe.Services.Resilience;
+using DigitalMe.Services.Security;
+using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -39,13 +39,13 @@ public static class ServiceCollectionExtensions
     {
         // MVP: Use simplified PersonalityService without repository pattern
         // Register both interfaces for ISP compliance
-        services.AddScoped<MVPPersonalityService>();
-        services.AddScoped<IPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
-        services.AddScoped<IMVPPersonalityService>(provider => provider.GetRequiredService<MVPPersonalityService>());
+        services.AddScoped<MvpPersonalityService>();
+        services.AddScoped<IPersonalityService>(provider => provider.GetRequiredService<MvpPersonalityService>());
+        services.AddScoped<IMvpPersonalityService>(provider => provider.GetRequiredService<MvpPersonalityService>());
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IProfileDataParser, ProfileDataParser>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();
-        services.AddScoped<IMVPMessageProcessor, MVPMessageProcessor>();
+        services.AddScoped<IMvpMessageProcessor, MvpMessageProcessor>();
         services.AddScoped<IHealthChecker, HealthChecker>();
         services.AddScoped<IIvanLevelHealthCheckService, IvanLevelHealthCheckService>();
 

@@ -1,7 +1,7 @@
-using DigitalMe.Services;
-using DigitalMe.Integrations.External.Telegram;
-using DigitalMe.Integrations.External.Google;
 using DigitalMe.Integrations.External.GitHub;
+using DigitalMe.Integrations.External.Google;
+using DigitalMe.Integrations.External.Telegram;
+using DigitalMe.Services;
 
 namespace DigitalMe.Integrations.MCP.Tools;
 

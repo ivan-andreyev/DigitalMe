@@ -1,9 +1,9 @@
+using System.Text;
+using DigitalMe.Configuration;
+using DigitalMe.Integrations.External.GitHub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
-using DigitalMe.Configuration;
-using DigitalMe.Integrations.External.GitHub;
-using System.Text;
 
 namespace DigitalMe.Controllers;
 

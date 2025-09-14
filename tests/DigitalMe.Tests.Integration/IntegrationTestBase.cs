@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Xunit;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using DigitalMe.Data;
 using DigitalMe.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 

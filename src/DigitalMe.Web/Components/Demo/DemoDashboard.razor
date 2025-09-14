@@ -10,12 +10,12 @@
             <p class="subtitle">Real-time system metrics and enterprise capabilities showcase</p>
         </div>
         <div class="status-indicator">
-            <span class="status-dot @(isConnected ? "connected" : "disconnected")"></span>
-            <span class="status-text">@(isConnected ? "Live Data Connected" : "Demo Mode")</span>
+            <span class="status-dot @(_isConnected ? "connected" : "disconnected")"></span>
+            <span class="status-text">@(_isConnected ? "Live Data Connected" : "Demo Mode")</span>
         </div>
     </div>
 
-    @if (isLoading)
+    @if (_isLoading)
     {
         <div class="loading-indicator">
             <div class="loading-spinner"></div>
@@ -30,19 +30,19 @@
             <h3>🏥 System Health</h3>
             <div class="metric-cards">
                 <div class="metric-card success">
-                    <div class="metric-value">@systemHealth.ApiResponseTime ms</div>
+                    <div class="metric-value">@_systemHealth.ApiResponseTime ms</div>
                     <div class="metric-label">API Response Time</div>
-                    <div class="metric-trend">@GetTrendIcon(systemHealth.ApiTrend) @systemHealth.ApiTrend</div>
+                    <div class="metric-trend">@GetTrendIcon(_systemHealth.ApiTrend) @_systemHealth.ApiTrend</div>
                 </div>
                 <div class="metric-card info">
-                    <div class="metric-value">@systemHealth.ActiveConnections</div>
+                    <div class="metric-value">@_systemHealth.ActiveConnections</div>
                     <div class="metric-label">Active Connections</div>
-                    <div class="metric-trend">@GetTrendIcon(systemHealth.ConnectionTrend) @systemHealth.ConnectionTrend</div>
+                    <div class="metric-trend">@GetTrendIcon(_systemHealth.ConnectionTrend) @_systemHealth.ConnectionTrend</div>
                 </div>
                 <div class="metric-card warning">
-                    <div class="metric-value">@systemHealth.MemoryUsage%</div>
+                    <div class="metric-value">@_systemHealth.MemoryUsage%</div>
                     <div class="metric-label">Memory Usage</div>
-                    <div class="metric-trend">@GetTrendIcon(systemHealth.MemoryTrend) @systemHealth.MemoryTrend</div>
+                    <div class="metric-trend">@GetTrendIcon(_systemHealth.MemoryTrend) @_systemHealth.MemoryTrend</div>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
         <div class="metric-section">
             <h3>🔗 Enterprise Integrations</h3>
             <div class="integration-status">
-                @foreach (var integration in integrationStatus)
+                @foreach (var integration in _integrationStatus)
                 {
                     <div class="integration-item @GetStatusClass(integration.Status)">
                         <div class="integration-icon">@integration.Icon</div>
@@ -76,32 +76,32 @@
             <h3>🧠 AI Performance</h3>
             <div class="metric-cards">
                 <div class="metric-card primary">
-                    <div class="metric-value">@aiMetrics.PersonalityAccuracy%</div>
+                    <div class="metric-value">@_aiMetrics.PersonalityAccuracy%</div>
                     <div class="metric-label">Personality Accuracy</div>
                     <div class="metric-description">Response alignment with Ivan's personality</div>
                 </div>
                 <div class="metric-card secondary">
-                    <div class="metric-value">@aiMetrics.ResponseQuality</div>
+                    <div class="metric-value">@_aiMetrics.ResponseQuality</div>
                     <div class="metric-label">Response Quality Score</div>
                     <div class="metric-description">Average quality rating (1-10)</div>
                 </div>
                 <div class="metric-card accent">
-                    <div class="metric-value">@aiMetrics.LearningProgress%</div>
+                    <div class="metric-value">@_aiMetrics.LearningProgress%</div>
                     <div class="metric-label">Learning Progress</div>
                     <div class="metric-description">Continuous personality refinement</div>
                 </div>
             </div>
             <div class="ai-activity-stats">
                 <div class="activity-stat">
-                    <span class="activity-count">@aiMetrics.ConversationsToday</span>
+                    <span class="activity-count">@_aiMetrics.ConversationsToday</span>
                     <span class="activity-label">Conversations Today</span>
                 </div>
                 <div class="activity-stat">
-                    <span class="activity-count">@aiMetrics.MessagesProcessed</span>
+                    <span class="activity-count">@_aiMetrics.MessagesProcessed</span>
                     <span class="activity-label">Messages This Week</span>
                 </div>
                 <div class="activity-stat">
-                    <span class="activity-count">@aiMetrics.LastModelUpdate.ToString("MMM dd")</span>
+                    <span class="activity-count">@_aiMetrics.LastModelUpdate.ToString("MMM dd")</span>
                     <span class="activity-label">Last Update</span>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                         <span class="insight-title">Performance</span>
                     </div>
                     <div class="insight-content">
-                        System running @(systemHealth.IsHealthy ? "optimally" : "degraded") with @systemHealth.ApiResponseTime ms average response time.
+                        System running @(_systemHealth.IsHealthy ? "optimally" : "degraded") with @_systemHealth.ApiResponseTime ms average response time.
                     </div>
                 </div>
                 <div class="insight-card">
@@ -126,7 +126,7 @@
                         <span class="insight-title">Business Value</span>
                     </div>
                     <div class="insight-content">
-                        Platform generates @businessMetrics.ROIPercentage.ToString("N0")% ROI with @businessMetrics.ComponentsBuilt enterprise components.
+                        Platform generates @_businessMetrics.RoiPercentage.ToString("N0")% ROI with @_businessMetrics.ComponentsBuilt enterprise components.
                     </div>
                 </div>
             </div>
@@ -137,33 +137,33 @@
             <h3>💼 Business Impact</h3>
             <div class="business-metrics">
                 <div class="business-card large">
-                    <div class="business-value">$@businessMetrics.PlatformValue.ToString("N0")</div>
+                    <div class="business-value">$@_businessMetrics.PlatformValue.ToString("N0")</div>
                     <div class="business-label">Platform Value Generated</div>
                     <div class="business-description">Enterprise IP and reusable components</div>
                 </div>
                 <div class="business-stats">
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.ComponentsBuilt</span>
+                        <span class="stat-value">@_businessMetrics.ComponentsBuilt</span>
                         <span class="stat-label">Reusable Components</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.IntegrationsReady</span>
+                        <span class="stat-value">@_businessMetrics.IntegrationsReady</span>
                         <span class="stat-label">Production Integrations</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.TimeToMarket%</span>
+                        <span class="stat-value">@_businessMetrics.TimeToMarket%</span>
                         <span class="stat-label">Faster Development</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.ROIPercentage.ToString("N0")%</span>
+                        <span class="stat-value">@_businessMetrics.RoiPercentage.ToString("N0")%</span>
                         <span class="stat-label">ROI Performance</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.DevelopmentVelocity</span>
+                        <span class="stat-value">@_businessMetrics.DevelopmentVelocity</span>
                         <span class="stat-label">Sprint Velocity</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">@businessMetrics.TechnicalDebt</span>
+                        <span class="stat-value">@_businessMetrics.TechnicalDebt</span>
                         <span class="stat-label">Technical Debt</span>
                     </div>
                 </div>
@@ -174,7 +174,7 @@
         <div class="metric-section full-width">
             <h3>📊 Live Activity Stream</h3>
             <div class="activity-feed">
-                @foreach (var activity in recentActivities.Take(8))
+                @foreach (var activity in _recentActivities.Take(8))
                 {
                     <div class="activity-item @GetActivityClass(activity.Type)">
                         <div class="activity-time">@activity.Time.ToString("HH:mm:ss")</div>
@@ -675,29 +675,29 @@
 </style>
 
 @code {
-    private bool isConnected = true;
-    private Timer? refreshTimer;
+    private bool _isConnected = true;
+    private Timer? _refreshTimer;
 
-    private SystemHealthMetrics systemHealth = new();
-    private List<IntegrationStatus> integrationStatus = new();
-    private AiMetrics aiMetrics = new();
-    private BusinessMetrics businessMetrics = new();
-    private List<ActivityLog> recentActivities = new();
-    private bool isLoading = true;
+    private SystemHealthMetrics _systemHealth = new();
+    private List<IntegrationStatus> _integrationStatus = new();
+    private AiMetrics _aiMetrics = new();
+    private BusinessMetrics _businessMetrics = new();
+    private List<ActivityLog> _recentActivities = new();
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadInitialData();
 
         // Set up auto-refresh timer
-        refreshTimer = new Timer(async _ => await RefreshData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+        _refreshTimer = new Timer(async _ => await RefreshData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
     }
 
     private async Task LoadInitialData()
     {
         try
         {
-            isLoading = true;
+            _isLoading = true;
 
             // Load real metrics from service
             var healthTask = MetricsService.GetSystemHealthAsync();
@@ -708,18 +708,18 @@
 
             await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
 
-            systemHealth = await healthTask;
-            integrationStatus = await integrationTask;
-            aiMetrics = await aiTask;
-            businessMetrics = await businessTask;
-            recentActivities = await activitiesTask;
+            _systemHealth = await healthTask;
+            _integrationStatus = await integrationTask;
+            _aiMetrics = await aiTask;
+            _businessMetrics = await businessTask;
+            _recentActivities = await activitiesTask;
 
-            isLoading = false;
+            _isLoading = false;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to load initial dashboard data");
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
@@ -736,20 +736,20 @@
 
             await Task.WhenAll(healthTask, integrationTask, aiTask, businessTask, activitiesTask);
 
-            systemHealth = await healthTask;
-            integrationStatus = await integrationTask;
-            aiMetrics = await aiTask;
-            businessMetrics = await businessTask;
-            recentActivities = await activitiesTask;
+            _systemHealth = await healthTask;
+            _integrationStatus = await integrationTask;
+            _aiMetrics = await aiTask;
+            _businessMetrics = await businessTask;
+            _recentActivities = await activitiesTask;
 
-            isConnected = systemHealth.IsHealthy;
+            _isConnected = _systemHealth.IsHealthy;
 
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error refreshing demo dashboard data");
-            isConnected = false;
+            _isConnected = false;
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -771,6 +771,6 @@
 
     public void Dispose()
     {
-        refreshTimer?.Dispose();
+        _refreshTimer?.Dispose();
     }
 }

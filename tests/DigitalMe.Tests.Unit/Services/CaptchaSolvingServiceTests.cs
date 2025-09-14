@@ -1,11 +1,11 @@
+using System.Net;
+using System.Text;
+using DigitalMe.Services.CaptchaSolving;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
-using System.Net;
-using System.Text;
 using Xunit;
-using DigitalMe.Services.CaptchaSolving;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -23,17 +23,17 @@ public class CaptchaSolvingServiceTests
 
     public CaptchaSolvingServiceTests()
     {
-        _mockLogger = new Mock<ILogger<CaptchaSolvingService>>();
-        _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        _httpClient = new HttpClient(_mockHttpMessageHandler.Object)
+        this._mockLogger = new Mock<ILogger<CaptchaSolvingService>>();
+        this._mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        this._httpClient = new HttpClient(this._mockHttpMessageHandler.Object)
         {
             BaseAddress = new Uri("http://2captcha.com/")
         };
 
-        _mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
-        _mockConfiguration.Setup(x => x["TwoCaptcha:ApiKey"]).Returns("test_api_key");
+        this._mockConfiguration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+        this._mockConfiguration.Setup(x => x["TwoCaptcha:ApiKey"]).Returns("test_api_key");
 
-        _service = new CaptchaSolvingService(_mockLogger.Object, _httpClient, _mockConfiguration.Object);
+        this._service = new CaptchaSolvingService(this._mockLogger.Object, this._httpClient, this._mockConfiguration.Object);
     }
 
     [Fact]
@@ -49,10 +49,10 @@ public class CaptchaSolvingServiceTests
             Language = "en"
         };
 
-        SetupHttpResponses("OK|12345", "OK|CAPTCHA_SOLUTION");
+        this.SetupHttpResponses("OK|12345", "OK|CAPTCHA_SOLUTION");
 
         // Act
-        var result = await _service.SolveImageCaptchaAsync(imageBase64, options);
+        var result = await this._service.SolveImageCaptchaAsync(imageBase64, options);
 
         // Assert
         Assert.True(result.Success);
@@ -66,7 +66,7 @@ public class CaptchaSolvingServiceTests
     public async Task SolveImageCaptchaAsync_WithNullBase64_ShouldReturnError()
     {
         // Act
-        var result = await _service.SolveImageCaptchaAsync(null);
+        var result = await this._service.SolveImageCaptchaAsync(null!);
 
         // Assert
         Assert.False(result.Success);
@@ -80,10 +80,10 @@ public class CaptchaSolvingServiceTests
         var imageUrl = "https://example.com/captcha.jpg";
         var options = new ImageCaptchaOptions { Language = "ru" };
 
-        SetupHttpResponses("OK|67890", "OK|CAPTCHA_FROM_URL");
+        this.SetupHttpResponses("OK|67890", "OK|CAPTCHA_FROM_URL");
 
         // Act
-        var result = await _service.SolveImageCaptchaFromUrlAsync(imageUrl, options);
+        var result = await this._service.SolveImageCaptchaFromUrlAsync(imageUrl, options);
 
         // Assert
         Assert.True(result.Success);
@@ -103,10 +103,10 @@ public class CaptchaSolvingServiceTests
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         };
 
-        SetupHttpResponses("OK|11111", "OK|03ANYolqvAAA...");
+        this.SetupHttpResponses("OK|11111", "OK|03ANYolqvAAA...");
 
         // Act
-        var result = await _service.SolveRecaptchaV2Async(siteKey, pageUrl, options);
+        var result = await this._service.SolveRecaptchaV2Async(siteKey, pageUrl, options);
 
         // Assert
         Assert.True(result.Success);
@@ -123,10 +123,10 @@ public class CaptchaSolvingServiceTests
         var action = "login";
         var minScore = 0.3;
 
-        SetupHttpResponses("OK|22222", "OK|03ANYolqvBBB...");
+        this.SetupHttpResponses("OK|22222", "OK|03ANYolqvBBB...");
 
         // Act
-        var result = await _service.SolveRecaptchaV3Async(siteKey, pageUrl, action, minScore);
+        var result = await this._service.SolveRecaptchaV3Async(siteKey, pageUrl, action, minScore);
 
         // Assert
         Assert.True(result.Success);
@@ -146,10 +146,10 @@ public class CaptchaSolvingServiceTests
             Data = "custom_data"
         };
 
-        SetupHttpResponses("OK|33333", "OK|P0_eyJ0eXAiOiJKV1Q...");
+        this.SetupHttpResponses("OK|33333", "OK|P0_eyJ0eXAiOiJKV1Q...");
 
         // Act
-        var result = await _service.SolveHCaptchaAsync(siteKey, pageUrl, options);
+        var result = await this._service.SolveHCaptchaAsync(siteKey, pageUrl, options);
 
         // Assert
         Assert.True(result.Success);
@@ -168,10 +168,10 @@ public class CaptchaSolvingServiceTests
             Instructions = "Answer the math question"
         };
 
-        SetupHttpResponses("OK|44444", "OK|4");
+        this.SetupHttpResponses("OK|44444", "OK|4");
 
         // Act
-        var result = await _service.SolveTextCaptchaAsync(text, options);
+        var result = await this._service.SolveTextCaptchaAsync(text, options);
 
         // Assert
         Assert.True(result.Success);
@@ -183,10 +183,10 @@ public class CaptchaSolvingServiceTests
     public async Task GetBalanceAsync_WithValidApiKey_ShouldReturnBalance()
     {
         // Arrange
-        SetupHttpResponse("OK|15.75");
+        this.SetupHttpResponse("OK|15.75");
 
         // Act
-        var result = await _service.GetBalanceAsync();
+        var result = await this._service.GetBalanceAsync();
 
         // Assert
         Assert.True(result.Success);
@@ -198,10 +198,10 @@ public class CaptchaSolvingServiceTests
     public async Task GetBalanceAsync_WithInvalidApiKey_ShouldReturnError()
     {
         // Arrange
-        SetupHttpResponse("ERROR_WRONG_USER_KEY");
+        this.SetupHttpResponse("ERROR_WRONG_USER_KEY");
 
         // Act
-        var result = await _service.GetBalanceAsync();
+        var result = await this._service.GetBalanceAsync();
 
         // Assert
         Assert.False(result.Success);
@@ -213,10 +213,10 @@ public class CaptchaSolvingServiceTests
     {
         // Arrange
         var captchaId = "12345";
-        SetupHttpResponse("OK_REPORT_RECORDED");
+        this.SetupHttpResponse("OK_REPORT_RECORDED");
 
         // Act
-        var result = await _service.ReportIncorrectCaptchaAsync(captchaId);
+        var result = await this._service.ReportIncorrectCaptchaAsync(captchaId);
 
         // Assert
         Assert.True(result.Success);
@@ -227,32 +227,32 @@ public class CaptchaSolvingServiceTests
     public async Task IsServiceAvailableAsync_WithValidConfiguration_ShouldReturnTrue()
     {
         // Arrange
-        SetupHttpResponse("OK|10.50");
+        this.SetupHttpResponse("OK|10.50");
 
         // Act
-        var result = await _service.IsServiceAvailableAsync();
+        var result = await this._service.IsServiceAvailableAsync();
 
         // Assert
         Assert.True(result);
     }
 
     [Fact]
-    public async Task IsServiceAvailableAsync_WithInvalidConfiguration_ShouldReturnFalse()
+    public void IsServiceAvailableAsync_WithInvalidConfiguration_ShouldReturnFalse()
     {
         // Arrange
         var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
-        mockConfig.Setup(x => x["TwoCaptcha:ApiKey"]).Returns((string)null); // null API key
+        mockConfig.Setup(x => x["TwoCaptcha:ApiKey"]).Returns((string?)null); // null API key
 
         // Act & Assert - This will throw during service construction
         Assert.Throws<InvalidOperationException>(() =>
-            new CaptchaSolvingService(_mockLogger.Object, _httpClient, mockConfig.Object));
+            new CaptchaSolvingService(this._mockLogger.Object, this._httpClient, mockConfig.Object));
     }
 
     [Fact]
     public async Task GetServiceStatsAsync_ShouldReturnStatistics()
     {
         // Act
-        var result = await _service.GetServiceStatsAsync();
+        var result = await this._service.GetServiceStatsAsync();
 
         // Assert
         Assert.True(result.Success);
@@ -267,7 +267,7 @@ public class CaptchaSolvingServiceTests
     public async Task SolveImageCaptchaAsync_WithInvalidInput_ShouldReturnError(string invalidBase64)
     {
         // Act
-        var result = await _service.SolveImageCaptchaAsync(invalidBase64);
+        var result = await this._service.SolveImageCaptchaAsync(invalidBase64);
 
         // Assert
         Assert.False(result.Success);
@@ -280,7 +280,7 @@ public class CaptchaSolvingServiceTests
     public async Task SolveRecaptchaV2Async_WithInvalidSiteKey_ShouldReturnError(string invalidSiteKey)
     {
         // Act
-        var result = await _service.SolveRecaptchaV2Async(invalidSiteKey, "https://example.com");
+        var result = await this._service.SolveRecaptchaV2Async(invalidSiteKey, "https://example.com");
 
         // Assert
         Assert.False(result.Success);
@@ -293,7 +293,7 @@ public class CaptchaSolvingServiceTests
     public async Task SolveRecaptchaV2Async_WithInvalidPageUrl_ShouldReturnError(string invalidPageUrl)
     {
         // Act
-        var result = await _service.SolveRecaptchaV2Async("valid_site_key", invalidPageUrl);
+        var result = await this._service.SolveRecaptchaV2Async("valid_site_key", invalidPageUrl);
 
         // Assert
         Assert.False(result.Success);
@@ -304,7 +304,7 @@ public class CaptchaSolvingServiceTests
     public async Task SolveRecaptchaV3Async_WithInvalidMinScore_ShouldReturnError()
     {
         // Act
-        var result = await _service.SolveRecaptchaV3Async("site_key", "https://example.com", "action", 1.5);
+        var result = await this._service.SolveRecaptchaV3Async("site_key", "https://example.com", "action", 1.5);
 
         // Assert
         Assert.False(result.Success);
@@ -316,10 +316,10 @@ public class CaptchaSolvingServiceTests
     {
         // Arrange
         var imageBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes("test_image_data"));
-        SetupHttpResponse("ERROR_NO_SLOT_AVAILABLE");
+        this.SetupHttpResponse("ERROR_NO_SLOT_AVAILABLE");
 
         // Act
-        var result = await _service.SolveImageCaptchaAsync(imageBase64);
+        var result = await this._service.SolveImageCaptchaAsync(imageBase64);
 
         // Assert
         Assert.False(result.Success);
@@ -331,12 +331,12 @@ public class CaptchaSolvingServiceTests
     {
         // Arrange
         var imageBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes("test_image_data"));
-        // Note: Cannot easily change timeout in this implementation, so test will use default
 
-        SetupHttpResponses("OK|12345", "CAPCHA_NOT_READY", "CAPCHA_NOT_READY");
+        // Note: Cannot easily change timeout in this implementation, so test will use default
+        this.SetupHttpResponses("OK|12345", "CAPCHA_NOT_READY", "CAPCHA_NOT_READY");
 
         // Act
-        var result = await _service.SolveImageCaptchaAsync(imageBase64);
+        var result = await this._service.SolveImageCaptchaAsync(imageBase64);
 
         // Assert - This should eventually timeout or return ready
         // Due to mocking limitations, we'll expect either success or timeout
@@ -349,15 +349,16 @@ public class CaptchaSolvingServiceTests
         // Arrange
         var imageBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes("test_image_data"));
 
-        _mockHttpMessageHandler
+        this._mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ThrowsAsync(new HttpRequestException("Network error"));
 
         // Act
-        var result = await _service.SolveImageCaptchaAsync(imageBase64);
+        var result = await this._service.SolveImageCaptchaAsync(imageBase64);
 
         // Assert
         Assert.False(result.Success);
@@ -373,7 +374,7 @@ public class CaptchaSolvingServiceTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new CaptchaSolvingService(null, _httpClient, _mockConfiguration.Object));
+            new CaptchaSolvingService(null!, this._httpClient, this._mockConfiguration.Object));
     }
 
     [Fact]
@@ -381,7 +382,7 @@ public class CaptchaSolvingServiceTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new CaptchaSolvingService(_mockLogger.Object, _httpClient, null));
+            new CaptchaSolvingService(this._mockLogger.Object, this._httpClient, null!));
     }
 
     [Fact]
@@ -389,16 +390,17 @@ public class CaptchaSolvingServiceTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new CaptchaSolvingService(_mockLogger.Object, null, _mockConfiguration.Object));
+            new CaptchaSolvingService(this._mockLogger.Object, null!, this._mockConfiguration.Object));
     }
 
     #region Helper Methods
 
     private void SetupHttpResponse(string responseContent)
     {
-        _mockHttpMessageHandler
+        this._mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -429,9 +431,10 @@ public class CaptchaSolvingServiceTests
             });
         }
 
-        _mockHttpMessageHandler
+        this._mockHttpMessageHandler
             .Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(() => responses.Dequeue());

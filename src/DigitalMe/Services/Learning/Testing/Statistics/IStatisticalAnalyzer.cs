@@ -79,5 +79,5 @@ public enum TrendDirection
     Improving,
     Stable,
     Declining,
-    Insufficient_Data
+    InsufficientData
 }

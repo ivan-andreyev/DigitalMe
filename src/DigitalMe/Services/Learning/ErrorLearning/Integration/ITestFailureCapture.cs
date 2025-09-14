@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using DigitalMe.Services.Learning.ErrorLearning.Models;
 using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.ErrorLearning.Models;
 
 namespace DigitalMe.Services.Learning.ErrorLearning.Integration;
 

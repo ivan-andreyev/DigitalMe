@@ -1,9 +1,9 @@
+using System.Diagnostics;
+using DigitalMe.Integrations.MCP;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Diagnostics;
 using Xunit;
-using DigitalMe.Integrations.MCP;
 
 namespace DigitalMe.Tests.Unit.Performance;
 
@@ -19,24 +19,24 @@ public class ClaudeApiPerformanceTests
 
     public ClaudeApiPerformanceTests()
     {
-        _mockConfiguration = new Mock<IConfiguration>();
-        _mockLogger = new Mock<ILogger<ClaudeApiService>>();
+        this._mockConfiguration = new Mock<IConfiguration>();
+        this._mockLogger = new Mock<ILogger<ClaudeApiService>>();
 
         // Setup configuration mocks for simple string keys
-        _mockConfiguration.Setup(x => x["Anthropic:ApiKey"]).Returns("test-api-key");
-        _mockConfiguration.Setup(x => x["Claude:RateLimitDelayMs"]).Returns("100");
-        _mockConfiguration.Setup(x => x["Claude:MaxTokens"]).Returns("2048");
+        this._mockConfiguration.Setup(x => x["Anthropic:ApiKey"]).Returns("test-api-key");
+        this._mockConfiguration.Setup(x => x["Claude:RateLimitDelayMs"]).Returns("100");
+        this._mockConfiguration.Setup(x => x["Claude:MaxTokens"]).Returns("2048");
 
         // Setup configuration section mocks for GetValue extension method
         var mockRateLimitSection = new Mock<IConfigurationSection>();
         mockRateLimitSection.Setup(x => x.Value).Returns("100");
-        _mockConfiguration.Setup(x => x.GetSection("Claude:RateLimitDelayMs")).Returns(mockRateLimitSection.Object);
+        this._mockConfiguration.Setup(x => x.GetSection("Claude:RateLimitDelayMs")).Returns(mockRateLimitSection.Object);
 
         var mockMaxTokensSection = new Mock<IConfigurationSection>();
         mockMaxTokensSection.Setup(x => x.Value).Returns("2048");
-        _mockConfiguration.Setup(x => x.GetSection("Claude:MaxTokens")).Returns(mockMaxTokensSection.Object);
+        this._mockConfiguration.Setup(x => x.GetSection("Claude:MaxTokens")).Returns(mockMaxTokensSection.Object);
 
-        _claudeApiService = new ClaudeApiService(_mockConfiguration.Object, _mockLogger.Object);
+        this._claudeApiService = new ClaudeApiService(this._mockConfiguration.Object, this._mockLogger.Object);
     }
 
     [Fact]
@@ -49,13 +49,14 @@ public class ClaudeApiPerformanceTests
 
         // Act
         var stopwatch = Stopwatch.StartNew();
-        var response = await _claudeApiService.GenerateResponseAsync(systemPrompt, userMessage);
+        var response = await this._claudeApiService.GenerateResponseAsync(systemPrompt, userMessage);
         stopwatch.Stop();
 
         // Assert
         Assert.NotNull(response);
         Assert.NotEmpty(response);
-        Assert.True(stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs,
+        Assert.True(
+            stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs,
             $"Response took {stopwatch.ElapsedMilliseconds}ms, expected < {maxAcceptableTimeMs}ms");
     }
 
@@ -71,7 +72,7 @@ public class ClaudeApiPerformanceTests
         // Act
         var stopwatch = Stopwatch.StartNew();
         var tasks = Enumerable.Range(0, concurrentRequests)
-            .Select(i => _claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} #{i}"))
+            .Select(i => this._claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} #{i}"))
             .ToArray();
 
         var responses = await Task.WhenAll(tasks);
@@ -84,7 +85,8 @@ public class ClaudeApiPerformanceTests
             Assert.NotNull(response);
             Assert.NotEmpty(response);
         });
-        Assert.True(stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs,
+        Assert.True(
+            stopwatch.ElapsedMilliseconds < maxAcceptableTimeMs,
             $"Concurrent requests took {stopwatch.ElapsedMilliseconds}ms, expected < {maxAcceptableTimeMs}ms");
     }
 
@@ -107,7 +109,7 @@ public class ClaudeApiPerformanceTests
                 .Select(async i =>
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    await _claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} batch{batch}-{i}");
+                    await this._claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} batch{batch}-{i}");
                     stopwatch.Stop();
                     return stopwatch.ElapsedMilliseconds;
                 })
@@ -125,11 +127,13 @@ public class ClaudeApiPerformanceTests
         var maxTime = responseTimes.Max();
         var minTime = responseTimes.Min();
 
-        Assert.True(averageTime < maxAverageTimeMs,
+        Assert.True(
+            averageTime < maxAverageTimeMs,
             $"Average response time {averageTime:F2}ms exceeded threshold {maxAverageTimeMs}ms");
 
         // Log performance metrics for analysis
-        _mockLogger.Verify(x => x.Log(
+        this._mockLogger.Verify(
+            x => x.Log(
             LogLevel.Information,
             It.IsAny<EventId>(),
             It.IsAny<It.IsAnyType>(),
@@ -138,7 +142,8 @@ public class ClaudeApiPerformanceTests
 
         // Performance should be consistent (no extreme outliers)
         var performanceVariance = responseTimes.Select(t => Math.Abs(t - averageTime)).Average();
-        Assert.True(performanceVariance < averageTime * 0.5, // Variance should be less than 50% of average
+        Assert.True(
+            performanceVariance < averageTime * 0.5, // Variance should be less than 50% of average
             $"Performance variance {performanceVariance:F2}ms is too high for average {averageTime:F2}ms");
     }
 
@@ -156,7 +161,7 @@ public class ClaudeApiPerformanceTests
             {
                 try
                 {
-                    var response = await _claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} #{i}");
+                    var response = await this._claudeApiService.GenerateResponseAsync(systemPrompt, $"{userMessage} #{i}");
                     return (Success: true, Response: response);
                 }
                 catch (Exception ex)
@@ -185,12 +190,13 @@ public class ClaudeApiPerformanceTests
 
         // Act
         var stopwatch = Stopwatch.StartNew();
-        var isConnected = await _claudeApiService.ValidateApiConnectionAsync();
+        var isConnected = await this._claudeApiService.ValidateApiConnectionAsync();
         stopwatch.Stop();
 
         // Assert
         Assert.True(isConnected);
-        Assert.True(stopwatch.ElapsedMilliseconds < maxConnectionTimeMs,
+        Assert.True(
+            stopwatch.ElapsedMilliseconds < maxConnectionTimeMs,
             $"API connection validation took {stopwatch.ElapsedMilliseconds}ms, expected < {maxConnectionTimeMs}ms");
     }
 }

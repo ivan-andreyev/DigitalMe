@@ -1,20 +1,20 @@
-using Microsoft.Extensions.Logging;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Integrations.MCP.Tools;
 using DigitalMe.Models;
 using DigitalMe.Services;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Integrations.MCP;
 
-public class MCPService : IMcpService
+public class McpService : IMcpService
 {
     private readonly IAnthropicService _anthropicService;
-    private readonly ILogger<MCPService> _logger;
+    private readonly ILogger<McpService> _logger;
     private readonly ToolExecutor _toolExecutor;
 
-    public MCPService(
+    public McpService(
         IAnthropicService anthropicService,
-        ILogger<MCPService> logger,
+        ILogger<McpService> logger,
         ToolExecutor toolExecutor)
     {
         _anthropicService = anthropicService;
@@ -52,26 +52,26 @@ public class MCPService : IMcpService
         return await _anthropicService.IsConnectedAsync();
     }
 
-    public async Task<MCPResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
         try
         {
             var result = await _toolExecutor.ExecuteToolAsync(toolName, parameters);
-            return new MCPResponse
+            return new McpResponse
             {
-                Result = new MCPResult
+                Result = new McpResult
                 {
                     Content = result?.ToString() ?? "No result",
-                    ToolCalls = new List<MCPToolCall>()
+                    ToolCalls = new List<McpToolCall>()
                 }
             };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing tool {ToolName}", toolName);
-            return new MCPResponse
+            return new McpResponse
             {
-                Error = new MCPError
+                Error = new McpError
                 {
                     Code = -1,
                     Message = $"Tool execution failed: {ex.Message}"

@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
-using DigitalMe.Integrations.External.Slack;
-using DigitalMe.Integrations.External.Slack.Models;
 using System.Text;
 using System.Text.Json;
+using DigitalMe.Integrations.External.Slack;
+using DigitalMe.Integrations.External.Slack.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DigitalMe.Controllers;
 

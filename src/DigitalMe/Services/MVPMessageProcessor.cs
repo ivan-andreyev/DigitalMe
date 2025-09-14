@@ -1,6 +1,6 @@
-using DigitalMe.Models;
-using DigitalMe.Integrations.MCP;
 using DigitalMe.Common.Exceptions;
+using DigitalMe.Integrations.MCP;
+using DigitalMe.Models;
 
 namespace DigitalMe.Services;
 
@@ -8,16 +8,16 @@ namespace DigitalMe.Services;
 /// MVP Message Processor with loose coupling and SOLID compliance.
 /// Simple pipeline: User input → Ivan personality response
 /// </summary>
-public class MVPMessageProcessor : IMVPMessageProcessor
+public class MvpMessageProcessor : IMvpMessageProcessor
 {
     private readonly IPersonalityService _personalityService;
     private readonly IClaudeApiService _claudeApiService;
-    private readonly ILogger<MVPMessageProcessor> _logger;
+    private readonly ILogger<MvpMessageProcessor> _logger;
 
-    public MVPMessageProcessor(
+    public MvpMessageProcessor(
         IPersonalityService personalityService,
         IClaudeApiService claudeApiService,
-        ILogger<MVPMessageProcessor> logger)
+        ILogger<MvpMessageProcessor> logger)
     {
         _personalityService = personalityService ?? throw new ArgumentNullException(nameof(personalityService));
         _claudeApiService = claudeApiService ?? throw new ArgumentNullException(nameof(claudeApiService));

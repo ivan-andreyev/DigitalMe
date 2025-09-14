@@ -5,9 +5,9 @@
 <div class="user-menu">
     <div class="user-info" @onclick="ToggleDropdown">
         <div class="user-avatar">
-            @if (!string.IsNullOrEmpty(userName))
+            @if (!string.IsNullOrEmpty(_userName))
             {
-                <span>@GetUserInitials(userName)</span>
+                <span>@GetUserInitials(_userName)</span>
             }
             else
             {
@@ -15,22 +15,22 @@
             }
         </div>
         <div class="user-details">
-            <div class="user-name">@(userName ?? "Пользователь")</div>
+            <div class="user-name">@(_userName ?? "Пользователь")</div>
             <div class="user-status">@GetUserStatus()</div>
         </div>
-        <div class="dropdown-arrow @(isDropdownOpen ? "open" : "")">
+        <div class="dropdown-arrow @(_isDropdownOpen ? "open" : "")">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M7,10L12,15L17,10H7Z" />
             </svg>
         </div>
     </div>
 
-    @if (isDropdownOpen)
+    @if (_isDropdownOpen)
     {
         <div class="dropdown-menu">
             <div class="menu-header">
                 <div class="menu-title">Аккаунт</div>
-                <div class="menu-subtitle">@(userName ?? "Пользователь")</div>
+                <div class="menu-subtitle">@(_userName ?? "Пользователь")</div>
             </div>
             
             <div class="menu-items">
@@ -73,7 +73,7 @@
 </div>
 
 <!-- Click outside to close dropdown -->
-@if (isDropdownOpen)
+@if (_isDropdownOpen)
 {
     <div class="dropdown-overlay" @onclick="CloseDropdown"></div>
 }
@@ -231,14 +231,14 @@
 </style>
 
 @code {
-    private bool isDropdownOpen = false;
-    private string? userName;
+    private bool _isDropdownOpen = false;
+    private string? _userName;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            userName = await AuthService.GetUserNameAsync();
+            _userName = await AuthService.GetUserNameAsync();
             AuthService.AuthStateChanged += OnAuthStateChanged;
         }
         catch (Exception ex)
@@ -249,12 +249,12 @@
 
     private void ToggleDropdown()
     {
-        isDropdownOpen = !isDropdownOpen;
+        _isDropdownOpen = !_isDropdownOpen;
     }
 
     private void CloseDropdown()
     {
-        isDropdownOpen = false;
+        _isDropdownOpen = false;
     }
 
     private string GetUserInitials(string name)
@@ -333,8 +333,8 @@
     {
         if (!authenticated)
         {
-            userName = null;
-            isDropdownOpen = false;
+            _userName = null;
+            _isDropdownOpen = false;
         }
         InvokeAsync(StateHasChanged);
     }

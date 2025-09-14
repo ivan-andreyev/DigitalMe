@@ -1,6 +1,6 @@
 @using DigitalMe.Web.Services
 @implements IAsyncDisposable
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 @inject ILogger<ChatContainer> Logger
 @inject ISignalRChatService SignalRChatService
 
@@ -13,10 +13,10 @@
         </div>
     </div>
     
-    <div class="chat-messages" @ref="messagesContainer">
-        @if (messages.Any())
+    <div class="chat-messages" @ref="_messagesContainer">
+        @if (_messages.Any())
         {
-            @foreach (var message in messages)
+            @foreach (var message in _messages)
             {
                 <MessageBubble Message="@message" />
             }
@@ -32,7 +32,7 @@
             </div>
         }
         
-        @if (isIvanTyping)
+        @if (_isIvanTyping)
         {
             <TypingIndicator />
         }
@@ -40,7 +40,7 @@
     
     <div class="chat-input">
         <MessageInput OnMessageSent="@HandleMessageSent" 
-                     IsLoading="@isLoading" 
+                     IsLoading="@_isLoading" 
                      Placeholder="@GetInputPlaceholder()" />
     </div>
 </div>
@@ -129,12 +129,12 @@
     [Parameter] public string CssClass { get; set; } = string.Empty;
     [Parameter] public PersonalityState PersonalityState { get; set; } = new();
     
-    private ElementReference messagesContainer;
-    private List<ChatMessage> messages = new();
-    private bool isIvanTyping = false;
-    private bool isLoading = false;
-    private string currentConversationId = Guid.NewGuid().ToString();
-    private string currentUserId = "demo-user";
+    private ElementReference _messagesContainer;
+    private List<ChatMessage> _messages = new();
+    private bool _isIvanTyping = false;
+    private bool _isLoading = false;
+    private string _currentConversationId = Guid.NewGuid().ToString();
+    private string _currentUserId = "demo-user";
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,7 +151,7 @@
         {
             if (SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
             {
-                await SignalRChatService.JoinChatAsync(currentUserId, "Web");
+                await SignalRChatService.JoinChatAsync(_currentUserId, "Web");
             }
         }
         catch (Exception ex)
@@ -168,7 +168,7 @@
         if (string.IsNullOrWhiteSpace(messageContent))
             return;
 
-        isLoading = true;
+        _isLoading = true;
         StateHasChanged();
 
         try
@@ -180,17 +180,17 @@
                 Content = messageContent,
                 Role = MessageRole.User,
                 Timestamp = DateTime.Now,
-                ConversationId = currentConversationId
+                ConversationId = _currentConversationId
             };
             
-            messages.Add(userMessage);
+            _messages.Add(userMessage);
             StateHasChanged();
             await ScrollToBottom();
 
             // Send via SignalR
             if (SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
             {
-                await SignalRChatService.SendMessageAsync(messageContent, currentUserId, currentConversationId);
+                await SignalRChatService.SendMessageAsync(messageContent, _currentUserId, _currentConversationId);
             }
             else
             {
@@ -209,14 +209,14 @@
                 Content = "❌ Не удалось отправить сообщение. Проверьте подключение к серверу.",
                 Role = MessageRole.System,
                 Timestamp = DateTime.Now,
-                ConversationId = currentConversationId
+                ConversationId = _currentConversationId
             };
-            messages.Add(errorMessage);
+            _messages.Add(errorMessage);
             StateHasChanged();
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }
@@ -228,10 +228,10 @@
         
         var request = new
         {
-            conversationId = currentConversationId,
+            conversationId = _currentConversationId,
             message = messageContent,
             platform = "Web",
-            userId = currentUserId,
+            userId = _currentUserId,
             timestamp = DateTime.UtcNow
         };
 
@@ -250,10 +250,10 @@
                         Content = chatResponse.Content,
                         Role = MessageRole.Assistant,
                         Timestamp = chatResponse.Timestamp,
-                        ConversationId = currentConversationId
+                        ConversationId = _currentConversationId
                     };
 
-                    messages.Add(ivanMessage);
+                    _messages.Add(ivanMessage);
                     StateHasChanged();
                     await ScrollToBottom();
                 }
@@ -283,7 +283,7 @@
                 Metadata = e.Message.Metadata
             };
 
-            messages.Add(message);
+            _messages.Add(message);
             StateHasChanged();
             await ScrollToBottom();
         });
@@ -293,7 +293,7 @@
     {
         InvokeAsync(() =>
         {
-            isIvanTyping = e.Indicator.IsTyping;
+            _isIvanTyping = e.Indicator.IsTyping;
             StateHasChanged();
         });
     }
@@ -304,14 +304,14 @@
         {
             StateHasChanged(); // Update connection status indicator
             
-            if (e.IsConnected && !string.IsNullOrEmpty(currentUserId))
+            if (e.IsConnected && !string.IsNullOrEmpty(_currentUserId))
             {
                 // Re-join chat room after reconnection
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        await SignalRChatService.JoinChatAsync(currentUserId, "Web");
+                        await SignalRChatService.JoinChatAsync(_currentUserId, "Web");
                     }
                     catch (Exception ex)
                     {
@@ -325,7 +325,7 @@
     private Task LoadConversationHistory()
     {
         // TODO: Load conversation history from API
-        Logger.LogInformation("Loading conversation history for conversation: {ConversationId}", currentConversationId);
+        Logger.LogInformation("Loading conversation history for conversation: {ConversationId}", _currentConversationId);
 
         return Task.CompletedTask;
     }
@@ -334,7 +334,7 @@
     {
         try
         {
-            await JS.InvokeVoidAsync("scrollToBottom", messagesContainer);
+            await Js.InvokeVoidAsync("scrollToBottom", _messagesContainer);
         }
         catch (Exception ex)
         {
@@ -381,7 +381,7 @@
         // Leave chat room
         try
         {
-            await SignalRChatService.LeaveChatAsync(currentUserId);
+            await SignalRChatService.LeaveChatAsync(_currentUserId);
         }
         catch (Exception ex)
         {

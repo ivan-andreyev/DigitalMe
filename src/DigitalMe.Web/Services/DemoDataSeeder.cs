@@ -1,5 +1,5 @@
-using DigitalMe.Web.Models;
 using DigitalMe.Web.Data;
+using DigitalMe.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DigitalMe.Web.Services;

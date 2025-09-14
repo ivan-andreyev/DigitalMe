@@ -6,9 +6,9 @@ namespace DigitalMe.Services;
 // Legacy wrapper - redirects to new MCP implementation
 public class McpService : IMcpService
 {
-    private readonly DigitalMe.Integrations.MCP.MCPService _mcpService;
+    private readonly DigitalMe.Integrations.MCP.McpService _mcpService;
 
-    public McpService(DigitalMe.Integrations.MCP.MCPService mcpService)
+    public McpService(DigitalMe.Integrations.MCP.McpService mcpService)
     {
         _mcpService = mcpService;
     }
@@ -23,7 +23,7 @@ public class McpService : IMcpService
         return await _mcpService.SendMessageAsync(message, context);
     }
 
-    public async Task<MCPResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
         return await _mcpService.CallToolAsync(toolName, parameters);
     }

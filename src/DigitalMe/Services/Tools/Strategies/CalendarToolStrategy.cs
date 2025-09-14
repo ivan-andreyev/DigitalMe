@@ -1,5 +1,5 @@
-using DigitalMe.Models;
 using DigitalMe.Integrations.External.Google;
+using DigitalMe.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Tools.Strategies;

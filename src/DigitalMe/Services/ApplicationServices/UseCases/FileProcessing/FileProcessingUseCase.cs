@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Logging;
 using DigitalMe.Infrastructure;
 using DigitalMe.Services.FileProcessing;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.UseCases.FileProcessing;
 

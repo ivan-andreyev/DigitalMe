@@ -1,13 +1,13 @@
-using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
 using System.Net;
 using System.Text;
 using DigitalMe.Services.Learning;
 using DigitalMe.Services.Learning.Testing;
-using DigitalMe.Services.Learning.Testing.TestGeneration;
-using DigitalMe.Services.Learning.Testing.TestExecution;
 using DigitalMe.Services.Learning.Testing.ResultsAnalysis;
+using DigitalMe.Services.Learning.Testing.TestExecution;
+using DigitalMe.Services.Learning.Testing.TestGeneration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -31,19 +31,19 @@ public class SelfTestingFrameworkTests : IDisposable
 
     public SelfTestingFrameworkTests()
     {
-        _mockLogger = new Mock<ILogger<SelfTestingFramework>>();
-        _mockHttpHandler = new Mock<HttpMessageHandler>();
-        _mockTestCaseGenerator = new Mock<ITestCaseGenerator>();
-        _mockTestExecutor = new Mock<ITestExecutor>();
-        _mockResultsAnalyzer = new Mock<IResultsAnalyzer>();
-        _mockTestOrchestrator = new Mock<ITestOrchestrator>();
-        _mockCapabilityValidator = new Mock<ICapabilityValidator>();
-        _mockTestAnalyzer = new Mock<ITestAnalyzer>();
-        _httpClient = new HttpClient(_mockHttpHandler.Object)
+        this._mockLogger = new Mock<ILogger<SelfTestingFramework>>();
+        this._mockHttpHandler = new Mock<HttpMessageHandler>();
+        this._mockTestCaseGenerator = new Mock<ITestCaseGenerator>();
+        this._mockTestExecutor = new Mock<ITestExecutor>();
+        this._mockResultsAnalyzer = new Mock<IResultsAnalyzer>();
+        this._mockTestOrchestrator = new Mock<ITestOrchestrator>();
+        this._mockCapabilityValidator = new Mock<ICapabilityValidator>();
+        this._mockTestAnalyzer = new Mock<ITestAnalyzer>();
+        this._httpClient = new HttpClient(this._mockHttpHandler.Object)
         {
             BaseAddress = new Uri("https://api.test.com")
         };
-        _framework = new SelfTestingFramework(_mockLogger.Object, _mockTestOrchestrator.Object, _mockCapabilityValidator.Object, _mockTestAnalyzer.Object);
+        this._framework = new SelfTestingFramework(this._mockLogger.Object, this._mockTestOrchestrator.Object, this._mockCapabilityValidator.Object, this._mockTestAnalyzer.Object);
     }
 
     #region Test Case Generation Tests
@@ -52,14 +52,14 @@ public class SelfTestingFrameworkTests : IDisposable
     public async Task GenerateTestCasesAsync_WithValidApiDocumentation_GeneratesTestCases()
     {
         // Arrange
-        var apiDocumentation = CreateSampleApiDocumentation();
-        var expectedTestCases = CreateSampleTestCases();
-        _mockTestOrchestrator
+        var apiDocumentation = this.CreateSampleApiDocumentation();
+        var expectedTestCases = this.CreateSampleTestCases();
+        this._mockTestOrchestrator
             .Setup(x => x.GenerateTestCasesAsync(It.IsAny<DocumentationParseResult>()))
             .ReturnsAsync(expectedTestCases);
 
         // Act
-        var testCases = await _framework.GenerateTestCasesAsync(apiDocumentation);
+        var testCases = await this._framework.GenerateTestCasesAsync(apiDocumentation);
 
         // Assert
         Assert.NotEmpty(testCases);
@@ -67,7 +67,7 @@ public class SelfTestingFrameworkTests : IDisposable
         Assert.All(testCases, tc => Assert.NotEmpty(tc.Endpoint));
         Assert.All(testCases, tc => Assert.NotEmpty(tc.HttpMethod));
         Assert.Contains(testCases, tc => tc.Priority == TestPriority.High);
-        _mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
     }
 
     [Fact]
@@ -90,69 +90,70 @@ public class SelfTestingFrameworkTests : IDisposable
         };
 
         var expectedTestCases = new List<SelfGeneratedTestCase>();
-        var getUsersTest = CreateSampleTestCase("GET_users", "/users");
+        var getUsersTest = this.CreateSampleTestCase("GET_users", "/users");
         getUsersTest.HttpMethod = "GET";
         expectedTestCases.Add(getUsersTest);
 
-        var postUsersTest = CreateSampleTestCase("POST_users", "/users");
+        var postUsersTest = this.CreateSampleTestCase("POST_users", "/users");
         postUsersTest.HttpMethod = "POST";
         expectedTestCases.Add(postUsersTest);
 
-        var getHealthTest = CreateSampleTestCase("GET_health", "/health");
+        var getHealthTest = this.CreateSampleTestCase("GET_health", "/health");
         getHealthTest.HttpMethod = "GET";
         expectedTestCases.Add(getHealthTest);
 
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.GenerateTestCasesAsync(It.IsAny<DocumentationParseResult>()))
             .ReturnsAsync(expectedTestCases);
 
         // Act
-        var testCases = await _framework.GenerateTestCasesAsync(apiDocumentation);
+        var testCases = await this._framework.GenerateTestCasesAsync(apiDocumentation);
 
         // Assert
         Assert.True(testCases.Count >= 3, "Should generate test cases for each endpoint");
         Assert.Contains(testCases, tc => tc.Endpoint.Contains("/users") && tc.HttpMethod == "GET");
         Assert.Contains(testCases, tc => tc.Endpoint.Contains("/users") && tc.HttpMethod == "POST");
         Assert.Contains(testCases, tc => tc.Endpoint.Contains("/health"));
-        _mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
     }
 
     [Fact]
     public async Task GenerateTestCasesAsync_WithAuthenticationRequired_IncludesAuthHeaders()
     {
         // Arrange
-        var apiDocumentation = CreateSampleApiDocumentation();
+        var apiDocumentation = this.CreateSampleApiDocumentation();
         apiDocumentation.Authentication = AuthenticationMethod.Bearer;
         apiDocumentation.RequiredHeaders = new List<string> { "Authorization", "Content-Type" };
 
         var expectedTestCases = new List<SelfGeneratedTestCase>();
-        var postWithAuth = CreateSampleTestCase("POST_with_auth", "/api/test");
+        var postWithAuth = this.CreateSampleTestCase("POST_with_auth", "/api/test");
         postWithAuth.HttpMethod = "POST";
         postWithAuth.Headers = new Dictionary<string, string> { { "Authorization", "Bearer token" } };
         expectedTestCases.Add(postWithAuth);
 
-        var getWithContentType = CreateSampleTestCase("GET_with_content_type", "/api/test");
+        var getWithContentType = this.CreateSampleTestCase("GET_with_content_type", "/api/test");
         getWithContentType.HttpMethod = "GET";
         getWithContentType.Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } };
         expectedTestCases.Add(getWithContentType);
 
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.GenerateTestCasesAsync(It.IsAny<DocumentationParseResult>()))
             .ReturnsAsync(expectedTestCases);
 
         // Act
-        var testCases = await _framework.GenerateTestCasesAsync(apiDocumentation);
+        var testCases = await this._framework.GenerateTestCasesAsync(apiDocumentation);
 
         // Assert
         Assert.All(testCases, tc =>
         {
             if (tc.HttpMethod != "GET")
             {
-                Assert.True(tc.Headers.ContainsKey("Authorization") || tc.Headers.ContainsKey("Content-Type"),
+                Assert.True(
+                    tc.Headers.ContainsKey("Authorization") || tc.Headers.ContainsKey("Content-Type"),
                     "Test cases should include required authentication headers");
             }
         });
-        _mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.GenerateTestCasesAsync(apiDocumentation), Times.Once);
     }
 
     #endregion
@@ -163,7 +164,7 @@ public class SelfTestingFrameworkTests : IDisposable
     public async Task ExecuteTestCaseAsync_WithSuccessfulResponse_ReturnsSuccessResult()
     {
         // Arrange
-        var testCase = CreateSampleTestCase();
+        var testCase = this.CreateSampleTestCase();
         var expectedResult = new TestExecutionResult
         {
             TestCaseId = testCase.Id,
@@ -172,25 +173,25 @@ public class SelfTestingFrameworkTests : IDisposable
             Response = "Success response",
             ExecutionTime = TimeSpan.FromMilliseconds(100)
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestCaseAsync(testCase))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestCaseAsync(testCase);
+        var result = await this._framework.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
         Assert.NotNull(result.Response);
         Assert.True(result.ExecutionTime > TimeSpan.Zero);
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
     }
 
     [Fact]
     public async Task ExecuteTestCaseAsync_WithHttpError_ReturnsFailureResult()
     {
         // Arrange
-        var testCase = CreateSampleTestCase();
+        var testCase = this.CreateSampleTestCase();
         var expectedResult = new TestExecutionResult
         {
             TestCaseId = testCase.Id,
@@ -203,26 +204,26 @@ public class SelfTestingFrameworkTests : IDisposable
                 new AssertionResult { AssertionName = "Status Check", Passed = false }
             }
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestCaseAsync(testCase))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestCaseAsync(testCase);
+        var result = await this._framework.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
         Assert.NotEmpty(result.AssertionResults);
         Assert.True(result.AssertionResults.Any(a => !a.Passed));
         Assert.True(result.ExecutionTime > TimeSpan.Zero);
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
     }
 
     [Fact]
     public async Task ExecuteTestCaseAsync_WithTimeout_HandlesGracefully()
     {
         // Arrange
-        var testCase = CreateSampleTestCase();
+        var testCase = this.CreateSampleTestCase();
         var expectedResult = new TestExecutionResult
         {
             TestCaseId = testCase.Id,
@@ -231,17 +232,17 @@ public class SelfTestingFrameworkTests : IDisposable
             ErrorMessage = "Test timed out after 5 seconds",
             ExecutionTime = TimeSpan.FromSeconds(5)
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestCaseAsync(testCase))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestCaseAsync(testCase);
+        var result = await this._framework.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
         Assert.Contains("timed out", result.ErrorMessage.ToLowerInvariant());
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
     }
 
     #endregion
@@ -254,9 +255,9 @@ public class SelfTestingFrameworkTests : IDisposable
         // Arrange
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateSampleTestCase("Test1", "/api/test1"),
-            CreateSampleTestCase("Test2", "/api/test2"),
-            CreateSampleTestCase("Test3", "/api/test3")
+            this.CreateSampleTestCase("Test1", "/api/test1"),
+            this.CreateSampleTestCase("Test2", "/api/test2"),
+            this.CreateSampleTestCase("Test3", "/api/test3")
         };
         var expectedResult = new TestSuiteResult
         {
@@ -271,12 +272,12 @@ public class SelfTestingFrameworkTests : IDisposable
                 ExecutionTime = TimeSpan.FromMilliseconds(100)
             }).ToList()
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestSuiteAsync(testCases))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestSuiteAsync(testCases);
+        var result = await this._framework.ExecuteTestSuiteAsync(testCases);
 
         // Assert
         Assert.Equal(3, result.TotalTests);
@@ -284,7 +285,7 @@ public class SelfTestingFrameworkTests : IDisposable
         Assert.All(result.TestResults, tr => Assert.True(tr.Success));
         Assert.Equal(100.0, result.SuccessRate);
         Assert.True(result.TotalExecutionTime > TimeSpan.Zero);
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
     }
 
     [Fact]
@@ -293,8 +294,8 @@ public class SelfTestingFrameworkTests : IDisposable
         // Arrange
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateSampleTestCase("SuccessTest", "/api/success"),
-            CreateSampleTestCase("FailTest", "/api/fail")
+            this.CreateSampleTestCase("SuccessTest", "/api/success"),
+            this.CreateSampleTestCase("FailTest", "/api/fail")
         };
         var expectedResult = new TestSuiteResult
         {
@@ -307,19 +308,19 @@ public class SelfTestingFrameworkTests : IDisposable
                 new TestExecutionResult { TestCaseId = testCases[1].Id, Success = false }
             }
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestSuiteAsync(testCases))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestSuiteAsync(testCases);
+        var result = await this._framework.ExecuteTestSuiteAsync(testCases);
 
         // Assert
         Assert.Equal(2, result.TotalTests);
         Assert.Equal(1, result.PassedTests);
         Assert.Equal(1, result.FailedTests);
         Assert.Equal(50.0, result.SuccessRate);
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
     }
 
     [Fact]
@@ -333,19 +334,19 @@ public class SelfTestingFrameworkTests : IDisposable
             Status = TestSuiteStatus.Completed,
             TestResults = new List<TestExecutionResult>()
         };
-        _mockTestOrchestrator
+        this._mockTestOrchestrator
             .Setup(x => x.ExecuteTestSuiteAsync(testCases))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ExecuteTestSuiteAsync(testCases);
+        var result = await this._framework.ExecuteTestSuiteAsync(testCases);
 
         // Assert
         Assert.Equal(0, result.TotalTests);
         Assert.Equal(0, result.PassedTests);
         Assert.Equal(0, result.FailedTests);
         Assert.Equal(0.0, result.SuccessRate);
-        _mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
+        this._mockTestOrchestrator.Verify(x => x.ExecuteTestSuiteAsync(testCases), Times.Once);
         Assert.Empty(result.TestResults);
     }
 
@@ -357,7 +358,7 @@ public class SelfTestingFrameworkTests : IDisposable
     public async Task ValidateLearnedCapabilityAsync_WithValidCapability_ReturnsValidationResult()
     {
         // Arrange
-        var capability = CreateSampleLearnedCapability();
+        var capability = this.CreateSampleLearnedCapability();
         var expectedResult = new CapabilityValidationResult
         {
             ConfidenceScore = 0.85,
@@ -371,26 +372,26 @@ public class SelfTestingFrameworkTests : IDisposable
             ImprovementSuggestions = new List<string> { "Continue monitoring" }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.NotNull(result);
         Assert.True(result.ConfidenceScore >= 0.0 && result.ConfidenceScore <= 1.0);
         Assert.NotEmpty(result.ValidationResults);
         Assert.NotNull(result.NewStatus);
-        _mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
     }
 
     [Fact]
     public async Task ValidateLearnedCapabilityAsync_WithFailingTests_LowersConfidenceScore()
     {
         // Arrange
-        var capability = CreateSampleLearnedCapability();
+        var capability = this.CreateSampleLearnedCapability();
         var expectedResult = new CapabilityValidationResult
         {
             ConfidenceScore = 0.4,
@@ -404,25 +405,25 @@ public class SelfTestingFrameworkTests : IDisposable
             ImprovementSuggestions = new List<string> { "Review server configuration", "Add retry logic" }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.True(result.ConfidenceScore < 0.7, "Confidence score should be lowered due to failing tests");
         Assert.Contains(result.Weaknesses, w => !string.IsNullOrEmpty(w));
         Assert.NotEmpty(result.ImprovementSuggestions);
-        _mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
     }
 
     [Fact]
     public async Task ValidateLearnedCapabilityAsync_WithHighSuccessRate_ProducesSuggestions()
     {
         // Arrange
-        var capability = CreateSampleLearnedCapability();
+        var capability = this.CreateSampleLearnedCapability();
         var expectedResult = new CapabilityValidationResult
         {
             ConfidenceScore = 0.95,
@@ -437,17 +438,17 @@ public class SelfTestingFrameworkTests : IDisposable
             ImprovementSuggestions = new List<string> { "Monitor for edge cases", "Consider performance optimizations" }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._framework.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.NotEmpty(result.Strengths);
         Assert.Contains(result.Strengths, s => s.Contains("success") || s.Contains("working"));
-        _mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.ValidateLearnedCapabilityAsync("TestAPI", capability), Times.Once);
     }
 
     #endregion
@@ -459,7 +460,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Arrange
         var skillName = "API Testing Skill";
-        var testResults = CreateSampleTestResults(5, 3);
+        var testResults = this.CreateSampleTestResults(5, 3);
         var expectedResult = new PerformanceBenchmarkResult
         {
             SkillName = skillName,
@@ -474,12 +475,12 @@ public class SelfTestingFrameworkTests : IDisposable
             }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.BenchmarkNewSkillAsync(skillName, testResults))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.BenchmarkNewSkillAsync(skillName, testResults);
+        var result = await this._framework.BenchmarkNewSkillAsync(skillName, testResults);
 
         // Assert
         Assert.Equal(skillName, result.SkillName);
@@ -488,7 +489,7 @@ public class SelfTestingFrameworkTests : IDisposable
         Assert.NotNull(result.Grade);
         Assert.True(result.Grade >= PerformanceGrade.F && result.Grade <= PerformanceGrade.A);
         Assert.NotEmpty(result.PerformanceMetrics);
-        _mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
     }
 
     [Fact]
@@ -496,7 +497,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Arrange
         var skillName = "Perfect API Skill";
-        var testResults = CreateSampleTestResults(5, 5); // All successful
+        var testResults = this.CreateSampleTestResults(5, 5); // All successful
         var expectedResult = new PerformanceBenchmarkResult
         {
             SkillName = skillName,
@@ -511,17 +512,17 @@ public class SelfTestingFrameworkTests : IDisposable
             }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.BenchmarkNewSkillAsync(skillName, testResults))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.BenchmarkNewSkillAsync(skillName, testResults);
+        var result = await this._framework.BenchmarkNewSkillAsync(skillName, testResults);
 
         // Assert
         Assert.True(result.Grade >= PerformanceGrade.B, "All successful tests should result in high grade");
         Assert.Equal(1.0, result.SuccessRate); // 1.0 = 100% success rate
-        _mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
     }
 
     [Fact]
@@ -529,7 +530,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Arrange
         var skillName = "Failing API Skill";
-        var testResults = CreateSampleTestResults(5, 0); // All failed
+        var testResults = this.CreateSampleTestResults(5, 0); // All failed
         var expectedResult = new PerformanceBenchmarkResult
         {
             SkillName = skillName,
@@ -544,17 +545,17 @@ public class SelfTestingFrameworkTests : IDisposable
             }
         };
 
-        _mockCapabilityValidator
+        this._mockCapabilityValidator
             .Setup(x => x.BenchmarkNewSkillAsync(skillName, testResults))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.BenchmarkNewSkillAsync(skillName, testResults);
+        var result = await this._framework.BenchmarkNewSkillAsync(skillName, testResults);
 
         // Assert
         Assert.True(result.Grade <= PerformanceGrade.D, "All failed tests should result in low grade");
         Assert.Equal(0.0, result.SuccessRate);
-        _mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
+        this._mockCapabilityValidator.Verify(x => x.BenchmarkNewSkillAsync(skillName, testResults), Times.Once);
     }
 
     #endregion
@@ -567,10 +568,10 @@ public class SelfTestingFrameworkTests : IDisposable
         // Arrange
         var failedTests = new List<TestExecutionResult>
         {
-            CreateFailedTestResult("Test1", 404, "Not Found"),
-            CreateFailedTestResult("Test2", 500, "Internal Server Error"),
-            CreateFailedTestResult("Test3", 401, "Unauthorized"),
-            CreateFailedTestResult("Test4", 404, "Not Found")
+            this.CreateFailedTestResult("Test1", 404, "Not Found"),
+            this.CreateFailedTestResult("Test2", 500, "Internal Server Error"),
+            this.CreateFailedTestResult("Test3", 401, "Unauthorized"),
+            this.CreateFailedTestResult("Test4", 404, "Not Found")
         };
 
         var expectedResult = new TestAnalysisResult
@@ -591,12 +592,12 @@ public class SelfTestingFrameworkTests : IDisposable
             }
         };
 
-        _mockTestAnalyzer
+        this._mockTestAnalyzer
             .Setup(x => x.AnalyzeTestFailuresAsync(failedTests))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._framework.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
@@ -606,7 +607,7 @@ public class SelfTestingFrameworkTests : IDisposable
         Assert.Contains(result.FailureCategories, fc => fc.Key == "Server Error");
         Assert.Contains(result.FailureCategories, fc => fc.Key == "Authentication");
         Assert.NotEmpty(result.Suggestions);
-        _mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
+        this._mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
     }
 
     [Fact]
@@ -615,9 +616,9 @@ public class SelfTestingFrameworkTests : IDisposable
         // Arrange
         var failedTests = new List<TestExecutionResult>
         {
-            CreateFailedTestResult("Test1", 401, "Unauthorized"),
-            CreateFailedTestResult("Test2", 401, "Unauthorized"),
-            CreateFailedTestResult("Test3", 401, "Unauthorized")
+            this.CreateFailedTestResult("Test1", 401, "Unauthorized"),
+            this.CreateFailedTestResult("Test2", 401, "Unauthorized"),
+            this.CreateFailedTestResult("Test3", 401, "Unauthorized")
         };
 
         var expectedResult = new TestAnalysisResult
@@ -640,12 +641,12 @@ public class SelfTestingFrameworkTests : IDisposable
             }
         };
 
-        _mockTestAnalyzer
+        this._mockTestAnalyzer
             .Setup(x => x.AnalyzeTestFailuresAsync(failedTests))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._framework.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotEmpty(result.CommonPatterns);
@@ -654,7 +655,7 @@ public class SelfTestingFrameworkTests : IDisposable
         Assert.Equal("401: Unauthorized", pattern.Description);
         Assert.Equal(3, pattern.Frequency);
         Assert.NotEmpty(result.Suggestions);
-        _mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
+        this._mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
     }
 
     [Fact]
@@ -670,19 +671,19 @@ public class SelfTestingFrameworkTests : IDisposable
             Suggestions = new List<ImprovementSuggestion>()
         };
 
-        _mockTestAnalyzer
+        this._mockTestAnalyzer
             .Setup(x => x.AnalyzeTestFailuresAsync(failedTests))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _framework.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._framework.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(0, result.TotalFailedTests);
         Assert.Empty(result.FailureCategories);
         Assert.Empty(result.CommonPatterns);
-        _mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
+        this._mockTestAnalyzer.Verify(x => x.AnalyzeTestFailuresAsync(failedTests), Times.Once);
     }
 
     #endregion
@@ -694,7 +695,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new SelfTestingFramework(null!, _mockTestOrchestrator.Object, _mockCapabilityValidator.Object, _mockTestAnalyzer.Object));
+            new SelfTestingFramework(null!, this._mockTestOrchestrator.Object, this._mockCapabilityValidator.Object, this._mockTestAnalyzer.Object));
     }
 
     [Fact]
@@ -702,7 +703,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new SelfTestingFramework(_mockLogger.Object, null!, _mockCapabilityValidator.Object, _mockTestAnalyzer.Object));
+            new SelfTestingFramework(this._mockLogger.Object, null!, this._mockCapabilityValidator.Object, this._mockTestAnalyzer.Object));
     }
 
     [Fact]
@@ -710,7 +711,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new SelfTestingFramework(_mockLogger.Object, _mockTestOrchestrator.Object, null!, _mockTestAnalyzer.Object));
+            new SelfTestingFramework(this._mockLogger.Object, this._mockTestOrchestrator.Object, null!, this._mockTestAnalyzer.Object));
     }
 
     [Fact]
@@ -718,7 +719,7 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new SelfTestingFramework(_mockLogger.Object, _mockTestOrchestrator.Object, _mockCapabilityValidator.Object, null!));
+            new SelfTestingFramework(this._mockLogger.Object, this._mockTestOrchestrator.Object, this._mockCapabilityValidator.Object, null!));
     }
 
     #endregion
@@ -779,10 +780,10 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateSampleTestCase("GET_Users_HappyPath", "/api/users"),
-            CreateSampleTestCase("POST_Users_HappyPath", "/api/users"),
-            CreateSampleTestCase("Unauthorized_Access_Test", "/api/users"),
-            CreateSampleTestCase("Not_Found_Test", "/non-existent-endpoint")
+            this.CreateSampleTestCase("GET_Users_HappyPath", "/api/users"),
+            this.CreateSampleTestCase("POST_Users_HappyPath", "/api/users"),
+            this.CreateSampleTestCase("Unauthorized_Access_Test", "/api/users"),
+            this.CreateSampleTestCase("Not_Found_Test", "/non-existent-endpoint")
         };
 
         // Set some test cases to High priority
@@ -800,8 +801,8 @@ public class SelfTestingFrameworkTests : IDisposable
             Description = "Ability to interact with sample API",
             ValidationTests = new List<SelfGeneratedTestCase>
             {
-                CreateSampleTestCase("ValidationTest1", "/api/validate1"),
-                CreateSampleTestCase("ValidationTest2", "/api/validate2")
+                this.CreateSampleTestCase("ValidationTest1", "/api/validate1"),
+                this.CreateSampleTestCase("ValidationTest2", "/api/validate2")
             }
         };
     }
@@ -848,7 +849,7 @@ public class SelfTestingFrameworkTests : IDisposable
 
     private void SetupSuccessfulHttpResponse()
     {
-        _mockHttpHandler
+        this._mockHttpHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -862,7 +863,7 @@ public class SelfTestingFrameworkTests : IDisposable
 
     private void SetupFailureHttpResponse(HttpStatusCode statusCode)
     {
-        _mockHttpHandler
+        this._mockHttpHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -876,7 +877,7 @@ public class SelfTestingFrameworkTests : IDisposable
 
     private void SetupTimeoutHttpResponse()
     {
-        _mockHttpHandler
+        this._mockHttpHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -891,13 +892,13 @@ public class SelfTestingFrameworkTests : IDisposable
     {
         if (disposing)
         {
-            _httpClient?.Dispose();
+            this._httpClient?.Dispose();
         }
     }
 
     public void Dispose()
     {
-        Dispose(true);
+        this.Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

@@ -1,19 +1,19 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Text.Json;
-using Xunit;
 using DigitalMe.Data;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 
-public class MVPIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class MvpIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public MVPIntegrationTests(WebApplicationFactory<Program> factory)
+    public MvpIntegrationTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {

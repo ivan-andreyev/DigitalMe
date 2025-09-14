@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
 using DigitalMe.Services.Learning.ErrorLearning;
-using DigitalMe.Services.Learning.ErrorLearning.Repositories;
 using DigitalMe.Services.Learning.ErrorLearning.Integration;
+using DigitalMe.Services.Learning.ErrorLearning.Repositories;
 using DigitalMe.Services.Learning.ErrorLearning.SuggestionEngine;
 using DigitalMe.Services.Learning.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMe.Extensions;
 

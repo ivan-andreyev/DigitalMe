@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using Xunit;
+using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.ErrorLearning;
+using DigitalMe.Services.Learning.ErrorLearning.Integration;
+using DigitalMe.Services.Learning.ErrorLearning.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using DigitalMe.Services.Learning.ErrorLearning;
-using DigitalMe.Services.Learning.ErrorLearning.Models;
-using DigitalMe.Services.Learning.ErrorLearning.Integration;
-using DigitalMe.Services.Learning;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services.Learning.ErrorLearning;
 
@@ -22,15 +22,15 @@ public class ErrorLearningSystemIntegrationTests
 
     public ErrorLearningSystemIntegrationTests()
     {
-        _mockErrorLearningService = new Mock<IErrorLearningService>();
-        _mockLogger = new Mock<ILogger<TestFailureCaptureService>>();
+        this._mockErrorLearningService = new Mock<IErrorLearningService>();
+        this._mockLogger = new Mock<ILogger<TestFailureCaptureService>>();
     }
 
     [Fact]
     public async Task ErrorLearningSystem_EndToEndFlow_ShouldCaptureAndProcessFailures()
     {
         // Arrange
-        var captureService = new TestFailureCaptureService(_mockLogger.Object, _mockErrorLearningService.Object);
+        var captureService = new TestFailureCaptureService(this._mockLogger.Object, this._mockErrorLearningService.Object);
 
         var testFailure = new TestExecutionResult
         {
@@ -52,7 +52,7 @@ public class ErrorLearningSystemIntegrationTests
             IsAnalyzed = false
         };
 
-        _mockErrorLearningService
+        this._mockErrorLearningService
             .Setup(x => x.RecordErrorAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -79,7 +79,8 @@ public class ErrorLearningSystemIntegrationTests
         result.IsAnalyzed.Should().BeFalse();
 
         // Verify the error was recorded through the learning service
-        _mockErrorLearningService.Verify(x => x.RecordErrorAsync(
+        this._mockErrorLearningService.Verify(
+            x => x.RecordErrorAsync(
             "SelfTestingFramework",
             It.IsAny<string>(),
             testFailure.TestCaseName,
@@ -98,7 +99,7 @@ public class ErrorLearningSystemIntegrationTests
     public void TestFailureCaptureService_WithValidDependencies_ShouldConstructSuccessfully()
     {
         // Act
-        var service = new TestFailureCaptureService(_mockLogger.Object, _mockErrorLearningService.Object);
+        var service = new TestFailureCaptureService(this._mockLogger.Object, this._mockErrorLearningService.Object);
 
         // Assert
         service.Should().NotBeNull();
@@ -108,7 +109,7 @@ public class ErrorLearningSystemIntegrationTests
     public async Task TestFailureCaptureService_WithSuccessfulTest_ShouldNotCaptureAsFailure()
     {
         // Arrange
-        var captureService = new TestFailureCaptureService(_mockLogger.Object, _mockErrorLearningService.Object);
+        var captureService = new TestFailureCaptureService(this._mockLogger.Object, this._mockErrorLearningService.Object);
 
         var successfulTest = new TestExecutionResult
         {
@@ -125,7 +126,8 @@ public class ErrorLearningSystemIntegrationTests
         exception.Message.Should().Contain("Cannot capture successful test as failure");
 
         // Verify no error was recorded
-        _mockErrorLearningService.Verify(x => x.RecordErrorAsync(
+        this._mockErrorLearningService.Verify(
+            x => x.RecordErrorAsync(
             It.IsAny<string>(),
             It.IsAny<string>(),
             It.IsAny<string>(),
@@ -148,7 +150,7 @@ public class ErrorLearningSystemIntegrationTests
         string errorMessage, string expectedCategory)
     {
         // Arrange
-        var captureService = new TestFailureCaptureService(_mockLogger.Object, _mockErrorLearningService.Object);
+        var captureService = new TestFailureCaptureService(this._mockLogger.Object, this._mockErrorLearningService.Object);
 
         var testFailure = new TestExecutionResult
         {
@@ -168,7 +170,7 @@ public class ErrorLearningSystemIntegrationTests
             Timestamp = DateTime.UtcNow
         };
 
-        _mockErrorLearningService
+        this._mockErrorLearningService
             .Setup(x => x.RecordErrorAsync(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -191,7 +193,8 @@ public class ErrorLearningSystemIntegrationTests
         result.ErrorMessage.Should().Be(errorMessage);
         result.TestCaseName.Should().Contain(expectedCategory);
 
-        _mockErrorLearningService.Verify(x => x.RecordErrorAsync(
+        this._mockErrorLearningService.Verify(
+            x => x.RecordErrorAsync(
             "SelfTestingFramework",
             It.IsAny<string>(),
             It.Is<string>(name => name.Contains(expectedCategory)),

@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using DigitalMe.Services;
-using DigitalMe.DTOs;
 using System.Text.Json;
+using DigitalMe.DTOs;
+using DigitalMe.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMe.Controllers;
 

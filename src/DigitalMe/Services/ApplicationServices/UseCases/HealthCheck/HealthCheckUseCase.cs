@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
+using DigitalMe.Services;
 using DigitalMe.Services.ApplicationServices.UseCases.FileProcessing;
 using DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability;
-using DigitalMe.Services;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.UseCases.HealthCheck;
 

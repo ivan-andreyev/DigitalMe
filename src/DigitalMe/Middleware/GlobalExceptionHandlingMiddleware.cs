@@ -49,7 +49,7 @@ public class GlobalExceptionHandlingMiddleware
                 response.StatusCode = digitalMeEx switch
                 {
                     PersonalityServiceException => (int)HttpStatusCode.ServiceUnavailable,
-                    MCPConnectionException => (int)HttpStatusCode.BadGateway,
+                    McpConnectionException => (int)HttpStatusCode.BadGateway,
                     MessageProcessingException => (int)HttpStatusCode.UnprocessableEntity,
                     _ => (int)HttpStatusCode.InternalServerError
                 };

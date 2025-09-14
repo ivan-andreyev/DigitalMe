@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
-using DigitalMe.Web.Models;
 using System.Threading;
+using DigitalMe.Web.Models;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.Web.Services;
 

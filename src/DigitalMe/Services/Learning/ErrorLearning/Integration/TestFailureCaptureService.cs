@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.Learning.ErrorLearning.Models;
 using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.ErrorLearning.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning.ErrorLearning.Integration;
 

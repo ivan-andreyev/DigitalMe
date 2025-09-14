@@ -1,14 +1,14 @@
-using Microsoft.Extensions.Logging;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit;
 using DigitalMe.Services.Learning;
 using DigitalMe.Services.Learning.Testing.ParallelProcessing;
 using DigitalMe.Services.Learning.Testing.TestExecution;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services.Learning.Testing.ParallelProcessing;
 
@@ -26,9 +26,9 @@ public class ParallelTestRunnerTests
 
     public ParallelTestRunnerTests()
     {
-        _loggerMock = new Mock<ILogger<ParallelTestRunner>>();
-        _singleTestExecutorMock = new Mock<ISingleTestExecutor>();
-        _parallelTestRunner = new ParallelTestRunner(_loggerMock.Object, _singleTestExecutorMock.Object);
+        this._loggerMock = new Mock<ILogger<ParallelTestRunner>>();
+        this._singleTestExecutorMock = new Mock<ISingleTestExecutor>();
+        this._parallelTestRunner = new ParallelTestRunner(this._loggerMock.Object, this._singleTestExecutorMock.Object);
     }
 
     #region Constructor Tests
@@ -37,7 +37,7 @@ public class ParallelTestRunnerTests
     public void Constructor_ValidParameters_ShouldCreateInstance()
     {
         // Act & Assert
-        Assert.NotNull(_parallelTestRunner);
+        Assert.NotNull(this._parallelTestRunner);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class ParallelTestRunnerTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new ParallelTestRunner(null!, _singleTestExecutorMock.Object));
+            new ParallelTestRunner(null!, this._singleTestExecutorMock.Object));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class ParallelTestRunnerTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new ParallelTestRunner(_loggerMock.Object, null!));
+            new ParallelTestRunner(this._loggerMock.Object, null!));
     }
 
     #endregion
@@ -67,43 +67,43 @@ public class ParallelTestRunnerTests
         var testCases = new List<SelfGeneratedTestCase>();
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
 
         // Assert
         Assert.Empty(results);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Never);
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Never);
     }
 
     [Fact]
     public async Task ExecuteTestsInParallelAsync_NullTestCases_ShouldReturnEmptyList()
     {
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(null!);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(null!);
 
         // Assert
         Assert.Empty(results);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Never);
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Never);
     }
 
     [Fact]
     public async Task ExecuteTestsInParallelAsync_SingleTestCase_ShouldExecuteOnce()
     {
         // Arrange
-        var testCase = CreateTestCase("Test1");
+        var testCase = this.CreateTestCase("Test1");
         var testCases = new List<SelfGeneratedTestCase> { testCase };
-        var expectedResult = CreateTestResult("Test1", true);
+        var expectedResult = this.CreateTestResult("Test1", true);
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ReturnsAsync(expectedResult);
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
 
         // Assert
         Assert.Single(results);
         Assert.Equal(expectedResult.TestCaseId, results[0].TestCaseId);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
     }
 
     [Fact]
@@ -112,21 +112,21 @@ public class ParallelTestRunnerTests
         // Arrange
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateTestCase("Test1"),
-            CreateTestCase("Test2"),
-            CreateTestCase("Test3")
+            this.CreateTestCase("Test1"),
+            this.CreateTestCase("Test2"),
+            this.CreateTestCase("Test3")
         };
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
-            .ReturnsAsync((SelfGeneratedTestCase tc) => CreateTestResult(tc.Name, true));
+            .ReturnsAsync((SelfGeneratedTestCase tc) => this.CreateTestResult(tc.Name, true));
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
 
         // Assert
         Assert.Equal(3, results.Count);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(3));
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(3));
     }
 
     [Fact]
@@ -134,24 +134,25 @@ public class ParallelTestRunnerTests
     {
         // Arrange
         var testCases = Enumerable.Range(1, 10)
-            .Select(i => CreateTestCase($"Test{i}"))
+            .Select(i => this.CreateTestCase($"Test{i}"))
             .ToList();
 
         var executionTimes = new List<DateTime>();
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .Returns(async (SelfGeneratedTestCase tc) =>
             {
                 executionTimes.Add(DateTime.Now);
                 await Task.Delay(100); // Simulate work
-                return CreateTestResult(tc.Name, true);
+                return this.CreateTestResult(tc.Name, true);
             });
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases, maxConcurrency: 2);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases, maxConcurrency: 2);
 
         // Assert
         Assert.Equal(10, results.Count);
+
         // With concurrency of 2 and 100ms delays, execution should take at least 500ms
         // This is a simple test to verify concurrency limitation is working
     }
@@ -167,7 +168,7 @@ public class ParallelTestRunnerTests
         var testCases = new List<SelfGeneratedTestCase>();
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsWithOptimalConcurrencyAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsWithOptimalConcurrencyAsync(testCases);
 
         // Assert
         Assert.Empty(results);
@@ -179,20 +180,20 @@ public class ParallelTestRunnerTests
         // Arrange
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateTestCase("Test1"),
-            CreateTestCase("Test2")
+            this.CreateTestCase("Test1"),
+            this.CreateTestCase("Test2")
         };
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
-            .ReturnsAsync((SelfGeneratedTestCase tc) => CreateTestResult(tc.Name, true));
+            .ReturnsAsync((SelfGeneratedTestCase tc) => this.CreateTestResult(tc.Name, true));
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsWithOptimalConcurrencyAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsWithOptimalConcurrencyAsync(testCases);
 
         // Assert
         Assert.Equal(2, results.Count);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(2));
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(2));
     }
 
     #endregion
@@ -206,7 +207,7 @@ public class ParallelTestRunnerTests
         var testCases = new List<SelfGeneratedTestCase>();
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInBatchesAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsInBatchesAsync(testCases);
 
         // Assert
         Assert.Empty(results);
@@ -218,20 +219,20 @@ public class ParallelTestRunnerTests
         // Arrange
         var testCases = new List<SelfGeneratedTestCase>
         {
-            CreateTestCase("Test1"),
-            CreateTestCase("Test2")
+            this.CreateTestCase("Test1"),
+            this.CreateTestCase("Test2")
         };
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
-            .ReturnsAsync((SelfGeneratedTestCase tc) => CreateTestResult(tc.Name, true));
+            .ReturnsAsync((SelfGeneratedTestCase tc) => this.CreateTestResult(tc.Name, true));
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInBatchesAsync(testCases, batchSize: 10);
+        var results = await this._parallelTestRunner.ExecuteTestsInBatchesAsync(testCases, batchSize: 10);
 
         // Assert
         Assert.Equal(2, results.Count);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(2));
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(2));
     }
 
     [Fact]
@@ -239,26 +240,26 @@ public class ParallelTestRunnerTests
     {
         // Arrange
         var testCases = Enumerable.Range(1, 15)
-            .Select(i => CreateTestCase($"Test{i}"))
+            .Select(i => this.CreateTestCase($"Test{i}"))
             .ToList();
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
-            .ReturnsAsync((SelfGeneratedTestCase tc) => CreateTestResult(tc.Name, true));
+            .ReturnsAsync((SelfGeneratedTestCase tc) => this.CreateTestResult(tc.Name, true));
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInBatchesAsync(testCases, batchSize: 5);
+        var results = await this._parallelTestRunner.ExecuteTestsInBatchesAsync(testCases, batchSize: 5);
 
         // Assert
         Assert.Equal(15, results.Count);
-        _singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(15));
+        this._singleTestExecutorMock.Verify(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()), Times.Exactly(15));
     }
 
     [Fact]
     public async Task ExecuteTestsInBatchesAsync_NullTestCases_ShouldReturnEmptyList()
     {
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInBatchesAsync(null!);
+        var results = await this._parallelTestRunner.ExecuteTestsInBatchesAsync(null!);
 
         // Assert
         Assert.Empty(results);
@@ -272,7 +273,7 @@ public class ParallelTestRunnerTests
     public void GetOptimalConcurrencyLevel_ShouldReturnReasonableValue()
     {
         // Act
-        var concurrency = _parallelTestRunner.GetOptimalConcurrencyLevel();
+        var concurrency = this._parallelTestRunner.GetOptimalConcurrencyLevel();
 
         // Assert
         Assert.True(concurrency >= 1, "Concurrency should be at least 1");
@@ -283,8 +284,8 @@ public class ParallelTestRunnerTests
     public void GetOptimalConcurrencyLevel_MultipleCalls_ShouldReturnConsistentResults()
     {
         // Act
-        var concurrency1 = _parallelTestRunner.GetOptimalConcurrencyLevel();
-        var concurrency2 = _parallelTestRunner.GetOptimalConcurrencyLevel();
+        var concurrency1 = this._parallelTestRunner.GetOptimalConcurrencyLevel();
+        var concurrency2 = this._parallelTestRunner.GetOptimalConcurrencyLevel();
 
         // Assert
         Assert.Equal(concurrency1, concurrency2);
@@ -301,7 +302,7 @@ public class ParallelTestRunnerTests
         var testResults = new List<TestExecutionResult>();
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 5);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 5);
 
         // Assert
         Assert.NotNull(analysis);
@@ -314,7 +315,7 @@ public class ParallelTestRunnerTests
     public void AnalyzeParallelPerformance_NullResults_ShouldReturnValidAnalysis()
     {
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(null!, 3);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(null!, 3);
 
         // Assert
         Assert.NotNull(analysis);
@@ -328,13 +329,13 @@ public class ParallelTestRunnerTests
         // Arrange
         var testResults = new List<TestExecutionResult>
         {
-            CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
-            CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(200)),
-            CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(150))
+            this.CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
+            this.CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(200)),
+            this.CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(150))
         };
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
 
         // Assert
         Assert.Equal(2, analysis.ConcurrencyLevel);
@@ -351,14 +352,14 @@ public class ParallelTestRunnerTests
         // Arrange
         var testResults = new List<TestExecutionResult>
         {
-            CreateTestResultWithTime("Test1", false, TimeSpan.FromMilliseconds(100)),
-            CreateTestResultWithTime("Test2", false, TimeSpan.FromMilliseconds(200)),
-            CreateTestResultWithTime("Test3", false, TimeSpan.FromMilliseconds(150)),
-            CreateTestResultWithTime("Test4", true, TimeSpan.FromMilliseconds(120))
+            this.CreateTestResultWithTime("Test1", false, TimeSpan.FromMilliseconds(100)),
+            this.CreateTestResultWithTime("Test2", false, TimeSpan.FromMilliseconds(200)),
+            this.CreateTestResultWithTime("Test3", false, TimeSpan.FromMilliseconds(150)),
+            this.CreateTestResultWithTime("Test4", true, TimeSpan.FromMilliseconds(120))
         };
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
 
         // Assert
         Assert.Contains(analysis.Recommendations, r => r.Contains("serial debugging"));
@@ -370,12 +371,12 @@ public class ParallelTestRunnerTests
         // Arrange
         var testResults = new List<TestExecutionResult>
         {
-            CreateTestResultWithTime("Test1", true, TimeSpan.FromSeconds(15)),
-            CreateTestResultWithTime("Test2", true, TimeSpan.FromSeconds(12))
+            this.CreateTestResultWithTime("Test1", true, TimeSpan.FromSeconds(15)),
+            this.CreateTestResultWithTime("Test2", true, TimeSpan.FromSeconds(12))
         };
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
 
         // Assert
         Assert.Contains(analysis.Recommendations, r => r.Contains("took longer than 10 seconds"));
@@ -387,13 +388,13 @@ public class ParallelTestRunnerTests
         // Arrange - Create scenario with very uneven execution times (suggests contention)
         var testResults = new List<TestExecutionResult>
         {
-            CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
-            CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(2000)),
-            CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(150))
+            this.CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
+            this.CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(2000)),
+            this.CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(150))
         };
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 8);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 8);
 
         // Assert
         Assert.True(analysis.ParallelEfficiency < 1.0);
@@ -406,14 +407,14 @@ public class ParallelTestRunnerTests
         // Arrange - Create scenario with even execution times (good parallelization)
         var testResults = new List<TestExecutionResult>
         {
-            CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
-            CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(105)),
-            CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(95)),
-            CreateTestResultWithTime("Test4", true, TimeSpan.FromMilliseconds(102))
+            this.CreateTestResultWithTime("Test1", true, TimeSpan.FromMilliseconds(100)),
+            this.CreateTestResultWithTime("Test2", true, TimeSpan.FromMilliseconds(105)),
+            this.CreateTestResultWithTime("Test3", true, TimeSpan.FromMilliseconds(95)),
+            this.CreateTestResultWithTime("Test4", true, TimeSpan.FromMilliseconds(102))
         };
 
         // Act
-        var analysis = _parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
+        var analysis = this._parallelTestRunner.AnalyzeParallelPerformance(testResults, 2);
 
         // Assert
         Assert.True(analysis.SpeedupRatio > 1.0, "Should show improvement over serial execution");
@@ -430,14 +431,14 @@ public class ParallelTestRunnerTests
     public async Task ExecuteTestsInParallelAsync_TestExecutorThrows_ShouldHandleGracefully()
     {
         // Arrange
-        var testCases = new List<SelfGeneratedTestCase> { CreateTestCase("Test1") };
+        var testCases = new List<SelfGeneratedTestCase> { this.CreateTestCase("Test1") };
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .ThrowsAsync(new InvalidOperationException("Test executor error"));
 
         // Act & Assert - Should not throw, but handle gracefully
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases);
 
         // The implementation should handle exceptions in the semaphore pattern
         Assert.NotNull(results);
@@ -452,29 +453,31 @@ public class ParallelTestRunnerTests
     {
         // Arrange
         var testCases = Enumerable.Range(1, 20)
-            .Select(i => CreateTestCase($"Test{i}"))
+            .Select(i => this.CreateTestCase($"Test{i}"))
             .ToList();
 
-        _singleTestExecutorMock
+        this._singleTestExecutorMock
             .Setup(x => x.ExecuteTestCaseAsync(It.IsAny<SelfGeneratedTestCase>()))
             .Returns(async (SelfGeneratedTestCase tc) =>
             {
                 await Task.Delay(50); // Simulate 50ms per test
-                return CreateTestResult(tc.Name, true);
+                return this.CreateTestResult(tc.Name, true);
             });
 
         var stopwatch = Stopwatch.StartNew();
 
         // Act
-        var results = await _parallelTestRunner.ExecuteTestsInParallelAsync(testCases, maxConcurrency: 5);
+        var results = await this._parallelTestRunner.ExecuteTestsInParallelAsync(testCases, maxConcurrency: 5);
 
         stopwatch.Stop();
 
         // Assert
         Assert.Equal(20, results.Count);
+
         // With 5 concurrent tests and 50ms each, should complete in roughly 200ms (4 batches)
         // Allow some tolerance for test environment variations
-        Assert.True(stopwatch.ElapsedMilliseconds < 1000,
+        Assert.True(
+            stopwatch.ElapsedMilliseconds < 1000,
             $"Execution took {stopwatch.ElapsedMilliseconds}ms, expected less than 1000ms");
     }
 
@@ -500,7 +503,7 @@ public class ParallelTestRunnerTests
 
     private TestExecutionResult CreateTestResult(string testName, bool success)
     {
-        return CreateTestResultWithTime(testName, success, TimeSpan.FromMilliseconds(100));
+        return this.CreateTestResultWithTime(testName, success, TimeSpan.FromMilliseconds(100));
     }
 
     private TestExecutionResult CreateTestResultWithTime(string testName, bool success, TimeSpan executionTime)

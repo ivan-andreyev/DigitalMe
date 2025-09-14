@@ -1,12 +1,12 @@
-using Xunit;
-using FluentAssertions;
-using Moq;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.AgentBehavior;
 using DigitalMe.Data.Entities;
-using DigitalMe.Services;
-using DigitalMe.Services.Tools;
 using DigitalMe.Models;
+using DigitalMe.Services;
+using DigitalMe.Services.AgentBehavior;
+using DigitalMe.Services.Tools;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -20,11 +20,11 @@ public class AgentBehaviorEngineTests
 
     public AgentBehaviorEngineTests()
     {
-        _mockPersonalityService = new Mock<IPersonalityService>();
-        _mockMcpService = new Mock<IMcpService>();
-        _mockToolRegistry = new Mock<IToolRegistry>();
-        _mockLogger = new Mock<ILogger<AgentBehaviorEngine>>();
-        _engine = new AgentBehaviorEngine(_mockPersonalityService.Object, _mockMcpService.Object, _mockToolRegistry.Object, _mockLogger.Object);
+        this._mockPersonalityService = new Mock<IPersonalityService>();
+        this._mockMcpService = new Mock<IMcpService>();
+        this._mockToolRegistry = new Mock<IToolRegistry>();
+        this._mockLogger = new Mock<ILogger<AgentBehaviorEngine>>();
+        this._engine = new AgentBehaviorEngine(this._mockPersonalityService.Object, this._mockMcpService.Object, this._mockToolRegistry.Object, this._mockLogger.Object);
     }
 
     [Fact]
@@ -40,11 +40,11 @@ public class AgentBehaviorEngineTests
             CurrentState = new Dictionary<string, object>()
         };
 
-        _mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
+        this._mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
                       .ReturnsAsync("Hello! How can I help you today?");
 
         // Act
-        var result = await _engine.ProcessMessageAsync(message, personalityContext);
+        var result = await this._engine.ProcessMessageAsync(message, personalityContext);
 
         // Assert
         result.Should().NotBeNull("should return agent response");
@@ -68,11 +68,11 @@ public class AgentBehaviorEngineTests
             CurrentState = new Dictionary<string, object>()
         };
 
-        _mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
+        this._mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
                       .ThrowsAsync(new HttpRequestException("API failure"));
 
         // Act
-        var result = await _engine.ProcessMessageAsync(message, personalityContext);
+        var result = await this._engine.ProcessMessageAsync(message, personalityContext);
 
         // Assert
         result.Should().NotBeNull("should return fallback response on API failure");
@@ -96,7 +96,7 @@ public class AgentBehaviorEngineTests
         };
 
         // Act
-        var result = await _engine.ProcessMessageAsync("", personalityContext);
+        var result = await this._engine.ProcessMessageAsync("", personalityContext);
 
         // Assert
         result.Should().NotBeNull("should handle empty message gracefully");
@@ -122,18 +122,19 @@ public class AgentBehaviorEngineTests
             CurrentState = new Dictionary<string, object>()
         };
 
-        _mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
+        this._mockMcpService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
                       .ReturnsAsync("Based on our previous conversation...");
 
         // Act
-        var result = await _engine.ProcessMessageAsync(message, personalityContext);
+        var result = await this._engine.ProcessMessageAsync(message, personalityContext);
 
         // Assert
         result.Should().NotBeNull();
         result.Content.Should().Contain("previous", "should reference conversation history");
 
         // Verify MCP service was called with contextual information
-        _mockMcpService.Verify(x => x.SendMessageAsync(
+        this._mockMcpService.Verify(
+            x => x.SendMessageAsync(
             It.Is<string>(msg => msg.Contains(message)),
             It.IsAny<PersonalityContext>()),
             Times.Once);
@@ -147,7 +148,7 @@ public class AgentBehaviorEngineTests
         var personality = CreateTestPersonality();
 
         // Act
-        var mood = await _engine.AnalyzeMoodAsync(positiveMessage, personality);
+        var mood = await this._engine.AnalyzeMoodAsync(positiveMessage, personality);
 
         // Assert
         mood.PrimaryMood.Should().Be("positive");
@@ -163,7 +164,7 @@ public class AgentBehaviorEngineTests
         var personality = CreateTestPersonality();
 
         // Act
-        var mood = await _engine.AnalyzeMoodAsync(negativeMessage, personality);
+        var mood = await this._engine.AnalyzeMoodAsync(negativeMessage, personality);
 
         // Assert
         mood.PrimaryMood.Should().Be("negative");
@@ -179,7 +180,7 @@ public class AgentBehaviorEngineTests
         var personality = CreateTestPersonality();
 
         // Act
-        var mood = await _engine.AnalyzeMoodAsync(neutralMessage, personality);
+        var mood = await this._engine.AnalyzeMoodAsync(neutralMessage, personality);
 
         // Assert
         mood.PrimaryMood.Should().Be("neutral");

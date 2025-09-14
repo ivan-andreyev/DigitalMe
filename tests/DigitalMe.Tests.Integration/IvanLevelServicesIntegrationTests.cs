@@ -1,15 +1,15 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using Xunit;
-using DigitalMe.Services;
-using DigitalMe.Services.FileProcessing;
-using DigitalMe.Services.WebNavigation;
-using DigitalMe.Services.CaptchaSolving;
-using DigitalMe.Services.Voice;
 using DigitalMe.Data;
 using DigitalMe.Extensions;
+using DigitalMe.Services;
+using DigitalMe.Services.CaptchaSolving;
+using DigitalMe.Services.FileProcessing;
+using DigitalMe.Services.Voice;
+using DigitalMe.Services.WebNavigation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -27,7 +27,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
     }
 
     [Fact]
-    public async Task IvanLevelServices_ShouldAllBeRegisteredInDI()
+    public void IvanLevelServices_ShouldAllBeRegisteredInDI()
     {
         // Arrange & Act - Get all Ivan-Level services from DI container
         using var scope = _fixture.ServiceProvider.CreateScope();
@@ -262,7 +262,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
     }
 
     [Fact]
-    public async Task Performance_ServiceInstantiation_ShouldBeFast()
+    public void Performance_ServiceInstantiation_ShouldBeFast()
     {
         // Arrange
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();

@@ -1,10 +1,10 @@
-using Xunit;
-using Moq;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.Learning.Testing.ResultsAnalysis;
-using DigitalMe.Services.Learning.Testing.TestExecution;
-using DigitalMe.Services.Learning.Testing.Statistics;
 using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.Testing.ResultsAnalysis;
+using DigitalMe.Services.Learning.Testing.Statistics;
+using DigitalMe.Services.Learning.Testing.TestExecution;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services.Learning.Testing.ResultsAnalysis;
 
@@ -22,20 +22,20 @@ public class ResultsAnalyzerTests
 
     public ResultsAnalyzerTests()
     {
-        _mockLogger = new Mock<ILogger<ResultsAnalyzer>>();
-        _mockTestExecutor = new Mock<ITestExecutor>();
-        _mockStatisticalAnalyzer = new Mock<IStatisticalAnalyzer>();
+        this._mockLogger = new Mock<ILogger<ResultsAnalyzer>>();
+        this._mockTestExecutor = new Mock<ITestExecutor>();
+        this._mockStatisticalAnalyzer = new Mock<IStatisticalAnalyzer>();
 
         // Setup common mock behaviors
-        SetupStatisticalAnalyzerMocks();
+        this.SetupStatisticalAnalyzerMocks();
 
-        _resultsAnalyzer = new ResultsAnalyzer(_mockLogger.Object, _mockTestExecutor.Object, _mockStatisticalAnalyzer.Object);
+        this._resultsAnalyzer = new ResultsAnalyzer(this._mockLogger.Object, this._mockTestExecutor.Object, this._mockStatisticalAnalyzer.Object);
     }
 
     private void SetupStatisticalAnalyzerMocks()
     {
         // Setup default confidence score calculation
-        _mockStatisticalAnalyzer
+        this._mockStatisticalAnalyzer
             .Setup(x => x.CalculateConfidenceScore(It.IsAny<double>(), It.IsAny<int>(), It.IsAny<IEnumerable<double>>()))
             .Returns((double successRate, int totalTests, IEnumerable<double> executionTimes) =>
             {
@@ -54,7 +54,7 @@ public class ResultsAnalyzerTests
             });
 
         // Setup performance metrics calculation
-        _mockStatisticalAnalyzer
+        this._mockStatisticalAnalyzer
             .Setup(x => x.CalculatePerformanceMetrics(It.IsAny<IEnumerable<double>>(), It.IsAny<int>(), It.IsAny<int>()))
             .Returns((IEnumerable<double> executionTimes, int successCount, int totalCount) =>
             {
@@ -89,7 +89,7 @@ public class ResultsAnalyzerTests
     public void Constructor_WithValidParameters_ShouldInitializeCorrectly()
     {
         // Arrange & Act
-        var analyzer = new ResultsAnalyzer(_mockLogger.Object, _mockTestExecutor.Object, _mockStatisticalAnalyzer.Object);
+        var analyzer = new ResultsAnalyzer(this._mockLogger.Object, this._mockTestExecutor.Object, this._mockStatisticalAnalyzer.Object);
 
         // Assert
         Assert.NotNull(analyzer);
@@ -100,7 +100,7 @@ public class ResultsAnalyzerTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ResultsAnalyzer(null!, _mockTestExecutor.Object, _mockStatisticalAnalyzer.Object));
+            new ResultsAnalyzer(null!, this._mockTestExecutor.Object, this._mockStatisticalAnalyzer.Object));
 
         Assert.Equal("logger", exception.ParamName);
     }
@@ -110,7 +110,7 @@ public class ResultsAnalyzerTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ResultsAnalyzer(_mockLogger.Object, null!, _mockStatisticalAnalyzer.Object));
+            new ResultsAnalyzer(this._mockLogger.Object, null!, this._mockStatisticalAnalyzer.Object));
 
         Assert.Equal("testExecutor", exception.ParamName);
     }
@@ -123,14 +123,14 @@ public class ResultsAnalyzerTests
     public async Task ValidateLearnedCapabilityAsync_WithValidCapability_ShouldReturnValidationResult()
     {
         // Arrange
-        var capability = CreateTestCapability();
-        var suiteResult = CreateSuccessfulTestSuiteResult();
+        var capability = this.CreateTestCapability();
+        var suiteResult = this.CreateSuccessfulTestSuiteResult();
 
-        _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
+        this._mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ReturnsAsync(suiteResult);
 
         // Act
-        var result = await _resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.NotNull(result);
@@ -146,14 +146,14 @@ public class ResultsAnalyzerTests
     public async Task ValidateLearnedCapabilityAsync_WithFailedTests_ShouldReturnFailedValidation()
     {
         // Arrange
-        var capability = CreateTestCapability();
-        var suiteResult = CreateFailedTestSuiteResult();
+        var capability = this.CreateTestCapability();
+        var suiteResult = this.CreateFailedTestSuiteResult();
 
-        _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
+        this._mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ReturnsAsync(suiteResult);
 
         // Act
-        var result = await _resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.NotNull(result);
@@ -168,13 +168,13 @@ public class ResultsAnalyzerTests
     public async Task ValidateLearnedCapabilityAsync_WithException_ShouldReturnFailedResult()
     {
         // Arrange
-        var capability = CreateTestCapability();
+        var capability = this.CreateTestCapability();
 
-        _mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
+        this._mockTestExecutor.Setup(x => x.ExecuteTestSuiteAsync(It.IsAny<List<SelfGeneratedTestCase>>()))
             .ThrowsAsync(new InvalidOperationException("Test exception"));
 
         // Act
-        var result = await _resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
+        var result = await this._resultsAnalyzer.ValidateLearnedCapabilityAsync("TestAPI", capability);
 
         // Assert
         Assert.NotNull(result);
@@ -191,10 +191,10 @@ public class ResultsAnalyzerTests
     public async Task BenchmarkNewSkillAsync_WithSuccessfulResults_ShouldReturnHighGrade()
     {
         // Arrange
-        var testResults = CreateSuccessfulTestResults();
+        var testResults = this.CreateSuccessfulTestResults();
 
         // Act
-        var result = await _resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
+        var result = await this._resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
 
         // Assert
         Assert.NotNull(result);
@@ -212,7 +212,7 @@ public class ResultsAnalyzerTests
         var testResults = new List<TestExecutionResult>();
 
         // Act
-        var result = await _resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
+        var result = await this._resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
 
         // Assert
         Assert.NotNull(result);
@@ -224,14 +224,15 @@ public class ResultsAnalyzerTests
     public async Task BenchmarkNewSkillAsync_WithMixedResults_ShouldReturnMediumGrade()
     {
         // Arrange
-        var testResults = CreateMixedTestResults();
+        var testResults = this.CreateMixedTestResults();
 
         // Act
-        var result = await _resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
+        var result = await this._resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("TestSkill", result.SkillName);
+
         // Debug: Check what we actually get
         Assert.True(result.SuccessRate > 0.5, $"Expected success rate > 0.5 but got {result.SuccessRate}");
         Assert.True(result.Grade >= PerformanceGrade.C, $"Expected grade >= C but got {result.Grade} (success rate: {result.SuccessRate})");
@@ -245,7 +246,7 @@ public class ResultsAnalyzerTests
         var testResults = new List<TestExecutionResult> { null! };
 
         // Act
-        var result = await _resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
+        var result = await this._resultsAnalyzer.BenchmarkNewSkillAsync("TestSkill", testResults);
 
         // Assert
         Assert.NotNull(result);
@@ -261,10 +262,10 @@ public class ResultsAnalyzerTests
     public async Task AnalyzeTestFailuresAsync_WithFailedTests_ShouldReturnAnalysis()
     {
         // Arrange
-        var failedTests = CreateFailedTestResults();
+        var failedTests = this.CreateFailedTestResults();
 
         // Act
-        var result = await _resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
@@ -282,7 +283,7 @@ public class ResultsAnalyzerTests
         var failedTests = new List<TestExecutionResult>();
 
         // Act
-        var result = await _resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
@@ -294,10 +295,10 @@ public class ResultsAnalyzerTests
     public async Task AnalyzeTestFailuresAsync_WithSevereCriticalFailures_ShouldReturnLowHealthScore()
     {
         // Arrange
-        var failedTests = CreateCriticalFailedTestResults();
+        var failedTests = this.CreateCriticalFailedTestResults();
 
         // Act
-        var result = await _resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
@@ -313,7 +314,7 @@ public class ResultsAnalyzerTests
         var failedTests = new List<TestExecutionResult> { null! };
 
         // Act
-        var result = await _resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
+        var result = await this._resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
 
         // Assert
         Assert.NotNull(result);
@@ -335,7 +336,7 @@ public class ResultsAnalyzerTests
         };
 
         // Act
-        var score = _resultsAnalyzer.CalculateConfidenceScore(suiteResult);
+        var score = this._resultsAnalyzer.CalculateConfidenceScore(suiteResult);
 
         // Assert
         Assert.Equal(0, score);
@@ -345,10 +346,10 @@ public class ResultsAnalyzerTests
     public void CalculateConfidenceScore_WithPerfectResults_ShouldReturnHighScore()
     {
         // Arrange
-        var suiteResult = CreateSuccessfulTestSuiteResult();
+        var suiteResult = this.CreateSuccessfulTestSuiteResult();
 
         // Act
-        var score = _resultsAnalyzer.CalculateConfidenceScore(suiteResult);
+        var score = this._resultsAnalyzer.CalculateConfidenceScore(suiteResult);
 
         // Assert
         Assert.True(score > 0.9);
@@ -360,11 +361,11 @@ public class ResultsAnalyzerTests
         // Arrange
         var suiteResult = new TestSuiteResult
         {
-            TestResults = CreateMixedTestResults()
+            TestResults = this.CreateMixedTestResults()
         };
 
         // Act
-        var score = _resultsAnalyzer.CalculateConfidenceScore(suiteResult);
+        var score = this._resultsAnalyzer.CalculateConfidenceScore(suiteResult);
 
         // Assert
         Assert.True(score >= 0.3 && score <= 0.8);
@@ -378,10 +379,10 @@ public class ResultsAnalyzerTests
     public void CollectDetailedMetrics_WithValidResults_ShouldReturnMetrics()
     {
         // Arrange
-        var testResults = CreateSuccessfulTestResults();
+        var testResults = this.CreateSuccessfulTestResults();
 
         // Act
-        var metrics = _resultsAnalyzer.CollectDetailedMetrics(testResults);
+        var metrics = this._resultsAnalyzer.CollectDetailedMetrics(testResults);
 
         // Assert
         Assert.NotNull(metrics);
@@ -399,7 +400,7 @@ public class ResultsAnalyzerTests
         var testResults = new List<TestExecutionResult>();
 
         // Act
-        var metrics = _resultsAnalyzer.CollectDetailedMetrics(testResults);
+        var metrics = this._resultsAnalyzer.CollectDetailedMetrics(testResults);
 
         // Assert
         Assert.NotNull(metrics);
@@ -412,11 +413,11 @@ public class ResultsAnalyzerTests
         // Arrange
         var testResults = new List<TestExecutionResult>
         {
-            CreateSuccessfulTestResult("Test1")
+            this.CreateSuccessfulTestResult("Test1")
         };
 
         // Act
-        var metrics = _resultsAnalyzer.CollectDetailedMetrics(testResults);
+        var metrics = this._resultsAnalyzer.CollectDetailedMetrics(testResults);
 
         // Assert
         Assert.NotNull(metrics);
@@ -436,9 +437,9 @@ public class ResultsAnalyzerTests
             Description = "A test capability for validation",
             ValidationTests = new List<SelfGeneratedTestCase>
             {
-                CreateTestCase("Test1"),
-                CreateTestCase("Test2"),
-                CreateTestCase("Test3")
+                this.CreateTestCase("Test1"),
+                this.CreateTestCase("Test2"),
+                this.CreateTestCase("Test3")
             }
         };
     }
@@ -462,7 +463,7 @@ public class ResultsAnalyzerTests
         return new TestSuiteResult
         {
             SuiteName = "TestSuite",
-            TestResults = CreateSuccessfulTestResults(),
+            TestResults = this.CreateSuccessfulTestResults(),
             TotalExecutionTime = TimeSpan.FromSeconds(5),
             Status = TestSuiteStatus.Completed
         };
@@ -473,7 +474,7 @@ public class ResultsAnalyzerTests
         return new TestSuiteResult
         {
             SuiteName = "FailedTestSuite",
-            TestResults = CreateFailedTestResults(),
+            TestResults = this.CreateFailedTestResults(),
             TotalExecutionTime = TimeSpan.FromSeconds(10),
             Status = TestSuiteStatus.Failed
         };
@@ -483,11 +484,11 @@ public class ResultsAnalyzerTests
     {
         return new List<TestExecutionResult>
         {
-            CreateSuccessfulTestResult("Test1"),
-            CreateSuccessfulTestResult("Test2"),
-            CreateSuccessfulTestResult("Test3"),
-            CreateSuccessfulTestResult("Test4"),
-            CreateSuccessfulTestResult("Test5")
+            this.CreateSuccessfulTestResult("Test1"),
+            this.CreateSuccessfulTestResult("Test2"),
+            this.CreateSuccessfulTestResult("Test3"),
+            this.CreateSuccessfulTestResult("Test4"),
+            this.CreateSuccessfulTestResult("Test5")
         };
     }
 
@@ -513,10 +514,10 @@ public class ResultsAnalyzerTests
     {
         return new List<TestExecutionResult>
         {
-            CreateFailedTestResult("FailedTest1", "500 Internal Server Error"),
-            CreateFailedTestResult("FailedTest2", "404 Not Found"),
-            CreateFailedTestResult("FailedTest3", "Request timeout"),
-            CreateFailedTestResult("FailedTest4", "401 Unauthorized")
+            this.CreateFailedTestResult("FailedTest1", "500 Internal Server Error"),
+            this.CreateFailedTestResult("FailedTest2", "404 Not Found"),
+            this.CreateFailedTestResult("FailedTest3", "Request timeout"),
+            this.CreateFailedTestResult("FailedTest4", "401 Unauthorized")
         };
     }
 
@@ -524,11 +525,11 @@ public class ResultsAnalyzerTests
     {
         return new List<TestExecutionResult>
         {
-            CreateFailedTestResult("CriticalFail1", "Critical system failure"),
-            CreateFailedTestResult("CriticalFail2", "Critical system failure"),
-            CreateFailedTestResult("CriticalFail3", "Critical system failure"),
-            CreateFailedTestResult("CriticalFail4", "Critical database error"),
-            CreateFailedTestResult("CriticalFail5", "Critical database error")
+            this.CreateFailedTestResult("CriticalFail1", "Critical system failure"),
+            this.CreateFailedTestResult("CriticalFail2", "Critical system failure"),
+            this.CreateFailedTestResult("CriticalFail3", "Critical system failure"),
+            this.CreateFailedTestResult("CriticalFail4", "Critical database error"),
+            this.CreateFailedTestResult("CriticalFail5", "Critical database error")
         };
     }
 
@@ -558,13 +559,13 @@ public class ResultsAnalyzerTests
         // Create exactly 7 successful tests
         for (int i = 1; i <= 7; i++)
         {
-            results.Add(CreateSuccessfulTestResult($"SuccessTest{i}"));
+            results.Add(this.CreateSuccessfulTestResult($"SuccessTest{i}"));
         }
 
         // Create exactly 3 failed tests
-        results.Add(CreateFailedTestResult("FailedTest1", "500 Internal Server Error"));
-        results.Add(CreateFailedTestResult("FailedTest2", "404 Not Found"));
-        results.Add(CreateFailedTestResult("FailedTest3", "Request timeout"));
+        results.Add(this.CreateFailedTestResult("FailedTest1", "500 Internal Server Error"));
+        results.Add(this.CreateFailedTestResult("FailedTest2", "404 Not Found"));
+        results.Add(this.CreateFailedTestResult("FailedTest3", "Request timeout"));
 
         return results; // Exactly 10 tests: 7 success + 3 fail = 70% success rate
     }

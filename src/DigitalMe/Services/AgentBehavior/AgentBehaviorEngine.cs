@@ -1,8 +1,8 @@
+using System.Text.RegularExpressions;
 using DigitalMe.Models;
 using DigitalMe.Services.AgentBehavior;
 using DigitalMe.Services.Tools;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace DigitalMe.Services.AgentBehavior;
 

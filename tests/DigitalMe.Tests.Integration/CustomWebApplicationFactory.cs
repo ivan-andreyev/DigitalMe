@@ -1,21 +1,21 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Routing;
-using Moq;
-using DigitalMe.Services.Tools;
-using DigitalMe.Services.Tools.Strategies;
 using DigitalMe.Data;
 using DigitalMe.Data.Entities;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Models;
-using DigitalMe.Tests.Unit.Fixtures;
 using DigitalMe.Services.AgentBehavior;
+using DigitalMe.Services.Tools;
+using DigitalMe.Services.Tools.Strategies;
+using DigitalMe.Tests.Unit.Fixtures;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -77,11 +77,11 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                 
                 // Mock CallToolAsync for tool testing
                 mockService.Setup(x => x.CallToolAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                          .ReturnsAsync(new MCPResponse 
+                          .ReturnsAsync(new McpResponse 
                           {
                               JsonRpc = "2.0",
                               Id = Guid.NewGuid().ToString(),
-                              Result = new MCPResult
+                              Result = new McpResult
                               {
                                   Content = "ФАКТОРЫ И СТРУКТУРИРОВАННЫЙ АНАЛИЗ от Mock Ivan",
                                   Metadata = new Dictionary<string, object> { ["source"] = "mock" }
@@ -137,13 +137,13 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             });
 
             // Mock IMCPClient for MCP integration testing
-            var mcpClientDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IMCPClient)).ToList();
+            var mcpClientDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Integrations.MCP.IMcpClient)).ToList();
             foreach (var descriptor in mcpClientDescriptors)
                 services.Remove(descriptor);
 
-            services.AddScoped<DigitalMe.Integrations.MCP.IMCPClient>(provider =>
+            services.AddScoped<DigitalMe.Integrations.MCP.IMcpClient>(provider =>
             {
-                var mockClient = new Mock<DigitalMe.Integrations.MCP.IMCPClient>();
+                var mockClient = new Mock<DigitalMe.Integrations.MCP.IMcpClient>();
                 
                 // Mock IsConnected property
                 mockClient.Setup(x => x.IsConnected).Returns(true);
@@ -154,19 +154,19 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                 
                 // Mock ListToolsAsync
                 mockClient.Setup(x => x.ListToolsAsync())
-                         .ReturnsAsync(new List<MCPTool>
+                         .ReturnsAsync(new List<McpTool>
                          {
-                             new MCPTool { Name = "get_personality_info", Description = "Get Ivan personality information" },
-                             new MCPTool { Name = "structured_thinking", Description = "Apply structured thinking approach" }
+                             new McpTool { Name = "get_personality_info", Description = "Get Ivan personality information" },
+                             new McpTool { Name = "structured_thinking", Description = "Apply structured thinking approach" }
                          });
                 
                 // Mock CallToolAsync
                 mockClient.Setup(x => x.CallToolAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                         .ReturnsAsync(new MCPResponse
+                         .ReturnsAsync(new McpResponse
                          {
                              JsonRpc = "2.0",
                              Id = Guid.NewGuid().ToString(),
-                             Result = new MCPResult
+                             Result = new McpResult
                              {
                                  Content = "ФАКТОРЫ И СТРУКТУРИРОВАННЫЙ АНАЛИЗ от Mock Ivan"
                              },

@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using DigitalMe.Configuration;
 using DigitalMe.Integrations.External.Slack.Models;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.Integrations.External.Slack;
 

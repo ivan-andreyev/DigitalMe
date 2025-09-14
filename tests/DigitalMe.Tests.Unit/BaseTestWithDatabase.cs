@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Fixtures;
+using Microsoft.EntityFrameworkCore;
 
 namespace DigitalMe.Tests.Unit;
 
@@ -14,9 +14,9 @@ public abstract class BaseTestWithDatabase : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        Context = new DigitalMeDbContext(options);
-        Context.Database.EnsureCreated();
-        SeedIvanPersonality();
+        this.Context = new DigitalMeDbContext(options);
+        this.Context.Database.EnsureCreated();
+        this.SeedIvanPersonality();
     }
 
     protected void SeedIvanPersonality()
@@ -24,16 +24,16 @@ public abstract class BaseTestWithDatabase : IDisposable
         var ivan = PersonalityTestFixtures.CreateCompleteIvanProfile();
         ivan.Name = "Ivan";
 
-        Context.PersonalityProfiles.Add(ivan);
-        Context.SaveChanges();
+        this.Context.PersonalityProfiles.Add(ivan);
+        this.Context.SaveChanges();
     }
 
     protected void CleanupDatabase()
     {
-        Context.Database.EnsureDeleted();
-        Context.Database.EnsureCreated();
-        SeedIvanPersonality();
+        this.Context.Database.EnsureDeleted();
+        this.Context.Database.EnsureCreated();
+        this.SeedIvanPersonality();
     }
 
-    public void Dispose() => Context?.Dispose();
+    public void Dispose() => this.Context?.Dispose();
 }

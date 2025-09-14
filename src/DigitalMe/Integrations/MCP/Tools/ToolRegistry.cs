@@ -4,11 +4,11 @@ namespace DigitalMe.Integrations.MCP.Tools;
 
 public class ToolRegistry
 {
-    public static IEnumerable<MCPTool> GetAvailableTools()
+    public static IEnumerable<McpTool> GetAvailableTools()
     {
         return new[]
         {
-            new MCPTool
+            new McpTool
             {
                 Name = "send_telegram_message",
                 Description = "Отправить сообщение в Telegram",
@@ -18,7 +18,7 @@ public class ToolRegistry
                     message = new { type = "string", description = "Текст сообщения" }
                 }
             },
-            new MCPTool
+            new McpTool
             {
                 Name = "create_calendar_event",
                 Description = "Создать событие в Google Calendar",
@@ -29,7 +29,7 @@ public class ToolRegistry
                     end_time = new { type = "string", description = "Время окончания (ISO 8601)" }
                 }
             },
-            new MCPTool
+            new McpTool
             {
                 Name = "search_github_repositories",
                 Description = "Поиск репозиториев на GitHub",
@@ -38,7 +38,7 @@ public class ToolRegistry
                     query = new { type = "string", description = "Поисковый запрос" }
                 }
             },
-            new MCPTool
+            new McpTool
             {
                 Name = "get_personality_traits",
                 Description = "Получить черты личности Ивана",
@@ -47,7 +47,7 @@ public class ToolRegistry
                     category = new { type = "string", description = "Категория черт (опционально)" }
                 }
             },
-            new MCPTool
+            new McpTool
             {
                 Name = "store_memory",
                 Description = "Сохранить важную информацию в долгосрочную память",

@@ -1,7 +1,7 @@
+using DigitalMe.Common.Exceptions;
 using DigitalMe.DTOs;
 using DigitalMe.Models;
 using DigitalMe.Services.AgentBehavior;
-using DigitalMe.Common.Exceptions;
 
 namespace DigitalMe.Services;
 

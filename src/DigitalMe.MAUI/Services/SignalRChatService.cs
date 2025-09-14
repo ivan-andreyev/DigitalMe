@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
 using DigitalMe.MAUI.Models;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.MAUI.Services;
 

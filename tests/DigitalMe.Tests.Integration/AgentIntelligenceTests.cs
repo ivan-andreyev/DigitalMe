@@ -1,13 +1,13 @@
-using Xunit;
+using System.Text.Json;
+using DigitalMe.Data.Entities;
+using DigitalMe.DTOs;
+using DigitalMe.Services;
+using DigitalMe.Services.AgentBehavior;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
-using DigitalMe.DTOs;
-using DigitalMe.Data.Entities;
-using DigitalMe.Services.AgentBehavior;
-using DigitalMe.Services;
-using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 

@@ -1,9 +1,9 @@
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 <div class="message-input-container">
     <div class="input-wrapper">
-        <textarea @ref="textareaRef" 
-                  @bind="currentMessage" 
+        <textarea @ref="_textareaRef" 
+                  @bind="_currentMessage" 
                   @bind:event="oninput"
                   @bind:after="@HandleInputWithStateChange"
                   @onkeypress="@HandleKeyPress"
@@ -15,7 +15,7 @@
         <div class="input-actions">
             <button type="button" 
                     @onclick="@HandleSendClick"
-                    disabled="@(IsLoading || string.IsNullOrWhiteSpace(currentMessage))"
+                    disabled="@(IsLoading || string.IsNullOrWhiteSpace(_currentMessage))"
                     class="send-button"
                     title="@GetButtonTitle()">
                 @if (IsLoading)
@@ -34,9 +34,9 @@
     
     <div class="input-hints">
         <span class="hint">Ctrl+Enter для отправки • Поддержка кода в ```блоках```</span>
-        @if (!string.IsNullOrEmpty(currentMessage))
+        @if (!string.IsNullOrEmpty(_currentMessage))
         {
-            <span class="char-count">@currentMessage.Length</span>
+            <span class="char-count">@_currentMessage.Length</span>
         }
     </div>
 </div>
@@ -156,14 +156,14 @@
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public string Placeholder { get; set; } = "Напиши сообщение...";
     
-    private ElementReference textareaRef;
-    private string currentMessage = string.Empty;
+    private ElementReference _textareaRef;
+    private string _currentMessage = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("initializeTextarea", textareaRef);
+            await Js.InvokeVoidAsync("initializeTextarea", _textareaRef);
         }
     }
 
@@ -186,7 +186,7 @@
     private async Task HandleInput()
     {
         // Auto-resize textarea
-        await JS.InvokeVoidAsync("autoResizeTextarea", textareaRef);
+        await Js.InvokeVoidAsync("autoResizeTextarea", _textareaRef);
     }
 
     private async Task HandleInputWithStateChange()
@@ -194,7 +194,7 @@
         // Auto-resize textarea
         try
         {
-            await JS.InvokeVoidAsync("autoResizeTextarea", textareaRef);
+            await Js.InvokeVoidAsync("autoResizeTextarea", _textareaRef);
         }
         catch (Exception ex)
         {
@@ -213,17 +213,17 @@
 
     private async Task SendMessage()
     {
-        if (IsLoading || string.IsNullOrWhiteSpace(currentMessage))
+        if (IsLoading || string.IsNullOrWhiteSpace(_currentMessage))
             return;
 
-        var message = currentMessage.Trim();
-        currentMessage = string.Empty;
+        var message = _currentMessage.Trim();
+        _currentMessage = string.Empty;
 
         // Reset textarea height
-        await JS.InvokeVoidAsync("resetTextareaHeight", textareaRef);
+        await Js.InvokeVoidAsync("resetTextareaHeight", _textareaRef);
         
         // Focus back to textarea
-        await textareaRef.FocusAsync();
+        await _textareaRef.FocusAsync();
         
         await OnMessageSent.InvokeAsync(message);
     }
@@ -231,7 +231,7 @@
     private string GetButtonTitle()
     {
         if (IsLoading) return "Отправка...";
-        if (string.IsNullOrWhiteSpace(currentMessage)) return $"Введите текст (длина: {currentMessage?.Length ?? 0})";
+        if (string.IsNullOrWhiteSpace(_currentMessage)) return $"Введите текст (длина: {_currentMessage?.Length ?? 0})";
         return "Отправить сообщение (Ctrl+Enter)";
     }
 }

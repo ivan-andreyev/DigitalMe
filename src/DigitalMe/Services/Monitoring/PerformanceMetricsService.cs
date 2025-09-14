@@ -243,7 +243,7 @@ public class PerformanceMetricsService : IPerformanceMetricsService
         {
             summary.SystemResources = new SystemResourceMetrics
             {
-                MemoryUsageMB = (long)latestMemoryMetric.Value,
+                MemoryUsageMb = (long)latestMemoryMetric.Value,
                 GcCollections = (int)(latestMemoryMetric.Metadata.GetValueOrDefault("gcCollections", 0)),
                 ThreadCount = (int)(latestMemoryMetric.Metadata.GetValueOrDefault("threadCount", 0))
             };

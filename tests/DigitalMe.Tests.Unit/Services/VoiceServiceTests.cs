@@ -1,11 +1,11 @@
+using System.Text;
+using DigitalMe.Services.Voice;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.Text;
-using Xunit;
-using DigitalMe.Services.Voice;
 using OpenAI;
 using OpenAI.Audio;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -22,9 +22,9 @@ public class VoiceServiceTests
 
     public VoiceServiceTests()
     {
-        _mockLogger = new Mock<ILogger<VoiceService>>();
+        this._mockLogger = new Mock<ILogger<VoiceService>>();
 
-        _config = new VoiceServiceConfig
+        this._config = new VoiceServiceConfig
         {
             OpenAiApiKey = "test_api_key_sk-1234567890abcdef",
             DefaultTimeout = 30000,
@@ -32,9 +32,9 @@ public class VoiceServiceTests
         };
 
         var mockOptions = new Mock<IOptions<VoiceServiceConfig>>();
-        mockOptions.Setup(x => x.Value).Returns(_config);
+        mockOptions.Setup(x => x.Value).Returns(this._config);
 
-        _service = new VoiceService(_mockLogger.Object, mockOptions.Object);
+        this._service = new VoiceService(this._mockLogger.Object, mockOptions.Object);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class VoiceServiceTests
         // In a production test suite, you would mock the OpenAI client
 
         // Act
-        var result = await _service.TextToSpeechAsync(text, options);
+        var result = await this._service.TextToSpeechAsync(text, options);
 
         // Assert - Since we can't mock OpenAI client easily, we test the validation logic
         if (!result.Success)
@@ -77,7 +77,7 @@ public class VoiceServiceTests
     public async Task TextToSpeechAsync_WithInvalidText_ShouldReturnError(string invalidText)
     {
         // Act
-        var result = await _service.TextToSpeechAsync(invalidText);
+        var result = await this._service.TextToSpeechAsync(invalidText);
 
         // Assert
         Assert.False(result.Success);
@@ -97,7 +97,7 @@ public class VoiceServiceTests
         };
 
         // Act
-        var result = await _service.SpeechToTextAsync(audioData, options);
+        var result = await this._service.SpeechToTextAsync(audioData, options);
 
         // Assert - Since we can't mock OpenAI client easily, we test the validation logic
         if (!result.Success)
@@ -120,7 +120,7 @@ public class VoiceServiceTests
     public async Task SpeechToTextAsync_WithInvalidAudioData_ShouldReturnError(byte[] invalidAudioData)
     {
         // Act
-        var result = await _service.SpeechToTextAsync(invalidAudioData);
+        var result = await this._service.SpeechToTextAsync(invalidAudioData);
 
         // Assert
         Assert.False(result.Success);
@@ -134,7 +134,7 @@ public class VoiceServiceTests
         var nonExistentFilePath = "C:\\NonExistent\\audio.wav";
 
         // Act
-        var result = await _service.SpeechToTextFromFileAsync(nonExistentFilePath);
+        var result = await this._service.SpeechToTextFromFileAsync(nonExistentFilePath);
 
         // Assert
         Assert.False(result.Success);
@@ -149,7 +149,7 @@ public class VoiceServiceTests
     public async Task SpeechToTextFromFileAsync_WithInvalidPath_ShouldReturnError(string invalidPath)
     {
         // Act
-        var result = await _service.SpeechToTextFromFileAsync(invalidPath);
+        var result = await this._service.SpeechToTextFromFileAsync(invalidPath);
 
         // Assert
         Assert.False(result.Success);
@@ -160,7 +160,7 @@ public class VoiceServiceTests
     public async Task SpeechToTextFromStreamAsync_WithNullStream_ShouldReturnError()
     {
         // Act
-        var result = await _service.SpeechToTextFromStreamAsync(null, "test.wav");
+        var result = await this._service.SpeechToTextFromStreamAsync(null, "test.wav");
 
         // Assert
         Assert.False(result.Success);
@@ -177,7 +177,7 @@ public class VoiceServiceTests
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes("test_audio_data"));
 
         // Act
-        var result = await _service.SpeechToTextFromStreamAsync(stream, invalidFileName);
+        var result = await this._service.SpeechToTextFromStreamAsync(stream, invalidFileName);
 
         // Assert
         Assert.False(result.Success);
@@ -188,7 +188,7 @@ public class VoiceServiceTests
     public async Task GetAvailableVoicesAsync_ShouldReturnAllVoices()
     {
         // Act
-        var result = await _service.GetAvailableVoicesAsync();
+        var result = await this._service.GetAvailableVoicesAsync();
 
         // Assert
         Assert.True(result.Success);
@@ -218,7 +218,7 @@ public class VoiceServiceTests
     public async Task GetSupportedAudioFormatsAsync_ShouldReturnSupportedFormats()
     {
         // Act
-        var result = await _service.GetSupportedAudioFormatsAsync();
+        var result = await this._service.GetSupportedAudioFormatsAsync();
 
         // Assert
         Assert.True(result.Success);
@@ -228,7 +228,7 @@ public class VoiceServiceTests
         Assert.Contains(AudioFormat.Mp3, formatList);
         Assert.Contains(AudioFormat.Mp4, formatList);
         Assert.Contains(AudioFormat.Wav, formatList);
-        Assert.Contains(AudioFormat.M4a, formatList);
+        Assert.Contains(AudioFormat.M4A, formatList);
         Assert.Contains(AudioFormat.Webm, formatList);
     }
 
@@ -240,7 +240,7 @@ public class VoiceServiceTests
         var fileName = "test.mp3";
 
         // Act
-        var result = await _service.ValidateAudioFormatAsync(audioData, fileName);
+        var result = await this._service.ValidateAudioFormatAsync(audioData, fileName);
 
         // Assert
         Assert.True(result.Success);
@@ -259,7 +259,7 @@ public class VoiceServiceTests
         var fileName = "test.xyz";
 
         // Act
-        var result = await _service.ValidateAudioFormatAsync(audioData, fileName);
+        var result = await this._service.ValidateAudioFormatAsync(audioData, fileName);
 
         // Assert
         var validation = Assert.IsType<AudioFormatValidation>(result.Data);
@@ -275,7 +275,7 @@ public class VoiceServiceTests
     public async Task ValidateAudioFormatAsync_WithInvalidAudioData_ShouldReturnError(byte[] invalidData)
     {
         // Act
-        var result = await _service.ValidateAudioFormatAsync(invalidData, "test.mp3");
+        var result = await this._service.ValidateAudioFormatAsync(invalidData, "test.mp3");
 
         // Assert
         Assert.False(result.Success);
@@ -292,7 +292,7 @@ public class VoiceServiceTests
         var audioData = Encoding.UTF8.GetBytes("test_audio_data");
 
         // Act
-        var result = await _service.ValidateAudioFormatAsync(audioData, invalidFileName);
+        var result = await this._service.ValidateAudioFormatAsync(audioData, invalidFileName);
 
         // Assert
         Assert.False(result.Success);
@@ -306,7 +306,7 @@ public class VoiceServiceTests
         var text = "This is a test text for cost estimation.";
 
         // Act
-        var result = await _service.EstimateTtsCostAsync(text, TtsVoice.Nova);
+        var result = await this._service.EstimateTtsCostAsync(text, TtsVoice.Nova);
 
         // Assert
         Assert.True(result.Success);
@@ -324,7 +324,7 @@ public class VoiceServiceTests
     public async Task EstimateTtsCostAsync_WithInvalidText_ShouldReturnError(string invalidText)
     {
         // Act
-        var result = await _service.EstimateTtsCostAsync(invalidText);
+        var result = await this._service.EstimateTtsCostAsync(invalidText);
 
         // Assert
         Assert.False(result.Success);
@@ -338,7 +338,7 @@ public class VoiceServiceTests
         var audioData = new byte[1024 * 1024]; // 1MB of dummy data
 
         // Act
-        var result = await _service.EstimateSttCostAsync(audioData);
+        var result = await this._service.EstimateSttCostAsync(audioData);
 
         // Assert
         Assert.True(result.Success);
@@ -354,7 +354,7 @@ public class VoiceServiceTests
     public async Task EstimateSttCostAsync_WithInvalidAudioData_ShouldReturnError(byte[] invalidData)
     {
         // Act
-        var result = await _service.EstimateSttCostAsync(invalidData);
+        var result = await this._service.EstimateSttCostAsync(invalidData);
 
         // Assert
         Assert.False(result.Success);
@@ -365,10 +365,10 @@ public class VoiceServiceTests
     public async Task IsServiceAvailableAsync_WithMissingApiKey_ShouldReturnFalse()
     {
         // Arrange
-        _config.OpenAiApiKey = "";
+        this._config.OpenAiApiKey = "";
 
         // Act
-        var result = await _service.IsServiceAvailableAsync();
+        var result = await this._service.IsServiceAvailableAsync();
 
         // Assert
         Assert.False(result);
@@ -378,7 +378,7 @@ public class VoiceServiceTests
     public async Task IsServiceAvailableAsync_WithInvalidApiKey_ShouldReturnFalse()
     {
         // Act - Using the test API key which should be invalid
-        var result = await _service.IsServiceAvailableAsync();
+        var result = await this._service.IsServiceAvailableAsync();
 
         // Assert - Should return false due to invalid API key
         Assert.False(result);
@@ -388,7 +388,7 @@ public class VoiceServiceTests
     public async Task GetServiceStatsAsync_ShouldReturnStatistics()
     {
         // Act
-        var result = await _service.GetServiceStatsAsync();
+        var result = await this._service.GetServiceStatsAsync();
 
         // Assert
         Assert.True(result.Success);
@@ -405,7 +405,7 @@ public class VoiceServiceTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new VoiceService(null, Options.Create(_config)));
+            new VoiceService(null, Options.Create(this._config)));
     }
 
     [Fact]
@@ -413,7 +413,7 @@ public class VoiceServiceTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new VoiceService(_mockLogger.Object, null));
+            new VoiceService(this._mockLogger.Object, null));
     }
 
     [Theory]
@@ -430,7 +430,7 @@ public class VoiceServiceTests
         var options = new TtsOptions { Voice = voice };
 
         // Act
-        var result = await _service.TextToSpeechAsync(text, options);
+        var result = await this._service.TextToSpeechAsync(text, options);
 
         // Assert - We expect this to fail with invalid API key, but validation should pass
         if (result.Success)
@@ -456,7 +456,7 @@ public class VoiceServiceTests
         var options = new TtsOptions { Format = format };
 
         // Act
-        var result = await _service.TextToSpeechAsync(text, options);
+        var result = await this._service.TextToSpeechAsync(text, options);
 
         // Assert - We expect this to fail with invalid API key, but validation should pass
         if (result.Success)
@@ -482,7 +482,7 @@ public class VoiceServiceTests
         var options = new SttOptions { ResponseFormat = format };
 
         // Act
-        var result = await _service.SpeechToTextAsync(audioData, options);
+        var result = await this._service.SpeechToTextAsync(audioData, options);
 
         // Assert - We expect this to fail with invalid API key, but validation should pass
         if (result.Success)
@@ -507,7 +507,7 @@ public class VoiceServiceTests
         var options = new TtsOptions { Speed = speed };
 
         // Act
-        var result = await _service.TextToSpeechAsync(text, options);
+        var result = await this._service.TextToSpeechAsync(text, options);
 
         // Assert - We expect this to fail with invalid API key, but speed validation should pass
         if (result.Success)
@@ -530,7 +530,7 @@ public class VoiceServiceTests
         var options = new SttOptions { Temperature = temperature };
 
         // Act
-        var result = await _service.SpeechToTextAsync(audioData, options);
+        var result = await this._service.SpeechToTextAsync(audioData, options);
 
         // Assert - We expect this to fail with invalid API key, but temperature validation should pass
         if (result.Success)

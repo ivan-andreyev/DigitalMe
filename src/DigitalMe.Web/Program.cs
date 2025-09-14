@@ -1,8 +1,8 @@
+using DigitalMe.Web.Data;
+using DigitalMe.Web.Models;
+using DigitalMe.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using DigitalMe.Web.Services;
-using DigitalMe.Web.Models;
-using DigitalMe.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 

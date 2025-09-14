@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
-using DigitalMe.Services;
 using DigitalMe.Common.Exceptions;
+using DigitalMe.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMe.Controllers;
 
@@ -10,14 +10,14 @@ namespace DigitalMe.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/mvp/[controller]")]
-public class MVPConversationController : ControllerBase
+public class MvpConversationController : ControllerBase
 {
-    private readonly IMVPMessageProcessor _messageProcessor;
-    private readonly ILogger<MVPConversationController> _logger;
+    private readonly IMvpMessageProcessor _messageProcessor;
+    private readonly ILogger<MvpConversationController> _logger;
 
-    public MVPConversationController(
-        IMVPMessageProcessor messageProcessor,
-        ILogger<MVPConversationController> logger)
+    public MvpConversationController(
+        IMvpMessageProcessor messageProcessor,
+        ILogger<MvpConversationController> logger)
     {
         _messageProcessor = messageProcessor ?? throw new ArgumentNullException(nameof(messageProcessor));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -29,7 +29,7 @@ public class MVPConversationController : ControllerBase
     /// <param name="request">Chat request with user message</param>
     /// <returns>Ivan's response</returns>
     [HttpPost("send")]
-    public async Task<IActionResult> SendMessage([FromBody] MVPChatRequest request)
+    public async Task<IActionResult> SendMessage([FromBody] MvpChatRequest request)
     {
         try
         {
@@ -50,7 +50,7 @@ public class MVPConversationController : ControllerBase
 
             var response = await _messageProcessor.ProcessMessageAsync(request.Message);
 
-            var result = new MVPChatResponse
+            var result = new MvpChatResponse
             {
                 Response = response,
                 Timestamp = DateTime.UtcNow
@@ -114,7 +114,7 @@ public class MVPConversationController : ControllerBase
 /// <summary>
 /// Simple request model for MVP chat messages
 /// </summary>
-public class MVPChatRequest
+public class MvpChatRequest
 {
     public string Message { get; set; } = string.Empty;
 }
@@ -122,7 +122,7 @@ public class MVPChatRequest
 /// <summary>
 /// Simple response model for MVP chat responses
 /// </summary>
-public class MVPChatResponse
+public class MvpChatResponse
 {
     public string Response { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;

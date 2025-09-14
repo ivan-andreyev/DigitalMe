@@ -86,7 +86,7 @@ public class LivenessStatus
 /// </summary>
 public class SystemMetrics
 {
-    public long MemoryUsageMB { get; set; }
+    public long MemoryUsageMb { get; set; }
     public double CpuUsagePercent { get; set; }
     public int ActiveConnections { get; set; }
     public int RequestsPerMinute { get; set; }

@@ -1,9 +1,9 @@
 @inject IBackupDemoScenariosService BackupScenariosService
 @inject ILogger<BackupDemoControl> Logger
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 
 <div class="backup-demo-control">
-    @if (showBackupOptions)
+    @if (_showBackupOptions)
     {
         <div class="backup-panel">
             <div class="backup-header">
@@ -13,7 +13,7 @@
             </div>
 
             <div class="backup-content">
-                @if (currentMode == BackupMode.None)
+                @if (_currentMode == BackupMode.None)
                 {
                     <div class="backup-modes">
                         <h5>Select Backup Mode:</h5>
@@ -59,7 +59,7 @@
                         <div class="active-mode">
                             <div class="status-indicator">✅</div>
                             <div class="status-text">
-                                <h5>Backup Mode Active: @GetModeDisplayName(currentMode)</h5>
+                                <h5>Backup Mode Active: @GetModeDisplayName(_currentMode)</h5>
                                 <p>Demo environment is configured for reliable execution</p>
                             </div>
                         </div>
@@ -88,12 +88,12 @@
                 }
             </div>
 
-            @if (availableScenarios.Any())
+            @if (_availableScenarios.Any())
             {
                 <div class="available-scenarios">
                     <h5>📋 Available Backup Scenarios:</h5>
                     <div class="scenario-grid">
-                        @foreach (var scenario in availableScenarios)
+                        @foreach (var scenario in _availableScenarios)
                         {
                             <div class="scenario-card @(scenario.Audience.ToString().ToLower())">
                                 <div class="scenario-header">
@@ -125,8 +125,8 @@
     }
 
     <div class="backup-trigger">
-        <button class="backup-toggle @(isBackupActive ? "active" : "")" @onclick="ShowBackupOptions" title="Demo Backup Options">
-            @if (isBackupActive)
+        <button class="backup-toggle @(_isBackupActive ? "active" : "")" @onclick="ShowBackupOptions" title="Demo Backup Options">
+            @if (_isBackupActive)
             {
                 <span class="indicator active">🛡️</span>
             }
@@ -137,10 +137,10 @@
             <span class="label">Backup</span>
         </button>
 
-        @if (isBackupActive)
+        @if (_isBackupActive)
         {
             <div class="backup-status-mini">
-                <span class="status-text">@GetModeDisplayName(currentMode)</span>
+                <span class="status-text">@GetModeDisplayName(_currentMode)</span>
             </div>
         }
     </div>
@@ -550,17 +550,17 @@
 </style>
 
 @code {
-    private bool showBackupOptions = false;
-    private bool isBackupActive = false;
-    private BackupMode currentMode = BackupMode.None;
-    private List<DemoScenario> availableScenarios = new();
+    private bool _showBackupOptions = false;
+    private bool _isBackupActive = false;
+    private BackupMode _currentMode = BackupMode.None;
+    private List<DemoScenario> _availableScenarios = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            isBackupActive = await BackupScenariosService.IsBackupModeActiveAsync();
-            availableScenarios = await BackupScenariosService.GetAvailableScenariosAsync();
+            _isBackupActive = await BackupScenariosService.IsBackupModeActiveAsync();
+            _availableScenarios = await BackupScenariosService.GetAvailableScenariosAsync();
         }
         catch (Exception ex)
         {
@@ -570,13 +570,13 @@
 
     private void ShowBackupOptions()
     {
-        showBackupOptions = true;
+        _showBackupOptions = true;
         StateHasChanged();
     }
 
     private void HideBackupOptions()
     {
-        showBackupOptions = false;
+        _showBackupOptions = false;
         StateHasChanged();
     }
 
@@ -585,18 +585,18 @@
         try
         {
             await BackupScenariosService.ActivateBackupModeAsync(mode);
-            currentMode = mode;
-            isBackupActive = true;
+            _currentMode = mode;
+            _isBackupActive = true;
             
             Logger.LogInformation($"Backup mode activated: {mode}");
-            await JSRuntime.InvokeVoidAsync("alert", $"Backup mode '{GetModeDisplayName(mode)}' activated successfully!");
+            await JsRuntime.InvokeVoidAsync("alert", $"Backup mode '{GetModeDisplayName(mode)}' activated successfully!");
             
             StateHasChanged();
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, $"Failed to activate backup mode: {mode}");
-            await JSRuntime.InvokeVoidAsync("alert", "Failed to activate backup mode. Please try again.");
+            await JsRuntime.InvokeVoidAsync("alert", "Failed to activate backup mode. Please try again.");
         }
     }
 
@@ -605,18 +605,18 @@
         try
         {
             await BackupScenariosService.ActivateBackupModeAsync(BackupMode.None);
-            currentMode = BackupMode.None;
-            isBackupActive = false;
+            _currentMode = BackupMode.None;
+            _isBackupActive = false;
             
             Logger.LogInformation("Backup mode deactivated");
-            await JSRuntime.InvokeVoidAsync("alert", "Backup mode deactivated successfully!");
+            await JsRuntime.InvokeVoidAsync("alert", "Backup mode deactivated successfully!");
             
             StateHasChanged();
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to deactivate backup mode");
-            await JSRuntime.InvokeVoidAsync("alert", "Failed to deactivate backup mode. Please try again.");
+            await JsRuntime.InvokeVoidAsync("alert", "Failed to deactivate backup mode. Please try again.");
         }
     }
 
@@ -625,12 +625,12 @@
         try
         {
             var testResponse = await BackupScenariosService.GetBackupResponseAsync("technical_expertise", "demo_test");
-            await JSRuntime.InvokeVoidAsync("alert", $"Backup test successful!\n\nResponse preview: {testResponse.Content[..Math.Min(100, testResponse.Content.Length)]}...");
+            await JsRuntime.InvokeVoidAsync("alert", $"Backup test successful!\n\nResponse preview: {testResponse.Content[..Math.Min(100, testResponse.Content.Length)]}...");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Backup scenario test failed");
-            await JSRuntime.InvokeVoidAsync("alert", "Backup scenario test failed. Please check the configuration.");
+            await JsRuntime.InvokeVoidAsync("alert", "Backup scenario test failed. Please check the configuration.");
         }
     }
 
@@ -649,7 +649,7 @@
 
     private List<string> GetActiveFeatures()
     {
-        return currentMode switch
+        return _currentMode switch
         {
             BackupMode.OfflineComplete => new List<string>
             {

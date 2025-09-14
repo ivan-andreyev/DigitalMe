@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DigitalMe.Services.Learning.Testing.Statistics;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using DigitalMe.Services.Learning.Testing.Statistics;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -20,8 +20,8 @@ public class StatisticalAnalyzerTests
 
     public StatisticalAnalyzerTests()
     {
-        _mockLogger = new Mock<ILogger<StatisticalAnalyzer>>();
-        _analyzer = new StatisticalAnalyzer(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<StatisticalAnalyzer>>();
+        this._analyzer = new StatisticalAnalyzer(this._mockLogger.Object);
     }
 
     #region Constructor Tests
@@ -30,7 +30,7 @@ public class StatisticalAnalyzerTests
     public void Constructor_WithValidLogger_ShouldInitialize()
     {
         // Arrange & Act
-        var analyzer = new StatisticalAnalyzer(_mockLogger.Object);
+        var analyzer = new StatisticalAnalyzer(this._mockLogger.Object);
 
         // Assert
         Assert.NotNull(analyzer);
@@ -56,7 +56,7 @@ public class StatisticalAnalyzerTests
         var executionTimes = new List<double> { 100, 120, 110, 105, 115, 108, 112, 118, 109, 111 };
 
         // Act
-        var result = _analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
+        var result = this._analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
 
         // Assert
         Assert.True(result >= 0 && result <= 1, "Confidence score should be between 0 and 1");
@@ -72,7 +72,7 @@ public class StatisticalAnalyzerTests
         var executionTimes = new List<double>();
 
         // Act
-        var result = _analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
+        var result = this._analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
 
         // Assert
         Assert.Equal(0, result);
@@ -87,7 +87,7 @@ public class StatisticalAnalyzerTests
         var executionTimes = new List<double> { 100, 120, 110, 105, 115, 108, 112, 118, 109, 111 };
 
         // Act
-        var result = _analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
+        var result = this._analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
 
         // Assert
         Assert.True(result < 0.5, "Should have low confidence for poor success rate");
@@ -102,7 +102,7 @@ public class StatisticalAnalyzerTests
         var executionTimes = new List<double> { 50, 200, 75, 300, 100, 250, 80, 400, 90, 350 }; // High variance
 
         // Act
-        var result = _analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
+        var result = this._analyzer.CalculateConfidenceScore(successRate, totalTests, executionTimes);
 
         // Assert
         Assert.True(result > 0, "Should still have some confidence");
@@ -118,7 +118,7 @@ public class StatisticalAnalyzerTests
         var executionTimes = Enumerable.Repeat(100.0, manyTests).ToList();
 
         // Act
-        var result = _analyzer.CalculateConfidenceScore(successRate, manyTests, executionTimes);
+        var result = this._analyzer.CalculateConfidenceScore(successRate, manyTests, executionTimes);
 
         // Assert
         Assert.True(result > 0.7, "Many consistent tests should increase confidence");
@@ -137,7 +137,7 @@ public class StatisticalAnalyzerTests
         var totalCount = 10;
 
         // Act
-        var result = _analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
+        var result = this._analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
 
         // Assert
         Assert.Contains("AverageExecutionTimeMs", result.Keys);
@@ -167,7 +167,7 @@ public class StatisticalAnalyzerTests
         var totalCount = 0;
 
         // Act
-        var result = _analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
+        var result = this._analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
 
         // Assert
         Assert.Empty(result);
@@ -182,7 +182,7 @@ public class StatisticalAnalyzerTests
         var totalCount = 3;
 
         // Act
-        var result = _analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
+        var result = this._analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
 
         // Assert
         Assert.Equal(1.0, result["SuccessRate"]);
@@ -201,7 +201,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 1, 3, 5, 7, 9 };
 
         // Act
-        var result = _analyzer.CalculateMedian(values);
+        var result = this._analyzer.CalculateMedian(values);
 
         // Assert
         Assert.Equal(5, result);
@@ -214,7 +214,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 1, 2, 3, 4 };
 
         // Act
-        var result = _analyzer.CalculateMedian(values);
+        var result = this._analyzer.CalculateMedian(values);
 
         // Assert
         Assert.Equal(2.5, result);
@@ -227,7 +227,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 9, 1, 5, 3, 7 };
 
         // Act
-        var result = _analyzer.CalculateMedian(values);
+        var result = this._analyzer.CalculateMedian(values);
 
         // Assert
         Assert.Equal(5, result);
@@ -240,7 +240,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double>();
 
         // Act
-        var result = _analyzer.CalculateMedian(values);
+        var result = this._analyzer.CalculateMedian(values);
 
         // Assert
         Assert.Equal(0, result);
@@ -253,7 +253,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 42.5 };
 
         // Act
-        var result = _analyzer.CalculateMedian(values);
+        var result = this._analyzer.CalculateMedian(values);
 
         // Assert
         Assert.Equal(42.5, result);
@@ -270,7 +270,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 5, 5, 5, 5, 5 };
 
         // Act
-        var result = _analyzer.CalculateStandardDeviation(values);
+        var result = this._analyzer.CalculateStandardDeviation(values);
 
         // Assert
         Assert.Equal(0, result, 10); // Allow for floating point precision
@@ -281,10 +281,11 @@ public class StatisticalAnalyzerTests
     {
         // Arrange - simple case where we can calculate manually
         var values = new List<double> { 1, 2, 3, 4, 5 };
+
         // Mean = 3, variance = 2, std dev = sqrt(2) ≈ 1.414
 
         // Act
-        var result = _analyzer.CalculateStandardDeviation(values);
+        var result = this._analyzer.CalculateStandardDeviation(values);
 
         // Assert
         Assert.Equal(Math.Sqrt(2), result, 3); // 3 decimal places precision
@@ -297,7 +298,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double>();
 
         // Act
-        var result = _analyzer.CalculateStandardDeviation(values);
+        var result = this._analyzer.CalculateStandardDeviation(values);
 
         // Assert
         Assert.Equal(0, result);
@@ -310,7 +311,7 @@ public class StatisticalAnalyzerTests
         var values = new List<double> { 42.5 };
 
         // Act
-        var result = _analyzer.CalculateStandardDeviation(values);
+        var result = this._analyzer.CalculateStandardDeviation(values);
 
         // Assert
         Assert.Equal(0, result);
@@ -330,10 +331,10 @@ public class StatisticalAnalyzerTests
         };
 
         // Act
-        var result = _analyzer.AnalyzeTrends(metrics);
+        var result = this._analyzer.AnalyzeTrends(metrics);
 
         // Assert
-        Assert.Equal(TrendDirection.Insufficient_Data, result.Direction);
+        Assert.Equal(TrendDirection.InsufficientData, result.Direction);
         Assert.Contains("Not enough historical data", result.TrendDescription);
     }
 
@@ -355,7 +356,7 @@ public class StatisticalAnalyzerTests
         }
 
         // Act
-        var result = _analyzer.AnalyzeTrends(metrics);
+        var result = this._analyzer.AnalyzeTrends(metrics);
 
         // Assert
         Assert.Equal(TrendDirection.Improving, result.Direction);
@@ -383,7 +384,7 @@ public class StatisticalAnalyzerTests
         }
 
         // Act
-        var result = _analyzer.AnalyzeTrends(metrics);
+        var result = this._analyzer.AnalyzeTrends(metrics);
 
         // Assert
         Assert.Equal(TrendDirection.Stable, result.Direction);
@@ -410,10 +411,10 @@ public class StatisticalAnalyzerTests
         }
 
         // Act
-        var result = _analyzer.AnalyzeTrends(metrics);
+        var result = this._analyzer.AnalyzeTrends(metrics);
 
         // Assert
-        Assert.NotEqual(TrendDirection.Insufficient_Data, result.Direction);
+        Assert.NotEqual(TrendDirection.InsufficientData, result.Direction);
         Assert.True(result.TrendConfidence >= 0 && result.TrendConfidence <= 1);
         Assert.NotEmpty(result.TrendDescription);
         Assert.NotEmpty(result.TrendRecommendations);
@@ -432,7 +433,7 @@ public class StatisticalAnalyzerTests
         var totalCount = 3;
 
         // Act
-        var result = _analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
+        var result = this._analyzer.CalculatePerformanceMetrics(executionTimes, successCount, totalCount);
 
         // Assert
         Assert.NotEmpty(result);
@@ -453,7 +454,7 @@ public class StatisticalAnalyzerTests
         };
 
         // Act
-        var result = _analyzer.AnalyzeTrends(metrics);
+        var result = this._analyzer.AnalyzeTrends(metrics);
 
         // Assert
         Assert.NotNull(result);
@@ -468,11 +469,11 @@ public class StatisticalAnalyzerTests
         var emptyTimes = new List<double>();
 
         // Act & Assert - methods should not throw exceptions
-        var confidence = _analyzer.CalculateConfidenceScore(100, 0, emptyTimes);
-        var metrics = _analyzer.CalculatePerformanceMetrics(emptyTimes, 0, 0);
-        var median = _analyzer.CalculateMedian(emptyTimes);
-        var stdDev = _analyzer.CalculateStandardDeviation(emptyTimes);
-        var trends = _analyzer.AnalyzeTrends(new List<HistoricalMetric>());
+        var confidence = this._analyzer.CalculateConfidenceScore(100, 0, emptyTimes);
+        var metrics = this._analyzer.CalculatePerformanceMetrics(emptyTimes, 0, 0);
+        var median = this._analyzer.CalculateMedian(emptyTimes);
+        var stdDev = this._analyzer.CalculateStandardDeviation(emptyTimes);
+        var trends = this._analyzer.AnalyzeTrends(new List<HistoricalMetric>());
 
         // Validate safe defaults are returned
         Assert.Equal(0, confidence);
@@ -496,7 +497,7 @@ public class StatisticalAnalyzerTests
 
         // Act
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var result = _analyzer.CalculatePerformanceMetrics(largeDataset, successCount, totalCount);
+        var result = this._analyzer.CalculatePerformanceMetrics(largeDataset, successCount, totalCount);
         stopwatch.Stop();
 
         // Assert

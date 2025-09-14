@@ -1,6 +1,6 @@
+using DigitalMe.Infrastructure;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
-using DigitalMe.Infrastructure;
 
 namespace DigitalMe.Services.FileProcessing;
 

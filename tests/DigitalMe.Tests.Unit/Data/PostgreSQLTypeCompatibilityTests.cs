@@ -1,23 +1,23 @@
-using Xunit;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
 using DigitalMe.Data.Entities;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Data;
 
-public class PostgreSQLTypeCompatibilityTests : IDisposable
+public class PostgreSqlTypeCompatibilityTests : IDisposable
 {
     private readonly DigitalMeDbContext _context;
 
-    public PostgreSQLTypeCompatibilityTests()
+    public PostgreSqlTypeCompatibilityTests()
     {
         var options = new DbContextOptionsBuilder<DigitalMeDbContext>()
             .UseInMemoryDatabase($"PostgreSQLTypeTest_{Guid.NewGuid()}")
             .Options;
 
-        _context = new DigitalMeDbContext(options);
-        _context.Database.EnsureCreated();
+        this._context = new DigitalMeDbContext(options);
+        this._context.Database.EnsureCreated();
     }
 
     [Fact]
@@ -35,26 +35,27 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        this._context.Conversations.Add(conversation);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedConversation = await _context.Conversations
+        var savedConversation = await this._context.Conversations
             .FirstOrDefaultAsync(c => c.UserId == "boolean-test-user");
 
         savedConversation.Should().NotBeNull("conversation should be saved successfully");
         savedConversation!.IsActive.Should().BeTrue("boolean field should maintain true value");
 
         // Test boolean queries that were failing before
-        var activeConversations = await _context.Conversations
+        var activeConversations = await this._context.Conversations
             .Where(c => c.IsActive == true) // This query was failing with PostgreSQL
             .ToListAsync();
 
-        activeConversations.Should().Contain(c => c.Id == conversation.Id,
+        activeConversations.Should().Contain(
+            c => c.Id == conversation.Id,
             "boolean comparison should work correctly");
 
         // Test boolean AND operations that were failing
-        var activeUserConversations = await _context.Conversations
+        var activeUserConversations = await this._context.Conversations
             .Where(c => c.UserId == "boolean-test-user" && c.IsActive) // AND with boolean was failing
             .ToListAsync();
 
@@ -79,11 +80,11 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        this._context.Conversations.Add(conversation);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedConversation = await _context.Conversations
+        var savedConversation = await this._context.Conversations
             .FirstOrDefaultAsync(c => c.UserId == "datetime-test-user");
 
         savedConversation.Should().NotBeNull("conversation with DateTime fields should save");
@@ -93,11 +94,12 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             "EndedAt DateTime should be preserved accurately");
 
         // Test DateTime queries that were failing before
-        var recentConversations = await _context.Conversations
+        var recentConversations = await this._context.Conversations
             .Where(c => c.StartedAt > DateTime.UtcNow.AddHours(-2)) // DateTime comparison was failing
             .ToListAsync();
 
-        recentConversations.Should().Contain(c => c.Id == conversation.Id,
+        recentConversations.Should().Contain(
+            c => c.Id == conversation.Id,
             "DateTime comparison queries should work");
     }
 
@@ -112,8 +114,8 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             Title = "Message DateTime Test",
             IsActive = true
         };
-        _context.Conversations.Add(conversation);
-        await _context.SaveChangesAsync();
+        this._context.Conversations.Add(conversation);
+        await this._context.SaveChangesAsync();
 
         var messageTime = DateTime.UtcNow;
         var message = new Message
@@ -126,11 +128,11 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.Messages.Add(message);
-        await _context.SaveChangesAsync();
+        this._context.Messages.Add(message);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedMessage = await _context.Messages
+        var savedMessage = await this._context.Messages
             .FirstOrDefaultAsync(m => m.ConversationId == conversation.Id);
 
         savedMessage.Should().NotBeNull("message should be saved with DateTime field");
@@ -138,7 +140,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
             "Timestamp should be preserved accurately");
 
         // Test DateTime ordering that was problematic
-        var orderedMessages = await _context.Messages
+        var orderedMessages = await this._context.Messages
             .Where(m => m.ConversationId == conversation.Id)
             .OrderByDescending(m => m.Timestamp) // Ordering by DateTime was failing
             .ToListAsync();
@@ -164,11 +166,11 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.PersonalityProfiles.Add(personality);
-        await _context.SaveChangesAsync();
+        this._context.PersonalityProfiles.Add(personality);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedPersonality = await _context.PersonalityProfiles
+        var savedPersonality = await this._context.PersonalityProfiles
             .FirstOrDefaultAsync(p => p.Name == "DateTime Test Profile");
 
         savedPersonality.Should().NotBeNull("personality should save with DateTime fields");
@@ -176,11 +178,12 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         savedPersonality.UpdatedAt.Should().BeCloseTo(updatedTime, TimeSpan.FromSeconds(1));
 
         // Test DateTime range queries
-        var recentProfiles = await _context.PersonalityProfiles
+        var recentProfiles = await this._context.PersonalityProfiles
             .Where(p => p.UpdatedAt > DateTime.UtcNow.AddHours(-1)) // DateTime comparison
             .ToListAsync();
 
-        recentProfiles.Should().Contain(p => p.Id == personality.Id,
+        recentProfiles.Should().Contain(
+            p => p.Id == personality.Id,
             "DateTime range queries should work");
     }
 
@@ -202,11 +205,11 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.TelegramMessages.Add(telegramMessage);
-        await _context.SaveChangesAsync();
+        this._context.TelegramMessages.Add(telegramMessage);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedMessage = await _context.TelegramMessages
+        var savedMessage = await this._context.TelegramMessages
             .FirstOrDefaultAsync(t => t.TelegramMessageId == 123456);
 
         savedMessage.Should().NotBeNull("telegram message should save with mixed field types");
@@ -215,11 +218,12 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         savedMessage.CreatedAt.Should().BeCloseTo(createdDate, TimeSpan.FromSeconds(1));
 
         // Test queries that combine string and DateTime operations
-        var userRecentMessages = await _context.TelegramMessages
+        var userRecentMessages = await this._context.TelegramMessages
             .Where(t => t.Username == "testuser" && t.MessageDate > DateTime.UtcNow.AddHours(-1))
             .ToListAsync();
 
-        userRecentMessages.Should().Contain(t => t.Id == telegramMessage.Id,
+        userRecentMessages.Should().Contain(
+            t => t.Id == telegramMessage.Id,
             "complex queries with string AND DateTime should work");
     }
 
@@ -273,17 +277,17 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         };
 
         // Act
-        _context.PersonalityProfiles.Add(personality);
-        _context.Conversations.Add(conversation);
-        _context.Messages.Add(message);
-        _context.PersonalityTraits.Add(trait);
-        await _context.SaveChangesAsync();
+        this._context.PersonalityProfiles.Add(personality);
+        this._context.Conversations.Add(conversation);
+        this._context.Messages.Add(message);
+        this._context.PersonalityTraits.Add(trait);
+        await this._context.SaveChangesAsync();
 
         // Assert
-        var savedPersonality = await _context.PersonalityProfiles.FindAsync(personalityId);
-        var savedConversation = await _context.Conversations.FindAsync(conversationId);
-        var savedMessage = await _context.Messages.FindAsync(messageId);
-        var savedTrait = await _context.PersonalityTraits.FindAsync(traitId);
+        var savedPersonality = await this._context.PersonalityProfiles.FindAsync(personalityId);
+        var savedConversation = await this._context.Conversations.FindAsync(conversationId);
+        var savedMessage = await this._context.Messages.FindAsync(messageId);
+        var savedTrait = await this._context.PersonalityTraits.FindAsync(traitId);
 
         savedPersonality.Should().NotBeNull("personality should save with GUID ID");
         savedConversation.Should().NotBeNull("conversation should save with GUID ID");
@@ -295,7 +299,7 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
         savedTrait!.PersonalityProfileId.Should().Be(personalityId, "GUID foreign key should work");
 
         // Test GUID queries
-        var messagesForConversation = await _context.Messages
+        var messagesForConversation = await this._context.Messages
             .Where(m => m.ConversationId == conversationId) // GUID comparison
             .ToListAsync();
 
@@ -305,6 +309,6 @@ public class PostgreSQLTypeCompatibilityTests : IDisposable
 
     public void Dispose()
     {
-        _context.Dispose();
+        this._context.Dispose();
     }
 }

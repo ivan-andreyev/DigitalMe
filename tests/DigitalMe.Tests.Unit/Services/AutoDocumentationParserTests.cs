@@ -1,13 +1,13 @@
-using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
 using System.Net;
 using System.Text;
 using DigitalMe.Services.Learning;
-using DigitalMe.Services.Learning.Documentation.HttpContentFetching;
 using DigitalMe.Services.Learning.Documentation.ContentParsing;
+using DigitalMe.Services.Learning.Documentation.HttpContentFetching;
 using DigitalMe.Services.Learning.Documentation.PatternAnalysis;
 using DigitalMe.Services.Learning.Documentation.TestGeneration;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -28,20 +28,20 @@ public class AutoDocumentationParserTests
 
     public AutoDocumentationParserTests()
     {
-        _mockLogger = new Mock<ILogger<AutoDocumentationParser>>();
-        _mockHttpHandler = new Mock<HttpMessageHandler>();
-        _httpClient = new HttpClient(_mockHttpHandler.Object);
-        _mockDocumentationFetcher = new Mock<IDocumentationFetcher>();
-        _mockDocumentationParser = new Mock<IDocumentationParser>();
-        _mockUsagePatternAnalyzer = new Mock<IUsagePatternAnalyzer>();
-        _mockApiTestCaseGenerator = new Mock<IApiTestCaseGenerator>();
+        this._mockLogger = new Mock<ILogger<AutoDocumentationParser>>();
+        this._mockHttpHandler = new Mock<HttpMessageHandler>();
+        this._httpClient = new HttpClient(this._mockHttpHandler.Object);
+        this._mockDocumentationFetcher = new Mock<IDocumentationFetcher>();
+        this._mockDocumentationParser = new Mock<IDocumentationParser>();
+        this._mockUsagePatternAnalyzer = new Mock<IUsagePatternAnalyzer>();
+        this._mockApiTestCaseGenerator = new Mock<IApiTestCaseGenerator>();
 
-        _parser = new AutoDocumentationParser(
-            _mockLogger.Object,
-            _mockDocumentationFetcher.Object,
-            _mockDocumentationParser.Object,
-            _mockUsagePatternAnalyzer.Object,
-            _mockApiTestCaseGenerator.Object);
+        this._parser = new AutoDocumentationParser(
+            this._mockLogger.Object,
+            this._mockDocumentationFetcher.Object,
+            this._mockDocumentationParser.Object,
+            this._mockUsagePatternAnalyzer.Object,
+            this._mockApiTestCaseGenerator.Object);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class AutoDocumentationParserTests
         ";
 
         // Setup mock dependencies for orchestrator pattern
-        _mockDocumentationFetcher
+        this._mockDocumentationFetcher
             .Setup(x => x.FetchDocumentationContentAsync(documentationUrl))
             .ReturnsAsync(mockContent);
 
@@ -107,32 +107,32 @@ public class AutoDocumentationParserTests
             new CodeExample { Language = "javascript", Code = "fetch('https://api.example.com/users', { method: 'POST', headers: { 'Authorization': 'Bearer your-token', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'John Doe', email: 'john@example.com' }) })" }
         };
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractEndpointsAsync(mockContent))
             .ReturnsAsync(mockEndpoints);
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractCodeExamplesAsync(mockContent))
             .ReturnsAsync(mockExamples);
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractConfiguration(mockContent))
             .Returns(new DocumentationConfig { Settings = new Dictionary<string, string>() });
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.DetectAuthenticationMethod(mockContent))
             .Returns(AuthenticationMethod.Bearer);
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractBaseUrl(mockContent))
             .Returns("https://api.example.com");
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractRequiredHeaders(mockContent))
             .Returns(new List<string> { "Authorization", "Content-Type" });
 
         // Act
-        var result = await _parser.ParseApiDocumentationAsync(documentationUrl, apiName);
+        var result = await this._parser.ParseApiDocumentationAsync(documentationUrl, apiName);
 
         // Assert
         Assert.True(result.Success);
@@ -187,12 +187,12 @@ public class AutoDocumentationParserTests
             }
         };
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractCodeExamplesAsync(content))
             .ReturnsAsync(mockExamples);
 
         // Act
-        var examples = await _parser.ExtractCodeExamplesAsync(content);
+        var examples = await this._parser.ExtractCodeExamplesAsync(content);
 
         // Assert
         Assert.True(examples.Count >= 2);
@@ -210,6 +210,7 @@ public class AutoDocumentationParserTests
         Assert.Equal("javascript", secondExample.Language);
         Assert.Contains("POST", secondExample.Code);
         Assert.Equal("/api/users", secondExample.Endpoint);
+
         // Note: Implementation may not extract values from JSON.stringify() payload
         // This is acceptable as the test validates overall code extraction capability
     }
@@ -265,12 +266,12 @@ public class AutoDocumentationParserTests
             ParameterPatterns = new List<ParameterPattern>()
         };
 
-        _mockUsagePatternAnalyzer
+        this._mockUsagePatternAnalyzer
             .Setup(x => x.AnalyzeUsagePatternsAsync(examples))
             .ReturnsAsync(mockAnalysis);
 
         // Act
-        var analysis = await _parser.AnalyzeUsagePatternsAsync(examples);
+        var analysis = await this._parser.AnalyzeUsagePatternsAsync(examples);
 
         // Assert
         Assert.NotEmpty(analysis.Patterns);
@@ -333,12 +334,12 @@ public class AutoDocumentationParserTests
             }
         };
 
-        _mockApiTestCaseGenerator
+        this._mockApiTestCaseGenerator
             .Setup(x => x.GenerateTestCasesAsync(patterns))
             .ReturnsAsync(mockTestCases);
 
         // Act
-        var testCases = await _parser.GenerateTestCasesAsync(patterns);
+        var testCases = await this._parser.GenerateTestCasesAsync(patterns);
 
         // Assert
         Assert.NotEmpty(testCases);
@@ -361,7 +362,7 @@ public class AutoDocumentationParserTests
         var documentationUrl = "https://api.example.com/docs";
         var apiName = "TestAPI";
 
-        _mockHttpHandler
+        this._mockHttpHandler
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -373,7 +374,7 @@ public class AutoDocumentationParserTests
             });
 
         // Act
-        var result = await _parser.ParseApiDocumentationAsync(documentationUrl, apiName);
+        var result = await this._parser.ParseApiDocumentationAsync(documentationUrl, apiName);
 
         // Assert
         Assert.False(result.Success);
@@ -414,12 +415,12 @@ public class AutoDocumentationParserTests
             }
         };
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractCodeExamplesAsync(content))
             .ReturnsAsync(mockExamples);
 
         // Act
-        var examples = await _parser.ExtractCodeExamplesAsync(content);
+        var examples = await this._parser.ExtractCodeExamplesAsync(content);
 
         // Assert
         Assert.NotEmpty(examples);
@@ -444,12 +445,12 @@ public class AutoDocumentationParserTests
             ParameterPatterns = new List<ParameterPattern>()
         };
 
-        _mockUsagePatternAnalyzer
+        this._mockUsagePatternAnalyzer
             .Setup(x => x.AnalyzeUsagePatternsAsync(examples))
             .ReturnsAsync(mockAnalysis);
 
         // Act
-        var analysis = await _parser.AnalyzeUsagePatternsAsync(examples);
+        var analysis = await this._parser.AnalyzeUsagePatternsAsync(examples);
 
         // Assert
         Assert.NotNull(analysis);
@@ -506,12 +507,12 @@ public class AutoDocumentationParserTests
             });
         }
 
-        _mockDocumentationParser
+        this._mockDocumentationParser
             .Setup(x => x.ExtractCodeExamplesAsync(content))
             .ReturnsAsync(mockExamples);
 
         // Act
-        var examples = await _parser.ExtractCodeExamplesAsync(content);
+        var examples = await this._parser.ExtractCodeExamplesAsync(content);
 
         // Assert
         if (shouldInclude)
@@ -548,7 +549,7 @@ public class AutoDocumentationParserTests
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new AutoDocumentationParser(null!, _mockDocumentationFetcher.Object, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
+            new AutoDocumentationParser(null!, this._mockDocumentationFetcher.Object, this._mockDocumentationParser.Object, this._mockUsagePatternAnalyzer.Object, this._mockApiTestCaseGenerator.Object));
     }
 
     [Fact]
@@ -556,20 +557,20 @@ public class AutoDocumentationParserTests
     {
         // Assert
         Assert.Throws<ArgumentNullException>(() =>
-            new AutoDocumentationParser(_mockLogger.Object, null!, _mockDocumentationParser.Object, _mockUsagePatternAnalyzer.Object, _mockApiTestCaseGenerator.Object));
+            new AutoDocumentationParser(this._mockLogger.Object, null!, this._mockDocumentationParser.Object, this._mockUsagePatternAnalyzer.Object, this._mockApiTestCaseGenerator.Object));
     }
 
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
-            _httpClient?.Dispose();
+            this._httpClient?.Dispose();
         }
     }
 
     public void Dispose()
     {
-        Dispose(true);
+        this.Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

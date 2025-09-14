@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.Learning.Testing.TestExecution;
 using DigitalMe.Services.Learning.Testing.Statistics;
+using DigitalMe.Services.Learning.Testing.TestExecution;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning.Testing.ResultsAnalysis;
 

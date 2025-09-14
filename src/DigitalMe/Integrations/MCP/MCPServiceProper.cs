@@ -1,22 +1,22 @@
-using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Models;
 using DigitalMe.Services;
-using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Integrations.MCP;
 
-public class MCPServiceProper : IMcpService
+public class McpServiceProper : IMcpService
 {
-    private readonly IMCPClient _mcpClient;
+    private readonly IMcpClient _mcpClient;
     private readonly IAnthropicService _anthropicService; // Fallback
-    private readonly ILogger<MCPServiceProper> _logger;
+    private readonly ILogger<McpServiceProper> _logger;
     private readonly IIvanPersonalityService _ivanPersonalityService;
 
-    public MCPServiceProper(
-        IMCPClient mcpClient,
+    public McpServiceProper(
+        IMcpClient mcpClient,
         IAnthropicService anthropicService,
-        ILogger<MCPServiceProper> logger,
+        ILogger<McpServiceProper> logger,
         IIvanPersonalityService ivanPersonalityService)
     {
         _mcpClient = mcpClient;
@@ -75,7 +75,7 @@ public class MCPServiceProper : IMcpService
 
             if (_mcpClient.IsConnected)
             {
-                return await SendMessageViaMCPAsync(message, context);
+                return await SendMessageViaMcpAsync(message, context);
             }
             else
             {
@@ -90,7 +90,7 @@ public class MCPServiceProper : IMcpService
         }
     }
 
-    private async Task<string> SendMessageViaMCPAsync(string message, PersonalityContext context)
+    private async Task<string> SendMessageViaMcpAsync(string message, PersonalityContext context)
     {
         _logger.LogInformation("🔗 Sending message via MCP protocol");
 
@@ -101,7 +101,7 @@ public class MCPServiceProper : IMcpService
             var systemPrompt = _ivanPersonalityService.GenerateSystemPrompt(ivanPersonality);
 
             // Prepare MCP request for conversation
-            var request = new MCPRequest
+            var request = new McpRequest
             {
                 Method = "llm/complete",
                 Params = new
@@ -137,7 +137,7 @@ public class MCPServiceProper : IMcpService
 
             if (response.Result?.Content != null)
             {
-                var resultText = ExtractContentFromMCPResult(response.Result.Content);
+                var resultText = ExtractContentFromMcpResult(response.Result.Content);
                 _logger.LogInformation("✅ MCP response received: {Length} characters", resultText.Length);
                 return resultText;
             }
@@ -152,7 +152,7 @@ public class MCPServiceProper : IMcpService
         }
     }
 
-    public async Task<MCPResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
         if (_mcpClient.IsConnected)
         {
@@ -162,9 +162,9 @@ public class MCPServiceProper : IMcpService
         else
         {
             _logger.LogWarning("⚠️ MCP not connected, cannot call tool: {ToolName}", toolName);
-            return new MCPResponse
+            return new McpResponse
             {
-                Error = new MCPError
+                Error = new McpError
                 {
                     Code = -32001,
                     Message = "MCP server not connected"
@@ -189,7 +189,7 @@ public class MCPServiceProper : IMcpService
         await _mcpClient.DisconnectAsync();
     }
 
-    private string ExtractContentFromMCPResult(string resultContent)
+    private string ExtractContentFromMcpResult(string resultContent)
     {
         try
         {

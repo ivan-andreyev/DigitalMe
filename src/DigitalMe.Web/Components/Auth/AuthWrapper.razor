@@ -3,7 +3,7 @@
 @inject ILogger<AuthWrapper> Logger
 @implements IDisposable
 
-@if (isLoading)
+@if (_isLoading)
 {
     <div class="auth-loading">
         <div class="loading-container">
@@ -12,19 +12,19 @@
         </div>
     </div>
 }
-else if (isAuthenticated)
+else if (_isAuthenticated)
 {
     @ChildContent
 }
 else
 {
-    @if (showRegister)
+    @if (_showRegister)
     {
-        <RegisterComponent OnRegisterSuccess="@HandleRegisterSuccess" OnSwitchToLogin="@(() => showRegister = false)" />
+        <RegisterComponent OnRegisterSuccess="@HandleRegisterSuccess" OnSwitchToLogin="@(() => _showRegister = false)" />
     }
     else
     {
-        <LoginComponent OnLoginSuccess="@HandleLoginSuccess" OnSwitchToRegister="@(() => showRegister = true)" />
+        <LoginComponent OnLoginSuccess="@HandleLoginSuccess" OnSwitchToRegister="@(() => _showRegister = true)" />
     }
 }
 
@@ -62,9 +62,9 @@ else
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private bool isAuthenticated = false;
-    private bool isLoading = true;
-    private bool showRegister = false;
+    private bool _isAuthenticated = false;
+    private bool _isLoading = true;
+    private bool _showRegister = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,18 +74,18 @@ else
             AuthService.AuthStateChanged += OnAuthStateChanged;
 
             // Check current authentication status
-            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            _isAuthenticated = await AuthService.IsAuthenticatedAsync();
             
-            Logger.LogInformation("Initial auth check completed. Authenticated: {IsAuthenticated}", isAuthenticated);
+            Logger.LogInformation("Initial auth check completed. Authenticated: {IsAuthenticated}", _isAuthenticated);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error during initial auth check");
-            isAuthenticated = false;
+            _isAuthenticated = false;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }
@@ -97,7 +97,7 @@ else
             Logger.LogInformation("Login success received");
             
             // Auth state should be updated by the AuthService
-            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            _isAuthenticated = await AuthService.IsAuthenticatedAsync();
             
             StateHasChanged();
         }
@@ -113,8 +113,8 @@ else
         {
             Logger.LogInformation("Registration success received");
             
-            isAuthenticated = await AuthService.IsAuthenticatedAsync();
-            showRegister = false;
+            _isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            _showRegister = false;
             
             StateHasChanged();
         }
@@ -126,7 +126,7 @@ else
 
     private void OnAuthStateChanged(bool authenticated)
     {
-        isAuthenticated = authenticated;
+        _isAuthenticated = authenticated;
         
         // Ensure UI update happens on correct thread
         InvokeAsync(() =>

@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
-using FluentAssertions;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration.Frontend;
 

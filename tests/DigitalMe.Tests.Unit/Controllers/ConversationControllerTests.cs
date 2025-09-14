@@ -1,13 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using DigitalMe.DTOs;
-using DigitalMe.Data.Entities;
 using DigitalMe.Data;
+using DigitalMe.Data.Entities;
+using DigitalMe.DTOs;
 using DigitalMe.Tests.Unit.Builders;
 using DigitalMe.Tests.Unit.Fixtures;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMe.Tests.Unit.Controllers;
 
@@ -18,8 +18,8 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
     public ConversationControllerTests(TestWebApplicationFactory<Program> factory)
     {
-        _factory = factory;
-        _client = factory.CreateClient();
+        this._factory = factory;
+        this._client = factory.CreateClient();
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/conversation", createDto);
+        var response = await this._client.PostAsJsonAsync("/api/conversation", createDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -79,10 +79,10 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
                 .Build()
         };
 
-        await SeedTestData(conversation, messages);
+        await this.SeedTestData(conversation, messages);
 
         // Act
-        var response = await _client.GetAsync($"/api/conversation/active?platform={conversation.Platform}&userId={conversation.UserId}");
+        var response = await this._client.GetAsync($"/api/conversation/active?platform={conversation.Platform}&userId={conversation.UserId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -105,7 +105,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
     public async Task GetActiveConversation_WithNoActiveConversation_ShouldReturnNotFound()
     {
         // Act
-        var response = await _client.GetAsync("/api/conversation/active?platform=Discord&userId=nonexistent");
+        var response = await this._client.GetAsync("/api/conversation/active?platform=Discord&userId=nonexistent");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -141,10 +141,10 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
                 .Build()
         };
 
-        await SeedTestData(conversation, messages);
+        await this.SeedTestData(conversation, messages);
 
         // Act
-        var response = await _client.GetAsync($"/api/conversation/{conversation.Id}/messages");
+        var response = await this._client.GetAsync($"/api/conversation/{conversation.Id}/messages");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -178,10 +178,10 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
                 .Build())
             .ToArray();
 
-        await SeedTestData(conversation, messages);
+        await this.SeedTestData(conversation, messages);
 
         // Act
-        var response = await _client.GetAsync($"/api/conversation/{conversation.Id}/messages?limit=3");
+        var response = await this._client.GetAsync($"/api/conversation/{conversation.Id}/messages?limit=3");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -204,7 +204,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
             .ForTelegram("user_add_message")
             .Build();
 
-        await SeedTestData(conversation);
+        await this.SeedTestData(conversation);
 
         var createMessageDto = new CreateMessageDto
         {
@@ -214,7 +214,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/conversation/{conversation.Id}/messages", createMessageDto);
+        var response = await this._client.PostAsJsonAsync($"/api/conversation/{conversation.Id}/messages", createMessageDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -245,7 +245,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/conversation/{nonExistentConversationId}/messages", createMessageDto);
+        var response = await this._client.PostAsJsonAsync($"/api/conversation/{nonExistentConversationId}/messages", createMessageDto);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
@@ -260,10 +260,10 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
             .IsActive(true)
             .Build();
 
-        await SeedTestData(conversation);
+        await this.SeedTestData(conversation);
 
         // Act
-        var response = await _client.PostAsync($"/api/conversation/{conversation.Id}/end", null);
+        var response = await this._client.PostAsync($"/api/conversation/{conversation.Id}/end", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -288,7 +288,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
         var nonExistentConversationId = Guid.NewGuid();
 
         // Act
-        var response = await _client.PostAsync($"/api/conversation/{nonExistentConversationId}/end", null);
+        var response = await this._client.PostAsync($"/api/conversation/{nonExistentConversationId}/end", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -316,6 +316,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
                 .IsActive(false)
                 .WithEndedAt(DateTime.UtcNow.AddHours(-1))
                 .Build(),
+
             // Different user - should not be included
             ConversationBuilder.Create()
                 .WithPlatform(platform)
@@ -324,10 +325,10 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
                 .Build()
         };
 
-        await SeedTestData(conversations, null);
+        await this.SeedTestData(conversations, null);
 
         // Act
-        var response = await _client.GetAsync($"/api/conversation/user?platform={platform}&userId={userId}");
+        var response = await this._client.GetAsync($"/api/conversation/user?platform={platform}&userId={userId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -349,7 +350,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
     public async Task GetUserConversations_WithNoUserConversations_ShouldReturnEmptyArray()
     {
         // Act
-        var response = await _client.GetAsync("/api/conversation/user?platform=Discord&userId=no_conversations_user");
+        var response = await this._client.GetAsync("/api/conversation/user?platform=Discord&userId=no_conversations_user");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -366,7 +367,7 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
     private async Task EnsureCleanDatabaseWithIvan()
     {
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
 
         // Ensure database is clean and recreated with Ivan
@@ -382,15 +383,15 @@ public class ConversationControllerTests : IClassFixture<TestWebApplicationFacto
 
     private async Task SeedTestData(Conversation conversation, Message[]? messages = null)
     {
-        await SeedTestData(new[] { conversation }, messages);
+        await this.SeedTestData(new[] { conversation }, messages);
     }
 
     private async Task SeedTestData(Conversation[] conversations, Message[]? messages = null)
     {
         // First ensure clean database with Ivan
-        await EnsureCleanDatabaseWithIvan();
+        await this.EnsureCleanDatabaseWithIvan();
 
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
 
         foreach (var conversation in conversations)

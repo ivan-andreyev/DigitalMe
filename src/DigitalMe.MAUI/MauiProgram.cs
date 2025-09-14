@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Components.WebView.Maui;
+using System.Reflection;
+using CommunityToolkit.Maui;
 using DigitalMe.MAUI.Data;
 using DigitalMe.MAUI.Models;
 using DigitalMe.MAUI.Services;
-using CommunityToolkit.Maui;
-using System.Reflection;
+using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.Configuration;
 
 namespace DigitalMe.MAUI;

@@ -8,79 +8,79 @@ public class ConversationBuilder
 
     public ConversationBuilder()
     {
-        _conversation = new Conversation();
+        this._conversation = new Conversation();
     }
 
     public static ConversationBuilder Create() => new();
 
     public ConversationBuilder WithId(Guid id)
     {
-        _conversation.Id = id;
+        this._conversation.Id = id;
         return this;
     }
 
     public ConversationBuilder WithTitle(string title)
     {
-        _conversation.Title = title;
+        this._conversation.Title = title;
         return this;
     }
 
     public ConversationBuilder WithPlatform(string platform)
     {
-        _conversation.Platform = platform;
+        this._conversation.Platform = platform;
         return this;
     }
 
     public ConversationBuilder WithUserId(string userId)
     {
-        _conversation.UserId = userId;
+        this._conversation.UserId = userId;
         return this;
     }
 
     public ConversationBuilder WithStartedAt(DateTime startedAt)
     {
-        _conversation.StartedAt = startedAt;
+        this._conversation.StartedAt = startedAt;
         return this;
     }
 
     public ConversationBuilder WithEndedAt(DateTime? endedAt)
     {
-        _conversation.EndedAt = endedAt;
+        this._conversation.EndedAt = endedAt;
         return this;
     }
 
     public ConversationBuilder WithIsActive(bool isActive)
     {
-        _conversation.IsActive = isActive;
+        this._conversation.IsActive = isActive;
         return this;
     }
 
     public ConversationBuilder WithMessage(Message message)
     {
-        _conversation.Messages.Add(message);
+        this._conversation.Messages.Add(message);
         return this;
     }
 
     public ConversationBuilder WithMessages(ICollection<Message> messages)
     {
-        _conversation.Messages = messages;
+        this._conversation.Messages = messages;
         return this;
     }
 
     public ConversationBuilder IsActive(bool isActive)
     {
-        _conversation.IsActive = isActive;
+        this._conversation.IsActive = isActive;
         return this;
     }
 
     public ConversationBuilder ForTelegram(string userId)
     {
-        _conversation.Platform = "Telegram";
-        _conversation.UserId = userId;
+        this._conversation.Platform = "Telegram";
+        this._conversation.UserId = userId;
         return this;
     }
 
-    public Conversation Build() => _conversation;
+    public Conversation Build() => this._conversation;
 
     public static Conversation Default() => Create()
         .WithTitle("Default Chat Session")

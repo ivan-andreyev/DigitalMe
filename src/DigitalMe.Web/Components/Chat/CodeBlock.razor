@@ -2,7 +2,7 @@
     <div class="code-header">
         <span class="language-label">@GetLanguageLabel()</span>
         <button type="button" @onclick="CopyCode" class="copy-button" title="Копировать код">
-            @if (copySuccess)
+            @if (_copySuccess)
             {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
@@ -112,13 +112,13 @@
 }
 </style>
 
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 @code {
     [Parameter, EditorRequired] public string Code { get; set; } = string.Empty;
     [Parameter] public string Language { get; set; } = "text";
     
-    private bool copySuccess = false;
+    private bool _copySuccess = false;
 
     private string GetLanguageLabel()
     {
@@ -141,14 +141,14 @@
     {
         try
         {
-            await JS.InvokeVoidAsync("copyToClipboard", Code);
-            copySuccess = true;
+            await Js.InvokeVoidAsync("copyToClipboard", Code);
+            _copySuccess = true;
             StateHasChanged();
             
             // Reset copy indicator after 2 seconds
             _ = Task.Delay(2000).ContinueWith(_ =>
             {
-                copySuccess = false;
+                _copySuccess = false;
                 InvokeAsync(StateHasChanged);
             });
         }

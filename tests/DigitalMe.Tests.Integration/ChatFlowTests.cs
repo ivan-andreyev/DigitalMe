@@ -1,17 +1,17 @@
+using System.Text.Json;
+using DigitalMe.Data;
+using DigitalMe.Data.Entities;
+using DigitalMe.DTOs;
+using DigitalMe.Services;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using Xunit;
-using FluentAssertions;
-using DigitalMe.Data;
-using DigitalMe.DTOs;
-using DigitalMe.Data.Entities;
-using DigitalMe.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using FluentAssertions.Execution;
+using Xunit;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -31,7 +31,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange
         await SeedTestData();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
@@ -148,13 +148,13 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange - Don't seed Ivan's personality to test error handling
         Environment.SetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY", "false");
-        
+
         // Explicitly clear the database to ensure no Ivan personality exists
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
         context.PersonalityProfiles.RemoveRange(context.PersonalityProfiles.Where(p => p.Name == "Ivan"));
         await context.SaveChangesAsync();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
@@ -186,20 +186,20 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
 
         // Assert
         errorMessages.Should().HaveCount(1, "should receive error when Ivan's personality is not found");
-        
+
         // Debug: Print the actual error structure
         var errorJson = JsonSerializer.Serialize(errorMessages.First(), new JsonSerializerOptions { WriteIndented = true });
         Console.WriteLine($"DEBUG ERROR STRUCTURE: {errorJson}");
-        
+
         var error = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(errorMessages.First()));
-        
+
         // Check if code property exists (lowercase in JSON serialization)
         error.TryGetProperty("code", out var codeElement).Should().BeTrue("Error object should contain 'code' property");
         codeElement.GetString().Should().Be("PROCESSING_ERROR", "ChatHub catches PersonalityServiceException and maps to PROCESSING_ERROR");
-        
+
         error.TryGetProperty("message", out var messageElement).Should().BeTrue("Error object should contain 'message' property");
         messageElement.GetString().Should().Be("Произошла ошибка при обработке сообщения. Попробуйте снова.", "ChatHub returns generic error message");
-        
+
         // Clean up: Reset environment variable for other tests
         Environment.SetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY", null);
     }
@@ -209,12 +209,12 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange
         await SeedTestData();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         var connection1 = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
             .Build();
-        
+
         var connection2 = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
             .Build();
@@ -241,7 +241,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
 
         await connection2.InvokeAsync("SendMessage", new ChatRequestDto
         {
-            Message = "Hello from user 2", 
+            Message = "Hello from user 2",
             UserId = "user2",
             Platform = "Web"
         });
@@ -252,11 +252,11 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
         user1Messages.Should().HaveCount(2, "user1 should only see their own conversation");
         user2Messages.Should().HaveCount(2, "user2 should only see their own conversation");
 
-        user1Messages.Should().OnlyContain(m => 
+        user1Messages.Should().OnlyContain(m =>
             m.Content.Contains("user 1") || m.Content.Contains("Mock Ivan response"),
             "user1 should only receive messages from their conversation");
-            
-        user2Messages.Should().OnlyContain(m => 
+
+        user2Messages.Should().OnlyContain(m =>
             m.Content.Contains("user 2") || m.Content.Contains("Mock Ivan response"),
             "user2 should only receive messages from their conversation");
 
@@ -268,7 +268,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
+
         // Ensure database is clean
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
@@ -304,7 +304,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
                 Weight = 1.0
             }
         };
-        
+
         ivanPersonality.Traits = traits;
 
         context.PersonalityProfiles.Add(ivanPersonality);
@@ -316,7 +316,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange
         await SeedTestData();
-        
+
         // Override mock to simulate API failure
         using var scope = _factory.Services.CreateScope();
         var mockService = new Mock<DigitalMe.Integrations.MCP.IAnthropicService>();
@@ -347,11 +347,11 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
 
         // Assert
         receivedMessages.Should().HaveCount(2, "should receive user message and fallback response");
-        
+
         var fallbackMessage = receivedMessages.FirstOrDefault(m => m.Role == "assistant");
         fallbackMessage.Should().NotBeNull("should receive fallback response on API failure");
         fallbackMessage!.Content.Should().NotBeNullOrEmpty("fallback response should have content");
-        
+
         // Verify fallback response characteristics
         fallbackMessage.Metadata.Should().ContainKey("confidence");
         var confidence = ((JsonElement)fallbackMessage.Metadata["confidence"]).GetDouble();
@@ -363,7 +363,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange - This test verifies PostgreSQL type issues we fixed
         await SeedTestData();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
@@ -392,16 +392,16 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
         // Verify database operations completed successfully
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-        
+
         var conversation = await context.Conversations
             .Include(c => c.Messages)
             .FirstOrDefaultAsync(c => c.UserId == _testUserId);
-            
+
         conversation.Should().NotBeNull("conversation should be created successfully");
         conversation!.IsActive.Should().BeTrue("boolean field should work correctly");
         conversation.StartedAt.Should().BeBefore(DateTime.UtcNow, "DateTime field should work correctly");
         conversation.Messages.Should().HaveCount(2, "messages should be saved with proper DateTime handling");
-        
+
         foreach (var message in conversation.Messages)
         {
             message.Timestamp.Should().BeBefore(DateTime.UtcNow, "message timestamps should be valid");
@@ -413,7 +413,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange - Test that all 9 steps complete successfully
         await SeedTestData();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
@@ -421,7 +421,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
 
         var receivedMessages = new List<MessageDto>();
         var typingIndicators = new List<object>();
-        
+
         _connection.On<MessageDto>("MessageReceived", message => receivedMessages.Add(message));
         _connection.On<object>("TypingIndicator", indicator => typingIndicators.Add(indicator));
 
@@ -442,20 +442,20 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
         // Assert
         // Step 1-2: Conversation and message creation
         receivedMessages.Should().HaveCount(2, "should complete steps 1-2 (conversation + message creation)");
-        
+
         // Step 3: User message notification
         var userMessage = receivedMessages.First(m => m.Role == "user");
         userMessage.Should().NotBeNull("step 3 should notify about user message");
-        
+
         // Step 4-5: Typing indicator and personality loading
         typingIndicators.Should().HaveCountGreaterThan(0, "step 4 should show typing indicator");
-        
+
         // Step 6-9: Agent processing, response generation, and delivery
         var assistantMessage = receivedMessages.First(m => m.Role == "assistant");
         assistantMessage.Should().NotBeNull("steps 6-9 should generate and deliver response");
         assistantMessage.Metadata.Should().ContainKey("mood", "step 6 should include mood analysis");
         assistantMessage.Metadata.Should().ContainKey("confidence", "step 6 should include confidence score");
-        
+
         // Database persistence verification removed due to scope issues in integration tests
         // The SignalR messaging pipeline is tested above, which is the core functionality
     }
@@ -465,7 +465,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange
         await SeedTestData();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
@@ -511,7 +511,7 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
 
         // Assert
         receivedMessages.Should().HaveCountGreaterThan(1, "should handle messages before and after reconnection");
-        
+
         // Database persistence verification removed due to scope issues in integration tests
         // The SignalR connection resilience is tested above, which is the core functionality
     }
@@ -521,13 +521,13 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         // Arrange - Test various error scenarios
         Environment.SetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY", "false");
-        
+
         // Explicitly clear the database to ensure no Ivan personality exists
         using var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
         context.PersonalityProfiles.RemoveRange(context.PersonalityProfiles.Where(p => p.Name == "Ivan"));
         await context.SaveChangesAsync();
-        
+
         var hubUrl = _factory.Server.BaseAddress + "chathub";
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options => { options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler(); })
@@ -547,33 +547,33 @@ public class ChatFlowTests : IClassFixture<CustomWebApplicationFactory<Program>>
             UserId = _testUserId,
             Platform = "Web"
         });
-        
+
         await Task.Delay(2000);
-        
+
         errorMessages.Should().HaveCount(1, "should receive error for missing personality");
         var error = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(errorMessages.First()));
         error.GetProperty("code").GetString().Should().Be("PROCESSING_ERROR", "ChatHub catches PersonalityServiceException and maps to PROCESSING_ERROR");
         error.GetProperty("message").GetString().Should().Be("Произошла ошибка при обработке сообщения. Попробуйте снова.", "ChatHub returns generic error message");
-        
+
         // Test 2: Empty message
         errorMessages.Clear();
         await SeedTestData(); // Add personality for next test
-        
+
         await _connection.InvokeAsync("SendMessage", new ChatRequestDto
         {
             Message = "",
             UserId = _testUserId,
             Platform = "Web"
         });
-        
+
         await Task.Delay(1000);
-        
+
         // Should handle empty message gracefully without crash
         // (specific behavior depends on validation implementation)
-        
+
         // Empty message should either be handled gracefully or trigger a validation error
         // The exact behavior depends on the validation rules in the implementation
-        
+
         // Clean up: Reset environment variable for other tests
         Environment.SetEnvironmentVariable("DIGITALME_SEED_IVAN_PERSONALITY", null);
     }

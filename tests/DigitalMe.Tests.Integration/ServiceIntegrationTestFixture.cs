@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
 using DigitalMe.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -15,7 +15,7 @@ namespace DigitalMe.Tests.Integration;
 public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
 {
     public IServiceProvider ServiceProvider { get; private set; }
-    public IConfiguration Configuration { get; private set; }
+    public IConfiguration Configuration { get; private set; } = null!;
 
     public ServiceIntegrationTestFixture()
     {
@@ -28,7 +28,7 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
         
         // Create test configuration
         var configBuilder = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>
+            .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:DefaultConnection"] = "Host=localhost;Database=digitalme_test;Username=test;Password=test",
                 ["Anthropic:ApiKey"] = "test-api-key",

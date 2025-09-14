@@ -4,12 +4,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using DigitalMe.Configuration;
+using DigitalMe.Services.Performance;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using DigitalMe.Configuration;
-using DigitalMe.Services.Performance;
 
 namespace DigitalMe.Services.Security;
 

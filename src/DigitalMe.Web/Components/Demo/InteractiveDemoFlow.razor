@@ -1,4 +1,4 @@
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 @inject ILogger<InteractiveDemoFlow> Logger
 
 <div class="demo-flow">
@@ -8,7 +8,7 @@
     </div>
 
     <div class="demo-content">
-        @if (currentStep == 0)
+        @if (_currentStep == 0)
         {
             <div class="welcome-screen">
                 <div class="welcome-content">
@@ -70,32 +70,32 @@
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: @GetProgressPercentage()%"></div>
                         </div>
-                        <span class="progress-text">Step @(currentStep - 1) of @(GetTotalSteps())</span>
+                        <span class="progress-text">Step @(_currentStep - 1) of @(GetTotalSteps())</span>
                     </div>
                     <button class="back-btn" @onclick="GoBack">← Back to Selection</button>
                 </div>
 
                 <div class="scenario-content">
-                    @if (currentScenario == 1)
+                    @if (_currentScenario == 1)
                     {
                         @RenderExecutiveScenario()
                     }
-                    else if (currentScenario == 2)
+                    else if (_currentScenario == 2)
                     {
                         @RenderTechnicalScenario()
                     }
-                    else if (currentScenario == 3)
+                    else if (_currentScenario == 3)
                     {
                         @RenderPlaygroundScenario()
                     }
                 </div>
 
                 <div class="scenario-controls">
-                    @if (currentStep > 1)
+                    @if (_currentStep > 1)
                     {
                         <button class="control-btn secondary" @onclick="PreviousStep">← Previous</button>
                     }
-                    @if (currentStep < GetTotalSteps())
+                    @if (_currentStep < GetTotalSteps())
                     {
                         <button class="control-btn primary" @onclick="NextStep">Next →</button>
                     }
@@ -445,37 +445,37 @@
 </style>
 
 @code {
-    private int currentStep = 0;
-    private int currentScenario = 0;
+    private int _currentStep = 0;
+    private int _currentScenario = 0;
 
     private void StartScenario(int scenarioId)
     {
-        currentScenario = scenarioId;
-        currentStep = 1;
+        _currentScenario = scenarioId;
+        _currentStep = 1;
         StateHasChanged();
     }
 
     private void GoBack()
     {
-        currentStep = 0;
-        currentScenario = 0;
+        _currentStep = 0;
+        _currentScenario = 0;
         StateHasChanged();
     }
 
     private void NextStep()
     {
-        if (currentStep < GetTotalSteps())
+        if (_currentStep < GetTotalSteps())
         {
-            currentStep++;
+            _currentStep++;
             StateHasChanged();
         }
     }
 
     private void PreviousStep()
     {
-        if (currentStep > 1)
+        if (_currentStep > 1)
         {
-            currentStep--;
+            _currentStep--;
             StateHasChanged();
         }
     }
@@ -483,13 +483,13 @@
     private void CompleteDemo()
     {
         // Could add completion analytics or redirect
-        Logger.LogInformation($"Demo completed - Scenario: {currentScenario}");
+        Logger.LogInformation($"Demo completed - Scenario: {_currentScenario}");
         GoBack();
     }
 
     private int GetTotalSteps()
     {
-        return currentScenario switch
+        return _currentScenario switch
         {
             1 => 4, // Executive scenario
             2 => 5, // Technical scenario
@@ -501,12 +501,12 @@
     private double GetProgressPercentage()
     {
         var total = GetTotalSteps();
-        return total > 0 ? ((double)(currentStep - 1) / total) * 100 : 0;
+        return total > 0 ? ((double)(_currentStep - 1) / total) * 100 : 0;
     }
 
     private RenderFragment RenderExecutiveScenario()
     {
-        return currentStep switch
+        return _currentStep switch
         {
             1 => @<div class="step-content">
                 <h3>💼 Executive Overview - Platform Value</h3>
@@ -622,7 +622,7 @@
 
     private RenderFragment RenderTechnicalScenario()
     {
-        return currentStep switch
+        return _currentStep switch
         {
             1 => @<div class="step-content">
                 <h3>🏗️ Enterprise Architecture Overview</h3>
@@ -730,7 +730,7 @@
 
     private RenderFragment RenderPlaygroundScenario()
     {
-        return currentStep switch
+        return _currentStep switch
         {
             1 => @<div class="step-content">
                 <h3>🎮 Interactive Playground Setup</h3>

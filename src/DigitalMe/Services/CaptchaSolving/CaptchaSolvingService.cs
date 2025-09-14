@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.CaptchaSolving;
 
@@ -31,7 +31,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             _apiKey = Environment.GetEnvironmentVariable(envVarName);
             _logger.LogInformation($"Attempting to get 2captcha API key from environment variable: {envVarName}");
         }
-        
+
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
             _logger.LogError("2captcha API key not configured - this is required for service operation");
@@ -41,7 +41,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
         {
             _logger.LogInformation("2captcha API key configured successfully");
         }
-        
+
         // Set default timeout for HTTP client
         _httpClient.Timeout = TimeSpan.FromMinutes(10);
     }
@@ -70,10 +70,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "base64",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["body"] = imageBase64,
                 ["regsense"] = options.CaseSensitive ? "1" : "0",
-                ["language"] = options.Language
+                ["language"] = options.Language ?? "en" ?? "en"
             };
 
             if (options.MinLength > 0)
@@ -135,10 +135,10 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "get",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["file"] = imageUrl,
                 ["regsense"] = options.CaseSensitive ? "1" : "0",
-                ["language"] = options.Language
+                ["language"] = options.Language ?? "en"
             };
 
             if (options.MinLength > 0)
@@ -205,7 +205,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "userrecaptcha",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["googlekey"] = siteKey,
                 ["pageurl"] = pageUrl,
                 ["invisible"] = options.Invisible ? "1" : "0"
@@ -299,7 +299,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "userrecaptcha",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["googlekey"] = siteKey,
                 ["pageurl"] = pageUrl,
                 ["version"] = "v3",
@@ -375,7 +375,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "hcaptcha",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["sitekey"] = siteKey,
                 ["pageurl"] = pageUrl,
                 ["invisible"] = options.Invisible ? "1" : "0"
@@ -449,9 +449,9 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             var submitParams = new Dictionary<string, string>
             {
                 ["method"] = "textcaptcha",
-                ["key"] = _apiKey,
+                ["key"] = _apiKey!,
                 ["textcaptcha"] = text,
-                ["language"] = options.Language
+                ["language"] = options.Language ?? "en"
             };
 
             if (!string.IsNullOrEmpty(options.Instructions))
@@ -502,13 +502,13 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             response.EnsureSuccessStatusCode();
 
             var balanceText = await response.Content.ReadAsStringAsync();
-            
+
             // Check for API errors
             if (balanceText.StartsWith("ERROR_WRONG_USER_KEY"))
             {
                 return CaptchaSolvingResult.ErrorResult("Invalid API key");
             }
-            
+
             // Handle "OK|balance" format
             if (balanceText.StartsWith("OK|"))
             {
@@ -519,14 +519,14 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                     return CaptchaSolvingResult.SuccessResult(balance, $"Account balance: ${balance}");
                 }
             }
-            
+
             // Try parsing as direct decimal
             if (decimal.TryParse(balanceText, out var directBalance))
             {
                 _logger.LogInformation("Account balance: ${Balance}", directBalance);
                 return CaptchaSolvingResult.SuccessResult(directBalance, $"Account balance: ${directBalance}");
             }
-            
+
             return CaptchaSolvingResult.ErrorResult($"Failed to parse balance: {balanceText}");
         }
         catch (Exception ex)
@@ -547,7 +547,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             response.EnsureSuccessStatusCode();
 
             var responseText = await response.Content.ReadAsStringAsync();
-            
+
             if (responseText.Contains("OK_REPORT_RECORDED"))
             {
                 _logger.LogInformation("Incorrect CAPTCHA reported successfully: {CaptchaId}", captchaId);
@@ -573,7 +573,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
             _logger.LogWarning("2captcha API key not configured - service unavailable");
             return false;
         }
-        
+
         try
         {
             var response = await _httpClient.GetAsync($"{BaseUrl}/res.php?key={_apiKey}&action=getbalance");
@@ -587,7 +587,7 @@ public class CaptchaSolvingService : ICaptchaSolvingService
     }
 
     /// <inheritdoc />
-    public async Task<CaptchaSolvingResult> GetServiceStatsAsync()
+    public Task<CaptchaSolvingResult> GetServiceStatsAsync()
     {
         try
         {
@@ -603,12 +603,12 @@ public class CaptchaSolvingService : ICaptchaSolvingService
                 LastActivity = DateTime.UtcNow
             };
 
-            return CaptchaSolvingResult.SuccessResult(stats, "Service statistics retrieved");
+            return Task.FromResult(CaptchaSolvingResult.SuccessResult(stats, "Service statistics retrieved"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get service statistics");
-            return CaptchaSolvingResult.ErrorResult($"Stats retrieval failed: {ex.Message}", ex.ToString());
+            return Task.FromResult(CaptchaSolvingResult.ErrorResult($"Stats retrieval failed: {ex.Message}", ex.ToString()));
         }
     }
 
@@ -715,22 +715,22 @@ public class CaptchaSolvingServiceConfig
     /// API key for 2captcha.com service authentication
     /// </summary>
     public string ApiKey { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Base URL for 2captcha.com API endpoints
     /// </summary>
     public string BaseUrl { get; set; } = "http://2captcha.com/";
-    
+
     /// <summary>
     /// Default timeout in seconds for CAPTCHA solving operations
     /// </summary>
     public int DefaultTimeout { get; set; } = 300;
-    
+
     /// <summary>
     /// Polling interval in seconds to check CAPTCHA solution status
     /// </summary>
     public int PollingInterval { get; set; } = 5;
-    
+
     /// <summary>
     /// Enable detailed logging for CAPTCHA solving operations
     /// </summary>

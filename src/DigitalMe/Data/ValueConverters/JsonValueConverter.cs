@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DigitalMe.Data.ValueConverters;
 

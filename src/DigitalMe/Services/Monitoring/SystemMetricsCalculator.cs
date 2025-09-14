@@ -26,20 +26,20 @@ public class SystemMetricsCalculator
         {
             var process = Process.GetCurrentProcess();
             var memoryUsage = process.WorkingSet64;
-            var memoryUsageMB = memoryUsage / 1024 / 1024;
+            var memoryUsageMb = memoryUsage / 1024 / 1024;
             var gcCollections = GC.CollectionCount(0) + GC.CollectionCount(1) + GC.CollectionCount(2);
             var threadCount = process.Threads.Count;
 
             var metrics = new SystemResourceMetrics
             {
-                MemoryUsageMB = memoryUsageMB,
+                MemoryUsageMb = memoryUsageMb,
                 CpuUsagePercent = CalculateCpuUsage(process),
                 GcCollections = gcCollections,
                 ThreadCount = threadCount
             };
 
             _logger.LogDebug("Calculated system metrics for {Context}: Memory={Memory}MB, Threads={Threads}, GC={GC}",
-                context, memoryUsageMB, threadCount, gcCollections);
+                context, memoryUsageMb, threadCount, gcCollections);
 
             return metrics;
         }
@@ -60,7 +60,7 @@ public class SystemMetricsCalculator
         return new MetricDataPoint
         {
             Timestamp = DateTime.UtcNow,
-            Value = systemMetrics.MemoryUsageMB,
+            Value = systemMetrics.MemoryUsageMb,
             Success = true,
             Metadata = new Dictionary<string, object>
             {
@@ -111,7 +111,7 @@ public class SystemMetricsCalculator
 
         return new SystemMetrics
         {
-            MemoryUsageMB = performanceMetrics.SystemResources.MemoryUsageMB,
+            MemoryUsageMb = performanceMetrics.SystemResources.MemoryUsageMb,
             CpuUsagePercent = performanceMetrics.SystemResources.CpuUsagePercent,
             ActiveConnections = performanceMetrics.SignalR.ActiveConnections,
             RequestsPerMinute = performanceMetrics.Business.AgentResponsesPerMinute,

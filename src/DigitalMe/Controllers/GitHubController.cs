@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using DigitalMe.Integrations.External.GitHub;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMe.Controllers;
 

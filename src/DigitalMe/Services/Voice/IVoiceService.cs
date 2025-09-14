@@ -167,7 +167,7 @@ public enum AudioFormat
     Flac,
     Wav,
     Pcm,
-    M4a,
+    M4A,
     Mp4,
     Mpeg,
     Mpga,

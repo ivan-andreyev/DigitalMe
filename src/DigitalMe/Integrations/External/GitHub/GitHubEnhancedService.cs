@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using DigitalMe.Configuration;
-using DigitalMe.Integrations.External.GitHub.Models;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Security.Cryptography;
+using DigitalMe.Configuration;
+using DigitalMe.Integrations.External.GitHub.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.Integrations.External.GitHub;
 

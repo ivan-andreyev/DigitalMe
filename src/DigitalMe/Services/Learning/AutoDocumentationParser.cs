@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.Learning.Documentation.HttpContentFetching;
 using DigitalMe.Services.Learning.Documentation.ContentParsing;
+using DigitalMe.Services.Learning.Documentation.HttpContentFetching;
 using DigitalMe.Services.Learning.Documentation.PatternAnalysis;
 using DigitalMe.Services.Learning.Documentation.TestGeneration;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning;
 

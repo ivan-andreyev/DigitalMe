@@ -8,55 +8,55 @@ public class MessageBuilder
 
     public MessageBuilder()
     {
-        _message = new Message();
+        this._message = new Message();
     }
 
     public static MessageBuilder Create() => new();
 
     public MessageBuilder WithId(Guid id)
     {
-        _message.Id = id;
+        this._message.Id = id;
         return this;
     }
 
     public MessageBuilder WithConversationId(Guid conversationId)
     {
-        _message.ConversationId = conversationId;
+        this._message.ConversationId = conversationId;
         return this;
     }
 
     public MessageBuilder WithRole(string role)
     {
-        _message.Role = role;
+        this._message.Role = role;
         return this;
     }
 
     public MessageBuilder WithContent(string content)
     {
-        _message.Content = content;
+        this._message.Content = content;
         return this;
     }
 
     public MessageBuilder WithMetadata(string metadata)
     {
-        _message.Metadata = metadata;
+        this._message.Metadata = metadata;
         return this;
     }
 
     public MessageBuilder WithTimestamp(DateTime timestamp)
     {
-        _message.Timestamp = timestamp;
+        this._message.Timestamp = timestamp;
         return this;
     }
 
     public MessageBuilder WithConversation(Conversation conversation)
     {
-        _message.Conversation = conversation;
-        _message.ConversationId = conversation.Id;
+        this._message.Conversation = conversation;
+        this._message.ConversationId = conversation.Id;
         return this;
     }
 
-    public Message Build() => _message;
+    public Message Build() => this._message;
 
     public static Message Default() => Create()
         .WithRole("user")

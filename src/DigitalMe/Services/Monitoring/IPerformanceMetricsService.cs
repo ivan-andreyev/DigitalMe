@@ -87,7 +87,7 @@ public class ResponseTimeMetric
 
 public class SystemResourceMetrics
 {
-    public long MemoryUsageMB { get; set; }
+    public long MemoryUsageMb { get; set; }
     public double CpuUsagePercent { get; set; }
     public int GcCollections { get; set; }
     public int ThreadCount { get; set; }

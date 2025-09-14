@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace DigitalMe.Web.Services;
 
@@ -26,9 +26,9 @@ public class QueryPerformanceMonitorService : IQueryPerformanceMonitorService
     private readonly object _lock = new();
     
     // Configuration
-    private const int MAX_RECORDS = 10000;
-    private const int SLOW_QUERY_THRESHOLD_MS = 100;
-    private const int VERY_SLOW_QUERY_THRESHOLD_MS = 1000;
+    private const int MaxRecords = 10000;
+    private const int SlowQueryThresholdMs = 100;
+    private const int VerySlowQueryThresholdMs = 1000;
     
     public QueryPerformanceMonitorService(ILogger<QueryPerformanceMonitorService> logger)
     {
@@ -50,20 +50,20 @@ public class QueryPerformanceMonitorService : IQueryPerformanceMonitorService
             RowCount = rowCount,
             ExecutedAt = DateTime.UtcNow,
             QueryPlan = queryPlan,
-            IsSlowQuery = duration.TotalMilliseconds > SLOW_QUERY_THRESHOLD_MS
+            IsSlowQuery = duration.TotalMilliseconds > SlowQueryThresholdMs
         };
         
         _queryRecords.Enqueue(record);
         
         // Log very slow queries immediately
-        if (duration.TotalMilliseconds > VERY_SLOW_QUERY_THRESHOLD_MS)
+        if (duration.TotalMilliseconds > VerySlowQueryThresholdMs)
         {
             _logger.LogWarning("Very slow query detected: {Duration}ms - {Sql}", 
                 duration.TotalMilliseconds, record.Sql);
         }
         
         // Maintain size limit
-        while (_queryRecords.Count > MAX_RECORDS)
+        while (_queryRecords.Count > MaxRecords)
         {
             _queryRecords.TryDequeue(out _);
         }
@@ -82,7 +82,7 @@ public class QueryPerformanceMonitorService : IQueryPerformanceMonitorService
         _cacheRecords.Enqueue(record);
         
         // Maintain size limit
-        while (_cacheRecords.Count > MAX_RECORDS)
+        while (_cacheRecords.Count > MaxRecords)
         {
             _cacheRecords.TryDequeue(out _);
         }

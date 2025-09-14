@@ -1,8 +1,8 @@
+using DigitalMe.Services.WebNavigation;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using DigitalMe.Services.WebNavigation;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -13,8 +13,8 @@ public class WebNavigationServiceTests : IAsyncLifetime
 
     public WebNavigationServiceTests()
     {
-        _mockLogger = new Mock<ILogger<WebNavigationService>>();
-        _service = new WebNavigationService(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<WebNavigationService>>();
+        this._service = new WebNavigationService(this._mockLogger.Object);
     }
 
     public async Task InitializeAsync()
@@ -24,7 +24,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _service.DisposeAsync();
+        await this._service.DisposeAsync();
     }
 
     #region Browser Initialization Tests
@@ -33,7 +33,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task InitializeBrowserAsync_WithDefaultOptions_ShouldInitializeSuccessfully()
     {
         // Act
-        var result = await _service.InitializeBrowserAsync();
+        var result = await this._service.InitializeBrowserAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -42,7 +42,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         result.Data.Should().NotBeNull();
 
         // Verify browser is ready
-        var isReady = await _service.IsBrowserReadyAsync();
+        var isReady = await this._service.IsBrowserReadyAsync();
         isReady.Should().BeTrue();
     }
 
@@ -59,7 +59,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         };
 
         // Act
-        var result = await _service.InitializeBrowserAsync(options);
+        var result = await this._service.InitializeBrowserAsync(options);
 
         // Assert
         result.Should().NotBeNull();
@@ -67,7 +67,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         result.Data.Should().NotBeNull();
 
         // Verify browser is ready
-        var isReady = await _service.IsBrowserReadyAsync();
+        var isReady = await this._service.IsBrowserReadyAsync();
         isReady.Should().BeTrue();
     }
 
@@ -75,10 +75,10 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task InitializeBrowserAsync_WhenAlreadyInitialized_ShouldReturnAlreadyInitialized()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
+        await this._service.InitializeBrowserAsync();
 
         // Act
-        var result = await _service.InitializeBrowserAsync();
+        var result = await this._service.InitializeBrowserAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -90,7 +90,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task IsBrowserReadyAsync_WhenNotInitialized_ShouldReturnFalse()
     {
         // Act
-        var result = await _service.IsBrowserReadyAsync();
+        var result = await this._service.IsBrowserReadyAsync();
 
         // Assert
         result.Should().BeFalse();
@@ -107,7 +107,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var url = "https://example.com";
 
         // Act
-        var result = await _service.NavigateToAsync(url);
+        var result = await this._service.NavigateToAsync(url);
 
         // Assert
         result.Should().NotBeNull();
@@ -119,11 +119,11 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task NavigateToAsync_WithValidUrl_ShouldNavigateSuccessfully()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
+        await this._service.InitializeBrowserAsync();
         var url = "https://example.com";
 
         // Act
-        var result = await _service.NavigateToAsync(url);
+        var result = await this._service.NavigateToAsync(url);
 
         // Assert
         result.Should().NotBeNull();
@@ -139,11 +139,11 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task NavigateToAsync_WithInvalidUrl_ShouldReturnError()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
+        await this._service.InitializeBrowserAsync();
         var invalidUrl = "invalid-url";
 
         // Act
-        var result = await _service.NavigateToAsync(invalidUrl);
+        var result = await this._service.NavigateToAsync(invalidUrl);
 
         // Assert
         result.Should().NotBeNull();
@@ -155,12 +155,12 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task NavigateToAsync_WithWaitSelector_ShouldWaitForElement()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
+        await this._service.InitializeBrowserAsync();
         var url = "https://example.com";
         var waitSelector = "body";
 
         // Act
-        var result = await _service.NavigateToAsync(url, waitSelector);
+        var result = await this._service.NavigateToAsync(url, waitSelector);
 
         // Assert
         result.Should().NotBeNull();
@@ -178,7 +178,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var selector = "button";
 
         // Act
-        var result = await _service.ClickElementAsync(selector);
+        var result = await this._service.ClickElementAsync(selector);
 
         // Assert
         result.Should().NotBeNull();
@@ -194,7 +194,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var text = "test text";
 
         // Act
-        var result = await _service.FillInputAsync(selector, text);
+        var result = await this._service.FillInputAsync(selector, text);
 
         // Assert
         result.Should().NotBeNull();
@@ -209,7 +209,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var selector = "h1";
 
         // Act
-        var result = await _service.ExtractTextAsync(selector);
+        var result = await this._service.ExtractTextAsync(selector);
 
         // Assert
         result.Should().NotBeNull();
@@ -221,15 +221,16 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task ExtractTextAsync_WithInitializedBrowser_ShouldExtractText()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var selector = "h1";
 
         // Act
-        var result = await _service.ExtractTextAsync(selector);
+        var result = await this._service.ExtractTextAsync(selector);
 
         // Assert
         result.Should().NotBeNull();
+
         // Note: This might fail or succeed depending on the actual page content
         // In a real test, we'd mock the page or use a test page with known content
     }
@@ -238,15 +239,16 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task ExtractTextAsync_WithMultipleElements_ShouldExtractAllTexts()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var selector = "p";
 
         // Act
-        var result = await _service.ExtractTextAsync(selector, multiple: true);
+        var result = await this._service.ExtractTextAsync(selector, multiple: true);
 
         // Assert
         result.Should().NotBeNull();
+
         // Note: This might fail or succeed depending on the actual page content
     }
 
@@ -258,7 +260,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task TakeScreenshotAsync_WithoutInitialization_ShouldReturnError()
     {
         // Act
-        var result = await _service.TakeScreenshotAsync();
+        var result = await this._service.TakeScreenshotAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -270,11 +272,11 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task TakeScreenshotAsync_WithInitializedBrowser_ShouldTakeScreenshot()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
 
         // Act
-        var result = await _service.TakeScreenshotAsync();
+        var result = await this._service.TakeScreenshotAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -287,8 +289,8 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task TakeScreenshotAsync_WithCustomOptions_ShouldUseOptions()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var options = new ScreenshotOptions
         {
             Format = ScreenshotFormat.Jpeg,
@@ -297,7 +299,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         };
 
         // Act
-        var result = await _service.TakeScreenshotAsync(null, options);
+        var result = await this._service.TakeScreenshotAsync(null, options);
 
         // Assert
         result.Should().NotBeNull();
@@ -315,7 +317,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var selector = "body";
 
         // Act
-        var result = await _service.WaitForElementAsync(selector);
+        var result = await this._service.WaitForElementAsync(selector);
 
         // Assert
         result.Should().NotBeNull();
@@ -327,12 +329,12 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task WaitForElementAsync_WithValidElement_ShouldWaitSuccessfully()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var selector = "body";
 
         // Act
-        var result = await _service.WaitForElementAsync(selector, ElementState.Visible, 5000);
+        var result = await this._service.WaitForElementAsync(selector, ElementState.Visible, 5000);
 
         // Assert
         result.Should().NotBeNull();
@@ -344,12 +346,12 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task WaitForElementAsync_WithNonExistentElement_ShouldTimeout()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var selector = "#non-existent-element";
 
         // Act
-        var result = await _service.WaitForElementAsync(selector, ElementState.Visible, 1000);
+        var result = await this._service.WaitForElementAsync(selector, ElementState.Visible, 1000);
 
         // Assert
         result.Should().NotBeNull();
@@ -368,7 +370,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         var script = "return document.title;";
 
         // Act
-        var result = await _service.ExecuteScriptAsync(script);
+        var result = await this._service.ExecuteScriptAsync(script);
 
         // Assert
         result.Should().NotBeNull();
@@ -380,12 +382,12 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task ExecuteScriptAsync_WithValidScript_ShouldExecuteSuccessfully()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var script = "document.title";
 
         // Act
-        var result = await _service.ExecuteScriptAsync(script);
+        var result = await this._service.ExecuteScriptAsync(script);
 
         // Assert
         result.Should().NotBeNull();
@@ -398,12 +400,12 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task ExecuteScriptAsync_WithInvalidScript_ShouldReturnError()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
         var invalidScript = "invalid javascript syntax {";
 
         // Act
-        var result = await _service.ExecuteScriptAsync(invalidScript);
+        var result = await this._service.ExecuteScriptAsync(invalidScript);
 
         // Assert
         result.Should().NotBeNull();
@@ -419,7 +421,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task GetPageInfoAsync_WithoutInitialization_ShouldReturnError()
     {
         // Act
-        var result = await _service.GetPageInfoAsync();
+        var result = await this._service.GetPageInfoAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -431,11 +433,11 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task GetPageInfoAsync_WithNavigatedPage_ShouldReturnPageInfo()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
-        await _service.NavigateToAsync("https://example.com");
+        await this._service.InitializeBrowserAsync();
+        await this._service.NavigateToAsync("https://example.com");
 
         // Act
-        var result = await _service.GetPageInfoAsync();
+        var result = await this._service.GetPageInfoAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -452,7 +454,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task DisposeBrowserAsync_WhenNotInitialized_ShouldReturnSuccess()
     {
         // Act
-        var result = await _service.DisposeBrowserAsync();
+        var result = await this._service.DisposeBrowserAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -464,10 +466,10 @@ public class WebNavigationServiceTests : IAsyncLifetime
     public async Task DisposeBrowserAsync_WhenInitialized_ShouldDisposeSuccessfully()
     {
         // Arrange
-        await _service.InitializeBrowserAsync();
+        await this._service.InitializeBrowserAsync();
 
         // Act
-        var result = await _service.DisposeBrowserAsync();
+        var result = await this._service.DisposeBrowserAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -475,7 +477,7 @@ public class WebNavigationServiceTests : IAsyncLifetime
         result.Message.Should().Contain("Browser disposed successfully");
 
         // Verify browser is no longer ready
-        var isReady = await _service.IsBrowserReadyAsync();
+        var isReady = await this._service.IsBrowserReadyAsync();
         isReady.Should().BeFalse();
     }
 

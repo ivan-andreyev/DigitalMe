@@ -1,9 +1,9 @@
+using System.Text;
+using DigitalMe.Services.FileProcessing;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using DigitalMe.Services.FileProcessing;
-using System.Text;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -16,12 +16,12 @@ public class FileProcessingServiceTests : IAsyncLifetime
 
     public FileProcessingServiceTests()
     {
-        _mockLogger = new Mock<ILogger<FileProcessingService>>();
-        _service = new FileProcessingService(_mockLogger.Object);
-        _tempDirectory = Path.Combine(Path.GetTempPath(), "DigitalMeTests", Guid.NewGuid().ToString());
-        _createdFiles = new List<string>();
+        this._mockLogger = new Mock<ILogger<FileProcessingService>>();
+        this._service = new FileProcessingService(this._mockLogger.Object);
+        this._tempDirectory = Path.Combine(Path.GetTempPath(), "DigitalMeTests", Guid.NewGuid().ToString());
+        this._createdFiles = new List<string>();
 
-        Directory.CreateDirectory(_tempDirectory);
+        Directory.CreateDirectory(this._tempDirectory);
     }
 
     public async Task InitializeAsync()
@@ -32,7 +32,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Cleanup created files
-        foreach (var file in _createdFiles)
+        foreach (var file in this._createdFiles)
         {
             if (File.Exists(file))
             {
@@ -41,9 +41,9 @@ public class FileProcessingServiceTests : IAsyncLifetime
         }
 
         // Cleanup temp directory
-        if (Directory.Exists(_tempDirectory))
+        if (Directory.Exists(this._tempDirectory))
         {
-            Directory.Delete(_tempDirectory, true);
+            Directory.Delete(this._tempDirectory, true);
         }
 
         await Task.CompletedTask;
@@ -51,9 +51,9 @@ public class FileProcessingServiceTests : IAsyncLifetime
 
     private string CreateTempFile(string fileName, string content = "Test content")
     {
-        var filePath = Path.Combine(_tempDirectory, fileName);
+        var filePath = Path.Combine(this._tempDirectory, fileName);
         File.WriteAllText(filePath, content);
-        _createdFiles.Add(filePath);
+        this._createdFiles.Add(filePath);
         return filePath;
     }
 
@@ -63,10 +63,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task IsFileAccessibleAsync_ExistingFile_ShouldReturnTrue()
     {
         // Arrange
-        var filePath = CreateTempFile("test.txt", "Some content");
+        var filePath = this.CreateTempFile("test.txt", "Some content");
 
         // Act
-        var result = await _service.IsFileAccessibleAsync(filePath);
+        var result = await this._service.IsFileAccessibleAsync(filePath);
 
         // Assert
         result.Should().BeTrue();
@@ -76,10 +76,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task IsFileAccessibleAsync_NonExistentFile_ShouldReturnFalse()
     {
         // Arrange
-        var filePath = Path.Combine(_tempDirectory, "nonexistent.txt");
+        var filePath = Path.Combine(this._tempDirectory, "nonexistent.txt");
 
         // Act
-        var result = await _service.IsFileAccessibleAsync(filePath);
+        var result = await this._service.IsFileAccessibleAsync(filePath);
 
         // Assert
         result.Should().BeFalse();
@@ -89,10 +89,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task IsFileAccessibleAsync_EmptyFile_ShouldReturnFalse()
     {
         // Arrange
-        var filePath = CreateTempFile("empty.txt", "");
+        var filePath = this.CreateTempFile("empty.txt", "");
 
         // Act
-        var result = await _service.IsFileAccessibleAsync(filePath);
+        var result = await this._service.IsFileAccessibleAsync(filePath);
 
         // Assert
         result.Should().BeFalse();
@@ -107,10 +107,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     {
         // Arrange
         var expectedContent = "This is test content for text extraction.";
-        var filePath = CreateTempFile("test.txt", expectedContent);
+        var filePath = this.CreateTempFile("test.txt", expectedContent);
 
         // Act
-        var result = await _service.ExtractTextAsync(filePath);
+        var result = await this._service.ExtractTextAsync(filePath);
 
         // Assert
         result.Should().Be(expectedContent);
@@ -120,10 +120,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ExtractTextAsync_NonExistentFile_ShouldThrowFileNotFoundException()
     {
         // Arrange
-        var filePath = Path.Combine(_tempDirectory, "nonexistent.txt");
+        var filePath = Path.Combine(this._tempDirectory, "nonexistent.txt");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _service.ExtractTextAsync(filePath))
+        await FluentActions.Invoking(() => this._service.ExtractTextAsync(filePath))
             .Should().ThrowAsync<FileNotFoundException>();
     }
 
@@ -131,10 +131,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ExtractTextAsync_UnsupportedFormat_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var filePath = CreateTempFile("test.unsupported", "content");
+        var filePath = this.CreateTempFile("test.unsupported", "content");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _service.ExtractTextAsync(filePath))
+        await FluentActions.Invoking(() => this._service.ExtractTextAsync(filePath))
             .Should().ThrowAsync<NotSupportedException>();
     }
 
@@ -146,8 +146,8 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessPdfAsync_CreateOperation_ShouldCreatePdfFile()
     {
         // Arrange
-        var pdfPath = Path.Combine(_tempDirectory, "test.pdf");
-        _createdFiles.Add(pdfPath);
+        var pdfPath = Path.Combine(this._tempDirectory, "test.pdf");
+        this._createdFiles.Add(pdfPath);
         var parameters = new Dictionary<string, object>
         {
             { "content", "Test PDF content" },
@@ -155,7 +155,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         };
 
         // Act
-        var result = await _service.ProcessPdfAsync("create", pdfPath, parameters);
+        var result = await this._service.ProcessPdfAsync("create", pdfPath, parameters);
 
         // Assert
         result.Should().NotBeNull();
@@ -168,9 +168,9 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessPdfAsync_ReadOperation_WithValidPdf_ShouldReturnMetadata()
     {
         // Arrange - First create a PDF
-        var pdfPath = Path.Combine(_tempDirectory, "test-read.pdf");
-        _createdFiles.Add(pdfPath);
-        var createResult = await _service.ProcessPdfAsync("create", pdfPath, new Dictionary<string, object>
+        var pdfPath = Path.Combine(this._tempDirectory, "test-read.pdf");
+        this._createdFiles.Add(pdfPath);
+        var createResult = await this._service.ProcessPdfAsync("create", pdfPath, new Dictionary<string, object>
         {
             { "content", "Test content" },
             { "title", "Test Title" }
@@ -179,7 +179,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         createResult.Success.Should().BeTrue();
 
         // Act
-        var result = await _service.ProcessPdfAsync("read", pdfPath);
+        var result = await this._service.ProcessPdfAsync("read", pdfPath);
 
         // Assert
         result.Should().NotBeNull();
@@ -192,23 +192,24 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessPdfAsync_ExtractOperation_WithValidPdf_ShouldReturnText()
     {
         // Arrange - First create a PDF with specific content
-        var pdfPath = Path.Combine(_tempDirectory, "test-extract.pdf");
-        _createdFiles.Add(pdfPath);
+        var pdfPath = Path.Combine(this._tempDirectory, "test-extract.pdf");
+        this._createdFiles.Add(pdfPath);
         var testContent = "This is test content for extraction";
 
-        var createResult = await _service.ProcessPdfAsync("create", pdfPath, new Dictionary<string, object>
+        var createResult = await this._service.ProcessPdfAsync("create", pdfPath, new Dictionary<string, object>
         {
             { "content", testContent }
         });
         createResult.Success.Should().BeTrue();
 
         // Act
-        var result = await _service.ProcessPdfAsync("extract", pdfPath);
+        var result = await this._service.ProcessPdfAsync("extract", pdfPath);
 
         // Assert
         result.Should().NotBeNull();
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
+
         // Since our PDF text extraction now works, it should return meaningful content
         // The PDF is created with default title "Generated PDF" so should match our extraction logic
         result.Data.ToString().Should().Contain("Ivan-Level capabilities");
@@ -218,10 +219,10 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessPdfAsync_UnsupportedOperation_ShouldReturnError()
     {
         // Arrange
-        var pdfPath = CreateTempFile("test.pdf", "dummy");
+        var pdfPath = this.CreateTempFile("test.pdf", "dummy");
 
         // Act
-        var result = await _service.ProcessPdfAsync("unsupported", pdfPath);
+        var result = await this._service.ProcessPdfAsync("unsupported", pdfPath);
 
         // Assert
         result.Should().NotBeNull();
@@ -237,8 +238,8 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessExcelAsync_CreateOperation_ShouldCreateExcelFile()
     {
         // Arrange
-        var excelPath = Path.Combine(_tempDirectory, "test.xlsx");
-        _createdFiles.Add(excelPath);
+        var excelPath = Path.Combine(this._tempDirectory, "test.xlsx");
+        this._createdFiles.Add(excelPath);
         var parameters = new Dictionary<string, object>
         {
             { "worksheetName", "TestSheet" },
@@ -246,7 +247,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         };
 
         // Act
-        var result = await _service.ProcessExcelAsync("create", excelPath, parameters);
+        var result = await this._service.ProcessExcelAsync("create", excelPath, parameters);
 
         // Assert
         result.Should().NotBeNull();
@@ -259,8 +260,8 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessExcelAsync_WriteOperation_WithData_ShouldWriteToFile()
     {
         // Arrange
-        var excelPath = Path.Combine(_tempDirectory, "test-write.xlsx");
-        _createdFiles.Add(excelPath);
+        var excelPath = Path.Combine(this._tempDirectory, "test-write.xlsx");
+        this._createdFiles.Add(excelPath);
         var testData = new object[,]
         {
             { "John", 30, "New York" },
@@ -274,7 +275,7 @@ public class FileProcessingServiceTests : IAsyncLifetime
         };
 
         // Act
-        var result = await _service.ProcessExcelAsync("write", excelPath, parameters);
+        var result = await this._service.ProcessExcelAsync("write", excelPath, parameters);
 
         // Assert
         result.Should().NotBeNull();
@@ -287,17 +288,17 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessExcelAsync_ReadOperation_WithValidExcel_ShouldReturnMetadata()
     {
         // Arrange - First create an Excel file
-        var excelPath = Path.Combine(_tempDirectory, "test-read.xlsx");
-        _createdFiles.Add(excelPath);
+        var excelPath = Path.Combine(this._tempDirectory, "test-read.xlsx");
+        this._createdFiles.Add(excelPath);
 
-        var createResult = await _service.ProcessExcelAsync("create", excelPath, new Dictionary<string, object>
+        var createResult = await this._service.ProcessExcelAsync("create", excelPath, new Dictionary<string, object>
         {
             { "worksheetName", "TestSheet" }
         });
         createResult.Success.Should().BeTrue();
 
         // Act
-        var result = await _service.ProcessExcelAsync("read", excelPath);
+        var result = await this._service.ProcessExcelAsync("read", excelPath);
 
         // Assert
         result.Should().NotBeNull();
@@ -310,11 +311,11 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ProcessExcelAsync_WriteOperation_WithoutData_ShouldReturnError()
     {
         // Arrange
-        var excelPath = Path.Combine(_tempDirectory, "test-nodata.xlsx");
+        var excelPath = Path.Combine(this._tempDirectory, "test-nodata.xlsx");
         var parameters = new Dictionary<string, object>();
 
         // Act
-        var result = await _service.ProcessExcelAsync("write", excelPath, parameters);
+        var result = await this._service.ProcessExcelAsync("write", excelPath, parameters);
 
         // Assert
         result.Should().NotBeNull();
@@ -330,12 +331,12 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ConvertFileAsync_TextToPdf_ShouldCreatePdfFile()
     {
         // Arrange
-        var textPath = CreateTempFile("source.txt", "This is content to convert to PDF");
-        var pdfPath = Path.Combine(_tempDirectory, "converted.pdf");
-        _createdFiles.Add(pdfPath);
+        var textPath = this.CreateTempFile("source.txt", "This is content to convert to PDF");
+        var pdfPath = Path.Combine(this._tempDirectory, "converted.pdf");
+        this._createdFiles.Add(pdfPath);
 
         // Act
-        var result = await _service.ConvertFileAsync(textPath, pdfPath, "pdf");
+        var result = await this._service.ConvertFileAsync(textPath, pdfPath, "pdf");
 
         // Assert
         result.Should().NotBeNull();
@@ -348,11 +349,11 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ConvertFileAsync_UnsupportedConversion_ShouldReturnError()
     {
         // Arrange
-        var sourcePath = CreateTempFile("source.txt", "content");
-        var targetPath = Path.Combine(_tempDirectory, "target.unknown");
+        var sourcePath = this.CreateTempFile("source.txt", "content");
+        var targetPath = Path.Combine(this._tempDirectory, "target.unknown");
 
         // Act
-        var result = await _service.ConvertFileAsync(sourcePath, targetPath, "unknown");
+        var result = await this._service.ConvertFileAsync(sourcePath, targetPath, "unknown");
 
         // Assert
         result.Should().NotBeNull();
@@ -364,11 +365,11 @@ public class FileProcessingServiceTests : IAsyncLifetime
     public async Task ConvertFileAsync_NonExistentInput_ShouldReturnError()
     {
         // Arrange
-        var sourcePath = Path.Combine(_tempDirectory, "nonexistent.txt");
-        var targetPath = Path.Combine(_tempDirectory, "target.pdf");
+        var sourcePath = Path.Combine(this._tempDirectory, "nonexistent.txt");
+        var targetPath = Path.Combine(this._tempDirectory, "target.pdf");
 
         // Act
-        var result = await _service.ConvertFileAsync(sourcePath, targetPath, "pdf");
+        var result = await this._service.ConvertFileAsync(sourcePath, targetPath, "pdf");
 
         // Assert
         result.Should().NotBeNull();

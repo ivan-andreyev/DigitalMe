@@ -1,6 +1,6 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
-using System.Text.Json;
 
 namespace DigitalMe.Services.WebNavigation;
 

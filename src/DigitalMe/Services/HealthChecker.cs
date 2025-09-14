@@ -1,6 +1,6 @@
+using System.Text.RegularExpressions;
 using DigitalMe.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 
 namespace DigitalMe.Services;
 

@@ -1,30 +1,30 @@
-using Microsoft.Extensions.Logging;
-using DigitalMe.Integrations.MCP.Models;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
+using DigitalMe.Integrations.MCP.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Integrations.MCP;
 
-public interface IMCPClient
+public interface IMcpClient
 {
     Task<bool> InitializeAsync();
-    Task<MCPResponse> SendRequestAsync(MCPRequest request);
-    Task<List<MCPTool>> ListToolsAsync();
-    Task<MCPResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters);
+    Task<McpResponse> SendRequestAsync(McpRequest request);
+    Task<List<McpTool>> ListToolsAsync();
+    Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters);
     Task DisconnectAsync();
     bool IsConnected { get; }
 }
 
-public class MCPClient : IMCPClient, IDisposable
+public class McpClient : IMcpClient, IDisposable
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<MCPClient> _logger;
+    private readonly ILogger<McpClient> _logger;
     private readonly string _serverUrl;
     private bool _isConnected;
 
     public bool IsConnected => _isConnected;
 
-    public MCPClient(HttpClient httpClient, ILogger<MCPClient> logger, string serverUrl = "http://localhost:3000")
+    public McpClient(HttpClient httpClient, ILogger<McpClient> logger, string serverUrl = "http://localhost:3000")
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -40,7 +40,7 @@ public class MCPClient : IMCPClient, IDisposable
             _logger.LogInformation("🔗 Initializing MCP connection to {ServerUrl}", _serverUrl);
 
             // Send MCP initialize request
-            var initRequest = new MCPRequest
+            var initRequest = new McpRequest
             {
                 Method = "initialize",
                 Params = new
@@ -68,7 +68,7 @@ public class MCPClient : IMCPClient, IDisposable
                 _logger.LogInformation("✅ MCP connection initialized successfully");
 
                 // Send initialized notification (no response expected)
-                var initializedNotification = new MCPRequest
+                var initializedNotification = new McpRequest
                 {
                     Method = "notifications/initialized",
                     Params = new { }
@@ -92,7 +92,7 @@ public class MCPClient : IMCPClient, IDisposable
         }
     }
 
-    public async Task<MCPResponse> SendRequestAsync(MCPRequest request)
+    public async Task<McpResponse> SendRequestAsync(McpRequest request)
     {
         try
         {
@@ -106,13 +106,13 @@ public class MCPClient : IMCPClient, IDisposable
             if (httpResponse.IsSuccessStatusCode)
             {
                 var responseText = await httpResponse.Content.ReadAsStringAsync();
-                var mcpResponse = JsonSerializer.Deserialize<MCPResponse>(responseText);
+                var mcpResponse = JsonSerializer.Deserialize<McpResponse>(responseText);
 
                 _logger.LogDebug("📥 Received MCP response for ID: {RequestId}", request.Id);
 
-                return mcpResponse ?? new MCPResponse
+                return mcpResponse ?? new McpResponse
                 {
-                    Error = new MCPError { Code = -32700, Message = "Parse error: Invalid response format" }
+                    Error = new McpError { Code = -32700, Message = "Parse error: Invalid response format" }
                 };
             }
             else
@@ -120,9 +120,9 @@ public class MCPClient : IMCPClient, IDisposable
                 _logger.LogWarning("⚠️ HTTP error from MCP server: {StatusCode} - {ReasonPhrase}",
                     httpResponse.StatusCode, httpResponse.ReasonPhrase);
 
-                return new MCPResponse
+                return new McpResponse
                 {
-                    Error = new MCPError
+                    Error = new McpError
                     {
                         Code = (int)httpResponse.StatusCode,
                         Message = $"HTTP {httpResponse.StatusCode}: {httpResponse.ReasonPhrase}"
@@ -134,9 +134,9 @@ public class MCPClient : IMCPClient, IDisposable
         {
             _logger.LogError(ex, "💥 Failed to send MCP request: {Method}", request.Method);
 
-            return new MCPResponse
+            return new McpResponse
             {
-                Error = new MCPError
+                Error = new McpError
                 {
                     Code = -32603,
                     Message = $"Internal error: {ex.Message}"
@@ -145,9 +145,9 @@ public class MCPClient : IMCPClient, IDisposable
         }
     }
 
-    public async Task<List<MCPTool>> ListToolsAsync()
+    public async Task<List<McpTool>> ListToolsAsync()
     {
-        var request = new MCPRequest
+        var request = new McpRequest
         {
             Method = "tools/list",
             Params = new { }
@@ -159,16 +159,16 @@ public class MCPClient : IMCPClient, IDisposable
         {
             _logger.LogError("Failed to list MCP tools: {ErrorCode} - {ErrorMessage}",
                 response.Error.Code, response.Error.Message);
-            return new List<MCPTool>();
+            return new List<McpTool>();
         }
 
         // Return tools directly from the result
-        return response.Result?.Tools ?? new List<MCPTool>();
+        return response.Result?.Tools ?? new List<McpTool>();
     }
 
-    public async Task<MCPResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
-        var request = new MCPRequest
+        var request = new McpRequest
         {
             Method = "tools/call",
             Params = new
@@ -195,7 +195,7 @@ public class MCPClient : IMCPClient, IDisposable
         return response;
     }
 
-    private async Task SendNotificationAsync(MCPRequest notification)
+    private async Task SendNotificationAsync(McpRequest notification)
     {
         try
         {

@@ -257,7 +257,7 @@ public class VoiceService : IVoiceService, ISpeechToTextService, ISpeechToTextCo
                 AudioFormat.Mp4,
                 AudioFormat.Mpeg,
                 AudioFormat.Mpga,
-                AudioFormat.M4a,
+                AudioFormat.M4A,
                 AudioFormat.Wav,
                 AudioFormat.Webm
             };
@@ -291,7 +291,7 @@ public class VoiceService : IVoiceService, ISpeechToTextService, ISpeechToTextCo
             _logger.LogInformation("Validating audio format for file: {FileName}", fileName);
 
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
-            var supportedFormats = new[] { AudioFormat.Mp3, AudioFormat.Mp4, AudioFormat.Mpeg, AudioFormat.Mpga, AudioFormat.M4a, AudioFormat.Wav, AudioFormat.Webm };
+            var supportedFormats = new[] { AudioFormat.Mp3, AudioFormat.Mp4, AudioFormat.Mpeg, AudioFormat.Mpga, AudioFormat.M4A, AudioFormat.Wav, AudioFormat.Webm };
             var supportedExtensions = new[] { ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm" };
             
             var isSupported = supportedExtensions.Contains(extension);
@@ -301,7 +301,7 @@ public class VoiceService : IVoiceService, ISpeechToTextService, ISpeechToTextCo
                 ".mp4" => AudioFormat.Mp4,
                 ".mpeg" => AudioFormat.Mpeg,
                 ".mpga" => AudioFormat.Mpga,
-                ".m4a" => AudioFormat.M4a,
+                ".m4a" => AudioFormat.M4A,
                 ".wav" => AudioFormat.Wav,
                 ".webm" => AudioFormat.Webm,
                 _ => AudioFormat.Mp3  // Default fallback for display purposes only

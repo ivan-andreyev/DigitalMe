@@ -21,7 +21,7 @@ public class FrameworkValidationTests : TestBase
     public void MockRepository_Should_BeAvailable()
     {
         // Arrange & Act
-        var mock = MockRepository.Create<IDisposable>();
+        var mock = this.MockRepository.Create<IDisposable>();
 
         // Assert
         mock.Should().NotBeNull();

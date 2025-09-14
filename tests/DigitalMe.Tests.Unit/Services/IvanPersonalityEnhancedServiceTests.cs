@@ -1,9 +1,9 @@
-using Microsoft.Extensions.Logging;
+using DigitalMe.Data.Entities;
+using DigitalMe.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using DigitalMe.Services;
-using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -20,22 +20,22 @@ public class IvanPersonalityEnhancedServiceTests
 
     public IvanPersonalityEnhancedServiceTests()
     {
-        _mockLogger = new Mock<ILogger<IvanPersonalityService>>();
-        _mockProfileParser = new Mock<IProfileDataParser>();
-        _mockConfiguration = new Mock<IConfiguration>();
+        this._mockLogger = new Mock<ILogger<IvanPersonalityService>>();
+        this._mockProfileParser = new Mock<IProfileDataParser>();
+        this._mockConfiguration = new Mock<IConfiguration>();
 
-        _service = new IvanPersonalityService(
-            _mockLogger.Object,
-            _mockProfileParser.Object,
-            _mockConfiguration.Object);
+        this._service = new IvanPersonalityService(
+            this._mockLogger.Object,
+            this._mockProfileParser.Object,
+            this._mockConfiguration.Object);
     }
 
     [Fact]
     public async Task GetIvanPersonalityAsync_ShouldReturnCachedProfile_WhenCalledMultipleTimes()
     {
         // Act
-        var profile1 = await _service.GetIvanPersonalityAsync();
-        var profile2 = await _service.GetIvanPersonalityAsync();
+        var profile1 = await this._service.GetIvanPersonalityAsync();
+        var profile2 = await this._service.GetIvanPersonalityAsync();
 
         // Assert
         Assert.Same(profile1, profile2);
@@ -47,7 +47,7 @@ public class IvanPersonalityEnhancedServiceTests
     public async Task GetIvanPersonalityAsync_ShouldContainEssentialPersonalityTraits()
     {
         // Act
-        var profile = await _service.GetIvanPersonalityAsync();
+        var profile = await this._service.GetIvanPersonalityAsync();
 
         // Assert
         Assert.NotNull(profile.Traits);
@@ -77,7 +77,7 @@ public class IvanPersonalityEnhancedServiceTests
         };
 
         // Act
-        var systemPrompt = _service.GenerateSystemPrompt(personalityProfile);
+        var systemPrompt = this._service.GenerateSystemPrompt(personalityProfile);
 
         // Assert
         Assert.Contains("Ivan", systemPrompt);
@@ -94,17 +94,17 @@ public class IvanPersonalityEnhancedServiceTests
     public async Task GenerateEnhancedSystemPromptAsync_WithValidProfileData_ShouldIncludeRealData()
     {
         // Arrange
-        var mockProfileData = CreateMockProfileData();
-        _mockProfileParser
+        var mockProfileData = this.CreateMockProfileData();
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
 
-        _mockConfiguration
+        this._mockConfiguration
             .Setup(x => x["IvanProfile:DataFilePath"])
             .Returns("test/path/IVAN_PROFILE_DATA.md");
 
         // Act
-        var enhancedPrompt = await _service.GenerateEnhancedSystemPromptAsync();
+        var enhancedPrompt = await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert
         Assert.Contains("34-year-old", enhancedPrompt);
@@ -116,46 +116,47 @@ public class IvanPersonalityEnhancedServiceTests
         Assert.Contains("Unity indie game framework", enhancedPrompt);
 
         // Verify parser was called
-        _mockProfileParser.Verify(x => x.ParseProfileDataAsync(It.IsAny<string>()), Times.Once);
+        this._mockProfileParser.Verify(x => x.ParseProfileDataAsync(It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
     public async Task GenerateEnhancedSystemPromptAsync_WithCachedData_ShouldNotReparseFile()
     {
         // Arrange
-        var mockProfileData = CreateMockProfileData();
-        _mockProfileParser
+        var mockProfileData = this.CreateMockProfileData();
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
 
         // Act - Call twice
-        await _service.GenerateEnhancedSystemPromptAsync();
-        await _service.GenerateEnhancedSystemPromptAsync();
+        await this._service.GenerateEnhancedSystemPromptAsync();
+        await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert - Parser should only be called once due to caching
-        _mockProfileParser.Verify(x => x.ParseProfileDataAsync(It.IsAny<string>()), Times.Once);
+        this._mockProfileParser.Verify(x => x.ParseProfileDataAsync(It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
     public async Task GenerateEnhancedSystemPromptAsync_WithParsingError_ShouldFallbackToBasicPrompt()
     {
         // Arrange
-        _mockProfileParser
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ThrowsAsync(new FileNotFoundException("Profile file not found"));
 
         // Act
-        var result = await _service.GenerateEnhancedSystemPromptAsync();
+        var result = await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert
         Assert.NotNull(result);
         Assert.NotEmpty(result);
+
         // Should contain basic Ivan characteristics from fallback method
         Assert.Contains("Ivan", result);
         Assert.Contains("Head of R&D", result);
 
         // Verify error was logged
-        VerifyLogWasCalled(LogLevel.Error, "Failed to generate enhanced system prompt");
+        this.VerifyLogWasCalled(LogLevel.Error, "Failed to generate enhanced system prompt");
     }
 
     [Theory]
@@ -164,20 +165,21 @@ public class IvanPersonalityEnhancedServiceTests
     public async Task GenerateEnhancedSystemPromptAsync_WithMissingConfigPath_ShouldUseDefaultPath(string configPath)
     {
         // Arrange
-        var mockProfileData = CreateMockProfileData();
-        _mockProfileParser
+        var mockProfileData = this.CreateMockProfileData();
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
 
-        _mockConfiguration
+        this._mockConfiguration
             .Setup(x => x["IvanProfile:DataFilePath"])
             .Returns(configPath);
 
         // Act
-        await _service.GenerateEnhancedSystemPromptAsync();
+        await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert - Should use default path
-        _mockProfileParser.Verify(x => x.ParseProfileDataAsync(
+        this._mockProfileParser.Verify(
+            x => x.ParseProfileDataAsync(
             It.Is<string>(path => path.EndsWith("data/profile/IVAN_PROFILE_DATA.md"))),
             Times.Once);
     }
@@ -186,13 +188,13 @@ public class IvanPersonalityEnhancedServiceTests
     public async Task GenerateEnhancedSystemPromptAsync_ShouldIncludeCriticalPersonalityElements()
     {
         // Arrange
-        var mockProfileData = CreateMockProfileData();
-        _mockProfileParser
+        var mockProfileData = this.CreateMockProfileData();
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
 
         // Act
-        var prompt = await _service.GenerateEnhancedSystemPromptAsync();
+        var prompt = await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert - Check for Ivan's critical personality characteristics
         Assert.Contains("structured, rational", prompt);
@@ -207,13 +209,13 @@ public class IvanPersonalityEnhancedServiceTests
     public async Task GenerateEnhancedSystemPromptAsync_ShouldIncludeAllProfileDataSections()
     {
         // Arrange
-        var mockProfileData = CreateMockProfileData();
-        _mockProfileParser
+        var mockProfileData = this.CreateMockProfileData();
+        this._mockProfileParser
             .Setup(x => x.ParseProfileDataAsync(It.IsAny<string>()))
             .ReturnsAsync(mockProfileData);
 
         // Act
-        var prompt = await _service.GenerateEnhancedSystemPromptAsync();
+        var prompt = await this._service.GenerateEnhancedSystemPromptAsync();
 
         // Assert - Check for all major sections
         Assert.Contains("CORE PERSONALITY & VALUES:", prompt);
@@ -305,7 +307,7 @@ public class IvanPersonalityEnhancedServiceTests
 
     private void VerifyLogWasCalled(LogLevel level, string message)
     {
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.Log(
                 level,
                 It.IsAny<EventId>(),

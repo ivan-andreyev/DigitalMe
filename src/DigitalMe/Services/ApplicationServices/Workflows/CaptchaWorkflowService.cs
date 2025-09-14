@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Logging;
-using DigitalMe.Services.CaptchaSolving;
 using System.Diagnostics;
+using DigitalMe.Services.CaptchaSolving;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.Workflows;
 

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
-using DigitalMe.Services.Tools;
 using DigitalMe.Integrations.MCP;
+using DigitalMe.Services.Tools;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Monitoring;
 
@@ -17,7 +17,7 @@ public class HealthCheckService : IHealthCheckService
     private readonly ILogger<HealthCheckService> _logger;
     private readonly DigitalMeDbContext _dbContext;
     private readonly IToolRegistry _toolRegistry;
-    private readonly IMCPClient _mcpClient;
+    private readonly IMcpClient _mcpClient;
     private readonly IPerformanceMetricsService _metricsService;
     private readonly Dictionary<string, Func<Task<ComponentHealthStatus>>> _customHealthChecks = new();
     private readonly DateTime _startTime = DateTime.UtcNow;
@@ -26,7 +26,7 @@ public class HealthCheckService : IHealthCheckService
         ILogger<HealthCheckService> logger,
         DigitalMeDbContext dbContext,
         IToolRegistry toolRegistry,
-        IMCPClient mcpClient,
+        IMcpClient mcpClient,
         IPerformanceMetricsService metricsService)
     {
         _logger = logger;
@@ -50,7 +50,7 @@ public class HealthCheckService : IHealthCheckService
             {
                 ["database"] = CheckDatabaseHealthAsync,
                 ["tool_registry"] = CheckToolRegistryHealthAsync,
-                ["mcp_client"] = CheckMCPClientHealthAsync,
+                ["mcp_client"] = CheckMcpClientHealthAsync,
                 ["memory"] = CheckMemoryHealthAsync,
                 ["performance"] = CheckPerformanceHealthAsync
             };
@@ -112,7 +112,7 @@ public class HealthCheckService : IHealthCheckService
             var performanceMetrics = await _metricsService.GetMetricsSummaryAsync(TimeSpan.FromMinutes(5));
             var systemMetrics = new SystemMetrics
             {
-                MemoryUsageMB = performanceMetrics.SystemResources.MemoryUsageMB,
+                MemoryUsageMb = performanceMetrics.SystemResources.MemoryUsageMb,
                 CpuUsagePercent = performanceMetrics.SystemResources.CpuUsagePercent,
                 ActiveConnections = performanceMetrics.SignalR.ActiveConnections,
                 RequestsPerMinute = performanceMetrics.Business.AgentResponsesPerMinute,
@@ -170,7 +170,7 @@ public class HealthCheckService : IHealthCheckService
         {
             "database" => CheckDatabaseHealthAsync,
             "tool_registry" => CheckToolRegistryHealthAsync,
-            "mcp_client" => CheckMCPClientHealthAsync,
+            "mcp_client" => CheckMcpClientHealthAsync,
             "memory" => CheckMemoryHealthAsync,
             "performance" => CheckPerformanceHealthAsync,
             _ => _customHealthChecks.GetValueOrDefault(componentName)
@@ -393,7 +393,7 @@ public class HealthCheckService : IHealthCheckService
         });
     }
 
-    private async Task<ComponentHealthStatus> CheckMCPClientHealthAsync()
+    private async Task<ComponentHealthStatus> CheckMcpClientHealthAsync()
     {
         return await ExecuteHealthCheck("mcp_client", async () =>
         {
@@ -442,13 +442,13 @@ public class HealthCheckService : IHealthCheckService
             await Task.Delay(1); // Make it async
             var process = Process.GetCurrentProcess();
             var memoryUsage = process.WorkingSet64;
-            var memoryUsageMB = memoryUsage / 1024 / 1024;
+            var memoryUsageMb = memoryUsage / 1024 / 1024;
 
             // Memory thresholds (in MB)
             const long warningThreshold = 500;
             const long criticalThreshold = 1000;
 
-            var status = memoryUsageMB switch
+            var status = memoryUsageMb switch
             {
                 > criticalThreshold => HealthStatus.Unhealthy,
                 > warningThreshold => HealthStatus.Degraded,
@@ -459,10 +459,10 @@ public class HealthCheckService : IHealthCheckService
             {
                 IsSuccessful = status != HealthStatus.Unhealthy,
                 Status = status,
-                Description = $"Memory usage: {memoryUsageMB} MB",
+                Description = $"Memory usage: {memoryUsageMb} MB",
                 Details = new Dictionary<string, object>
                 {
-                    ["memory_usage_mb"] = memoryUsageMB,
+                    ["memory_usage_mb"] = memoryUsageMb,
                     ["memory_usage_bytes"] = memoryUsage,
                     ["warning_threshold_mb"] = warningThreshold,
                     ["critical_threshold_mb"] = criticalThreshold,
@@ -508,7 +508,7 @@ public class HealthCheckService : IHealthCheckService
                     ["error_rate"] = errorRate,
                     ["requests_per_minute"] = metrics.Business.AgentResponsesPerMinute,
                     ["active_users"] = metrics.Business.ActiveUsers,
-                    ["memory_usage_mb"] = metrics.SystemResources.MemoryUsageMB,
+                    ["memory_usage_mb"] = metrics.SystemResources.MemoryUsageMb,
                     ["active_connections"] = metrics.SignalR.ActiveConnections
                 }
             };

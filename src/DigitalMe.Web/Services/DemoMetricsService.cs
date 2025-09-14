@@ -19,7 +19,7 @@ public class DemoMetricsService : IDemoMetricsService
     private readonly ILogger<DemoMetricsService> _logger;
     private readonly Random _random = new();
     
-    private static readonly List<ActivityLog> _activityHistory = new();
+    private static readonly List<ActivityLog> ActivityHistory = new();
     private static DateTime _lastActivityUpdate = DateTime.MinValue;
 
     public DemoMetricsService(
@@ -145,7 +145,7 @@ public class DemoMetricsService : IDemoMetricsService
                 TimeToMarket = CalculateTimeToMarketImprovement(),
                 TechnicalDebt = "Low",
                 DevelopmentVelocity = CalculateDevelopmentVelocity(),
-                ROIPercentage = CalculateROI(platformValue, 45000) // $45K investment from ROI analysis
+                RoiPercentage = CalculateRoi(platformValue, 45000) // $45K investment from ROI analysis
             };
         }
         catch (Exception ex)
@@ -166,7 +166,7 @@ public class DemoMetricsService : IDemoMetricsService
                 _lastActivityUpdate = DateTime.Now;
             }
             
-            return _activityHistory.OrderByDescending(a => a.Time).Take(20).ToList();
+            return ActivityHistory.OrderByDescending(a => a.Time).Take(20).ToList();
         }
         catch (Exception ex)
         {
@@ -195,11 +195,11 @@ public class DemoMetricsService : IDemoMetricsService
         };
 
         var newActivity = activities[_random.Next(activities.Length)];
-        _activityHistory.Insert(0, newActivity);
+        ActivityHistory.Insert(0, newActivity);
         
-        if (_activityHistory.Count > 50)
+        if (ActivityHistory.Count > 50)
         {
-            _activityHistory.RemoveRange(50, _activityHistory.Count - 50);
+            ActivityHistory.RemoveRange(50, ActivityHistory.Count - 50);
         }
     }
 
@@ -336,7 +336,7 @@ public class DemoMetricsService : IDemoMetricsService
         return _random.Next(180, 220); // Story points per sprint
     }
 
-    private double CalculateROI(int platformValue, int investment)
+    private double CalculateRoi(int platformValue, int investment)
     {
         return Math.Round(((double)platformValue / investment - 1) * 100, 0);
     }
@@ -396,7 +396,7 @@ public class DemoMetricsService : IDemoMetricsService
             TimeToMarket = _random.Next(65, 78),
             TechnicalDebt = "Low",
             DevelopmentVelocity = _random.Next(180, 220),
-            ROIPercentage = CalculateROI(value, 45000)
+            RoiPercentage = CalculateRoi(value, 45000)
         };
     }
 
@@ -457,7 +457,7 @@ public class BusinessMetrics
     public int TimeToMarket { get; set; }
     public string TechnicalDebt { get; set; } = "";
     public int DevelopmentVelocity { get; set; }
-    public double ROIPercentage { get; set; }
+    public double RoiPercentage { get; set; }
 }
 
 public class ActivityLog

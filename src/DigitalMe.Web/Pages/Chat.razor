@@ -5,7 +5,7 @@
 <PageTitle>Чат с Иваном - DigitalMe</PageTitle>
 
 <div class="chat-page">
-    <ChatContainer PersonalityState="@currentPersonalityState" />
+    <ChatContainer PersonalityState="@_currentPersonalityState" />
 </div>
 
 <style>
@@ -16,7 +16,7 @@
 </style>
 
 @code {
-    private PersonalityState currentPersonalityState = new()
+    private PersonalityState _currentPersonalityState = new()
     {
         IsOnline = true,
         CurrentMood = "Focused",

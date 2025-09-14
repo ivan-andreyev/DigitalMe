@@ -1,12 +1,12 @@
-using Xunit;
-using FluentAssertions;
-using Moq;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using DigitalMe.Services;
-using DigitalMe.Repositories;
-using DigitalMe.Data.Entities;
 using DigitalMe.Data;
+using DigitalMe.Data.Entities;
+using DigitalMe.Repositories;
+using DigitalMe.Services;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -17,12 +17,12 @@ public class ConversationServiceTests : BaseTestWithDatabase
 
     public ConversationServiceTests()
     {
-        _mockLogger = new Mock<ILogger<ConversationService>>();
+        this._mockLogger = new Mock<ILogger<ConversationService>>();
 
-        var conversationRepository = new ConversationRepository(Context);
-        var messageRepository = new MessageRepository(Context);
+        var conversationRepository = new ConversationRepository(this.Context);
+        var messageRepository = new MessageRepository(this.Context);
 
-        _service = new ConversationService(conversationRepository, messageRepository, _mockLogger.Object);
+        this._service = new ConversationService(conversationRepository, messageRepository, this._mockLogger.Object);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         var title = "Test Conversation";
 
         // Act
-        var result = await _service.StartConversationAsync(platform, userId, title);
+        var result = await this._service.StartConversationAsync(platform, userId, title);
 
         // Assert
         result.Should().NotBeNull("should create new conversation");
@@ -45,7 +45,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         result.StartedAt.Should().BeBefore(DateTime.UtcNow.AddSeconds(1), "should set recent start time");
 
         // Verify saved to database
-        var savedConversation = await Context.Conversations.FindAsync(result.Id);
+        var savedConversation = await this.Context.Conversations.FindAsync(result.Id);
         savedConversation.Should().NotBeNull("should be saved to database");
     }
 
@@ -67,11 +67,11 @@ public class ConversationServiceTests : BaseTestWithDatabase
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
 
-        Context.Conversations.Add(existingConversation);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.Add(existingConversation);
+        await this.Context.SaveChangesAsync();
 
         // Act
-        var result = await _service.StartConversationAsync(platform, userId, title);
+        var result = await this._service.StartConversationAsync(platform, userId, title);
 
         // Assert
         result.Should().NotBeNull();
@@ -79,7 +79,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         result.Title.Should().Be("Existing Conversation", "should keep existing title");
 
         // Should not create duplicate
-        var allUserConversations = await Context.Conversations
+        var allUserConversations = await this.Context.Conversations
             .Where(c => c.UserId == userId && c.Platform == platform)
             .ToListAsync();
         allUserConversations.Should().HaveCount(1, "should not create duplicate conversations");
@@ -96,15 +96,15 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Title = "Test Chat",
             IsActive = true
         };
-        Context.Conversations.Add(conversation);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.Add(conversation);
+        await this.Context.SaveChangesAsync();
 
         var role = "user";
         var content = "Hello Ivan!";
         var metadata = new Dictionary<string, object> { ["test"] = "value" };
 
         // Act
-        var result = await _service.AddMessageAsync(conversation.Id, role, content, metadata);
+        var result = await this._service.AddMessageAsync(conversation.Id, role, content, metadata);
 
         // Assert
         result.Should().NotBeNull("should create message");
@@ -117,7 +117,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         result.Metadata.Should().NotBeNullOrEmpty("should serialize metadata");
 
         // Verify saved to database
-        var savedMessage = await Context.Messages.FindAsync(result.Id);
+        var savedMessage = await this.Context.Messages.FindAsync(result.Id);
         savedMessage.Should().NotBeNull("should be saved to database");
         savedMessage!.Content.Should().Be(content);
     }
@@ -130,7 +130,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
 
         // Act & Assert - should throw exception for non-existent conversation
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.AddMessageAsync(nonExistentConversationId, "user", "test", null));
+            this._service.AddMessageAsync(nonExistentConversationId, "user", "test", null));
 
         exception.ParamName.Should().Be("conversationId");
         exception.Message.Should().Contain($"Conversation with ID {nonExistentConversationId} does not exist");
@@ -147,8 +147,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Title = "History Test",
             IsActive = true
         };
-        Context.Conversations.Add(conversation);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.Add(conversation);
+        await this.Context.SaveChangesAsync();
 
         // Add messages in specific order
         var messages = new[]
@@ -159,11 +159,11 @@ public class ConversationServiceTests : BaseTestWithDatabase
             new Message { ConversationId = conversation.Id, Role = "assistant", Content = "Second response", Timestamp = DateTime.UtcNow.AddMinutes(-4) }
         };
 
-        Context.Messages.AddRange(messages);
-        await Context.SaveChangesAsync();
+        this.Context.Messages.AddRange(messages);
+        await this.Context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetConversationHistoryAsync(conversation.Id, 10);
+        var result = await this._service.GetConversationHistoryAsync(conversation.Id, 10);
 
         // Assert
         result.Should().HaveCount(4, "should return all messages");
@@ -183,13 +183,13 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Title = "Limit Test",
             IsActive = true
         };
-        Context.Conversations.Add(conversation);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.Add(conversation);
+        await this.Context.SaveChangesAsync();
 
         // Add 5 messages
         for (int i = 0; i < 5; i++)
         {
-            Context.Messages.Add(new Message
+            this.Context.Messages.Add(new Message
             {
                 ConversationId = conversation.Id,
                 Role = i % 2 == 0 ? "user" : "assistant",
@@ -198,10 +198,10 @@ public class ConversationServiceTests : BaseTestWithDatabase
                 Metadata = "{}"
             });
         }
-        await Context.SaveChangesAsync();
+        await this.Context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetConversationHistoryAsync(conversation.Id, 3);
+        var result = await this._service.GetConversationHistoryAsync(conversation.Id, 3);
 
         // Assert
         result.Should().HaveCount(3, "should respect limit parameter");
@@ -224,11 +224,11 @@ public class ConversationServiceTests : BaseTestWithDatabase
             new Conversation { Platform = "Mobile", UserId = targetUserId, Title = "Wrong Platform", IsActive = true }
         };
 
-        Context.Conversations.AddRange(conversations);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.AddRange(conversations);
+        await this.Context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetUserConversationsAsync(platform, targetUserId);
+        var result = await this._service.GetUserConversationsAsync(platform, targetUserId);
 
         // Assert
         result.Should().HaveCount(2, "should return only target user's conversations for specified platform");
@@ -249,17 +249,17 @@ public class ConversationServiceTests : BaseTestWithDatabase
             IsActive = true,
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
-        Context.Conversations.Add(conversation);
-        await Context.SaveChangesAsync();
+        this.Context.Conversations.Add(conversation);
+        await this.Context.SaveChangesAsync();
 
         // Act
-        var result = await _service.EndConversationAsync(conversation.Id);
+        var result = await this._service.EndConversationAsync(conversation.Id);
 
         // Assert
         result.Should().NotBeNull("should return updated conversation");
         result.IsActive.Should().Be(false, "should mark conversation as inactive");
 
-        var updatedConversation = await Context.Conversations.FindAsync(conversation.Id);
+        var updatedConversation = await this.Context.Conversations.FindAsync(conversation.Id);
         updatedConversation.Should().NotBeNull();
         updatedConversation!.IsActive.Should().Be(false, "should mark as inactive");
         updatedConversation.EndedAt.Should().NotBeNull("should set end time");
@@ -273,7 +273,7 @@ public class ConversationServiceTests : BaseTestWithDatabase
         var nonExistentId = Guid.NewGuid();
 
         // Act & Assert
-        await FluentActions.Invoking(() => _service.EndConversationAsync(nonExistentId))
+        await FluentActions.Invoking(() => this._service.EndConversationAsync(nonExistentId))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage("*not found*");
     }

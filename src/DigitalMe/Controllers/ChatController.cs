@@ -1,7 +1,7 @@
+using DigitalMe.DTOs;
+using DigitalMe.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using DigitalMe.Services;
-using DigitalMe.DTOs;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Controllers;
@@ -10,14 +10,14 @@ namespace DigitalMe.Controllers;
 [Route("api/[controller]")]
 public class ChatController : ControllerBase
 {
-    private readonly IMVPPersonalityService _personalityService;
-    private readonly IMVPMessageProcessor _messageProcessor;
+    private readonly IMvpPersonalityService _personalityService;
+    private readonly IMvpMessageProcessor _messageProcessor;
     private readonly IConversationService _conversationService;
     private readonly ILogger<ChatController> _logger;
 
     public ChatController(
-        IMVPPersonalityService personalityService,
-        IMVPMessageProcessor messageProcessor,
+        IMvpPersonalityService personalityService,
+        IMvpMessageProcessor messageProcessor,
         IConversationService conversationService,
         ILogger<ChatController> logger)
     {

@@ -1,10 +1,10 @@
-using FluentAssertions;
-using Moq;
-using Microsoft.Extensions.Logging;
+using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 using DigitalMe.Services.PersonalityEngine;
-using DigitalMe.Data.Entities;
 using DigitalMe.Tests.Unit.Builders;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
@@ -21,27 +21,27 @@ public class ContextualPersonalityEngineTests
 
     public ContextualPersonalityEngineTests()
     {
-        _mockLogger = new Mock<ILogger<ContextualPersonalityEngine>>();
-        _mockContextAdapter = new Mock<IPersonalityContextAdapter>();
-        _mockStressBehaviorAnalyzer = new Mock<IStressBehaviorAnalyzer>();
-        _mockExpertiseConfidenceAnalyzer = new Mock<IExpertiseConfidenceAnalyzer>();
-        _mockCommunicationStyleAnalyzer = new Mock<ICommunicationStyleAnalyzer>();
-        _mockContextAnalyzer = new Mock<IContextAnalyzer>();
+        this._mockLogger = new Mock<ILogger<ContextualPersonalityEngine>>();
+        this._mockContextAdapter = new Mock<IPersonalityContextAdapter>();
+        this._mockStressBehaviorAnalyzer = new Mock<IStressBehaviorAnalyzer>();
+        this._mockExpertiseConfidenceAnalyzer = new Mock<IExpertiseConfidenceAnalyzer>();
+        this._mockCommunicationStyleAnalyzer = new Mock<ICommunicationStyleAnalyzer>();
+        this._mockContextAnalyzer = new Mock<IContextAnalyzer>();
 
         // Configure mock setups
-        SetupContextAdapterMock();
-        SetupStressBehaviorAnalyzerMock();
-        SetupExpertiseConfidenceAnalyzerMock();
-        SetupCommunicationStyleAnalyzerMock();
-        SetupContextAnalyzerMock();
+        this.SetupContextAdapterMock();
+        this.SetupStressBehaviorAnalyzerMock();
+        this.SetupExpertiseConfidenceAnalyzerMock();
+        this.SetupCommunicationStyleAnalyzerMock();
+        this.SetupContextAnalyzerMock();
 
-        _engine = new ContextualPersonalityEngine(
-            _mockLogger.Object,
-            _mockContextAdapter.Object,
-            _mockStressBehaviorAnalyzer.Object,
-            _mockExpertiseConfidenceAnalyzer.Object,
-            _mockCommunicationStyleAnalyzer.Object,
-            _mockContextAnalyzer.Object);
+        this._engine = new ContextualPersonalityEngine(
+            this._mockLogger.Object,
+            this._mockContextAdapter.Object,
+            this._mockStressBehaviorAnalyzer.Object,
+            this._mockExpertiseConfidenceAnalyzer.Object,
+            this._mockCommunicationStyleAnalyzer.Object,
+            this._mockContextAnalyzer.Object);
     }
 
     private PersonalityProfile CreateIvanPersonality()
@@ -66,12 +66,12 @@ public class ContextualPersonalityEngineTests
 
     private void SetupContextAdapterMock()
     {
-        _mockContextAdapter
+        this._mockContextAdapter
             .Setup(x => x.AdaptToContextAsync(It.IsAny<PersonalityProfile>(), It.IsAny<SituationalContext>()))
             .Returns<PersonalityProfile, SituationalContext>((personality, context) =>
             {
                 // Create adapted personality with context-specific trait boosts
-                var adaptedPersonality = ClonePersonality(personality);
+                var adaptedPersonality = this.ClonePersonality(personality);
 
                 // Apply context-specific trait modifications to match test expectations
                 if (context.ContextType == ContextType.Technical && adaptedPersonality.Traits != null)
@@ -101,7 +101,7 @@ public class ContextualPersonalityEngineTests
 
     private void SetupStressBehaviorAnalyzerMock()
     {
-        _mockStressBehaviorAnalyzer
+        this._mockStressBehaviorAnalyzer
             .Setup(x => x.AnalyzeStressModifications(It.IsAny<PersonalityProfile>(), It.IsAny<double>(), It.IsAny<double>()))
             .Returns<PersonalityProfile, double, double>((personality, stress, timePressure) =>
             {
@@ -138,7 +138,7 @@ public class ContextualPersonalityEngineTests
 
     private void SetupExpertiseConfidenceAnalyzerMock()
     {
-        _mockExpertiseConfidenceAnalyzer
+        this._mockExpertiseConfidenceAnalyzer
             .Setup(x => x.AnalyzeExpertiseConfidence(It.IsAny<PersonalityProfile>(), It.IsAny<DomainType>(), It.IsAny<int>()))
             .Returns<PersonalityProfile, DomainType, int>((personality, domain, complexity) =>
             {
@@ -179,7 +179,8 @@ public class ContextualPersonalityEngineTests
 
                 // Apply complexity adjustment
                 adjustment.ComplexityAdjustment = complexity > 7 ? -0.2 : 0.0;
-                adjustment.AdjustedConfidence = Math.Max(0.0, Math.Min(1.0,
+                adjustment.AdjustedConfidence = Math.Max(0.0, Math.Min(
+                    1.0,
                     adjustment.BaseConfidence + adjustment.DomainExpertiseBonus - adjustment.KnownWeaknessReduction + adjustment.ComplexityAdjustment));
 
                 return adjustment;
@@ -188,7 +189,7 @@ public class ContextualPersonalityEngineTests
 
     private void SetupCommunicationStyleAnalyzerMock()
     {
-        _mockCommunicationStyleAnalyzer
+        this._mockCommunicationStyleAnalyzer
             .Setup(x => x.DetermineOptimalCommunicationStyle(It.IsAny<PersonalityProfile>(), It.IsAny<SituationalContext>()))
             .Returns<PersonalityProfile, SituationalContext>((personality, context) =>
             {
@@ -243,7 +244,7 @@ public class ContextualPersonalityEngineTests
 
     private void SetupContextAnalyzerMock()
     {
-        _mockContextAnalyzer
+        this._mockContextAnalyzer
             .Setup(x => x.AnalyzeContextRequirements(It.IsAny<SituationalContext>()))
             .Returns<SituationalContext>(context =>
             {
@@ -332,7 +333,7 @@ public class ContextualPersonalityEngineTests
     public async Task AdaptPersonalityToContextAsync_WithTechnicalContext_ShouldBoostTechnicalTraits()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var context = new SituationalContext
         {
             ContextType = ContextType.Technical,
@@ -343,7 +344,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = await _engine.AdaptPersonalityToContextAsync(personality, context);
+        var result = await this._engine.AdaptPersonalityToContextAsync(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -358,7 +359,7 @@ public class ContextualPersonalityEngineTests
     public async Task AdaptPersonalityToContextAsync_WithPersonalContext_ShouldBoostPersonalTraits()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var context = new SituationalContext
         {
             ContextType = ContextType.Personal,
@@ -369,7 +370,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = await _engine.AdaptPersonalityToContextAsync(personality, context);
+        var result = await this._engine.AdaptPersonalityToContextAsync(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -383,7 +384,7 @@ public class ContextualPersonalityEngineTests
     public async Task AdaptPersonalityToContextAsync_WithHighUrgency_ShouldReduceCommunicationWeight()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         personality.Traits?.Add(new PersonalityTrait
         {
             Name = "Communication",
@@ -399,7 +400,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = await _engine.AdaptPersonalityToContextAsync(personality, context);
+        var result = await this._engine.AdaptPersonalityToContextAsync(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -417,14 +418,14 @@ public class ContextualPersonalityEngineTests
     public void ModifyBehaviorForStressAndTime_WithIvanPersonality_ShouldApplyIvanSpecificPatterns()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var stressLevel = 0.7;
         var timePressure = 0.8;
 
         // Mock is already configured globally to return appropriate values for Ivan personality
 
         // Act
-        var result = _engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
+        var result = this._engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
 
         // Assert
         result.Should().NotBeNull();
@@ -446,12 +447,12 @@ public class ContextualPersonalityEngineTests
     public void ModifyBehaviorForStressAndTime_WithGenericPersonality_ShouldApplyGenericPatterns()
     {
         // Arrange
-        var personality = CreateGenericPersonality();
+        var personality = this.CreateGenericPersonality();
         var stressLevel = 0.6;
         var timePressure = 0.7;
 
         // Act
-        var result = _engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
+        var result = this._engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
 
         // Assert
         result.Should().NotBeNull();
@@ -464,12 +465,12 @@ public class ContextualPersonalityEngineTests
     public void ModifyBehaviorForStressAndTime_WithExtremeValues_ShouldClampToValidRange()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var stressLevel = 1.5; // Above max
         var timePressure = -0.2; // Below min
 
         // Act
-        var result = _engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
+        var result = this._engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
 
         // Assert
         result.StressLevel.Should().Be(1.0); // Clamped to max
@@ -484,12 +485,12 @@ public class ContextualPersonalityEngineTests
     public void AdjustConfidenceByExpertise_WithCSharpDomain_ShouldShowHighConfidence()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var domainType = DomainType.CSharpDotNet;
         var taskComplexity = 3; // Lower complexity to test high confidence scenario
 
         // Act
-        var result = _engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
+        var result = this._engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
 
         // Assert
         result.Should().NotBeNull();
@@ -504,12 +505,12 @@ public class ContextualPersonalityEngineTests
     public void AdjustConfidenceByExpertise_WithWorkLifeBalanceDomain_ShouldShowLowerConfidence()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var domainType = DomainType.WorkLifeBalance;
         var taskComplexity = 3;
 
         // Act
-        var result = _engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
+        var result = this._engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
 
         // Assert
         result.Should().NotBeNull();
@@ -523,12 +524,12 @@ public class ContextualPersonalityEngineTests
     public void AdjustConfidenceByExpertise_WithHighComplexity_ShouldReduceConfidence()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var domainType = DomainType.SoftwareArchitecture;
         var taskComplexity = 10; // Maximum complexity
 
         // Act
-        var result = _engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
+        var result = this._engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
 
         // Assert
         result.Should().NotBeNull();
@@ -541,12 +542,12 @@ public class ContextualPersonalityEngineTests
     public void AdjustConfidenceByExpertise_WithGenericPersonality_ShouldUseGenericCalculation()
     {
         // Arrange
-        var personality = CreateGenericPersonality();
+        var personality = this.CreateGenericPersonality();
         var domainType = DomainType.CSharpDotNet;
         var taskComplexity = 5;
 
         // Act
-        var result = _engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
+        var result = this._engine.AdjustConfidenceByExpertise(personality, domainType, taskComplexity);
 
         // Assert
         result.Should().NotBeNull();
@@ -563,7 +564,7 @@ public class ContextualPersonalityEngineTests
     public void DetermineOptimalCommunicationStyle_WithTechnicalContext_ShouldReturnTechnicalStyle()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var context = new SituationalContext
         {
             ContextType = ContextType.Technical,
@@ -572,7 +573,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = _engine.DetermineOptimalCommunicationStyle(personality, context);
+        var result = this._engine.DetermineOptimalCommunicationStyle(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -587,7 +588,7 @@ public class ContextualPersonalityEngineTests
     public void DetermineOptimalCommunicationStyle_WithFamilyContext_ShouldReturnWarmStyle()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var context = new SituationalContext
         {
             ContextType = ContextType.Family,
@@ -596,7 +597,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = _engine.DetermineOptimalCommunicationStyle(personality, context);
+        var result = this._engine.DetermineOptimalCommunicationStyle(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -610,7 +611,7 @@ public class ContextualPersonalityEngineTests
     public void DetermineOptimalCommunicationStyle_WithHighUrgency_ShouldAdjustForUrgency()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var context = new SituationalContext
         {
             ContextType = ContextType.Professional,
@@ -618,7 +619,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = _engine.DetermineOptimalCommunicationStyle(personality, context);
+        var result = this._engine.DetermineOptimalCommunicationStyle(personality, context);
 
         // Assert
         result.Should().NotBeNull();
@@ -643,7 +644,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = _engine.AnalyzeContextRequirements(context);
+        var result = this._engine.AnalyzeContextRequirements(context);
 
         // Assert
         result.Should().NotBeNull();
@@ -673,7 +674,7 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = _engine.AnalyzeContextRequirements(context);
+        var result = this._engine.AnalyzeContextRequirements(context);
 
         // Assert
         result.Should().NotBeNull();
@@ -694,7 +695,7 @@ public class ContextualPersonalityEngineTests
     public async Task AdaptPersonalityToContextAsync_WithNullTraits_ShouldHandleGracefully()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         personality.Traits = null; // Null traits
 
         var context = new SituationalContext
@@ -704,11 +705,12 @@ public class ContextualPersonalityEngineTests
         };
 
         // Act
-        var result = await _engine.AdaptPersonalityToContextAsync(personality, context);
+        var result = await this._engine.AdaptPersonalityToContextAsync(personality, context);
 
         // Assert
         result.Should().NotBeNull();
         result.Name.Should().Be(personality.Name);
+
         // Should not throw exception even with null traits
     }
 
@@ -716,12 +718,12 @@ public class ContextualPersonalityEngineTests
     public void ModifyBehaviorForStressAndTime_WithZeroValues_ShouldReturnBaseModifications()
     {
         // Arrange
-        var personality = CreateIvanPersonality();
+        var personality = this.CreateIvanPersonality();
         var stressLevel = 0.0;
         var timePressure = 0.0;
 
         // Act
-        var result = _engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
+        var result = this._engine.ModifyBehaviorForStressAndTime(personality, stressLevel, timePressure);
 
         // Assert
         result.Should().NotBeNull();

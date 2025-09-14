@@ -1,7 +1,7 @@
+using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using DigitalMe.Services;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -16,8 +16,8 @@ public class ProfileDataParserTests
 
     public ProfileDataParserTests()
     {
-        _mockLogger = new Mock<ILogger<ProfileDataParser>>();
-        _parser = new ProfileDataParser(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<ProfileDataParser>>();
+        this._parser = new ProfileDataParser(this._mockLogger.Object);
     }
 
     [Fact]
@@ -28,19 +28,19 @@ public class ProfileDataParserTests
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            _parser.ParseProfileDataAsync(nonExistentPath));
+            this._parser.ParseProfileDataAsync(nonExistentPath));
     }
 
     [Fact]
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParseBasicInfo()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.Equal("Иван", result.Name);
@@ -58,12 +58,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParseFamilyInfo()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.Equal("Марина", result.Family.WifeName);
@@ -81,12 +81,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParseProfessionalInfo()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.Equal("Head of R&D в EllyAnalytics inc", result.Professional.Position);
@@ -105,12 +105,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParsePersonalityTraits()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.NotEmpty(result.Personality.CoreValues);
@@ -138,12 +138,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParseTechnicalPreferences()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.NotEmpty(result.TechnicalPreferences);
@@ -162,12 +162,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithValidMarkdownContent_ShouldParseGoals()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.NotEmpty(result.Goals);
@@ -193,15 +193,16 @@ public class ProfileDataParserTests
             **Random:** value
             """;
 
-        var tempFilePath = CreateTempProfileFile(invalidContent);
+        var tempFilePath = this.CreateTempProfileFile(invalidContent);
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.NotNull(result);
+
             // Should still return object with default/empty values
             Assert.Equal(string.Empty, result.Name);
             Assert.Equal(0, result.Age);
@@ -219,12 +220,12 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_WithEmptyFile_ShouldReturnEmptyData()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(string.Empty);
+        var tempFilePath = this.CreateTempProfileFile(string.Empty);
 
         try
         {
             // Act
-            var result = await _parser.ParseProfileDataAsync(tempFilePath);
+            var result = await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
             Assert.NotNull(result);
@@ -247,7 +248,7 @@ public class ProfileDataParserTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            _parser.ParseProfileDataAsync(invalidPath));
+            this._parser.ParseProfileDataAsync(invalidPath));
 
         // Verify exception message
         Assert.Contains("Profile data file not found", exception.Message);
@@ -257,15 +258,15 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_ShouldLogParsingStart()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            await _parser.ParseProfileDataAsync(tempFilePath);
+            await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
-            _mockLogger.Verify(
+            this._mockLogger.Verify(
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
@@ -284,15 +285,15 @@ public class ProfileDataParserTests
     public async Task ParseProfileDataAsync_ShouldLogSuccessfulCompletion()
     {
         // Arrange
-        var tempFilePath = CreateTempProfileFile(GetSampleProfileContent());
+        var tempFilePath = this.CreateTempProfileFile(this.GetSampleProfileContent());
 
         try
         {
             // Act
-            await _parser.ParseProfileDataAsync(tempFilePath);
+            await this._parser.ParseProfileDataAsync(tempFilePath);
 
             // Assert
-            _mockLogger.Verify(
+            this._mockLogger.Verify(
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),

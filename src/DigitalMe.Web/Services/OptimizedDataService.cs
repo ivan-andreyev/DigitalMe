@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using DigitalMe.Web.Data;
-using DigitalMe.Web.Models;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Caching.Distributed;
 using System.Diagnostics;
 using System.Text.Json;
+using DigitalMe.Web.Data;
+using DigitalMe.Web.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DigitalMe.Web.Services;
 
@@ -42,8 +42,8 @@ public class OptimizedDataService : IOptimizedDataService
     private readonly IDatabaseConnectionService _connectionService;
     private readonly QueryPerformanceTracker _performanceTracker;
     
-    private const int DEFAULT_CACHE_MINUTES = 15;
-    private const int CONFIG_CACHE_MINUTES = 60;
+    private const int DefaultCacheMinutes = 15;
+    private const int ConfigCacheMinutes = 60;
     
     public OptimizedDataService(
         DigitalMeDbContext context,
@@ -230,7 +230,7 @@ public class OptimizedDataService : IOptimizedDataService
             
             if (profile != null)
             {
-                _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(DEFAULT_CACHE_MINUTES));
+                _memoryCache.Set(cacheKey, profile, TimeSpan.FromMinutes(DefaultCacheMinutes));
             }
             
             activity.AddTag("cache_hit", "false");
@@ -499,7 +499,7 @@ public class OptimizedDataService : IOptimizedDataService
             if (config != null)
             {
                 // System config changes rarely, cache longer
-                _memoryCache.Set(cacheKey, config, TimeSpan.FromMinutes(CONFIG_CACHE_MINUTES));
+                _memoryCache.Set(cacheKey, config, TimeSpan.FromMinutes(ConfigCacheMinutes));
             }
             
             activity.AddTag("cache_hit", "false");

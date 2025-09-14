@@ -11,12 +11,12 @@ public abstract class TestBase
 
     protected TestBase()
     {
-        MockRepository = new MockRepository(MockBehavior.Strict);
+        this.MockRepository = new MockRepository(MockBehavior.Strict);
     }
 
     protected void VerifyAll()
     {
-        MockRepository.VerifyAll();
+        this.MockRepository.VerifyAll();
     }
 
     protected DbContextOptions<T> CreateInMemoryDbOptions<T>(string? databaseName = null) where T : DbContext

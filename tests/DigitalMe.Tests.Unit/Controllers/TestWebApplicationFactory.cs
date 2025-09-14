@@ -1,7 +1,7 @@
+using DigitalMe.Tests.Unit.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using DigitalMe.Tests.Unit.Infrastructure;
 
 namespace DigitalMe.Tests.Unit.Controllers;
 
@@ -11,14 +11,14 @@ public class TestWebApplicationFactory<TStartup> : WebApplicationFactory<TStartu
 
     public TestWebApplicationFactory()
     {
-        _serviceConfigurators = CreateDefaultConfigurators();
+        this._serviceConfigurators = CreateDefaultConfigurators();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices((context, services) =>
         {
-            foreach (var configurator in _serviceConfigurators)
+            foreach (var configurator in this._serviceConfigurators)
             {
                 configurator.ConfigureServices(services, context.Configuration);
             }

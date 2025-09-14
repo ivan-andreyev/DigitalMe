@@ -29,12 +29,12 @@ public class AgentBehaviorException : DigitalMeException
         : base("AGENT_BEHAVIOR_ERROR", message, innerException, errorData) { }
 }
 
-public class MCPConnectionException : DigitalMeException
+public class McpConnectionException : DigitalMeException
 {
-    public MCPConnectionException(string message, object? errorData = null)
+    public McpConnectionException(string message, object? errorData = null)
         : base("MCP_CONNECTION_ERROR", message, errorData) { }
 
-    public MCPConnectionException(string message, Exception innerException, object? errorData = null)
+    public McpConnectionException(string message, Exception innerException, object? errorData = null)
         : base("MCP_CONNECTION_ERROR", message, innerException, errorData) { }
 }
 

@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
-using Moq;
 using DigitalMe.Services.Learning;
 using DigitalMe.Services.Learning.Testing.TestGeneration;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace DigitalMe.Tests.Unit.Services;
 
@@ -16,8 +16,8 @@ public class TestCaseGeneratorTests : IDisposable
 
     public TestCaseGeneratorTests()
     {
-        _mockLogger = new Mock<ILogger<TestCaseGenerator>>();
-        _generator = new TestCaseGenerator(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<TestCaseGenerator>>();
+        this._generator = new TestCaseGenerator(this._mockLogger.Object);
     }
 
     #region Test Case Generation Tests
@@ -26,10 +26,10 @@ public class TestCaseGeneratorTests : IDisposable
     public async Task GenerateTestCasesAsync_WithValidApiDocumentation_GeneratesTestCases()
     {
         // Arrange
-        var apiDocumentation = CreateSampleApiDocumentation();
+        var apiDocumentation = this.CreateSampleApiDocumentation();
 
         // Act
-        var testCases = await _generator.GenerateTestCasesAsync(apiDocumentation);
+        var testCases = await this._generator.GenerateTestCasesAsync(apiDocumentation);
 
         // Assert
         Assert.NotEmpty(testCases);
@@ -43,7 +43,7 @@ public class TestCaseGeneratorTests : IDisposable
     public async Task GenerateEndpointTestCasesAsync_WithRequiredParameters_GeneratesParameterValidationTests()
     {
         // Arrange
-        var apiDoc = CreateSampleApiDocumentation();
+        var apiDoc = this.CreateSampleApiDocumentation();
         var endpoint = new ApiEndpoint
         {
             Method = "POST",
@@ -56,10 +56,11 @@ public class TestCaseGeneratorTests : IDisposable
         };
 
         // Act
-        var testCases = await _generator.GenerateEndpointTestCasesAsync(apiDoc, endpoint);
+        var testCases = await this._generator.GenerateEndpointTestCasesAsync(apiDoc, endpoint);
 
         // Assert
         Assert.NotEmpty(testCases);
+
         // Should generate happy path + missing parameter tests
         Assert.True(testCases.Count >= 3); // 1 happy path + 2 missing parameter tests
         Assert.Contains(testCases, tc => tc.Name.Contains("HappyPath"));
@@ -71,11 +72,11 @@ public class TestCaseGeneratorTests : IDisposable
     public void GenerateErrorHandlingTestCases_WithAuthentication_GeneratesUnauthorizedTest()
     {
         // Arrange
-        var apiDoc = CreateSampleApiDocumentation();
+        var apiDoc = this.CreateSampleApiDocumentation();
         apiDoc.Authentication = AuthenticationMethod.Bearer;
 
         // Act
-        var testCases = _generator.GenerateErrorHandlingTestCases(apiDoc);
+        var testCases = this._generator.GenerateErrorHandlingTestCases(apiDoc);
 
         // Assert
         Assert.NotEmpty(testCases);
@@ -87,11 +88,11 @@ public class TestCaseGeneratorTests : IDisposable
     public void GenerateAuthenticationTestCases_WithValidAuthentication_GeneratesAuthTest()
     {
         // Arrange
-        var apiDoc = CreateSampleApiDocumentation();
+        var apiDoc = this.CreateSampleApiDocumentation();
         apiDoc.Authentication = AuthenticationMethod.Bearer;
 
         // Act
-        var testCases = _generator.GenerateAuthenticationTestCases(apiDoc);
+        var testCases = this._generator.GenerateAuthenticationTestCases(apiDoc);
 
         // Assert
         Assert.NotEmpty(testCases);
@@ -103,7 +104,7 @@ public class TestCaseGeneratorTests : IDisposable
     public async Task GenerateExampleBasedTestCasesAsync_WithCodeExamples_GeneratesExampleTests()
     {
         // Arrange
-        var apiDoc = CreateSampleApiDocumentation();
+        var apiDoc = this.CreateSampleApiDocumentation();
         apiDoc.Examples = new List<CodeExample>
         {
             new CodeExample
@@ -116,7 +117,7 @@ public class TestCaseGeneratorTests : IDisposable
         };
 
         // Act
-        var testCases = await _generator.GenerateExampleBasedTestCasesAsync(apiDoc);
+        var testCases = await this._generator.GenerateExampleBasedTestCasesAsync(apiDoc);
 
         // Assert
         Assert.NotEmpty(testCases);

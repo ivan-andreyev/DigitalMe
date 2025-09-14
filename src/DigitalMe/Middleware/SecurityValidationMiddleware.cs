@@ -1,6 +1,6 @@
 using System.Text;
-using Microsoft.Extensions.Options;
 using DigitalMe.Services.Security;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.Middleware;
 

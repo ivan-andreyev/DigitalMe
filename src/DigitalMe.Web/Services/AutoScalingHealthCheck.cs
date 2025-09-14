@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Diagnostics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace DigitalMe.Web.Services;
 
@@ -112,14 +112,14 @@ public class AutoScalingHealthCheck : IHealthCheck
         {
             // Get current managed memory usage
             var managedMemoryBytes = GC.GetTotalMemory(false);
-            var managedMemoryMB = managedMemoryBytes / (1024.0 * 1024.0);
+            var managedMemoryMb = managedMemoryBytes / (1024.0 * 1024.0);
             
             // Also get process working set for total memory picture
             using var process = Process.GetCurrentProcess();
-            var workingSetMB = process.WorkingSet64 / (1024.0 * 1024.0);
+            var workingSetMb = process.WorkingSet64 / (1024.0 * 1024.0);
             
             // Return the higher of the two for conservative scaling decisions
-            return Math.Max(managedMemoryMB, workingSetMB);
+            return Math.Max(managedMemoryMb, workingSetMb);
         }
         catch (Exception)
         {

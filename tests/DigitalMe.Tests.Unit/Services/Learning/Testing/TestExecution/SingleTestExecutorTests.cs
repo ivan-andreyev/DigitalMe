@@ -1,17 +1,17 @@
-using Xunit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using DigitalMe.Services.Learning;
+using DigitalMe.Services.Learning.Testing.TestExecution;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
-using System.Threading;
-using DigitalMe.Services.Learning.Testing.TestExecution;
-using DigitalMe.Services.Learning;
-using System;
-using System.Linq;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services.Learning.Testing.TestExecution;
 
@@ -30,14 +30,14 @@ public class SingleTestExecutorTests
 
     public SingleTestExecutorTests()
     {
-        _mockLogger = new Mock<ILogger<SingleTestExecutor>>();
-        _mockHttpHandler = new Mock<HttpMessageHandler>();
-        _mockHttpClient = new HttpClient(_mockHttpHandler.Object)
+        this._mockLogger = new Mock<ILogger<SingleTestExecutor>>();
+        this._mockHttpHandler = new Mock<HttpMessageHandler>();
+        this._mockHttpClient = new HttpClient(this._mockHttpHandler.Object)
         {
             BaseAddress = new Uri("https://api.example.com")
         };
 
-        _singleTestExecutor = new SingleTestExecutor(_mockLogger.Object, _mockHttpClient);
+        this._singleTestExecutor = new SingleTestExecutor(this._mockLogger.Object, this._mockHttpClient);
     }
 
     #region Constructor Tests
@@ -46,7 +46,7 @@ public class SingleTestExecutorTests
     public void Constructor_WithValidParameters_ShouldInitialize()
     {
         // Arrange & Act
-        var executor = new SingleTestExecutor(_mockLogger.Object, _mockHttpClient);
+        var executor = new SingleTestExecutor(this._mockLogger.Object, this._mockHttpClient);
 
         // Assert
         Assert.NotNull(executor);
@@ -57,7 +57,7 @@ public class SingleTestExecutorTests
     {
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new SingleTestExecutor(null!, _mockHttpClient));
+            new SingleTestExecutor(null!, this._mockHttpClient));
         Assert.Equal("logger", exception.ParamName);
     }
 
@@ -66,7 +66,7 @@ public class SingleTestExecutorTests
     {
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new SingleTestExecutor(_mockLogger.Object, null!));
+            new SingleTestExecutor(this._mockLogger.Object, null!));
         Assert.Equal("httpClient", exception.ParamName);
     }
 
@@ -78,13 +78,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithSimpleGetRequest_ShouldReturnSuccessResult()
     {
         // Arrange
-        var testCase = CreateBasicGetTestCase();
+        var testCase = this.CreateBasicGetTestCase();
         var responseContent = "{\"status\": \"success\", \"id\": 123}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.NotNull(result);
@@ -102,20 +102,20 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithPostRequest_ShouldCreateCorrectHttpRequest()
     {
         // Arrange
-        var testCase = CreatePostTestCase();
+        var testCase = this.CreatePostTestCase();
         var responseContent = "{\"created\": true, \"id\": 456}";
 
-        SetupHttpResponse(HttpStatusCode.Created, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.Created, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
         Assert.Equal(responseContent, result.Response);
 
         // CRITICAL: Verify HTTP POST request with proper content verification
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -132,13 +132,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithQueryParameters_ShouldBuildCorrectUrl()
     {
         // Arrange
-        var testCase = CreateGetTestCaseWithQueryParams();
+        var testCase = this.CreateGetTestCaseWithQueryParams();
         var responseContent = "{\"results\": []}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.NotNull(result);
@@ -146,7 +146,7 @@ public class SingleTestExecutorTests
         Assert.Equal(testCase.Name, result.TestCaseName);
 
         // CRITICAL: Verify HTTP request with correct URL construction including query parameters
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -166,19 +166,19 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithCustomHeaders_ShouldAddHeaders()
     {
         // Arrange
-        var testCase = CreateTestCaseWithHeaders();
+        var testCase = this.CreateTestCaseWithHeaders();
         var responseContent = "{\"authenticated\": true}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
 
         // Verify HTTP request was made (header verification is complex with mock setup)
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
@@ -196,12 +196,12 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithStatusCodeAssertion_ShouldValidateCorrectly()
     {
         // Arrange
-        var testCase = CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.OK);
+        var testCase = this.CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.OK);
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
@@ -216,12 +216,12 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithFailingStatusCodeAssertion_ShouldReturnFalse()
     {
         // Arrange
-        var testCase = CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.NotFound);
+        var testCase = this.CreateTestCaseWithStatusCodeAssertion(HttpStatusCode.NotFound);
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"status\": \"ok\"}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success); // Should fail due to status code mismatch
@@ -235,13 +235,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithResponseBodyContainsAssertion_ShouldValidateContent()
     {
         // Arrange
-        var testCase = CreateTestCaseWithBodyContainsAssertion("success");
+        var testCase = this.CreateTestCaseWithBodyContainsAssertion("success");
         var responseContent = "{\"status\": \"success\", \"message\": \"Operation completed\"}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
@@ -254,13 +254,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithJsonPathAssertion_ShouldExtractCorrectValue()
     {
         // Arrange
-        var testCase = CreateTestCaseWithJsonPathAssertion("status", "success");
+        var testCase = this.CreateTestCaseWithJsonPathAssertion("status", "success");
         var responseContent = "{\"status\": \"success\", \"data\": {\"id\": 123}}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
@@ -274,13 +274,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithMultipleAssertions_ShouldEvaluateAll()
     {
         // Arrange
-        var testCase = CreateTestCaseWithMultipleAssertions();
+        var testCase = this.CreateTestCaseWithMultipleAssertions();
         var responseContent = "{\"status\": \"success\", \"count\": 5}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
@@ -292,13 +292,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithNonCriticalFailingAssertion_ShouldStillSucceed()
     {
         // Arrange
-        var testCase = CreateTestCaseWithNonCriticalAssertion();
+        var testCase = this.CreateTestCaseWithNonCriticalAssertion();
         var responseContent = "{\"status\": \"success\", \"optional\": null}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success); // Should succeed because failing assertion is non-critical
@@ -316,13 +316,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithHttpRequestException_ShouldHandleGracefully()
     {
         // Arrange
-        var testCase = CreateBasicGetTestCase();
+        var testCase = this.CreateBasicGetTestCase();
         var exception = new HttpRequestException("Connection timeout");
 
-        SetupHttpException(exception);
+        this.SetupHttpException(exception);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
@@ -335,13 +335,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithTimeout_ShouldCancelAndReturnTimeoutResult()
     {
         // Arrange
-        var testCase = CreateBasicGetTestCase();
+        var testCase = this.CreateBasicGetTestCase();
         testCase.ExpectedExecutionTime = TimeSpan.FromMilliseconds(100); // Very short timeout
 
-        SetupHttpDelay(TimeSpan.FromSeconds(2)); // Longer delay than timeout
+        this.SetupHttpDelay(TimeSpan.FromSeconds(2)); // Longer delay than timeout
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
@@ -353,13 +353,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithInvalidJsonResponse_ShouldHandleJsonParsingErrors()
     {
         // Arrange
-        var testCase = CreateTestCaseWithJsonPathAssertion("status", "success");
+        var testCase = this.CreateTestCaseWithJsonPathAssertion("status", "success");
         var invalidJsonContent = "{invalid json content}";
 
-        SetupHttpResponse(HttpStatusCode.OK, invalidJsonContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, invalidJsonContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
@@ -372,13 +372,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithMissingJsonPath_ShouldReturnEmptyValue()
     {
         // Arrange
-        var testCase = CreateTestCaseWithJsonPathAssertion("nonexistent.path", "value");
+        var testCase = this.CreateTestCaseWithJsonPathAssertion("nonexistent.path", "value");
         var responseContent = "{\"status\": \"success\"}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.False(result.Success);
@@ -395,18 +395,18 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithPutRequest_ShouldIncludeRequestBody()
     {
         // Arrange
-        var testCase = CreatePutTestCase();
+        var testCase = this.CreatePutTestCase();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"updated\": true}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"updated\": true}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
 
         // Verify PUT request with content was made
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -419,18 +419,18 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithPatchRequest_ShouldSetCorrectContentType()
     {
         // Arrange
-        var testCase = CreatePatchTestCase();
+        var testCase = this.CreatePatchTestCase();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"patched\": true}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"patched\": true}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
 
         // Verify PATCH request was made
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -448,21 +448,21 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithResponseHeaderAssertion_ShouldValidateHeaders()
     {
         // Arrange
-        var testCase = CreateTestCaseWithResponseHeaderAssertion("Content-Type", "application/json");
+        var testCase = this.CreateTestCaseWithResponseHeaderAssertion("Content-Type", "application/json");
         var responseContent = "{\"data\": true}";
 
         // Use standard setup - response headers are automatically set by StringContent
-        SetupHttpResponse(HttpStatusCode.OK, responseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.NotNull(result);
         Assert.Single(result.AssertionResults);
 
         // CRITICAL: Verify HTTP request was made correctly
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -489,13 +489,13 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_ShouldCollectComprehensiveMetrics()
     {
         // Arrange
-        var testCase = CreateBasicGetTestCase();
+        var testCase = this.CreateBasicGetTestCase();
         var responseContent = "{\"test\": \"data\"}";
 
-        SetupHttpResponse(HttpStatusCode.OK, responseContent, contentLength: responseContent.Length);
+        this.SetupHttpResponse(HttpStatusCode.OK, responseContent, contentLength: responseContent.Length);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
@@ -527,10 +527,10 @@ public class SingleTestExecutorTests
             .Build();
 
         var nestedResponseContent = "{\"user\": {\"profile\": {\"name\": \"John Doe\", \"age\": 30}}}";
-        SetupHttpResponse(HttpStatusCode.OK, nestedResponseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, nestedResponseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success, "Nested JSON path extraction should succeed");
@@ -551,15 +551,16 @@ public class SingleTestExecutorTests
             .Build();
 
         var arrayResponseContent = "{\"items\": [{\"name\": \"First Item\", \"id\": 1}, {\"name\": \"Second Item\", \"id\": 2}]}";
-        SetupHttpResponse(HttpStatusCode.OK, arrayResponseContent);
+        this.SetupHttpResponse(HttpStatusCode.OK, arrayResponseContent);
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         // Note: The simplified JSON path extraction in SingleTestExecutor may not handle array indices
         Assert.NotNull(result);
         Assert.Single(result.AssertionResults);
+
         // This test documents current behavior - may pass or fail depending on JSON path implementation
     }
 
@@ -575,16 +576,16 @@ public class SingleTestExecutorTests
             .WithParameter("filter", "type=user&status=active")
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"results\": []}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"results\": []}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
 
         // Verify URL encoding of special characters
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -610,16 +611,16 @@ public class SingleTestExecutorTests
             .WithHeader("X-Token", "Bearer abc123!@#$%^&*()")
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success);
 
         // Verify headers with special characters are added correctly
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -640,8 +641,8 @@ public class SingleTestExecutorTests
             ["dateField"] = DateTime.Now,
             ["floatField"] = 3.14159
         };
-        // Note: Creating actual circular reference is complex in test setup
 
+        // Note: Creating actual circular reference is complex in test setup
         var testCase = TestCaseBuilder.Create()
             .WithName("Malformed Body Serialization Test")
             .WithEndpoint("/api/complex")
@@ -649,13 +650,14 @@ public class SingleTestExecutorTests
             .WithRequestBody(problematicObject)
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert - Should not crash, should handle serialization gracefully
         Assert.NotNull(result);
+
         // May succeed or fail depending on JSON serialization handling
         if (!result.Success && result.ErrorMessage != null)
         {
@@ -675,10 +677,10 @@ public class SingleTestExecutorTests
             .Build();
 
         var unicodeResponse = "{\"message\": \"тест 测试 🚀 emoji\", \"status\": \"success\"}";
-        SetupHttpResponse(HttpStatusCode.OK, unicodeResponse, contentType: "application/json; charset=utf-8");
+        this.SetupHttpResponse(HttpStatusCode.OK, unicodeResponse, contentType: "application/json; charset=utf-8");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
         Assert.True(result.Success, "Should handle Unicode characters in response");
@@ -705,13 +707,13 @@ public class SingleTestExecutorTests
             .WithHeader("X-API-Version", "v2")
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.Created, "{\"id\": 456, \"status\": \"created\"}");
+        this.SetupHttpResponse(HttpStatusCode.Created, "{\"id\": 456, \"status\": \"created\"}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert - Comprehensive mock verification
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -735,10 +737,10 @@ public class SingleTestExecutorTests
     public async Task ExecuteTestCaseAsync_WithCancellationToken_ShouldPropagateCancellation()
     {
         // Arrange
-        var testCase = CreateBasicGetTestCase();
+        var testCase = this.CreateBasicGetTestCase();
 
         // Setup HTTP handler to delay and check for cancellation
-        _mockHttpHandler.Protected()
+        this._mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -754,12 +756,12 @@ public class SingleTestExecutorTests
             });
 
         // Act & Assert - Should complete normally with proper token propagation
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         Assert.True(result.Success);
 
         // Verify cancellation token was passed to SendAsync
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
@@ -777,10 +779,10 @@ public class SingleTestExecutorTests
             .WithRequestBody(new { validField = "test", problematicField = double.NaN }) // NaN causes JSON issues
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"processed\": true}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(problematicTestCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(problematicTestCase);
 
         // Assert - Should handle serialization errors gracefully
         Assert.NotNull(result);
@@ -808,13 +810,13 @@ public class SingleTestExecutorTests
             .WithParameter("includeMetadata", true)
             .Build();
 
-        SetupHttpResponse(HttpStatusCode.OK, "{\"results\": [], \"total\": 0}");
+        this.SetupHttpResponse(HttpStatusCode.OK, "{\"results\": [], \"total\": 0}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert - Verify all parameters are properly encoded and included
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -860,13 +862,13 @@ public class SingleTestExecutorTests
             testCase.RequestBody = new { data = $"test-{methodName}" };
         }
 
-        SetupHttpResponse(HttpStatusCode.OK, $"{{\"method\": \"{methodName}\"}}");
+        this.SetupHttpResponse(HttpStatusCode.OK, $"{{\"method\": \"{methodName}\"}}");
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.Is<HttpRequestMessage>(req =>
@@ -888,7 +890,7 @@ public class SingleTestExecutorTests
             .Build();
 
         // Setup long delay to trigger timeout
-        _mockHttpHandler.Protected()
+        this._mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -900,7 +902,7 @@ public class SingleTestExecutorTests
             });
 
         // Act
-        var result = await _singleTestExecutor.ExecuteTestCaseAsync(testCase);
+        var result = await this._singleTestExecutor.ExecuteTestCaseAsync(testCase);
 
         // Assert - Should handle timeout gracefully
         Assert.False(result.Success);
@@ -908,7 +910,7 @@ public class SingleTestExecutorTests
         Assert.Contains("timeout", result.ErrorMessage.ToLowerInvariant());
 
         // Verify HTTP request was attempted with proper cancellation token
-        _mockHttpHandler.Protected().Verify(
+        this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
@@ -928,7 +930,7 @@ public class SingleTestExecutorTests
 
         private TestCaseBuilder()
         {
-            _testCase = new SelfGeneratedTestCase
+            this._testCase = new SelfGeneratedTestCase
             {
                 Id = Guid.NewGuid().ToString(),
                 ExpectedExecutionTime = TimeSpan.FromSeconds(5),
@@ -940,33 +942,33 @@ public class SingleTestExecutorTests
 
         public static TestCaseBuilder Create() => new();
 
-        public TestCaseBuilder WithName(string name) { _testCase.Name = name; return this; }
-        public TestCaseBuilder WithEndpoint(string endpoint) { _testCase.Endpoint = endpoint; return this; }
-        public TestCaseBuilder WithMethod(string method) { _testCase.HttpMethod = method; return this; }
-        public TestCaseBuilder WithRequestBody(object body) { _testCase.RequestBody = body; return this; }
-        public TestCaseBuilder WithTimeout(TimeSpan timeout) { _testCase.ExpectedExecutionTime = timeout; return this; }
+        public TestCaseBuilder WithName(string name) { this._testCase.Name = name; return this; }
+        public TestCaseBuilder WithEndpoint(string endpoint) { this._testCase.Endpoint = endpoint; return this; }
+        public TestCaseBuilder WithMethod(string method) { this._testCase.HttpMethod = method; return this; }
+        public TestCaseBuilder WithRequestBody(object body) { this._testCase.RequestBody = body; return this; }
+        public TestCaseBuilder WithTimeout(TimeSpan timeout) { this._testCase.ExpectedExecutionTime = timeout; return this; }
 
         public TestCaseBuilder WithParameter(string key, object value)
         {
-            _testCase.Parameters[key] = value;
+            this._testCase.Parameters[key] = value;
             return this;
         }
 
         public TestCaseBuilder WithHeader(string key, string value)
         {
-            _testCase.Headers[key] = value;
+            this._testCase.Headers[key] = value;
             return this;
         }
 
         public TestCaseBuilder WithAssertion(TestAssertion assertion)
         {
-            _testCase.Assertions.Add(assertion);
+            this._testCase.Assertions.Add(assertion);
             return this;
         }
 
         public TestCaseBuilder WithStatusCodeAssertion(HttpStatusCode expectedCode, bool isCritical = true)
         {
-            return WithAssertion(new TestAssertion
+            return this.WithAssertion(new TestAssertion
             {
                 Name = "Status Code Check",
                 Type = AssertionType.StatusCode,
@@ -978,7 +980,7 @@ public class SingleTestExecutorTests
 
         public TestCaseBuilder WithBodyContainsAssertion(string expectedText, bool isCritical = true)
         {
-            return WithAssertion(new TestAssertion
+            return this.WithAssertion(new TestAssertion
             {
                 Name = "Body Contains",
                 Type = AssertionType.ResponseBody,
@@ -990,7 +992,7 @@ public class SingleTestExecutorTests
 
         public TestCaseBuilder WithJsonPathAssertion(string jsonPath, string expectedValue, bool isCritical = true)
         {
-            return WithAssertion(new TestAssertion
+            return this.WithAssertion(new TestAssertion
             {
                 Name = "JSON Path Check",
                 Type = AssertionType.JsonPath,
@@ -1003,7 +1005,7 @@ public class SingleTestExecutorTests
 
         public TestCaseBuilder WithHeaderAssertion(string headerName, string expectedValue, bool isCritical = true)
         {
-            return WithAssertion(new TestAssertion
+            return this.WithAssertion(new TestAssertion
             {
                 Name = "Response Header Check",
                 Type = AssertionType.ResponseHeader,
@@ -1014,7 +1016,7 @@ public class SingleTestExecutorTests
             });
         }
 
-        public SelfGeneratedTestCase Build() => _testCase;
+        public SelfGeneratedTestCase Build() => this._testCase;
     }
 
     private SelfGeneratedTestCase CreateBasicGetTestCase()
@@ -1300,7 +1302,7 @@ public class SingleTestExecutorTests
             response.Content.Headers.ContentLength = contentLength.Value;
         }
 
-        _mockHttpHandler.Protected()
+        this._mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -1311,7 +1313,7 @@ public class SingleTestExecutorTests
 
     private void SetupHttpException(Exception exception)
     {
-        _mockHttpHandler.Protected()
+        this._mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -1321,7 +1323,7 @@ public class SingleTestExecutorTests
 
     private void SetupHttpDelay(TimeSpan delay)
     {
-        _mockHttpHandler.Protected()
+        this._mockHttpHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),

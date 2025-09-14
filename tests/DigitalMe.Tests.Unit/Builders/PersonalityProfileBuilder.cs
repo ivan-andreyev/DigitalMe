@@ -1,5 +1,5 @@
-using DigitalMe.Data.Entities;
 using System.Collections.Generic;
+using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Tests.Unit.Builders;
 
@@ -9,7 +9,7 @@ public class PersonalityProfileBuilder
 
     public PersonalityProfileBuilder()
     {
-        _profile = new PersonalityProfile();
+        this._profile = new PersonalityProfile();
     }
 
     public static PersonalityProfileBuilder Create()
@@ -19,43 +19,43 @@ public class PersonalityProfileBuilder
 
     public PersonalityProfileBuilder WithId(Guid id)
     {
-        _profile.Id = id;
+        this._profile.Id = id;
         return this;
     }
 
     public PersonalityProfileBuilder WithName(string name)
     {
-        _profile.Name = name;
+        this._profile.Name = name;
         return this;
     }
 
     public PersonalityProfileBuilder WithDescription(string description)
     {
-        _profile.Description = description;
+        this._profile.Description = description;
         return this;
     }
 
     public PersonalityProfileBuilder WithTraits(ICollection<PersonalityTrait> traits)
     {
-        _profile.Traits = traits;
+        this._profile.Traits = traits;
         return this;
     }
 
     public PersonalityProfileBuilder WithCreatedAt(DateTime createdAt)
     {
-        _profile.CreatedAt = createdAt;
+        this._profile.CreatedAt = createdAt;
         return this;
     }
 
     public PersonalityProfileBuilder WithAge(int age)
     {
-        _profile.Age = age;
+        this._profile.Age = age;
         return this;
     }
 
     public PersonalityProfileBuilder WithTags(List<PersonalityTrait> traits)
     {
-        _profile.Traits = traits;
+        this._profile.Traits = traits;
         return this;
     }
 
@@ -85,6 +85,6 @@ public class PersonalityProfileBuilder
 
     public PersonalityProfile Build()
     {
-        return _profile;
+        return this._profile;
     }
 }

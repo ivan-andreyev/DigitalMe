@@ -1,9 +1,9 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using DigitalMe.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using DigitalMe.Configuration;
-using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace DigitalMe.Services.Performance;
 

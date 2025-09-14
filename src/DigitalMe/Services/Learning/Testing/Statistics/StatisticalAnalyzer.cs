@@ -179,7 +179,7 @@ public class StatisticalAnalyzer : IStatisticalAnalyzer
                 _logger.LogWarning("Insufficient historical data for trend analysis: {Count} metrics", metrics.Count);
                 return new TrendAnalysisResult
                 {
-                    Direction = TrendDirection.Insufficient_Data,
+                    Direction = TrendDirection.InsufficientData,
                     TrendDescription = "Not enough historical data for trend analysis (minimum 2 data points required)"
                 };
             }
@@ -197,7 +197,7 @@ public class StatisticalAnalyzer : IStatisticalAnalyzer
             _logger.LogError(ex, "Error analyzing trends");
             return new TrendAnalysisResult
             {
-                Direction = TrendDirection.Insufficient_Data,
+                Direction = TrendDirection.InsufficientData,
                 TrendDescription = "Error occurred during trend analysis"
             };
         }

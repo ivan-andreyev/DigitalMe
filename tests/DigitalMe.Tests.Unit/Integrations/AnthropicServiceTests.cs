@@ -1,14 +1,14 @@
-using Xunit;
-using FluentAssertions;
-using Moq;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
-using Moq.Protected;
-using DigitalMe.Integrations.MCP;
 using DigitalMe.Data.Entities;
+using DigitalMe.Integrations.MCP;
 using DigitalMe.Services;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
+using Moq.Protected;
+using Xunit;
 
 namespace DigitalMe.Tests.Unit.Integrations;
 
@@ -21,20 +21,20 @@ public class AnthropicServiceTests
 
     public AnthropicServiceTests()
     {
-        _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        _mockLogger = new Mock<ILogger<AnthropicServiceSimple>>();
-        _mockPersonalityService = new Mock<IIvanPersonalityService>();
+        this._mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        this._mockLogger = new Mock<ILogger<AnthropicServiceSimple>>();
+        this._mockPersonalityService = new Mock<IIvanPersonalityService>();
 
         // Setup mock to return test personality data
         var testPersonality = CreateTestPersonality();
-        _mockPersonalityService
+        this._mockPersonalityService
             .Setup(x => x.GetIvanPersonalityAsync())
             .ReturnsAsync(testPersonality);
-        _mockPersonalityService
+        this._mockPersonalityService
             .Setup(x => x.GenerateSystemPrompt(It.IsAny<PersonalityProfile>()))
             .Returns("You are Ivan, a Direct and Technical expert with analytical approach to problem-solving.");
 
-        var httpClient = new HttpClient(_mockHttpMessageHandler.Object)
+        var httpClient = new HttpClient(this._mockHttpMessageHandler.Object)
         {
             BaseAddress = new Uri("https://api.anthropic.com/")
         };
@@ -49,7 +49,7 @@ public class AnthropicServiceTests
             Model = "claude-3-5-sonnet-20241022"
         });
 
-        _service = new AnthropicServiceSimple(httpClient, mockConfig.Object, _mockLogger.Object, _mockPersonalityService.Object);
+        this._service = new AnthropicServiceSimple(httpClient, mockConfig.Object, this._mockLogger.Object, this._mockPersonalityService.Object);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class AnthropicServiceTests
             Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
         };
 
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -87,13 +87,13 @@ public class AnthropicServiceTests
             .ReturnsAsync(httpResponse);
 
         // Act
-        var result = await _service.SendMessageAsync(message, personality);
+        var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
         result.Should().Be(expectedResponse, "should return the content from Anthropic response");
 
         // Verify correct API call was made
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Verify("SendAsync", Times.Once(),
                 ItExpr.Is<HttpRequestMessage>(req =>
                     req.Method == HttpMethod.Post &&
@@ -125,7 +125,7 @@ public class AnthropicServiceTests
             Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
         };
 
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -133,14 +133,14 @@ public class AnthropicServiceTests
             .ReturnsAsync(httpResponse);
 
         // Act
-        var result = await _service.SendMessageAsync(message, personality);
+        var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
         result.Should().NotBeNullOrEmpty("should return fallback response on API error");
         result.Should().Contain("Claude", "fallback should mention connection issue");
 
         // Verify warning was logged
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.Log(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
@@ -157,7 +157,7 @@ public class AnthropicServiceTests
         var message = "Test network error";
         var personality = CreateTestPersonality();
 
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -165,14 +165,14 @@ public class AnthropicServiceTests
             .ThrowsAsync(new HttpRequestException("Network error"));
 
         // Act
-        var result = await _service.SendMessageAsync(message, personality);
+        var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
         result.Should().NotBeNullOrEmpty("should return fallback response on network error");
         result.Should().MatchRegex("подключени[ем]", "fallback should mention connection issue in Russian");
 
         // Verify error was logged
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
@@ -206,7 +206,7 @@ public class AnthropicServiceTests
             Content = new StringContent(responseJson, Encoding.UTF8, "application/json")
         };
 
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -214,7 +214,7 @@ public class AnthropicServiceTests
             .ReturnsAsync(httpResponse);
 
         // Act
-        var result = await _service.SendMessageAsync("", personality);
+        var result = await this._service.SendMessageAsync("", personality);
 
         // Assert
         result.Should().NotBeNullOrEmpty("should handle empty message gracefully");
@@ -246,7 +246,7 @@ public class AnthropicServiceTests
         };
 
         string? capturedRequestBody = null;
-        _mockHttpMessageHandler.Protected()
+        this._mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -261,7 +261,7 @@ public class AnthropicServiceTests
             .ReturnsAsync(httpResponse);
 
         // Act
-        var result = await _service.SendMessageAsync(message, personality);
+        var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -281,7 +281,7 @@ public class AnthropicServiceTests
         // Arrange
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", apiKey);
 
-        var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
+        var httpClient = new HttpClient(this._mockHttpMessageHandler.Object);
         var mockConfig = new Mock<IOptions<AnthropicConfiguration>>();
         mockConfig.Setup(x => x.Value).Returns(new AnthropicConfiguration
         {
@@ -289,7 +289,7 @@ public class AnthropicServiceTests
             Model = "claude-3-5-sonnet-20241022"
         });
 
-        var service = new AnthropicServiceSimple(httpClient, mockConfig.Object, _mockLogger.Object, _mockPersonalityService.Object);
+        var service = new AnthropicServiceSimple(httpClient, mockConfig.Object, this._mockLogger.Object, this._mockPersonalityService.Object);
         var message = "Test with missing API key";
         var personality = CreateTestPersonality();
 

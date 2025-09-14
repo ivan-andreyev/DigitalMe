@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 using DigitalMe.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMe.Tests.Unit.Infrastructure;
 
@@ -11,13 +11,13 @@ public class DatabaseServiceConfigurator : ITestServiceConfigurator
 
     public DatabaseServiceConfigurator(string databaseName)
     {
-        _databaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName));
+        this._databaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName));
     }
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         RemoveExistingDbContext(services);
-        AddInMemoryDbContext(services);
+        this.AddInMemoryDbContext(services);
     }
 
     private static void RemoveExistingDbContext(IServiceCollection services)
@@ -43,7 +43,7 @@ public class DatabaseServiceConfigurator : ITestServiceConfigurator
     {
         services.AddDbContext<DigitalMeDbContext>(options =>
         {
-            options.UseInMemoryDatabase(databaseName: _databaseName);
+            options.UseInMemoryDatabase(databaseName: this._databaseName);
             options.EnableSensitiveDataLogging();
         });
     }

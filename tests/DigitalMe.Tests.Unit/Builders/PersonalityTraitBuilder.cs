@@ -8,61 +8,61 @@ public class PersonalityTraitBuilder
 
     public PersonalityTraitBuilder()
     {
-        _trait = new PersonalityTrait();
+        this._trait = new PersonalityTrait();
     }
 
     public static PersonalityTraitBuilder Create() => new();
 
     public PersonalityTraitBuilder WithId(Guid id)
     {
-        _trait.Id = id;
+        this._trait.Id = id;
         return this;
     }
 
     public PersonalityTraitBuilder WithPersonalityProfileId(Guid personalityProfileId)
     {
-        _trait.PersonalityProfileId = personalityProfileId;
+        this._trait.PersonalityProfileId = personalityProfileId;
         return this;
     }
 
     public PersonalityTraitBuilder WithCategory(string category)
     {
-        _trait.Category = category;
+        this._trait.Category = category;
         return this;
     }
 
     public PersonalityTraitBuilder WithName(string name)
     {
-        _trait.Name = name;
+        this._trait.Name = name;
         return this;
     }
 
     public PersonalityTraitBuilder WithDescription(string description)
     {
-        _trait.Description = description;
+        this._trait.Description = description;
         return this;
     }
 
     public PersonalityTraitBuilder WithWeight(double weight)
     {
-        _trait.Weight = weight;
+        this._trait.Weight = weight;
         return this;
     }
 
     public PersonalityTraitBuilder WithCreatedAt(DateTime createdAt)
     {
-        _trait.CreatedAt = createdAt;
+        this._trait.CreatedAt = createdAt;
         return this;
     }
 
     public PersonalityTraitBuilder WithPersonalityProfile(PersonalityProfile profile)
     {
-        _trait.PersonalityProfile = profile;
-        _trait.PersonalityProfileId = profile.Id;
+        this._trait.PersonalityProfile = profile;
+        this._trait.PersonalityProfileId = profile.Id;
         return this;
     }
 
-    public PersonalityTrait Build() => _trait;
+    public PersonalityTrait Build() => this._trait;
 
     public static PersonalityTrait Default() => Create()
         .WithCategory("Communication")

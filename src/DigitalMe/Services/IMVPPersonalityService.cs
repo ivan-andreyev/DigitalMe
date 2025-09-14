@@ -6,7 +6,7 @@ namespace DigitalMe.Services;
 /// MVP-specific personality service interface focused on Ivan's profile
 /// Follows Interface Segregation Principle by exposing only MVP-required methods
 /// </summary>
-public interface IMVPPersonalityService
+public interface IMvpPersonalityService
 {
     /// <summary>
     /// Gets Ivan's personality profile from database

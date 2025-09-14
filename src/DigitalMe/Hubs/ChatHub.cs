@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.SignalR;
+using DigitalMe.DTOs;
+using DigitalMe.Models;
 using DigitalMe.Services;
 using DigitalMe.Services.AgentBehavior;
-using DigitalMe.Models;
-using DigitalMe.DTOs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DigitalMe.Hubs;
 

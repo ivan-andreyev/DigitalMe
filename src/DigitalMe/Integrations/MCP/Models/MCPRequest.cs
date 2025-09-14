@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalMe.Integrations.MCP.Models;
 
-public class MCPRequest
+public class McpRequest
 {
     [JsonPropertyName("jsonrpc")]
     public string JsonRpc { get; set; } = "2.0";
@@ -18,7 +18,7 @@ public class MCPRequest
     public object? Params { get; set; }
 }
 
-public class MCPResponse
+public class McpResponse
 {
     [JsonPropertyName("jsonrpc")]
     public string JsonRpc { get; set; } = string.Empty;
@@ -27,23 +27,23 @@ public class MCPResponse
     public string Id { get; set; } = string.Empty;
 
     [JsonPropertyName("result")]
-    public MCPResult? Result { get; set; }
+    public McpResult? Result { get; set; }
 
     [JsonPropertyName("error")]
-    public MCPError? Error { get; set; }
+    public McpError? Error { get; set; }
 }
 
-public class MCPResult
+public class McpResult
 {
     [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;
 
     [JsonPropertyName("toolCalls")]
-    public IEnumerable<MCPToolCall> ToolCalls { get; set; } = new List<MCPToolCall>();
+    public IEnumerable<McpToolCall> ToolCalls { get; set; } = new List<McpToolCall>();
 
     // For tools/list response
     [JsonPropertyName("tools")]
-    public List<MCPTool> Tools { get; set; } = new List<MCPTool>();
+    public List<McpTool> Tools { get; set; } = new List<McpTool>();
 
     // For llm/complete response metadata
     [JsonPropertyName("metadata")]
@@ -54,7 +54,7 @@ public class MCPResult
     public Dictionary<string, JsonElement>? ExtensionData { get; set; }
 }
 
-public class MCPError
+public class McpError
 {
     [JsonPropertyName("code")]
     public int Code { get; set; }
@@ -66,7 +66,7 @@ public class MCPError
     public object? Data { get; set; }
 }
 
-public class MCPToolCall
+public class McpToolCall
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -75,7 +75,7 @@ public class MCPToolCall
     public Dictionary<string, object> Parameters { get; set; } = new();
 }
 
-public class MCPTool
+public class McpTool
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;

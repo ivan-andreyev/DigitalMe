@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DigitalMe.Services.Learning;
 using DigitalMe.Services.Learning.Testing.TestExecution;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning.Testing.ParallelProcessing;
 
@@ -155,13 +155,13 @@ public class ParallelTestRunner : IParallelTestRunner
     {
         // Base concurrency on processor count and available memory
         var processorCount = Environment.ProcessorCount;
-        var availableMemoryMB = GC.GetTotalMemory(false) / (1024 * 1024);
+        var availableMemoryMb = GC.GetTotalMemory(false) / (1024 * 1024);
 
         // Conservative approach: use 75% of processor count with memory considerations
         var baseConcurrency = Math.Max(1, (int)(processorCount * 0.75));
 
         // Adjust based on available memory (each concurrent test might use ~10MB)
-        var memoryConcurrency = Math.Max(1, (int)(availableMemoryMB / 10));
+        var memoryConcurrency = Math.Max(1, (int)(availableMemoryMb / 10));
 
         // Use the minimum of the two to avoid resource exhaustion
         var optimalConcurrency = Math.Min(baseConcurrency, memoryConcurrency);

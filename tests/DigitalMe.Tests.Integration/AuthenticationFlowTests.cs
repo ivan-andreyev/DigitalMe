@@ -2,13 +2,13 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using DigitalMe;
 using DigitalMe.Data;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DigitalMe.Tests.Integration;

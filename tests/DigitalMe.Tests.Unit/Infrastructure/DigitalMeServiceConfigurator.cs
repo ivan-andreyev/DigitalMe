@@ -1,6 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using DigitalMe.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMe.Tests.Unit.Infrastructure;
 

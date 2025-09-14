@@ -1,9 +1,9 @@
+using System.Text;
+using DigitalMe.Infrastructure;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
-using System.Text;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using DigitalMe.Infrastructure;
 
 namespace DigitalMe.Services.FileProcessing;
 

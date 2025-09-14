@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Logging;
 using DigitalMe.Services.WebNavigation;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.UseCases.WebNavigation;
 

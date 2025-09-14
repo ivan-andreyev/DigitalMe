@@ -6,26 +6,26 @@
     <div class="dashboard-header">
         <h2>🧠 Ivan's Digital Personality</h2>
         <div class="last-updated">
-            @if (lastUpdated.HasValue)
+            @if (_lastUpdated.HasValue)
             {
-                <span>Обновлено: @lastUpdated.Value.ToString("HH:mm:ss")</span>
+                <span>Обновлено: @_lastUpdated.Value.ToString("HH:mm:ss")</span>
             }
-            <button @onclick="RefreshData" class="refresh-button" disabled="@isLoading">
-                <svg class="@(isLoading ? "spinning" : "")" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <button @onclick="RefreshData" class="refresh-button" disabled="@_isLoading">
+                <svg class="@(_isLoading ? "spinning" : "")" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
                 </svg>
             </button>
         </div>
     </div>
 
-    @if (isLoading && personalityData == null)
+    @if (_isLoading && _personalityData == null)
     {
         <div class="loading-state">
             <div class="loading-spinner large"></div>
             <p>Загружаем данные о личности Ивана...</p>
         </div>
     }
-    else if (personalityData == null)
+    else if (_personalityData == null)
     {
         <div class="error-state">
             <p>⚠️ Не удалось загрузить данные о личности</p>
@@ -88,11 +88,11 @@
                         <h4>💼 Работа</h4>
                         <div class="context-item">
                             <span class="label">Текущая задача:</span>
-                            <span class="value">@(personalityData.CurrentActivity ?? "Доступен для общения")</span>
+                            <span class="value">@(_personalityData.CurrentActivity ?? "Доступен для общения")</span>
                         </div>
                         <div class="context-item">
                             <span class="label">Статус:</span>
-                            <span class="value">@(personalityData.IsOnline ? "🟢 Online" : "🔴 Offline")</span>
+                            <span class="value">@(_personalityData.IsOnline ? "🟢 Online" : "🔴 Offline")</span>
                         </div>
                     </div>
                     
@@ -357,9 +357,9 @@
 </style>
 
 @code {
-    private PersonalityStateDto? personalityData;
-    private bool isLoading = false;
-    private DateTime? lastUpdated;
+    private PersonalityStateDto? _personalityData;
+    private bool _isLoading = false;
+    private DateTime? _lastUpdated;
 
     protected override async Task OnInitializedAsync()
     {
@@ -368,14 +368,14 @@
 
     private async Task RefreshData()
     {
-        isLoading = true;
+        _isLoading = true;
         StateHasChanged();
 
         try
         {
             // Try to get personality data from API
-            personalityData = await Http.GetFromJsonAsync<PersonalityStateDto>("http://localhost:5000/api/personality/Ivan");
-            lastUpdated = DateTime.Now;
+            _personalityData = await Http.GetFromJsonAsync<PersonalityStateDto>("http://localhost:5000/api/personality/Ivan");
+            _lastUpdated = DateTime.Now;
             
             Logger.LogInformation("Personality data loaded successfully");
         }
@@ -384,12 +384,12 @@
             Logger.LogError(ex, "Failed to load personality data");
             
             // Use mock data as fallback
-            personalityData = GetMockPersonalityData();
-            lastUpdated = DateTime.Now;
+            _personalityData = GetMockPersonalityData();
+            _lastUpdated = DateTime.Now;
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }
@@ -418,27 +418,27 @@
 
     private string GetMoodEmoji()
     {
-        return personalityData?.MoodEmoji ?? "🤔";
+        return _personalityData?.MoodEmoji ?? "🤔";
     }
 
     private string GetCurrentMood()
     {
-        return personalityData?.CurrentMood ?? "Думает";
+        return _personalityData?.CurrentMood ?? "Думает";
     }
 
     private int GetEnergyLevel()
     {
-        return personalityData?.EnergyLevel ?? 75;
+        return _personalityData?.EnergyLevel ?? 75;
     }
 
     private int GetCognitiveLoad()
     {
-        return personalityData?.CognitiveLoad ?? 50;
+        return _personalityData?.CognitiveLoad ?? 50;
     }
 
     private List<TraitInfo> GetTopTraits()
     {
-        var traits = personalityData?.Traits ?? new Dictionary<string, int>();
+        var traits = _personalityData?.Traits ?? new Dictionary<string, int>();
         
         return traits.OrderByDescending(t => t.Value)
                     .Take(6)

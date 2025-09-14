@@ -1,7 +1,7 @@
+using System.Diagnostics;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Data.Sqlite;
-using System.Diagnostics;
 
 namespace DigitalMe.Services.Backup;
 

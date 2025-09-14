@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using DigitalMe.Services.Learning;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMe.Controllers;
 

@@ -1,7 +1,7 @@
+using System.Text.Json;
 using DigitalMe.Models;
 using DigitalMe.Repositories;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace DigitalMe.Services;
 

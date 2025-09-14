@@ -1,9 +1,9 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using DigitalMe.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using DigitalMe.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DigitalMe.Integrations.External.GitHub;
 
@@ -124,10 +124,10 @@ public class GitHubWebhookService : IGitHubWebhookService
 
             var repository = root.GetProperty("repository").GetProperty("full_name").GetString();
             var pusher = root.GetProperty("pusher").GetProperty("name").GetString();
-            var ref_ = root.GetProperty("ref").GetString();
+            var @ref = root.GetProperty("ref").GetString();
             var commits = root.GetProperty("commits").GetArrayLength();
 
-            var branchName = ref_?.Replace("refs/heads/", "") ?? "unknown";
+            var branchName = @ref?.Replace("refs/heads/", "") ?? "unknown";
 
             _logger.LogInformation("Push event: {Pusher} pushed {CommitCount} commits to {Branch} in {Repository}",
                 pusher, commits, branchName, repository);

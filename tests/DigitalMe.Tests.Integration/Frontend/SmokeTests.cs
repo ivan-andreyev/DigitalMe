@@ -1,7 +1,7 @@
+using System.Net;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
-using FluentAssertions;
-using System.Net;
 
 namespace DigitalMe.Tests.Integration.Frontend;
 

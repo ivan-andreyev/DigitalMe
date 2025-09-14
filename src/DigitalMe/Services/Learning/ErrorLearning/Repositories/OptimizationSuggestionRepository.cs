@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using DigitalMe.Data;
 using DigitalMe.Services.Learning.ErrorLearning.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.Learning.ErrorLearning.Repositories;
 

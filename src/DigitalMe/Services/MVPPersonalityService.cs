@@ -10,14 +10,14 @@ namespace DigitalMe.Services;
 /// No repository pattern - direct database operations for simplicity
 /// Implements both IPersonalityService (for compatibility) and IMVPPersonalityService (ISP compliance)
 /// </summary>
-public class MVPPersonalityService : IPersonalityService, IMVPPersonalityService
+public class MvpPersonalityService : IPersonalityService, IMvpPersonalityService
 {
     private readonly DigitalMeDbContext _context;
-    private readonly ILogger<MVPPersonalityService> _logger;
+    private readonly ILogger<MvpPersonalityService> _logger;
 
-    public MVPPersonalityService(
+    public MvpPersonalityService(
         DigitalMeDbContext context,
-        ILogger<MVPPersonalityService> logger)
+        ILogger<MvpPersonalityService> logger)
     {
         _context = context;
         _logger = logger;
