@@ -505,4 +505,4 @@ public class RepositoryIntegrationTests : IDisposable
 ---
 
 **Next Phase**: [Phase2-ServiceLayer.md](./Phase2-ServiceLayer.md)  
-**Related**: [Service Architecture Roadmap](../SERVICE-ARCHITECTURE-ROADMAP.md)
+**Related**: [Service Architecture Roadmap](../../SERVICE-ARCHITECTURE-ROADMAP.md)

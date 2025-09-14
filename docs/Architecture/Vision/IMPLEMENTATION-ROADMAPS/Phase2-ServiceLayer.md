@@ -891,4 +891,4 @@ public class AgentBehaviorEnginePhase2Tests
 
 **Next Phase**: [Phase3-Integration.md](./Phase3-Integration.md)  
 **Previous**: [Phase1-Foundation.md](./Phase1-Foundation.md)  
-**Related**: [Service Architecture Roadmap](../SERVICE-ARCHITECTURE-ROADMAP.md)
+**Related**: [Service Architecture Roadmap](../../SERVICE-ARCHITECTURE-ROADMAP.md)

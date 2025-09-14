@@ -1,6 +1,12 @@
 # Validation Checklist & Quality Gates
 
-**Родительский план**: [HYBRID-CODE-QUALITY-RECOVERY-PLAN.md](../HYBRID-CODE-QUALITY-RECOVERY-PLAN.md)
+**⬅️ Back to:** [MAIN_PLAN.md](../../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Parent Plan:** [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](../08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Architecture diagram
+
+**📋 Related Files:**
+- [01-automated-tooling-config.md](01-automated-tooling-config.md) - Automated tooling config
+- [02-manual-refactoring-specs.md](02-manual-refactoring-specs.md) - Manual refactoring specs
 
 ## Цель раздела
 Обеспечить систематическую валидацию всех изменений с измеримыми критериями качества и готовность к продакшену.

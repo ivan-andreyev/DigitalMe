@@ -1,5 +1,12 @@
 # 📋 Master Development Decisions Log - DigitalMe
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [01-MASTER_TECHNICAL_PLAN.md](01-MASTER_TECHNICAL_PLAN.md) - Master technical plan
+- [20-PLANS-INDEX.md](20-PLANS-INDEX.md) - Plans index
+- [17-STRATEGIC-NEXT-STEPS-SUMMARY.md](17-STRATEGIC-NEXT-STEPS-SUMMARY.md) - Strategic next steps
+
 ## 🎯 Стратегический контекст и принятые решения
 
 **Дата последнего обновления:** 2025-09-06  

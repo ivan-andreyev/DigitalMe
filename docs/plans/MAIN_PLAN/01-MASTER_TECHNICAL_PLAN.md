@@ -1,6 +1,13 @@
 # MASTER TECHNICAL PLAN
 ## Central Technical Coordination Hub for DigitalMe Platform
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [02-ARCHITECTURAL_REMEDIATION_PLAN.md](02-ARCHITECTURAL_REMEDIATION_PLAN.md) - Architecture fixes
+- [09-CONSOLIDATED-EXECUTION-PLAN.md](09-CONSOLIDATED-EXECUTION-PLAN.md) - Active execution plan
+- [19-MASTER-DEVELOPMENT-DECISIONS-LOG.md](19-MASTER-DEVELOPMENT-DECISIONS-LOG.md) - Decision tracking
+
 **Document Version**: 1.0  
 **Plan Date**: September 10, 2025  
 **Planning Horizon**: Phase 0-4 Technical Evolution (30+ months)  

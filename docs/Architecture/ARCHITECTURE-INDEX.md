@@ -181,8 +181,8 @@ dotnet build --verbosity normal
 - **[Phase 1.1 Learning Infrastructure Implementation](Actual/PHASE_1_1_LEARNING_INFRASTRUCTURE_IMPLEMENTATION.md)** - ✅ **COMPREHENSIVE ANALYSIS** - Advanced cognitive capabilities, architectural violations, SOLID principle analysis
 
 ### Planning Documents
-- [MVP Phase 5 Plan](../plans/MVP-Phase5-Final-Polish.md) - ✅ COMPLETED
-- [Review Plans](../reviews/) - Multiple perspectives (some with stale data)
+- [MVP Phase 5 Plan](../../plans/MVP-Phase5-Final-Polish.md) - ✅ COMPLETED
+- [Review Plans](../../reviews/) - Multiple perspectives (some with stale data)
 
 ### Implementation Files
 - [Security Services](../../DigitalMe/Services/Security/) - JWT, Validation, Middleware

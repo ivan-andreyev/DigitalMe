@@ -130,17 +130,17 @@ Docs/Architecture/
 
 **Your Integration Points:**
 
-**With @common-plan-generator.mdc:**
+**With .cursor/rules/common-plan-generator.mdc:**
 - Automatically create planned architecture documentation when plans are generated
 - Ensure architectural diagrams are included in all technical plans
 - Validate architectural feasibility of planned features
 
-**With @common-plan-executor.mdc:**  
+**With .cursor/rules/common-plan-executor.mdc:**  
 - Update actual architecture documentation when components are implemented
 - Sync planned vs actual status after task completion
 - Flag architectural discrepancies during implementation
 
-**With @systematic-review.mdc:**
+**With .cursor/rules/systematic-review.mdc:**
 - Include architecture validation in systematic plan reviews  
 - Check for orphaned or outdated architecture documentation
 - Ensure architectural decisions are properly documented

@@ -1,6 +1,13 @@
 # PHASE 1: ADVANCED COGNITIVE TASKS
 ## Детализированный план развития когнитивных способностей агента
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [13-PHASE0_IVAN_LEVEL_AGENT.md](13-PHASE0_IVAN_LEVEL_AGENT.md) - Phase 0 agent
+- [03-IVAN_LEVEL_COMPLETION_PLAN.md](03-IVAN_LEVEL_COMPLETION_PLAN.md) - Ivan level completion
+- [18-Future-R&D-Extensions-Roadmap.md](18-Future-R&D-Extensions-Roadmap.md) - Future R&D roadmap
+
 **Дата**: Сентябрь 10, 2025  
 **Статус**: Sequel к Phase 0 - выполняется ПОСЛЕ завершения Ivan-Level Agent  
 **Цель**: Добавить агенту способности к самообучению, автономности и advanced reasoning  

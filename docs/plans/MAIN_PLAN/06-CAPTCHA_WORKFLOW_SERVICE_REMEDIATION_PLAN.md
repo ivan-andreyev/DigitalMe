@@ -1,5 +1,11 @@
 # CAPTCHA Workflow Service Remediation Plan
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [02-ARCHITECTURAL_REMEDIATION_PLAN.md](02-ARCHITECTURAL_REMEDIATION_PLAN.md) - Architecture remediation
+- [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Code quality recovery
+
 **Generated**: September 12, 2025  
 **Context**: Remediation of CaptchaWorkflowService after comprehensive reviewer findings  
 **Current Compliance**: 35% with original requirements  

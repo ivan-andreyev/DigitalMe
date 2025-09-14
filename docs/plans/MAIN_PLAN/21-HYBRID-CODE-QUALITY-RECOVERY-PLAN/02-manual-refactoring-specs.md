@@ -1,6 +1,12 @@
 # Manual Refactoring Specifications
 
-**Родительский план**: [HYBRID-CODE-QUALITY-RECOVERY-PLAN.md](../HYBRID-CODE-QUALITY-RECOVERY-PLAN.md)
+**⬅️ Back to:** [MAIN_PLAN.md](../../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Parent Plan:** [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](../08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Architecture diagram
+
+**📋 Related Files:**
+- [01-automated-tooling-config.md](01-automated-tooling-config.md) - Automated tooling config
+- [03-validation-checklist.md](03-validation-checklist.md) - Validation checklist
 
 ## Цель раздела
 Выполнить архитектурные рефакторинги для исправления 11 нарушений SOLID принципов, разделения больших файлов и реорганизации тестовой структуры.

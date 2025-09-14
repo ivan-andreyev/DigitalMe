@@ -1,6 +1,12 @@
 # Automated Tooling Configuration
 
-**Родительский план**: [HYBRID-CODE-QUALITY-RECOVERY-PLAN.md](../HYBRID-CODE-QUALITY-RECOVERY-PLAN.md)
+**⬅️ Back to:** [MAIN_PLAN.md](../../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Parent Plan:** [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](../08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Architecture diagram
+
+**📋 Related Files:**
+- [02-manual-refactoring-specs.md](02-manual-refactoring-specs.md) - Manual refactoring specs
+- [03-validation-checklist.md](03-validation-checklist.md) - Validation checklist
 
 ## Цель раздела
 Настроить и активировать инструменты автоматического исправления для устранения 47 стилевых нарушений кода за 30 минут.

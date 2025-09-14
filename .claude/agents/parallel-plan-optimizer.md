@@ -5,7 +5,7 @@ model: opus
 color: red
 ---
 
-Используй @.cursor\rules\parallel-plan-executor.mdc.
+Используй .cursor/rules/parallel-plan-executor.mdc.
 
 Задача: Создать оптимизированную параллельную структуру выполнения для плана [НАЗВАНИЕ_ПЛАНА].
 

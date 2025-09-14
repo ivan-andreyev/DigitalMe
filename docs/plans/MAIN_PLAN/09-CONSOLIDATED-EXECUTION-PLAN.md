@@ -1,5 +1,12 @@
 # 🎯 Consolidated Execution Plan - DigitalMe Platform
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [03-IVAN_LEVEL_COMPLETION_PLAN.md](03-IVAN_LEVEL_COMPLETION_PLAN.md) - Ivan level completion
+- [10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md](10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md) - Phase 1 tasks
+- [17-STRATEGIC-NEXT-STEPS-SUMMARY.md](17-STRATEGIC-NEXT-STEPS-SUMMARY.md) - Strategic next steps
+
 **Статус:** FINAL ACTIVE PLAN  
 **Дата создации:** 2025-09-11  
 **Источник:** Consolidation of 12 active plans after deep analysis  

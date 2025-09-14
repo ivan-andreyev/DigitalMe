@@ -1,6 +1,13 @@
 # ✅ IVAN LEVEL COMPLETION PLAN - ACTIVE
 ## Основной план исполнения Ivan-Level Agent (Phase B)
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [13-PHASE0_IVAN_LEVEL_AGENT.md](13-PHASE0_IVAN_LEVEL_AGENT.md) - Phase 0 agent details
+- [14-PHASE1_ADVANCED_COGNITIVE_TASKS.md](14-PHASE1_ADVANCED_COGNITIVE_TASKS.md) - Advanced cognitive tasks
+- [09-CONSOLIDATED-EXECUTION-PLAN.md](09-CONSOLIDATED-EXECUTION-PLAN.md) - Current execution plan
+
 **Дата создания**: 11 сентября 2025  
 **Статус**: АКТИВНЫЙ ПЛАН ИСПОЛНЕНИЯ (Phase B Selected)  
 **Цель**: "Всё, что может сделать Иван лично - может сделать агент"  

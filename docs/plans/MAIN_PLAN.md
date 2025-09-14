@@ -4,20 +4,55 @@
 
 ## 📋 НАВИГАЦИЯ ПО ПЛАНАМ
 
+### **🗂️ БЫСТРАЯ НАВИГАЦИЯ ПО ВСЕМ ПЛАНАМ:**
+
+> **📁 Все планы находятся в каталоге [MAIN_PLAN/](MAIN_PLAN/) с двусторонними навигационными ссылками**
+
+**Стратегические Мастер-планы (01-05)**:
+- [01-MASTER_TECHNICAL_PLAN.md](MAIN_PLAN/01-MASTER_TECHNICAL_PLAN.md) - Главный технический план
+- [02-ARCHITECTURAL_REMEDIATION_PLAN.md](MAIN_PLAN/02-ARCHITECTURAL_REMEDIATION_PLAN.md) - Архитектурная реновация
+- [03-IVAN_LEVEL_COMPLETION_PLAN.md](MAIN_PLAN/03-IVAN_LEVEL_COMPLETION_PLAN.md) - Завершение уровня Ивана
+- [04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md](MAIN_PLAN/04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md) - Обучающая инфраструктура
+- [05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md](MAIN_PLAN/05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md) - Критические исправления тестов
+
+**Специализированные планы исправлений (06-10)**:
+- [06-CAPTCHA_WORKFLOW_SERVICE_REMEDIATION_PLAN.md](MAIN_PLAN/06-CAPTCHA_WORKFLOW_SERVICE_REMEDIATION_PLAN.md) - CAPTCHA workflow
+- [07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md](MAIN_PLAN/07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md) - Улучшение тестовой инфраструктуры
+- [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](MAIN_PLAN/08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Качество кода
+- [09-CONSOLIDATED-EXECUTION-PLAN.md](MAIN_PLAN/09-CONSOLIDATED-EXECUTION-PLAN.md) - Консолидированный план выполнения
+- [10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md](MAIN_PLAN/10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md) - Немедленные задачи
+
+**Фазовые планы (11-15)**:
+- [11-PHASE_2_SELFTESTINGFRAMEWORK_FIXES.md](MAIN_PLAN/11-PHASE_2_SELFTESTINGFRAMEWORK_FIXES.md) - Фаза 2 исправлений
+- [12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md](MAIN_PLAN/12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md) - Фаза 3 валидации
+- [13-PHASE0_IVAN_LEVEL_AGENT.md](MAIN_PLAN/13-PHASE0_IVAN_LEVEL_AGENT.md) - Фаза 0 агента
+- [14-PHASE1_ADVANCED_COGNITIVE_TASKS.md](MAIN_PLAN/14-PHASE1_ADVANCED_COGNITIVE_TASKS.md) - Фаза 1 когнитивных задач
+- [15-EXECUTIVE_SUMMARY_CRITICAL_TEST_REMEDIATION.md](MAIN_PLAN/15-EXECUTIVE_SUMMARY_CRITICAL_TEST_REMEDIATION.md) - Executive summary
+
+**Документация и индексы (16-21)**:
+- [16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md](MAIN_PLAN/16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md) - Базовая документация
+- [17-STRATEGIC-NEXT-STEPS-SUMMARY.md](MAIN_PLAN/17-STRATEGIC-NEXT-STEPS-SUMMARY.md) - Стратегические следующие шаги
+- [18-Future-R&D-Extensions-Roadmap.md](MAIN_PLAN/18-Future-R&D-Extensions-Roadmap.md) - Roadmap R&D расширений
+- [19-MASTER-DEVELOPMENT-DECISIONS-LOG.md](MAIN_PLAN/19-MASTER-DEVELOPMENT-DECISIONS-LOG.md) - Лог решений разработки
+- [20-PLANS-INDEX.md](MAIN_PLAN/20-PLANS-INDEX.md) - Индекс планов
+- [21-HYBRID-CODE-QUALITY-RECOVERY-PLAN/](MAIN_PLAN/21-HYBRID-CODE-QUALITY-RECOVERY-PLAN/) - Детализированный план качества кода
+
+---
+
 ### **🎯 Стратегические документы:**
-- **[MASTER-DEVELOPMENT-DECISIONS-LOG.md](MASTER-DEVELOPMENT-DECISIONS-LOG.md)** - Главный лог всех принятых решений
+- **[MASTER-DEVELOPMENT-DECISIONS-LOG.md](MAIN_PLAN/19-MASTER-DEVELOPMENT-DECISIONS-LOG.md)** - Главный лог всех принятых решений
   - Все стратегические решения и их обоснования
   - Reference map ко всем документам проекта
   - Трекинг изменений приоритетов и подходов
 
 ### **🚀 Активные планы выполнения:**
-- **[INTEGRATION-FOCUSED-HYBRID-PLAN.md](INTEGRATION-FOCUSED-HYBRID-PLAN.md)** - Текущий план разработки (7-8 недель)
+- **[CONSOLIDATED-EXECUTION-PLAN.md](MAIN_PLAN/09-CONSOLIDATED-EXECUTION-PLAN.md)** - Текущий план разработки (7-8 недель)
   - Phase 1: Foundation Fixes (3-5 дней)
   - Phase 2: Slack + ClickUp + GitHub integrations (2-3 недели) 
   - Phase 3: Quality & optimization (1-2 недели)
 
 ### **📚 Индексы и навигация:**
-- **[PLANS-INDEX.md](PLANS-INDEX.md)** - Полный индекс всех планов и архитектурных документов
+- **[PLANS-INDEX.md](MAIN_PLAN/20-PLANS-INDEX.md)** - Полный индекс всех планов и архитектурных документов
   - Навигация по ролям (стратегические/разработка/архитектура)
   - Статус документов и их взаимосвязи
 
@@ -257,10 +292,10 @@ public class PersonalityTrait : BaseEntity
 | ClaudeApiService.cs | ✅ **READY** | `DigitalMe/Integrations/MCP/` | 302 |
 
 #### **📋 MVP TARGETS** (упрощенные):
-- **Phase 1**: SQLite migrations + hardcoded Ivan data → [MVP-Phase1-Database-Setup.md](MVP-Phase1-Database-Setup.md)
-- **Phase 2**: Простой PersonalityService + MessageProcessor → [MVP-Phase2-Core-Services.md](MVP-Phase2-Core-Services.md)
-- **Phase 3**: Одна Blazor страница для чата → [MVP-Phase3-Basic-UI.md](MVP-Phase3-Basic-UI.md)
-- **Phase 4**: End-to-end MVP testing → [MVP-Phase4-Integration.md](MVP-Phase4-Integration.md)
+- **Phase 1**: SQLite migrations + hardcoded Ivan data → [MVP-Phase1-Database-Setup.md](../archive/MVP-Phase1-Database-Setup.md)
+- **Phase 2**: Простой PersonalityService + MessageProcessor → [MVP-Phase2-Core-Services.md](../archive/MVP-Phase2-Core-Services.md)
+- **Phase 3**: Одна Blazor страница для чата → [MVP-Phase3-Basic-UI.md](../archive/MVP-Phase3-Basic-UI.md)
+- **Phase 4**: End-to-end MVP testing → [MVP-Phase4-Integration.md](../archive/MVP-Phase4-Integration.md)
 
 ### **✅ DELIVERED PLATFORM CONFIGURATION:**
 - **Database**: SQLite (development) + PostgreSQL support (production-ready)
@@ -316,16 +351,16 @@ public class PersonalityTrait : BaseEntity
   - DOMAIN-MODEL-BLUEPRINT.md - Complete domain model
   - SERVICE-ARCHITECTURE-ROADMAP.md - Service layer roadmap
   - TECHNICAL-DEBT-ANALYSIS.md - Strategic gap analysis
-- **[ARCHITECTURAL-INTELLIGENCE-SUMMARY.md](ARCHITECTURAL-INTELLIGENCE-SUMMARY.md)** - Быстрый архитектурный справочник
+- **[ARCHITECTURAL-INTELLIGENCE-SUMMARY.md](../archive/ARCHITECTURAL-INTELLIGENCE-SUMMARY.md)** - Быстрый архитектурный справочник
 
 ### **🔄 MVP планы (упрощённые):**
-- **[MVP-Phase1-Database-Setup.md](MVP-Phase1-Database-Setup.md)** - SQLite migrations + hardcoded Ivan data
-- **[MVP-Phase2-Core-Services.md](MVP-Phase2-Core-Services.md)** - Простой PersonalityService + MessageProcessor  
-- **[MVP-Phase3-Basic-UI.md](MVP-Phase3-Basic-UI.md)** - Одна Blazor страница для чата
-- **[MVP-Phase4-Integration.md](MVP-Phase4-Integration.md)** - End-to-end MVP testing
+- **[MVP-Phase1-Database-Setup.md](../archive/MVP-Phase1-Database-Setup.md)** - SQLite migrations + hardcoded Ivan data
+- **[MVP-Phase2-Core-Services.md](../archive/MVP-Phase2-Core-Services.md)** - Простой PersonalityService + MessageProcessor  
+- **[MVP-Phase3-Basic-UI.md](../archive/MVP-Phase3-Basic-UI.md)** - Одна Blazor страница для чата
+- **[MVP-Phase4-Integration.md](../archive/MVP-Phase4-Integration.md)** - End-to-end MVP testing
 
 **Last Updated**: 2025-09-14
 **Version**: 5.0.0 (ENTERPRISE PLATFORM + ERROR LEARNING SYSTEM EXCELLENCE)
 **Status**: ✅ **PROJECT SUCCESS** - MVP + Enterprise integrations + Error Learning System + Quality excellence
-**Achievement**: [INTEGRATION-FOCUSED-HYBRID-PLAN.md](INTEGRATION-FOCUSED-HYBRID-PLAN.md) + ERROR LEARNING SYSTEM ✅ **FULLY DELIVERED**
+**Achievement**: [CONSOLIDATED-EXECUTION-PLAN.md](MAIN_PLAN/09-CONSOLIDATED-EXECUTION-PLAN.md) + ERROR LEARNING SYSTEM ✅ **FULLY DELIVERED**
 **Final Result**: Complete enterprise-grade Digital Ivan platform + Advanced ML Error Intelligence ready for production deployment

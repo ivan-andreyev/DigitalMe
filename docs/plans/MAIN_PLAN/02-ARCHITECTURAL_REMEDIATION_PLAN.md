@@ -1,5 +1,12 @@
 # 🏗️ ARCHITECTURAL REMEDIATION PLAN
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [01-MASTER_TECHNICAL_PLAN.md](01-MASTER_TECHNICAL_PLAN.md) - Technical coordination hub
+- [08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md](08-HYBRID-CODE-QUALITY-RECOVERY-PLAN-Architecture.md) - Code quality recovery
+- [07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md](07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md) - Test improvements
+
 **DigitalMe Ivan-Level Agent - Critical Architecture Fixes**
 
 **Date Created**: September 12, 2025  

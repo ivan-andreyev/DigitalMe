@@ -1,6 +1,13 @@
 # PHASE 0: IVAN-LEVEL AGENT (PROLOGUE)
 ## Пролог к стратегическому плану DigitalMe
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [03-IVAN_LEVEL_COMPLETION_PLAN.md](03-IVAN_LEVEL_COMPLETION_PLAN.md) - Ivan level completion
+- [14-PHASE1_ADVANCED_COGNITIVE_TASKS.md](14-PHASE1_ADVANCED_COGNITIVE_TASKS.md) - Phase 1 cognitive tasks
+- [01-MASTER_TECHNICAL_PLAN.md](01-MASTER_TECHNICAL_PLAN.md) - Master technical plan
+
 **Дата**: Сентябрь 10, 2025  
 **Статус**: Пролог перед основными фазами стратегического плана  
 **Цель**: Создать working proof-of-concept - цифрового клона Ивана  

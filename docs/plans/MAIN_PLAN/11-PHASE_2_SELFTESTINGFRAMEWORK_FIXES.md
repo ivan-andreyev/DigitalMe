@@ -1,4 +1,12 @@
 # PHASE 2: SELFTESTINGFRAMEWORK ARCHITECTURE ALIGNMENT
+
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md](10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md) - Phase 1 tasks
+- [12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md](12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md) - Phase 3 validation
+- [07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md](07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md) - Test infrastructure
+
 *Mock Verification Issues - Orchestration Pattern Mismatch*
 
 ## 🔍 ROOT CAUSE ANALYSIS

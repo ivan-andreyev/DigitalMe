@@ -1,5 +1,12 @@
 # Test Infrastructure Improvement Plan - Post-Review Remediation
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md](04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md) - Infrastructure remediation
+- [05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md](05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md) - Critical test failures
+- [16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md](16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md) - Baseline documentation
+
 **Created**: 2025-09-09  
 **Based on**: Comprehensive Review Reports from 4 Reviewer Agents  
 **Status**: PLAN CREATED - READY FOR EXECUTION  

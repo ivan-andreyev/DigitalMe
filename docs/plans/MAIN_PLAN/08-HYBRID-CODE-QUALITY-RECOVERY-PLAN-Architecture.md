@@ -1,5 +1,12 @@
 # HYBRID-CODE-QUALITY-RECOVERY-PLAN - Архитектурная диаграмма
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [02-ARCHITECTURAL_REMEDIATION_PLAN.md](02-ARCHITECTURAL_REMEDIATION_PLAN.md) - Architecture remediation
+- [21-HYBRID-CODE-QUALITY-RECOVERY-PLAN/](21-HYBRID-CODE-QUALITY-RECOVERY-PLAN/) - Detailed recovery plan
+- [06-CAPTCHA_WORKFLOW_SERVICE_REMEDIATION_PLAN.md](06-CAPTCHA_WORKFLOW_SERVICE_REMEDIATION_PLAN.md) - Service remediation
+
 ## Высокоуровневая архитектура решения
 
 ```mermaid

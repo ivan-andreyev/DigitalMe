@@ -1,7 +1,7 @@
 # Phase 7 Business Showcase Architecture Documentation
 
 **Type**: Actual  
-**Plan Reference**: [MVP-Phase7-Business-Showcase.md](../plans/MVP-Phase7-Business-Showcase.md)
+**Plan Reference**: [MVP-Phase7-Business-Showcase.md](../../plans/MVP-Phase7-Business-Showcase.md)
 **Implementation Status**: Completed
 **Last Updated**: 2025-09-09  
 **Phase**: MVP Phase 7 - Business Showcase  

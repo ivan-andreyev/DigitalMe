@@ -1,4 +1,12 @@
 # EXECUTIVE SUMMARY: CRITICAL TEST FAILURES REMEDIATION
+
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md](05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md) - Detailed remediation plan
+- [12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md](12-PHASE_3_VALIDATION_AND_PRODUCTION_READINESS.md) - Production readiness
+- [16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md](16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md) - Baseline documentation
+
 *Comprehensive Plan for Production Deployment Readiness*
 
 **Generated**: 2025-09-12  

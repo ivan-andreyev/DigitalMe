@@ -1,6 +1,13 @@
 # TEST REMEDIATION BASELINE DOCUMENTATION
 ## Evidence and Traceability for T2.7 Completion
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md](04-PHASE_1_1_LEARNING_INFRASTRUCTURE_REMEDIATION_PLAN.md) - Infrastructure remediation
+- [07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md](07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md) - Test infrastructure
+- [15-EXECUTIVE_SUMMARY_CRITICAL_TEST_REMEDIATION.md](15-EXECUTIVE_SUMMARY_CRITICAL_TEST_REMEDIATION.md) - Executive summary
+
 **Document Version**: 1.0  
 **Created**: 2025-09-13  
 **Purpose**: Address pre-completion-validator feedback on documentation gaps  

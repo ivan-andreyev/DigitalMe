@@ -1,8 +1,13 @@
 # 🔮 Future R&D Extensions Roadmap
 
-> **PARENT PLAN**: [MAIN_PLAN.md](MAIN_PLAN.md) → Post-MVP Extensions  
-> **SCOPE**: Strategic R&D opportunities and advanced feature development  
-> **TIMELINE**: 3-12 months post-MVP  
+> **PARENT PLAN**: [MAIN_PLAN.md](../MAIN_PLAN.md) → Post-MVP Extensions
+> **SCOPE**: Strategic R&D opportunities and advanced feature development
+> **TIMELINE**: 3-12 months post-MVP
+
+**📋 Related Plans:**
+- [14-PHASE1_ADVANCED_COGNITIVE_TASKS.md](14-PHASE1_ADVANCED_COGNITIVE_TASKS.md) - Phase 1 cognitive tasks
+- [17-STRATEGIC-NEXT-STEPS-SUMMARY.md](17-STRATEGIC-NEXT-STEPS-SUMMARY.md) - Strategic next steps
+- [01-MASTER_TECHNICAL_PLAN.md](01-MASTER_TECHNICAL_PLAN.md) - Master technical plan  
 > **STATUS**: 📋 **STRATEGIC ROADMAP** - Optional advanced features for continued R&D value
 
 ---

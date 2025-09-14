@@ -1,4 +1,12 @@
 # PHASE 1: IMMEDIATE EXECUTION TASKS
+
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [09-CONSOLIDATED-EXECUTION-PLAN.md](09-CONSOLIDATED-EXECUTION-PLAN.md) - Consolidated execution plan
+- [11-PHASE_2_SELFTESTINGFRAMEWORK_FIXES.md](11-PHASE_2_SELFTESTINGFRAMEWORK_FIXES.md) - Phase 2 fixes
+- [05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md](05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md) - Critical test failures
+
 *Critical Test Failures Remediation - TestExecutor Component*
 
 ## 🎯 SPECIFIC FAILURE ANALYSIS

@@ -1,6 +1,13 @@
 # PHASE 1.1 LEARNING INFRASTRUCTURE REMEDIATION PLAN
 ## Critical Issues Resolution for Production Readiness
 
+**⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
+
+**📋 Related Plans:**
+- [05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md](05-CRITICAL_TEST_FAILURES_REMEDIATION_PLAN.md) - Test failures remediation
+- [07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md](07-TEST-INFRASTRUCTURE-IMPROVEMENT-PLAN.md) - Test infrastructure improvements
+- [16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md](16-TEST_REMEDIATION_BASELINE_DOCUMENTATION.md) - Test baseline documentation
+
 **Document Version**: 1.0  
 **Created**: 2025-09-12  
 **Status**: ACTIVE REMEDIATION PLAN  
