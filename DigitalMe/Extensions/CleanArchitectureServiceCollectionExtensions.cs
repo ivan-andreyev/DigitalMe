@@ -4,6 +4,8 @@ using DigitalMe.Services.ApplicationServices.UseCases.WebNavigation;
 using DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability;
 using DigitalMe.Services.ApplicationServices.UseCases.HealthCheck;
 using DigitalMe.Services.ApplicationServices.Workflows;
+using DigitalMe.Services.PersonalityEngine;
+using DigitalMe.Services.Strategies;
 using DigitalMe.Infrastructure;
 using DigitalMe.Infrastructure.Repositories;
 
@@ -36,6 +38,28 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<IWebNavigationWorkflowService, WebNavigationWorkflowService>();
         services.AddScoped<ICaptchaWorkflowService, CaptchaWorkflowService>();
         services.AddScoped<IIvanLevelWorkflowService, IvanLevelWorkflowService>();
+
+        // Personality Engine Services - SOLID Refactored Architecture
+        services.AddScoped<DigitalMe.Services.IIvanPersonalityService, DigitalMe.Services.IvanPersonalityService>();
+        services.AddScoped<DigitalMe.Services.IPersonalityBehaviorMapper, DigitalMe.Services.PersonalityBehaviorMapper>();
+
+        // Configuration Service
+        services.AddSingleton<IPersonalityConfigurationService, PersonalityConfigurationService>();
+
+        // Strategy Pattern Services
+        services.AddScoped<IPersonalityStrategyFactory, PersonalityStrategyFactory>();
+        services.AddScoped<IvanPersonalityStrategy>();
+        services.AddScoped<GenericPersonalityStrategy>();
+
+        // Specialized Analyzer Services (SRP compliance)
+        services.AddScoped<IPersonalityContextAdapter, PersonalityContextAdapter>();
+        services.AddScoped<IStressBehaviorAnalyzer, StressBehaviorAnalyzer>();
+        services.AddScoped<IExpertiseConfidenceAnalyzer, ExpertiseConfidenceAnalyzer>();
+        services.AddScoped<ICommunicationStyleAnalyzer, CommunicationStyleAnalyzer>();
+        services.AddScoped<IContextAnalyzer, ContextAnalyzer>();
+
+        // Main Orchestrator (now delegates to specialized services)
+        services.AddScoped<DigitalMe.Services.IContextualPersonalityEngine, DigitalMe.Services.ContextualPersonalityEngine>();
         
         // Learning Infrastructure Services - Phase 1.1 refactored architecture
         services.AddLearningInfrastructureServices();
