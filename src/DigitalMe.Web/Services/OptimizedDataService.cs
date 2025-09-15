@@ -22,7 +22,7 @@ public interface IOptimizedDataService
     Task<List<ChatMessageEntity>> GetChatMessagesAsync(Guid sessionId, int page = 0, int pageSize = 50, CancellationToken cancellationToken = default);
     
     // Optimized summary operations for dashboard/quick access
-    Task<ChatSessionSummary> GetChatSessionSummaryAsync(Guid sessionId, CancellationToken cancellationToken = default);
+    Task<ChatSessionSummary?> GetChatSessionSummaryAsync(Guid sessionId, CancellationToken cancellationToken = default);
     Task<List<ChatSessionSummary>> GetRecentChatSessionSummariesAsync(Guid userId, int count = 10, CancellationToken cancellationToken = default);
     
     // System configuration caching
@@ -371,7 +371,7 @@ public class OptimizedDataService : IOptimizedDataService
         });
     }
     
-    public async Task<ChatSessionSummary> GetChatSessionSummaryAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    public async Task<ChatSessionSummary?> GetChatSessionSummaryAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         using var activity = _performanceTracker.StartActivity("GetChatSessionSummary");
         

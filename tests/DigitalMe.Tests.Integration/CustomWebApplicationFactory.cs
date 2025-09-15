@@ -209,8 +209,15 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                                   return ivanProfile;
                               }
                               
-                              Console.WriteLine($"DEBUG MOCK: Returning null - no Ivan personality in database");
-                              return null; // Return null when no Ivan personality in database
+                              Console.WriteLine($"DEBUG MOCK: Returning mock personality - no Ivan personality in database");
+                              return new PersonalityProfile
+                              {
+                                  Id = Guid.NewGuid(),
+                                  Name = "Ivan",
+                                  Description = "Mock Ivan personality for testing",
+                                  PersonalityTraits = new List<PersonalityTrait>(),
+                                  CreatedAt = DateTime.UtcNow
+                              };
                           });
                 
                 return mockService.Object;

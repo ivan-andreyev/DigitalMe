@@ -175,7 +175,16 @@ public class QueryOptimizationValidator : IQueryOptimizationValidator
             
             // This query should use AsNoTracking from OptimizedDataService
             var profile = await _optimizedService.GetUserProfileAsync(testUserId);
-            
+
+            if (profile == null)
+            {
+                return new ValidationResult
+                {
+                    IsValid = false,
+                    ValidationMessage = "User profile not found for tracking validation"
+                };
+            }
+
             // Verify the context isn't tracking the entity
             var entry = _context.Entry(profile);
             var isTracked = entry.State != EntityState.Detached;

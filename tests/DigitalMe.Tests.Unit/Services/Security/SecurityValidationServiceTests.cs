@@ -99,7 +99,7 @@ public class SecurityValidationServiceTests
     public void SanitizeInput_ShouldHandleNullOrEmpty()
     {
         // Act & Assert
-        _service.SanitizeInput(null).Should().BeNull();
+        _service.SanitizeInput(null!).Should().BeNull();
         _service.SanitizeInput("").Should().Be("");
         _service.SanitizeInput("   ").Should().Be("");
     }
