@@ -180,8 +180,8 @@ public class QueryOptimizationValidator : IQueryOptimizationValidator
             {
                 return new ValidationResult
                 {
-                    IsValid = false,
-                    ValidationMessage = "User profile not found for tracking validation"
+                    Success = false,
+                    Message = "User profile not found for tracking validation"
                 };
             }
 
