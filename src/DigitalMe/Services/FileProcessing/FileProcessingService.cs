@@ -184,10 +184,9 @@ public class FileProcessingService : IFileProcessingService
                 return content;
             }
             
-            // Fallback for complex PDFs - return basic file info but indicate success
+            // Fallback for complex PDFs - return consistent fallback message
             var fileInfo = new FileInfo(filePath);
-            return $"PDF processed successfully. File: {fileInfo.Name}, Size: {fileInfo.Length} bytes. " +
-                   "Content extracted from simple text-based PDF structure.";
+            return $"{FileProcessingConstants.PdfExtractionFallbackMessage} File: {fileInfo.Name}, Size: {fileInfo.Length} bytes.";
         }
         catch (Exception ex)
         {

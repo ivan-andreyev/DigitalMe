@@ -43,12 +43,24 @@
         <PackageReference Include="Microsoft.Playwright" Version="1.48.0" />
         <!-- Voice Service packages for Ivan-Level TTS/STT capabilities -->
         <PackageReference Include="OpenAI" Version="2.0.0" />
+        <!-- Email Service packages for Ivan-Level email capabilities -->
+        <PackageReference Include="MailKit" Version="4.8.0" />
+        <PackageReference Include="MimeKit" Version="4.8.0" />
+        <!-- StyleCop analyzers for code quality -->
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="stylecop.json" />
     </ItemGroup>
 
 </Project>

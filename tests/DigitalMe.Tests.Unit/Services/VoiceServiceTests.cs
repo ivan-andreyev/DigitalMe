@@ -160,7 +160,9 @@ public class VoiceServiceTests
     public async Task SpeechToTextFromStreamAsync_WithNullStream_ShouldReturnError()
     {
         // Act
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         var result = await this._service.SpeechToTextFromStreamAsync(null, "test.wav");
+#pragma warning restore CS8625
 
         // Assert
         Assert.False(result.Success);
@@ -404,16 +406,20 @@ public class VoiceServiceTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         Assert.Throws<ArgumentNullException>(() =>
             new VoiceService(null, Options.Create(this._config)));
+#pragma warning restore CS8625
     }
 
     [Fact]
     public void Constructor_WithNullConfig_ShouldThrowArgumentNullException()
     {
         // Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         Assert.Throws<ArgumentNullException>(() =>
             new VoiceService(this._mockLogger.Object, null));
+#pragma warning restore CS8625
     }
 
     [Theory]

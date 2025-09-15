@@ -696,7 +696,9 @@ public class ContextualPersonalityEngineTests
     {
         // Arrange
         var personality = this.CreateIvanPersonality();
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         personality.Traits = null; // Null traits
+#pragma warning restore CS8625
 
         var context = new SituationalContext
         {

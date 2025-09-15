@@ -311,8 +311,8 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
                 ["traitCount"] = personality?.Traits?.Count ?? 0,
                 ["basicPromptGenerated"] = basicPromptGenerated,
                 ["enhancedPromptGenerated"] = enhancedPromptGenerated,
-                ["basicPromptPreview"] = basicPrompt?.Length > 150 ? basicPrompt.Substring(0, 150) : basicPrompt,
-                ["enhancedPromptPreview"] = enhancedPrompt?.Length > 150 ? enhancedPrompt.Substring(0, 150) : enhancedPrompt
+                ["basicPromptPreview"] = basicPrompt?.Length > 150 ? basicPrompt.Substring(0, 150) : basicPrompt ?? string.Empty,
+                ["enhancedPromptPreview"] = enhancedPrompt?.Length > 150 ? enhancedPrompt.Substring(0, 150) : enhancedPrompt ?? string.Empty
             });
     }
 

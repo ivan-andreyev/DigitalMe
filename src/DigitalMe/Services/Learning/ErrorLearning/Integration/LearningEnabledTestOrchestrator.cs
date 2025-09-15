@@ -44,6 +44,17 @@ public class LearningEnabledTestOrchestrator : ITestOrchestrator
         {
             _logger.LogDebug("Executing test case with learning enabled: {TestCaseId}", testCase?.Id ?? "Unknown");
 
+            if (testCase == null)
+            {
+                _logger.LogWarning("Cannot execute test case: testCase is null");
+                return new TestExecutionResult
+                {
+                    Success = false,
+                    ErrorMessage = "Test case is null",
+                    TestCaseName = "Unknown"
+                };
+            }
+
             // Execute test using base orchestrator
             var result = await _baseOrchestrator.ExecuteTestCaseAsync(testCase);
 
@@ -68,6 +79,16 @@ public class LearningEnabledTestOrchestrator : ITestOrchestrator
         try
         {
             _logger.LogInformation("Executing test suite with learning enabled: {TestCount} test cases", testCases?.Count ?? 0);
+
+            if (testCases == null)
+            {
+                _logger.LogWarning("Cannot execute test suite: testCases list is null");
+                return new TestSuiteResult
+                {
+                    Status = TestSuiteStatus.Failed,
+                    SuiteName = "Unknown"
+                };
+            }
 
             // Execute test suite using base orchestrator
             var suiteResult = await _baseOrchestrator.ExecuteTestSuiteAsync(testCases);

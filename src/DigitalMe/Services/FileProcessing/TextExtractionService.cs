@@ -67,10 +67,9 @@ public class TextExtractionService : ITextExtractionService
                 return content;
             }
             
-            // Fallback for complex PDFs - return basic file info
+            // Fallback for complex PDFs - return consistent fallback message
             var fileInfo = await _fileRepository.GetFileInfoAsync(filePath);
-            return $"PDF processed successfully. File: {fileInfo?.Name}, Size: {fileInfo?.Length} bytes. " +
-                   "Note: Complex PDF text extraction requires advanced libraries. Content may be available in source format.";
+            return $"{FileProcessingConstants.PdfExtractionFallbackMessage} File: {fileInfo?.Name}, Size: {fileInfo?.Length} bytes.";
         }
         catch (Exception ex)
         {

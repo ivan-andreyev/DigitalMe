@@ -345,7 +345,9 @@ public class SingleTestExecutorTests
 
         // Assert
         Assert.False(result.Success);
+#pragma warning disable CS8602 // Dereference of a possibly null reference
         Assert.Contains("timeout", result.ErrorMessage.ToLowerInvariant());
+#pragma warning restore CS8602
         Assert.True(result.ExecutionTime >= testCase.ExpectedExecutionTime);
     }
 
@@ -365,7 +367,9 @@ public class SingleTestExecutorTests
         Assert.False(result.Success);
         Assert.Single(result.AssertionResults);
         Assert.False(result.AssertionResults[0].Passed);
+#pragma warning disable CS8604 // Possible null reference argument
         Assert.Empty(result.AssertionResults[0].ActualValue); // Should return empty string for invalid JSON
+#pragma warning restore CS8604
     }
 
     [Fact]
@@ -384,7 +388,9 @@ public class SingleTestExecutorTests
         Assert.False(result.Success);
         Assert.Single(result.AssertionResults);
         Assert.False(result.AssertionResults[0].Passed);
+#pragma warning disable CS8604 // Possible null reference argument
         Assert.Empty(result.AssertionResults[0].ActualValue);
+#pragma warning restore CS8604
     }
 
     #endregion
@@ -430,6 +436,7 @@ public class SingleTestExecutorTests
         Assert.True(result.Success);
 
         // Verify PATCH request was made
+#pragma warning disable CS8602 // Dereference of a possibly null reference
         this._mockHttpHandler.Protected().Verify(
             "SendAsync",
             Times.Once(),
@@ -437,6 +444,7 @@ public class SingleTestExecutorTests
                 req.Method.Method == "PATCH" &&
                 req.Content != null &&
                 req.Content.Headers.ContentType.MediaType == "application/json"),
+#pragma warning restore CS8602
             ItExpr.IsAny<CancellationToken>());
     }
 

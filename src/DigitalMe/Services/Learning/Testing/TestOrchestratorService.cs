@@ -33,6 +33,13 @@ public class TestOrchestratorService : ITestOrchestrator
     public async Task<List<SelfGeneratedTestCase>> GenerateTestCasesAsync(DocumentationParseResult apiDocumentation)
     {
         _logger.LogDebug("Generating test cases for API: {ApiName}", apiDocumentation?.ApiName ?? "Unknown");
+
+        if (apiDocumentation == null)
+        {
+            _logger.LogWarning("Cannot generate test cases: apiDocumentation is null");
+            return new List<SelfGeneratedTestCase>();
+        }
+
         return await _testCaseGenerator.GenerateTestCasesAsync(apiDocumentation);
     }
 
@@ -40,6 +47,18 @@ public class TestOrchestratorService : ITestOrchestrator
     public async Task<TestExecutionResult> ExecuteTestCaseAsync(SelfGeneratedTestCase testCase)
     {
         _logger.LogDebug("Executing test case: {TestCaseId}", testCase?.Id ?? "Unknown");
+
+        if (testCase == null)
+        {
+            _logger.LogWarning("Cannot execute test case: testCase is null");
+            return new TestExecutionResult
+            {
+                Success = false,
+                ErrorMessage = "Test case is null",
+                TestCaseName = "Unknown"
+            };
+        }
+
         return await _testExecutor.ExecuteTestCaseAsync(testCase);
     }
 
@@ -47,6 +66,17 @@ public class TestOrchestratorService : ITestOrchestrator
     public async Task<TestSuiteResult> ExecuteTestSuiteAsync(List<SelfGeneratedTestCase> testCases)
     {
         _logger.LogDebug("Executing test suite with {TestCount} test cases", testCases?.Count ?? 0);
+
+        if (testCases == null)
+        {
+            _logger.LogWarning("Cannot execute test suite: testCases list is null");
+            return new TestSuiteResult
+            {
+                Status = TestSuiteStatus.Failed,
+                SuiteName = "Unknown"
+            };
+        }
+
         return await _testExecutor.ExecuteTestSuiteAsync(testCases);
     }
 }

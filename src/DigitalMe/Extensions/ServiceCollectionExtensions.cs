@@ -117,8 +117,17 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
         services.AddScoped<DigitalMe.Services.Voice.ISpeechToTextConfigurationService>(provider => 
             provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
-        services.AddScoped<DigitalMe.Services.Voice.IVoiceServiceManager>(provider => 
+        services.AddScoped<DigitalMe.Services.Voice.IVoiceServiceManager>(provider =>
             provider.GetRequiredService<DigitalMe.Services.Voice.VoiceService>());
+
+        // Ivan-Level capability services - Phase B Week 4 - Email Integration
+        services.AddScoped<DigitalMe.Services.Email.EmailService>();
+        services.AddScoped<DigitalMe.Services.Email.IEmailService>(provider =>
+            provider.GetRequiredService<DigitalMe.Services.Email.EmailService>());
+
+        // Focused email interfaces following ISP
+        services.AddScoped<DigitalMe.Services.Email.ISmtpService, DigitalMe.Services.Email.SmtpService>();
+        services.AddScoped<DigitalMe.Services.Email.IImapService, DigitalMe.Services.Email.ImapService>();
 
         // Application Services layer - Clean Architecture compliance
         services.AddScoped<DigitalMe.Services.ApplicationServices.Workflows.IIvanLevelWorkflowService, DigitalMe.Services.ApplicationServices.Workflows.IvanLevelWorkflowService>();
@@ -131,6 +140,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.WebNavigation.IWebNavigationUseCase, DigitalMe.Services.ApplicationServices.UseCases.WebNavigation.WebNavigationUseCase>();
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability.IServiceAvailabilityUseCase, DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability.ServiceAvailabilityUseCase>();
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.IHealthCheckUseCase, DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.HealthCheckUseCase>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Email.IEmailUseCase, DigitalMe.Services.ApplicationServices.UseCases.Email.EmailUseCase>();
 
         // Backup Services - Refactored following SRP (Single Responsibility Principle)
         services.AddScoped<DigitalMe.Services.Backup.IBackupExecutor, DigitalMe.Services.Backup.BackupExecutor>();

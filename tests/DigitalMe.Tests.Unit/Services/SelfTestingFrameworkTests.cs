@@ -241,7 +241,9 @@ public class SelfTestingFrameworkTests : IDisposable
 
         // Assert
         Assert.False(result.Success);
+#pragma warning disable CS8602 // Dereference of a possibly null reference
         Assert.Contains("timed out", result.ErrorMessage.ToLowerInvariant());
+#pragma warning restore CS8602
         this._mockTestOrchestrator.Verify(x => x.ExecuteTestCaseAsync(testCase), Times.Once);
     }
 

@@ -70,21 +70,27 @@ public class TestExecutorTests
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Arrange, Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         Assert.Throws<ArgumentNullException>(() => new TestExecutor(null!, this._mockHttpClient, this._mockSingleTestExecutor.Object));
+#pragma warning restore CS8625
     }
 
     [Fact]
     public void Constructor_WithNullHttpClient_ShouldThrowArgumentNullException()
     {
         // Arrange, Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         Assert.Throws<ArgumentNullException>(() => new TestExecutor(this._mockLogger.Object, null!, this._mockSingleTestExecutor.Object));
+#pragma warning restore CS8625
     }
 
     [Fact]
     public void Constructor_WithNullSingleTestExecutor_ShouldThrowArgumentNullException()
     {
         // Arrange, Act & Assert
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
         Assert.Throws<ArgumentNullException>(() => new TestExecutor(this._mockLogger.Object, this._mockHttpClient, null!));
+#pragma warning restore CS8625
     }
 
     #endregion

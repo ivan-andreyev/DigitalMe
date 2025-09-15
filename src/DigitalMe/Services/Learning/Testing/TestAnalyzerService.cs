@@ -29,6 +29,18 @@ public class TestAnalyzerService : ITestAnalyzer
     public async Task<TestAnalysisResult> AnalyzeTestFailuresAsync(List<TestExecutionResult> failedTests)
     {
         _logger.LogDebug("Analyzing {FailedTestCount} failed tests", failedTests?.Count ?? 0);
+
+        if (failedTests == null)
+        {
+            _logger.LogWarning("Cannot analyze test failures: failedTests list is null");
+            return new TestAnalysisResult
+            {
+                TotalFailedTests = 0,
+                OverallHealthScore = 0.0,
+                CriticalIssues = new List<string> { "Failed tests list is null" }
+            };
+        }
+
         return await _resultsAnalyzer.AnalyzeTestFailuresAsync(failedTests);
     }
 }

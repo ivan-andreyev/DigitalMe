@@ -39,6 +39,13 @@ public class SelfTestingFramework : ISelfTestingFramework
     public async Task<List<SelfGeneratedTestCase>> GenerateTestCasesAsync(DocumentationParseResult apiDocumentation)
     {
         _logger.LogInformation("Orchestrating test case generation for API: {ApiName}", apiDocumentation?.ApiName ?? "Unknown");
+
+        if (apiDocumentation == null)
+        {
+            _logger.LogWarning("Cannot generate test cases: apiDocumentation is null");
+            return new List<SelfGeneratedTestCase>();
+        }
+
         return await _testOrchestrator.GenerateTestCasesAsync(apiDocumentation);
     }
 
@@ -46,6 +53,18 @@ public class SelfTestingFramework : ISelfTestingFramework
     public async Task<TestExecutionResult> ExecuteTestCaseAsync(SelfGeneratedTestCase testCase)
     {
         _logger.LogInformation("Orchestrating test case execution: {TestCaseId}", testCase?.Id ?? "Unknown");
+
+        if (testCase == null)
+        {
+            _logger.LogWarning("Cannot execute test case: testCase is null");
+            return new TestExecutionResult
+            {
+                Success = false,
+                ErrorMessage = "Test case is null",
+                TestCaseName = "Unknown"
+            };
+        }
+
         return await _testOrchestrator.ExecuteTestCaseAsync(testCase);
     }
 
@@ -53,6 +72,17 @@ public class SelfTestingFramework : ISelfTestingFramework
     public async Task<TestSuiteResult> ExecuteTestSuiteAsync(List<SelfGeneratedTestCase> testCases)
     {
         _logger.LogInformation("Orchestrating test suite execution with {TestCount} test cases", testCases?.Count ?? 0);
+
+        if (testCases == null)
+        {
+            _logger.LogWarning("Cannot execute test suite: testCases list is null");
+            return new TestSuiteResult
+            {
+                Status = TestSuiteStatus.Failed,
+                SuiteName = "Unknown"
+            };
+        }
+
         return await _testOrchestrator.ExecuteTestSuiteAsync(testCases);
     }
 
@@ -60,6 +90,19 @@ public class SelfTestingFramework : ISelfTestingFramework
     public async Task<CapabilityValidationResult> ValidateLearnedCapabilityAsync(string apiName, LearnedCapability capability)
     {
         _logger.LogInformation("Orchestrating capability validation: {CapabilityName} for API: {ApiName}", capability?.Name ?? "Unknown", apiName);
+
+        if (capability == null)
+        {
+            _logger.LogWarning("Cannot validate capability: capability is null for API {ApiName}", apiName);
+            return new CapabilityValidationResult
+            {
+                CapabilityName = apiName,
+                IsValid = false,
+                ConfidenceScore = 0.0,
+                ImprovementSuggestions = new List<string> { "Capability is null" }
+            };
+        }
+
         return await _capabilityValidator.ValidateLearnedCapabilityAsync(apiName, capability);
     }
 
@@ -74,6 +117,18 @@ public class SelfTestingFramework : ISelfTestingFramework
     public async Task<TestAnalysisResult> AnalyzeTestFailuresAsync(List<TestExecutionResult> failedTests)
     {
         _logger.LogInformation("Orchestrating test failure analysis for {FailedTestCount} failed tests", failedTests?.Count ?? 0);
+
+        if (failedTests == null)
+        {
+            _logger.LogWarning("Cannot analyze test failures: failedTests list is null");
+            return new TestAnalysisResult
+            {
+                TotalFailedTests = 0,
+                OverallHealthScore = 0.0,
+                CriticalIssues = new List<string> { "Failed tests list is null" }
+            };
+        }
+
         return await _testAnalyzer.AnalyzeTestFailuresAsync(failedTests);
     }
 
