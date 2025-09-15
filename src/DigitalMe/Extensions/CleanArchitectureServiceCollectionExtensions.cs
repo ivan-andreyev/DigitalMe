@@ -42,6 +42,15 @@ public static class CleanArchitectureServiceCollectionExtensions
         // Personality Engine Services - SOLID Refactored Architecture
         services.AddScoped<DigitalMe.Services.IIvanPersonalityService, DigitalMe.Services.IvanPersonalityService>();
         services.AddScoped<DigitalMe.Services.IPersonalityBehaviorMapper, DigitalMe.Services.PersonalityBehaviorMapper>();
+        services.AddScoped<DigitalMe.Services.IProfileDataParser, DigitalMe.Services.ProfileDataParser>();
+
+        // Ivan-Specific Use Cases and Integration
+        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Ivan.IIvanPersonalityUseCase,
+                          DigitalMe.Services.ApplicationServices.UseCases.Ivan.IvanPersonalityUseCase>();
+
+        // Ivan Response Styling Service
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingService>();
 
         // Configuration Service
         services.AddSingleton<IPersonalityConfigurationService, PersonalityConfigurationService>();

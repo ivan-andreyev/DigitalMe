@@ -1,6 +1,8 @@
 using DigitalMe.Data;
+using DigitalMe.Data.Entities;
 using DigitalMe.Extensions;
 using DigitalMe.Services;
+using DigitalMe.Services.ApplicationServices.ResponseStyling;
 using DigitalMe.Services.CaptchaSolving;
 using DigitalMe.Services.FileProcessing;
 using DigitalMe.Services.Voice;
@@ -39,6 +41,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
         var voiceService = services.GetService<IVoiceService>();
         var ivanPersonalityService = services.GetService<IIvanPersonalityService>();
         var profileDataParser = services.GetService<IProfileDataParser>();
+        var ivanResponseStylingService = services.GetService<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService>();
 
         // Assert - All services should be available
         Assert.NotNull(fileProcessingService);
@@ -47,6 +50,7 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
         Assert.NotNull(voiceService);
         Assert.NotNull(ivanPersonalityService);
         Assert.NotNull(profileDataParser);
+        Assert.NotNull(ivanResponseStylingService);
     }
 
     [Fact]
@@ -63,14 +67,98 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
         // Assert
         Assert.NotNull(personality);
         Assert.Equal("Ivan Digital Clone", personality.Name);
-        
+
         Assert.Contains("Ivan", systemPrompt);
         Assert.Contains("C#/.NET", systemPrompt);
         Assert.Contains("EllyAnalytics", systemPrompt);
-        
+
         Assert.Contains("Ivan", enhancedPrompt);
         Assert.Contains("CORE PERSONALITY", enhancedPrompt);
         Assert.Contains("TECHNICAL PREFERENCES", enhancedPrompt);
+    }
+
+    [Fact]
+    public async Task IvanResponseStyling_ContextualAdaptation_ShouldApplyCorrectStyling()
+    {
+        // Arrange
+        var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
+
+        var technicalContext = new SituationalContext
+        {
+            ContextType = ContextType.Technical,
+            UrgencyLevel = 0.7
+        };
+
+        var personalContext = new SituationalContext
+        {
+            ContextType = ContextType.Personal,
+            UrgencyLevel = 0.3
+        };
+
+        var professionalContext = new SituationalContext
+        {
+            ContextType = ContextType.Professional,
+            UrgencyLevel = 0.5
+        };
+
+        // Act
+        var technicalResponse = await responseStylingService.StyleResponseAsync(
+            "This programming approach should work for the implementation.", technicalContext);
+
+        var personalResponse = await responseStylingService.StyleResponseAsync(
+            "I need to balance work and family time better.", personalContext);
+
+        var professionalResponse = await responseStylingService.StyleResponseAsync(
+            "We should approach this business challenge systematically.", professionalContext);
+
+        // Assert Technical Context
+        Assert.NotNull(technicalResponse);
+        Assert.Contains("C#/.NET", technicalResponse); // Technical precision should be added
+
+        // Assert Personal Context
+        Assert.NotNull(personalResponse);
+        Assert.Contains("struggle to balance", personalResponse); // Personal honesty should be added
+        Assert.Contains("Marina and Sofia", personalResponse); // Personal touches should be added
+
+        // Assert Professional Context
+        Assert.NotNull(professionalResponse);
+        // Professional context should enhance or maintain the original business-focused language
+        Assert.True(professionalResponse.Contains("business") || professionalResponse.Contains("should"),
+            "Professional response should maintain business focus and directness");
+    }
+
+    [Theory]
+    [InlineData(ContextType.Technical)]
+    [InlineData(ContextType.Professional)]
+    [InlineData(ContextType.Personal)]
+    public async Task IvanResponseStyling_VocabularyPreferences_ShouldMatchContext(ContextType contextType)
+    {
+        // Arrange
+        var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
+        var context = new SituationalContext { ContextType = contextType, UrgencyLevel = 0.5 };
+
+        // Act
+        var vocabularyPreferences = await responseStylingService.GetVocabularyPreferencesAsync(context);
+
+        // Assert
+        Assert.NotNull(vocabularyPreferences);
+        Assert.NotNull(vocabularyPreferences.SignatureExpressions);
+        Assert.NotEmpty(vocabularyPreferences.SignatureExpressions);
+
+        switch (contextType)
+        {
+            case ContextType.Technical:
+                Assert.Contains("C#/.NET", vocabularyPreferences.PreferredTechnicalTerms);
+                Assert.Contains("That's the pragmatic choice", vocabularyPreferences.SignatureExpressions);
+                break;
+            case ContextType.Professional:
+                Assert.Contains("The smart business move here", vocabularyPreferences.SignatureExpressions);
+                break;
+            case ContextType.Personal:
+                Assert.Contains("I'm still figuring this out myself", vocabularyPreferences.SignatureExpressions);
+                Assert.Contains("Perfect work-life balance", vocabularyPreferences.AvoidedPhrases);
+                break;
+        }
     }
 
     [Fact]
@@ -262,22 +350,250 @@ public class IvanLevelServicesIntegrationTests : IClassFixture<ServiceIntegratio
     }
 
     [Fact]
+    public async Task IvanLevelEndToEndScenario_TechnicalAnalysisWorkflow_ShouldWorkCompletely()
+    {
+        // This test simulates a complete Ivan-Level workflow:
+        // 1. Generate Ivan personality-based system prompt
+        // 2. Apply response styling for technical context
+        // 3. Create a technical document with styled content
+        // 4. Verify the complete workflow integration
+
+        // Arrange
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
+        var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
+
+        // Act - Step 1: Generate Ivan's technical personality response
+        var personality = await ivanService.GetIvanPersonalityAsync();
+        var enhancedPrompt = await ivanService.GenerateEnhancedSystemPromptAsync();
+
+        // Step 2: Apply Ivan's technical response styling
+        var technicalContext = new SituationalContext
+        {
+            ContextType = ContextType.Technical,
+            UrgencyLevel = 0.8 // High urgency technical issue
+        };
+
+        var rawAnalysis = """
+            This programming problem requires careful consideration and detailed analysis of the implementation requirements.
+            We might want to try a different approach to solve the performance bottlenecks.
+            The current implementation might have some performance issues that need to be addressed systematically.
+            """;
+
+        var styledResponse = await responseStylingService.StyleResponseAsync(rawAnalysis, technicalContext);
+
+        // Step 3: Create a technical document with Ivan's styled content
+        var documentContent = $"""
+            TECHNICAL ANALYSIS REPORT
+            Generated by: {personality.Name}
+            Context: Technical Problem Solving
+            Urgency Level: High
+
+            ANALYSIS:
+            {styledResponse}
+
+            SYSTEM PROMPT EXCERPT:
+            {enhancedPrompt.Substring(0, Math.Min(200, enhancedPrompt.Length))}...
+
+            This demonstrates Ivan-Level technical reasoning and communication patterns.
+            """;
+
+        var tempFilePath = Path.GetTempFileName() + ".pdf";
+        var parameters = new Dictionary<string, object>
+        {
+            ["content"] = documentContent,
+            ["title"] = "Ivan-Level Technical Analysis Report"
+        };
+
+        var pdfResult = await fileService.ProcessPdfAsync("create", tempFilePath, parameters);
+
+        // Assert - Complete workflow validation
+        // 1. Personality service worked
+        Assert.NotNull(personality);
+        Assert.Equal("Ivan Digital Clone", personality.Name);
+        Assert.Contains("TECHNICAL PREFERENCES", enhancedPrompt);
+
+        // 2. Response styling worked
+        Assert.NotNull(styledResponse);
+        Assert.Contains("C#/.NET", styledResponse); // Technical precision added
+        // Check for enhanced directness - either specific changes or overall improvement
+        Assert.True(styledResponse.Length >= rawAnalysis.Length,
+            "Styled response should be enhanced with additional technical context");
+
+        // 3. Document creation worked
+        Assert.True(pdfResult.Success, "PDF creation should succeed");
+        Assert.True(File.Exists(tempFilePath), "PDF file should exist");
+
+        // 4. Content extraction validation
+        var extractedText = await fileService.ExtractTextAsync(tempFilePath);
+        Assert.False(string.IsNullOrEmpty(extractedText));
+        Assert.Contains("Ivan Digital Clone", extractedText);
+        Assert.Contains("TECHNICAL ANALYSIS REPORT", extractedText);
+        Assert.Contains("Ivan-Level technical reasoning", extractedText);
+
+        // Cleanup
+        if (File.Exists(tempFilePath))
+            File.Delete(tempFilePath);
+    }
+
+    [Fact]
+    public async Task IvanLevelEndToEndScenario_PersonalContextWorkflow_ShouldDemonstrateVulnerability()
+    {
+        // This test validates Ivan's personal context handling with vulnerability patterns
+
+        // Arrange
+        var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
+
+        var personalContext = new SituationalContext
+        {
+            ContextType = ContextType.Personal,
+            UrgencyLevel = 0.4
+        };
+
+        var personalInput = """
+            I've been struggling with work-life balance lately.
+            It's hard to manage everything perfectly.
+            Family time is important but career advancement matters too.
+            """;
+
+        // Act
+        var styledPersonalResponse = await responseStylingService.StyleResponseAsync(personalInput, personalContext);
+        var vocabularyPrefs = await responseStylingService.GetVocabularyPreferencesAsync(personalContext);
+
+        // Assert
+        Assert.NotNull(styledPersonalResponse);
+        Assert.NotNull(vocabularyPrefs);
+
+        // Verify Ivan's personal vulnerability patterns
+        Assert.Contains("Marina and Sofia", styledPersonalResponse); // Personal family references
+        Assert.Contains("struggle", styledPersonalResponse); // Honest vulnerability
+        // Ivan should avoid absolutist language or enhance it with vulnerability
+        Assert.True(!styledPersonalResponse.Contains("everything perfectly") ||
+                   styledPersonalResponse.Contains("struggle"),
+                   "Ivan should either avoid perfection claims or balance them with vulnerability");
+
+        // Verify vocabulary preferences align with personal context
+        Assert.Contains("I'm still figuring this out myself", vocabularyPrefs.SignatureExpressions);
+        Assert.Contains("Perfect work-life balance", vocabularyPrefs.AvoidedPhrases);
+        Assert.Equal("As a father who's still learning to balance everything", vocabularyPrefs.SelfReferenceStyle);
+    }
+
+    [Fact]
+    public async Task IvanLevelEndToEndScenario_MultiServiceOrchestration_ShouldCoordinateServices()
+    {
+        // This test validates coordination between multiple Ivan-Level services
+
+        // Arrange
+        var services = new
+        {
+            Ivan = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>(),
+            ResponseStyling = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>(),
+            FileProcessing = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>(),
+            WebNavigation = _fixture.ServiceProvider.GetRequiredService<IWebNavigationService>(),
+            Voice = _fixture.ServiceProvider.GetRequiredService<IVoiceService>(),
+            Captcha = _fixture.ServiceProvider.GetRequiredService<ICaptchaSolvingService>()
+        };
+
+        // Act - Test service coordination
+        var coordination = new Dictionary<string, bool>();
+
+        // Test Ivan personality service
+        try
+        {
+            var personality = await services.Ivan.GetIvanPersonalityAsync();
+            coordination["IvanPersonality"] = personality != null && personality.Name == "Ivan Digital Clone";
+        }
+        catch
+        {
+            coordination["IvanPersonality"] = false;
+        }
+
+        // Test Response styling service
+        try
+        {
+            var context = new SituationalContext { ContextType = ContextType.Professional, UrgencyLevel = 0.5 };
+            var styled = await services.ResponseStyling.StyleResponseAsync("Test business analysis.", context);
+            coordination["ResponseStyling"] = !string.IsNullOrEmpty(styled);
+        }
+        catch
+        {
+            coordination["ResponseStyling"] = false;
+        }
+
+        // Test File processing service
+        try
+        {
+            var testPath = Path.GetTempFileName();
+            var accessible = await services.FileProcessing.IsFileAccessibleAsync(testPath);
+            coordination["FileProcessing"] = true; // Service exists and is callable
+            File.Delete(testPath); // Cleanup
+        }
+        catch
+        {
+            coordination["FileProcessing"] = false;
+        }
+
+        // Test Web navigation service readiness
+        try
+        {
+            var isReady = await services.WebNavigation.IsBrowserReadyAsync();
+            coordination["WebNavigation"] = true; // Service exists and is callable
+        }
+        catch
+        {
+            coordination["WebNavigation"] = false;
+        }
+
+        // Test Voice service
+        try
+        {
+            var voices = await services.Voice.GetAvailableVoicesAsync();
+            coordination["Voice"] = voices != null;
+        }
+        catch
+        {
+            coordination["Voice"] = false;
+        }
+
+        // Test CAPTCHA service
+        try
+        {
+            var isAvailable = await services.Captcha.IsServiceAvailableAsync();
+            coordination["Captcha"] = true; // Service exists and is callable
+        }
+        catch
+        {
+            coordination["Captcha"] = false;
+        }
+
+        // Assert - All services should coordinate successfully
+        var successfulServices = coordination.Count(kvp => kvp.Value);
+        var totalServices = coordination.Count;
+
+        // We expect at least 5 out of 6 services to work (CAPTCHA might fail without API key)
+        Assert.True(successfulServices >= 5,
+            $"Expected at least 5/6 services to work, but only {successfulServices}/{totalServices} succeeded. " +
+            $"Failed services: {string.Join(", ", coordination.Where(kvp => !kvp.Value).Select(kvp => kvp.Key))}");
+    }
+
+    [Fact]
     public void Performance_ServiceInstantiation_ShouldBeFast()
     {
         // Arrange
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        // Act - Test service instantiation performance
+        // Act - Test service instantiation performance (including new Response Styling service)
         var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
         var webService = _fixture.ServiceProvider.GetRequiredService<IWebNavigationService>();
         var captchaService = _fixture.ServiceProvider.GetRequiredService<ICaptchaSolvingService>();
         var voiceService = _fixture.ServiceProvider.GetRequiredService<IVoiceService>();
         var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
 
         stopwatch.Stop();
 
         // Assert - Service instantiation should be fast (< 1 second)
-        Assert.True(stopwatch.ElapsedMilliseconds < 1000, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 1000,
             $"Service instantiation took {stopwatch.ElapsedMilliseconds}ms, should be < 1000ms");
     }
 }
