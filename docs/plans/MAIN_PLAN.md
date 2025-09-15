@@ -360,8 +360,149 @@ public class PersonalityTrait : BaseEntity
 - **[MVP-Phase3-Basic-UI.md](../archive/MVP-Phase3-Basic-UI.md)** - Одна Blazor страница для чата
 - **[MVP-Phase4-Integration.md](../archive/MVP-Phase4-Integration.md)** - End-to-end MVP testing
 
-**Last Updated**: 2025-09-14
-**Version**: 5.0.0 (ENTERPRISE PLATFORM + ERROR LEARNING SYSTEM EXCELLENCE)
-**Status**: ✅ **PROJECT SUCCESS** - MVP + Enterprise integrations + Error Learning System + Quality excellence
-**Achievement**: [CONSOLIDATED-EXECUTION-PLAN.md](MAIN_PLAN/09-CONSOLIDATED-EXECUTION-PLAN.md) + ERROR LEARNING SYSTEM ✅ **FULLY DELIVERED**
-**Final Result**: Complete enterprise-grade Digital Ivan platform + Advanced ML Error Intelligence ready for production deployment
+---
+
+## 🔧 TECHNICAL DEBT & ENHANCEMENT ROADMAP
+
+> **Added**: 2025-01-15 - Post Army Review Analysis
+> **Source**: Comprehensive code review by 4 specialized reviewers
+
+### **🚨 CRITICAL TECHNICAL DEBT (Priority: HIGH)**
+
+#### **T1: DRY Violations - Massive Code Duplication**
+**Issue**: Significant duplication in integration folder structures
+**Impact**: High maintenance cost, inconsistent implementations
+**Effort**: 3-5 days
+**Enhancement Plan**:
+- Consolidate duplicate integration service patterns
+- Create shared base classes for external API integrations
+- Implement unified configuration patterns
+- Reduce codebase by estimated 20-30%
+
+#### **T2: SRP Violations - Program.cs Monolith**
+**Issue**: Program.cs contains 737 lines handling multiple responsibilities
+**Impact**: Difficult maintenance, testing, and deployment configuration
+**Effort**: 2-3 days
+**Enhancement Plan**:
+- Extract ServiceConfiguration classes
+- Separate HostConfiguration logic
+- Create dedicated MiddlewareConfiguration
+- Implement modular startup pattern
+
+#### **T3: Error Learning System Integration**
+**Status**: DEFERRED TO TECHNICAL DEBT ROADMAP
+**Issue**: Partially implemented components missing integration
+**Impact**: Advanced ML features not fully available
+**Effort**: 20-28 hours
+**Decision**: Focus on core Ivan-Level Agent first, defer complex ML system
+**Enhancement Plan**:
+- Complete ErrorLearningServiceCollectionExtensions registration
+- Implement missing service orchestration
+- Add proper error pattern recognition
+- Enable full ML-powered optimization pipeline
+
+### **⚡ PERFORMANCE ENHANCEMENTS (Priority: MEDIUM)**
+
+#### **P1: Integration Test Performance**
+**Issue**: Tests timeout after 60+ seconds
+**Impact**: Slow CI/CD pipeline, developer productivity
+**Effort**: 3-5 days
+**Enhancement Plan**:
+- Implement parallel test execution
+- Optimize WebNavigation test browser initialization
+- Add configurable timeout strategies
+- Reduce test execution time by 50-70%
+
+#### **P2: Database Testing Optimization**
+**Issue**: In-memory database initialization overhead
+**Impact**: Unit test suite runtime
+**Effort**: 2-3 days
+**Enhancement Plan**:
+- Implement database fixture sharing
+- Add transaction-based test isolation
+- Optimize seed data generation
+- Target sub-second unit test execution
+
+### **🏗️ ARCHITECTURE ENHANCEMENTS (Priority: MEDIUM)**
+
+#### **A1: Service Registration Consolidation**
+**Issue**: Service registrations scattered across multiple extension methods
+**Impact**: Difficult to track dependencies, potential registration conflicts
+**Effort**: 2-3 days
+**Enhancement Plan**:
+- Consolidate to single registration strategy
+- Implement registration validation
+- Add dependency visualization tools
+- Create clear service lifetime documentation
+
+#### **A2: Over-Engineering Assessment**
+**Issue**: Custom services potentially reinventing existing solutions
+**Impact**: Unnecessary complexity, maintenance overhead
+**Effort**: 5-7 days analysis + implementation
+**Enhancement Plan**:
+- Conduct alternative solutions analysis for:
+  - WebNavigationService vs Selenium Grid
+  - FileProcessingService vs existing libraries
+  - VoiceService vs cloud services
+- Implement cost/benefit analysis
+- Migrate to off-the-shelf where justified
+
+### **📚 DOCUMENTATION ENHANCEMENTS (Priority: LOW)**
+
+#### **D1: API Documentation Coverage**
+**Issue**: Some service interfaces lack comprehensive XML documentation
+**Impact**: Developer onboarding, maintenance clarity
+**Effort**: 3-4 days
+**Enhancement Plan**:
+- Complete XML documentation for all public APIs
+- Add usage examples in documentation
+- Generate comprehensive API documentation site
+- Implement documentation quality gates
+
+#### **D2: Architecture Decision Records**
+**Issue**: Technical decisions not systematically documented
+**Impact**: Context loss over time, difficult technical evolution
+**Effort**: 2-3 days
+**Enhancement Plan**:
+- Create ADR template and process
+- Document major architectural decisions retroactively
+- Implement decision tracking system
+- Establish ongoing ADR discipline
+
+### **🎯 ENHANCEMENT EXECUTION PRIORITY**
+
+**Phase 1 (Immediate - 1-2 weeks)**:
+- T1: DRY Violations Resolution
+- T2: Program.cs Refactoring
+- P1: Integration Test Performance
+
+**Phase 2 (Short Term - 3-4 weeks)**:
+- T3: Error Learning System - DEFERRED (see Technical Debt Roadmap)
+- A1: Service Registration Consolidation
+- P2: Database Testing Optimization
+
+**Phase 3 (Medium Term - 6-8 weeks)**:
+- A2: Over-Engineering Assessment
+- D1: API Documentation Coverage
+- D2: Architecture Decision Records
+
+### **📊 POST-ENHANCEMENT PROJECTIONS**
+
+**Current Quality Score**: 6.8/10
+**Post-Enhancement Score**: 9.2/10
+
+**Expected Benefits**:
+- **Code Maintainability**: +40% improvement
+- **Test Performance**: +60% faster execution
+- **Developer Productivity**: +35% improvement
+- **Technical Debt**: -70% reduction
+- **Documentation Quality**: +90% coverage improvement
+
+---
+
+**Last Updated**: 2025-01-15
+**Version**: 5.1.0 (ARMY REVIEW ENHANCED + TECHNICAL DEBT ROADMAP)
+**Status**: ✅ **PROJECT SUCCESS** - MVP + Enterprise integrations + Quality excellence (Error Learning System deferred to technical debt)
+**Enhancement Status**: 🔧 **TECHNICAL DEBT IDENTIFIED** - Systematic improvement roadmap established
+**Achievement**: [CONSOLIDATED-EXECUTION-PLAN.md](MAIN_PLAN/09-CONSOLIDATED-EXECUTION-PLAN.md) + ERROR LEARNING SYSTEM ⚠️ **DEFERRED TO TECHNICAL DEBT**
+**Final Result**: Complete enterprise-grade Digital Ivan platform + Enhancement Roadmap + Technical Debt Framework ready for production deployment

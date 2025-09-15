@@ -3,7 +3,7 @@
 **⬅️ Back to:** [MAIN_PLAN.md](../MAIN_PLAN.md) - Central entry point for all plans
 
 **📋 Related Plans:**
-- [03-IVAN_LEVEL_COMPLETION_PLAN.md](03-IVAN_LEVEL_COMPLETION_PLAN.md) - Ivan level completion
+- [03-IVAN_LEVEL_COMPLETION_PLAN.md](03-IVAN_LEVEL_COMPLETION_PLAN.md) - SUPERSEDED BY THIS PLAN
 - [10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md](10-PHASE_1_IMMEDIATE_EXECUTION_TASKS.md) - Phase 1 tasks
 - [17-STRATEGIC-NEXT-STEPS-SUMMARY.md](17-STRATEGIC-NEXT-STEPS-SUMMARY.md) - Strategic next steps
 
@@ -29,8 +29,20 @@
 
 ## 📊 CONSOLIDATED STATE ANALYSIS
 
+### 📚 TECHNICAL DEBT ROADMAP
+
+#### Deferred Components (20-28 hours development)
+- **Error Learning System**: Advanced failure analysis and learning capabilities
+  - **Status**: DEFERRED - Technical Debt
+  - **Scope**: Comprehensive error pattern recognition, learning algorithms, failure prediction
+  - **Investment**: 20-28 hours development effort
+  - **Business Case**: Enhancement for future phases after core Ivan-Level Agent complete
+  - **Technical Notes**: Well-architected system already partially implemented, deferred due to complexity vs immediate ROI
+
+---
+
 ### ✅ CONFIRMED COMPLETED (Архивированы)
-- Phase 0: 89% - Enterprise platform с 116/116 тестами ✅
+- Phase 0: 89% - Enterprise platform foundation ✅
 - Clean Architecture: Repository pattern, DDD, SOLID ✅
 - Tool System: ToolRegistry + 5 ToolStrategies ✅
 - Agent Behavior: Mood analysis, context responses ✅
@@ -44,7 +56,7 @@
 
 **Immediate Actions:**
 - StyleCop compliance: 47→≤10 violations (30 mins)
-- Test coverage: Unit 81%→95%, Integration 0%→70% (4 weeks)
+- Test coverage: PENDING VALIDATION - current metrics require verification (4 weeks)
 - Code quality: SRP violations fix, file size reduction
 
 #### 2. MISSING IVAN-LEVEL TOOLS  
