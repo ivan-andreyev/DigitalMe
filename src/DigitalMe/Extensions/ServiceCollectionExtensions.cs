@@ -52,9 +52,8 @@ public static class ServiceCollectionExtensions
         // Resilience services
         services.AddSingleton<IResiliencePolicyService, ResiliencePolicyService>();
 
-        // Performance optimization services
-        services.AddSingleton<IPerformanceOptimizationService, PerformanceOptimizationService>();
-        services.AddMemoryCache(); // Required for response caching
+        // Performance optimization services moved to CleanArchitectureServiceCollectionExtensions
+        // services.AddMemoryCache(); // Already added in CleanArchitectureServiceCollectionExtensions
 
         // Security services
         services.AddScoped<ISecurityValidationService, SecurityValidationService>();
@@ -62,8 +61,7 @@ public static class ServiceCollectionExtensions
         // Health check services
         services.AddScoped<DigitalMe.Services.Monitoring.IHealthCheckService, DigitalMe.Services.Monitoring.HealthCheckService>();
 
-        // Performance metrics services
-        services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
+        // Performance metrics services moved to Program.cs for centralized monitoring setup
 
         // Ivan-Level capability services - Phase B Week 1
         services.AddScoped<DigitalMe.Services.FileProcessing.FileProcessingService>();

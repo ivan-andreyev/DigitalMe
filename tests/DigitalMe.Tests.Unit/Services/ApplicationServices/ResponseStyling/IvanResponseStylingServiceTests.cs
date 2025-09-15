@@ -34,8 +34,9 @@ public class IvanResponseStylingServiceTests
             .Returns<string, Func<Task<IvanVocabularyPreferences>>, TimeSpan?>((key, func, expiry) => func());
 
         _service = new IvanResponseStylingService(
-            _mockIvanPersonalityService.Object,
-            _mockCommunicationStyleAnalyzer.Object,
+            Mock.Of<IIvanVocabularyService>(),
+            Mock.Of<IIvanLinguisticPatternService>(),
+            Mock.Of<IIvanContextAnalyzer>(),
             _mockPerformanceOptimizationService.Object,
             _mockLogger.Object);
     }

@@ -31,6 +31,29 @@
 
 ### 📚 TECHNICAL DEBT ROADMAP
 
+#### ⚠️ MEDIUM-TERM ARCHITECTURAL IMPROVEMENTS (2-4 weeks)
+- **Error Handling Unification with Result<T> Pattern**:
+  - **Status**: MEDIUM-TERM - Architecture Enhancement
+  - **Scope**: Implement consistent Result<T> pattern across all services for better error handling
+  - **Investment**: 2-3 weeks development effort
+  - **Business Case**: Improved error handling consistency, better debugging, cleaner API responses
+  - **Technical Notes**: Replace try-catch patterns with Result<T>, implement in PersonalResponseStylingService first
+
+- **Interface Segregation for IPerformanceOptimizationService**:
+  - **Status**: MEDIUM-TERM - SOLID Compliance
+  - **Scope**: Split IPerformanceOptimizationService into focused interfaces following ISP
+  - **Investment**: 1-2 weeks development effort
+  - **Business Case**: Better testability, cleaner dependencies, improved maintainability
+  - **Technical Notes**: Create ICacheService, IRateLimitingService, IPerformanceMetricsService
+
+#### 🔮 LONG-TERM ARCHITECTURAL IMPROVEMENTS (1-2 months)
+- **Full Migration to ConfigureAwait(false)**:
+  - **Status**: LONG-TERM - Performance Optimization
+  - **Scope**: Systematic review and update of all async calls to use ConfigureAwait(false)
+  - **Investment**: 3-4 weeks development effort
+  - **Business Case**: Avoid deadlocks, improve performance in high-load scenarios
+  - **Technical Notes**: Requires thorough testing, affects all async methods across codebase
+
 #### Deferred Components (20-28 hours development)
 - **Error Learning System**: Advanced failure analysis and learning capabilities
   - **Status**: DEFERRED - Technical Debt

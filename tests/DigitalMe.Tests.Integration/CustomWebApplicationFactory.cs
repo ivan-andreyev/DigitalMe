@@ -215,7 +215,7 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                                   Id = Guid.NewGuid(),
                                   Name = "Ivan",
                                   Description = "Mock Ivan personality for testing",
-                                  PersonalityTraits = new List<PersonalityTrait>(),
+                                  Traits = new List<PersonalityTrait>(),
                                   CreatedAt = DateTime.UtcNow
                               };
                           });

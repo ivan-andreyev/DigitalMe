@@ -48,9 +48,25 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Ivan.IIvanPersonalityUseCase,
                           DigitalMe.Services.ApplicationServices.UseCases.Ivan.IvanPersonalityUseCase>();
 
-        // Ivan Response Styling Service
+        // Personal Response Styling Services - Generic and Reusable
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IPersonalVocabularyService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.PersonalVocabularyService>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IPersonalLinguisticPatternService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.PersonalLinguisticPatternService>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IPersonalContextAnalyzer,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.PersonalContextAnalyzer>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IPersonalResponseStylingService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.PersonalResponseStylingService>();
+
+        // Legacy Ivan Response Styling Services - Backward Compatibility
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyService>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanLinguisticPatternService>();
+        services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer,
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanContextAnalyzer>();
         services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService,
-                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingService>();
+                          DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingServiceRefactored>();
 
         // Performance Optimization Services
         services.AddSingleton<DigitalMe.Services.Optimization.IPerformanceOptimizationService,

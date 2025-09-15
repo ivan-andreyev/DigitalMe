@@ -247,6 +247,10 @@ public class ContextualCommunicationStyle
     public double TechnicalLanguageUsage { get; set; } = 0.5;
     public double EnergyLevel { get; set; } = 0.5;
     public string BasePersonality { get; set; } = ""; // Унификация с BasePersonalityName
+    public double PragmatismLevel { get; set; } = 0.5;
+    public double ConfidenceLevel { get; set; } = 0.5;
+    public double StructuredApproach { get; set; } = 0.5;
+    public double EmotionalTone { get; set; } = 0.5;
     public string StyleSummary { get; set; } = "";
 }
 
