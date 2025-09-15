@@ -2,6 +2,7 @@ using DigitalMe.Data.Entities;
 using DigitalMe.Services.ApplicationServices.ResponseStyling;
 using DigitalMe.Services.PersonalityEngine;
 using DigitalMe.Services;
+using DigitalMe.Services.Optimization;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -12,6 +13,7 @@ public class IvanResponseStylingServiceTests
 {
     private readonly Mock<IIvanPersonalityService> _mockIvanPersonalityService;
     private readonly Mock<ICommunicationStyleAnalyzer> _mockCommunicationStyleAnalyzer;
+    private readonly Mock<IPerformanceOptimizationService> _mockPerformanceOptimizationService;
     private readonly Mock<ILogger<IvanResponseStylingService>> _mockLogger;
     private readonly IvanResponseStylingService _service;
 
@@ -19,11 +21,22 @@ public class IvanResponseStylingServiceTests
     {
         _mockIvanPersonalityService = new Mock<IIvanPersonalityService>();
         _mockCommunicationStyleAnalyzer = new Mock<ICommunicationStyleAnalyzer>();
+        _mockPerformanceOptimizationService = new Mock<IPerformanceOptimizationService>();
         _mockLogger = new Mock<ILogger<IvanResponseStylingService>>();
+
+        // Setup performance optimization service to pass through by default
+        _mockPerformanceOptimizationService
+            .Setup(x => x.GetOrSetAsync<ContextualCommunicationStyle>(It.IsAny<string>(), It.IsAny<Func<Task<ContextualCommunicationStyle>>>(), It.IsAny<TimeSpan?>()))
+            .Returns<string, Func<Task<ContextualCommunicationStyle>>, TimeSpan?>((key, func, expiry) => func());
+
+        _mockPerformanceOptimizationService
+            .Setup(x => x.GetOrSetAsync<IvanVocabularyPreferences>(It.IsAny<string>(), It.IsAny<Func<Task<IvanVocabularyPreferences>>>(), It.IsAny<TimeSpan?>()))
+            .Returns<string, Func<Task<IvanVocabularyPreferences>>, TimeSpan?>((key, func, expiry) => func());
 
         _service = new IvanResponseStylingService(
             _mockIvanPersonalityService.Object,
             _mockCommunicationStyleAnalyzer.Object,
+            _mockPerformanceOptimizationService.Object,
             _mockLogger.Object);
     }
 

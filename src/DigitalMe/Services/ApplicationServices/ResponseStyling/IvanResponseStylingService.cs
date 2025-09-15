@@ -1,5 +1,6 @@
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.PersonalityEngine;
+using DigitalMe.Services.Optimization;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -63,6 +64,7 @@ public class IvanResponseStylingService : IIvanResponseStylingService
 {
     private readonly IIvanPersonalityService _ivanPersonalityService;
     private readonly ICommunicationStyleAnalyzer _communicationStyleAnalyzer;
+    private readonly IPerformanceOptimizationService _performanceOptimizationService;
     private readonly ILogger<IvanResponseStylingService> _logger;
 
     // Ivan's characteristic expressions by context
@@ -141,10 +143,12 @@ public class IvanResponseStylingService : IIvanResponseStylingService
     public IvanResponseStylingService(
         IIvanPersonalityService ivanPersonalityService,
         ICommunicationStyleAnalyzer communicationStyleAnalyzer,
+        IPerformanceOptimizationService performanceOptimizationService,
         ILogger<IvanResponseStylingService> logger)
     {
         _ivanPersonalityService = ivanPersonalityService;
         _communicationStyleAnalyzer = communicationStyleAnalyzer;
+        _performanceOptimizationService = performanceOptimizationService;
         _logger = logger;
     }
 
@@ -187,21 +191,28 @@ public class IvanResponseStylingService : IIvanResponseStylingService
     {
         _logger.LogDebug("Getting contextual communication style for {ContextType}", context.ContextType);
 
-        try
-        {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-            var style = _communicationStyleAnalyzer.DetermineOptimalCommunicationStyle(personality, context);
+        // Use caching for communication styles to improve performance
+        var cacheKey = $"communication_style_{context.ContextType}_{context.UrgencyLevel:F1}";
 
-            // Apply Ivan-specific adjustments
-            ApplyIvanStyleAdjustments(style, context);
-
-            return style;
-        }
-        catch (Exception ex)
+        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
         {
-            _logger.LogError(ex, "Failed to get contextual style, using default");
-            return CreateDefaultIvanStyle(context);
-        }
+            try
+            {
+                var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+                var style = _communicationStyleAnalyzer.DetermineOptimalCommunicationStyle(personality, context);
+
+                // Apply Ivan-specific adjustments
+                ApplyIvanStyleAdjustments(style, context);
+
+                _logger.LogDebug("Created and cached communication style for {ContextType}", context.ContextType);
+                return style;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get contextual style, using default");
+                return CreateDefaultIvanStyle(context);
+            }
+        }, TimeSpan.FromMinutes(30)); // Cache for 30 minutes
     }
 
     public string ApplyIvanLinguisticPatterns(string text, ContextualCommunicationStyle style)
@@ -242,18 +253,28 @@ public class IvanResponseStylingService : IIvanResponseStylingService
     {
         _logger.LogDebug("Getting vocabulary preferences for {ContextType} context", context.ContextType);
 
-        if (VocabularyByContext.TryGetValue(context.ContextType, out var preferences))
-        {
-            return preferences;
-        }
+        // Use caching for vocabulary preferences since they are relatively static
+        var cacheKey = $"vocabulary_preferences_{context.ContextType}";
 
-        // Default vocabulary for unknown contexts
-        return new IvanVocabularyPreferences
+        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
         {
-            SignatureExpressions = new List<string> { "Let me think about this systematically" },
-            DecisionMakingLanguage = "I need to weigh the key factors here...",
-            SelfReferenceStyle = "From my experience"
-        };
+            await Task.CompletedTask; // Make it async to match the signature
+
+            if (VocabularyByContext.TryGetValue(context.ContextType, out var preferences))
+            {
+                _logger.LogDebug("Retrieved vocabulary preferences from static data for {ContextType}", context.ContextType);
+                return preferences;
+            }
+
+            // Default vocabulary for unknown contexts
+            _logger.LogDebug("Using default vocabulary preferences for unknown context {ContextType}", context.ContextType);
+            return new IvanVocabularyPreferences
+            {
+                SignatureExpressions = new List<string> { "Let me think about this systematically" },
+                DecisionMakingLanguage = "I need to weigh the key factors here...",
+                SelfReferenceStyle = "From my experience"
+            };
+        }, TimeSpan.FromHours(2)); // Cache for 2 hours - vocabulary preferences are very stable
     }
 
     private void ApplyIvanStyleAdjustments(ContextualCommunicationStyle style, SituationalContext context)

@@ -187,7 +187,7 @@ builder.Services.AddScoped<DigitalMe.Services.Database.IDatabaseMigrationService
                            DigitalMe.Services.Database.DatabaseMigrationService>();
 
 // Configure Security settings
-builder.Services.Configure<DigitalMe.Services.Security.SecuritySettings>(
+builder.Services.Configure<DigitalMe.Configuration.SecuritySettings>(
     builder.Configuration.GetSection("Security"));
 
 // Configure JWT settings

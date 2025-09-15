@@ -72,16 +72,3 @@ public class SecurityValidationResult
     }
 }
 
-/// <summary>
-/// Security configuration settings
-/// </summary>
-public class SecuritySettings
-{
-    public int MaxPayloadSizeBytes { get; set; } = 1024 * 1024; // 1MB
-    public int RateLimitRequestsPerMinute { get; set; } = 100;
-    public int JwtTokenExpiryMinutes { get; set; } = 60;
-    public bool EnableInputSanitization { get; set; } = true;
-    public bool EnableRateLimiting { get; set; } = true;
-    public List<string> AllowedOrigins { get; set; } = new() { "localhost" };
-    public List<string> BlockedIpRanges { get; set; } = new();
-}

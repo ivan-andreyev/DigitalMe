@@ -1,4 +1,5 @@
 using System.Text;
+using DigitalMe.Configuration;
 using DigitalMe.Services.Security;
 using Microsoft.Extensions.Options;
 

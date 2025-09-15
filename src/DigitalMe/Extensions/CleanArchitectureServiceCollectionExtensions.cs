@@ -52,6 +52,15 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService,
                           DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingService>();
 
+        // Performance Optimization Services
+        services.AddSingleton<DigitalMe.Services.Optimization.IPerformanceOptimizationService,
+                           DigitalMe.Services.Optimization.PerformanceOptimizationService>();
+        services.AddMemoryCache(); // Add memory cache support
+
+        // Security Services
+        services.AddScoped<DigitalMe.Services.Security.ISecurityValidationService,
+                          DigitalMe.Services.Security.SecurityValidationService>();
+
         // Configuration Service
         services.AddSingleton<IPersonalityConfigurationService, PersonalityConfigurationService>();
 

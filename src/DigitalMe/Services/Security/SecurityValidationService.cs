@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using DigitalMe.Configuration;
-using DigitalMe.Services.Performance;
+using DigitalMe.Services.Optimization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -88,8 +88,11 @@ public class SecurityValidationService : ISecurityValidationService
 
     public string SanitizeInput(string input)
     {
-        if (string.IsNullOrWhiteSpace(input))
+        if (string.IsNullOrEmpty(input))
             return input;
+
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
 
         try
         {
@@ -130,8 +133,8 @@ public class SecurityValidationService : ISecurityValidationService
         if (string.IsNullOrWhiteSpace(apiKey))
             return false;
 
-        // API key should be at least 32 characters and contain alphanumeric + allowed special chars
-        if (apiKey.Length < 32)
+        // API key should be at least MinimumApiKeyLength characters and contain alphanumeric + allowed special chars
+        if (apiKey.Length < MinimumApiKeyLength)
             return false;
 
         // Check for reasonable API key pattern (no whitespace, reasonable characters)
@@ -139,37 +142,33 @@ public class SecurityValidationService : ISecurityValidationService
         return apiKeyPattern.IsMatch(apiKey);
     }
 
-    public async Task<bool> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = 1048576)
+    private const int MinimumApiKeyLength = 32;
+
+    public async Task<bool> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = DefaultMaxPayloadSize)
     {
+        if (string.IsNullOrEmpty(payload))
+        {
+            _logger.LogWarning("Empty webhook payload received");
+            return false;
+        }
+
+        var payloadBytes = Encoding.UTF8.GetByteCount(payload);
+        if (payloadBytes > maxSizeBytes)
+        {
+            _logger.LogWarning("Webhook payload too large: {Size} bytes (max: {MaxSize})",
+                payloadBytes, maxSizeBytes);
+            return false;
+        }
+
         try
         {
-            if (string.IsNullOrEmpty(payload))
-            {
-                _logger.LogWarning("Empty webhook payload received");
-                return false;
-            }
-
-            // Check payload size
-            var payloadBytes = Encoding.UTF8.GetByteCount(payload);
-            if (payloadBytes > maxSizeBytes)
-            {
-                _logger.LogWarning("Webhook payload too large: {Size} bytes (max: {MaxSize})",
-                    payloadBytes, maxSizeBytes);
-                return false;
-            }
-
-            // Try to parse as JSON to ensure it's valid
-            try
-            {
-                JsonDocument.Parse(payload);
-            }
-            catch (JsonException)
-            {
-                _logger.LogWarning("Invalid JSON in webhook payload");
-                return false;
-            }
-
+            JsonDocument.Parse(payload);
             return true;
+        }
+        catch (JsonException)
+        {
+            _logger.LogWarning("Invalid JSON in webhook payload");
+            return false;
         }
         catch (Exception ex)
         {
@@ -177,6 +176,8 @@ public class SecurityValidationService : ISecurityValidationService
             return false;
         }
     }
+
+    private const int DefaultMaxPayloadSize = 1048576; // 1MB
 
     public async Task<bool> IsRateLimitExceededAsync(string clientIdentifier, string endpoint)
     {
