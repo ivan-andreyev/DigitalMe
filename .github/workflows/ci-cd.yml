@@ -68,18 +68,19 @@ jobs:
         dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
         dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
-    - name: 🎭 Install Playwright CLI and Browsers
-      run: |
-        dotnet tool install --global Microsoft.Playwright.CLI
-        playwright install chromium --with-deps
-
     - name: 🔍 Build Projects (excluding MAUI)
       run: |
         echo "Building projects with warnings suppressed..."
         dotnet build src/DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
-        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal  
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
+
+    - name: 🎭 Install Playwright Browsers
+      run: |
+        cd src/DigitalMe
+        dotnet tool install --global Microsoft.Playwright.CLI
+        $HOME/.dotnet/tools/playwright install chromium --with-deps
 
     - name: 🧪 Run Unit Tests
       run: |
