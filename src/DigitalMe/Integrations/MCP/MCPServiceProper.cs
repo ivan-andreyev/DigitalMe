@@ -97,8 +97,10 @@ public class McpServiceProper : IMcpService
         try
         {
             // Get Ivan's personality for system prompt
-            var ivanPersonality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-            var systemPrompt = _ivanPersonalityService.GenerateSystemPrompt(ivanPersonality);
+            var ivanPersonalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var systemPrompt = ivanPersonalityResult.IsSuccess
+                ? _ivanPersonalityService.GenerateSystemPrompt(ivanPersonalityResult.Value).Value ?? "System prompt unavailable"
+                : "Error loading personality profile";
 
             // Prepare MCP request for conversation
             var request = new McpRequest
@@ -233,7 +235,8 @@ public class McpServiceProper : IMcpService
 
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityContext context)
     {
-        var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfile = ivanProfileResult.IsSuccess ? ivanProfileResult.Value : null;
 
         var responses = new[]
         {

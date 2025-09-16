@@ -4,6 +4,7 @@ using DigitalMe.Data;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 namespace DigitalMe.Tests.Integration;
@@ -29,6 +30,31 @@ public class MvpIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                 services.AddDbContext<DigitalMeDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("TestDb");
+                });
+
+                // Mock IPerformanceOptimizationService for SecurityValidationService
+                var performanceServiceDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.Optimization.IPerformanceOptimizationService)).ToList();
+                foreach (var performanceDescriptor in performanceServiceDescriptors)
+                    services.Remove(performanceDescriptor);
+
+                services.AddScoped<DigitalMe.Services.Optimization.IPerformanceOptimizationService>(provider =>
+                {
+                    var mockService = new Mock<DigitalMe.Services.Optimization.IPerformanceOptimizationService>();
+                    mockService.Setup(x => x.ShouldRateLimitAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+                              .ReturnsAsync(false);
+                    return mockService.Object;
+                });
+
+                // Mock IIvanLevelHealthCheckService for HealthCheckUseCase
+                var healthCheckServiceDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.IIvanLevelHealthCheckService)).ToList();
+                foreach (var healthCheckDescriptor in healthCheckServiceDescriptors)
+                    services.Remove(healthCheckDescriptor);
+
+                services.AddScoped<DigitalMe.Services.IIvanLevelHealthCheckService>(provider =>
+                {
+                    var mockService = new Mock<DigitalMe.Services.IIvanLevelHealthCheckService>();
+                    // Mock the legacy interface method if it exists
+                    return mockService.Object;
                 });
             });
         });

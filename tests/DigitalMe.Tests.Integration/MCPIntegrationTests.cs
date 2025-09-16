@@ -42,12 +42,12 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var mcpService = scope.ServiceProvider.GetRequiredService<IMcpService>();
-        var ivanPersonalityService = scope.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanPersonalityService = scope.ServiceProvider.GetRequiredService<IPersonalityService>();
         
-        var personality = await ivanPersonalityService.GetIvanPersonalityAsync();
+        var personality = await ivanPersonalityService.GetPersonalityAsync();
         var context = new PersonalityContext
         {
-            Profile = personality,
+            Profile = personality.Value,
             RecentMessages = new List<Message>(),
             CurrentState = new Dictionary<string, object>
             {
@@ -129,8 +129,8 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
         agentResult.AgentResponse.Content.Should().NotBeNullOrEmpty("should have agent response content");
         agentResult.AgentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
         
-        // Should contain Ivan's structured approach
-        agentResult.AgentResponse.Content.Should().Contain("структурно", "should mention structured approach");
+        // Should contain Ivan's personal approach
+        agentResult.AgentResponse.Content.Should().Contain("figuring this out", "should mention Ivan's personal honesty");
     }
 
     public ValueTask DisposeAsync()
@@ -139,3 +139,4 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
         return ValueTask.CompletedTask;
     }
 }
+

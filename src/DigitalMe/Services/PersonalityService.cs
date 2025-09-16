@@ -5,44 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services;
 
-/// <summary>
-/// Сервис для работы с профилем личности.
-/// Обеспечивает загрузку данных личности и генерацию системных промптов для LLM.
-/// </summary>
-public interface IPersonalityService
-{
-    /// <summary>
-    /// Асинхронно загружает профиль личности.
-    /// </summary>
-    /// <returns>Result containing PersonalityProfile с данными личности or error details</returns>
-    Task<Result<PersonalityProfile>> GetPersonalityAsync();
-
-    /// <summary>
-    /// Генерирует системный промпт для LLM на основе профиля личности.
-    /// </summary>
-    /// <param name="personality">Профиль личности для генерации промпта</param>
-    /// <returns>Result containing системный промпт в виде строки or error details</returns>
-    Result<string> GenerateSystemPrompt(PersonalityProfile personality);
-
-    /// <summary>
-    /// Генерирует расширенный системный промпт с интеграцией реальных данных профиля.
-    /// </summary>
-    /// <returns>Result containing улучшенный системный промпт с данными из файла профиля or error details</returns>
-    Task<Result<string>> GenerateEnhancedSystemPromptAsync();
-}
-
-/// <summary>
-/// Legacy alias for IPersonalityService for backward compatibility.
-/// </summary>
-[Obsolete("Use IPersonalityService instead", false)]
-public interface IIvanPersonalityService : IPersonalityService
-{
-    /// <summary>
-    /// Legacy method name - use GetPersonalityAsync() instead.
-    /// </summary>
-    [Obsolete("Use GetPersonalityAsync() instead", false)]
-    Task<Result<PersonalityProfile>> GetIvanPersonalityAsync() => GetPersonalityAsync();
-}
 
 /// <summary>
 /// Реализация сервиса для работы с профилем личности.
@@ -219,5 +181,62 @@ When responding as Ivan:
 Respond as Ivan would - with analytical precision, technical expertise, family-conscious decision making, and the pragmatic confidence of someone who has rapidly advanced their career while managing significant life transitions.
 """;
         }, "Error generating enhanced system prompt");
+    }
+
+    // Legacy database-oriented interface methods for backward compatibility
+    async Task<PersonalityProfile?> IPersonalityService.GetPersonalityAsync(string name)
+    {
+        // For legacy compatibility, if requesting Ivan, return from the Result<T> version
+        if (name.Equals("Ivan", StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Ivan Digital Clone", StringComparison.OrdinalIgnoreCase))
+        {
+            var result = await GetPersonalityAsync(); // Call the Result<T> version
+            return result.IsSuccess ? result.Value : null;
+        }
+
+        _logger.LogWarning("Requested personality '{Name}' not supported in current implementation", name);
+        return null;
+    }
+
+    Task<PersonalityProfile> IPersonalityService.CreatePersonalityAsync(string name, string description)
+    {
+        throw new NotImplementedException("Creating personalities not supported in current implementation");
+    }
+
+    Task<PersonalityProfile> IPersonalityService.UpdatePersonalityAsync(Guid id, string description)
+    {
+        throw new NotImplementedException("Updating personalities not supported in current implementation");
+    }
+
+    async Task<string> IPersonalityService.GenerateSystemPromptAsync(Guid personalityId)
+    {
+        // For legacy compatibility, always generate enhanced system prompt regardless of ID
+        var result = await GenerateEnhancedSystemPromptAsync();
+        return result.IsSuccess ? result.Value : "Error generating system prompt";
+    }
+
+    async Task<string> IPersonalityService.GenerateIvanSystemPromptAsync()
+    {
+        var result = await GenerateEnhancedSystemPromptAsync();
+        return result.IsSuccess ? result.Value : "Error generating Ivan system prompt";
+    }
+
+    Task<PersonalityTrait> IPersonalityService.AddTraitAsync(Guid personalityId, string category, string name, string description, double weight = 1.0)
+    {
+        throw new NotImplementedException("Adding traits not supported in current implementation");
+    }
+
+    async Task<IEnumerable<PersonalityTrait>> IPersonalityService.GetPersonalityTraitsAsync(Guid personalityId)
+    {
+        // For legacy compatibility, return traits from current personality profile
+        var result = await GetPersonalityAsync();
+        return result.IsSuccess && result.Value?.Traits != null
+            ? result.Value.Traits
+            : new List<PersonalityTrait>();
+    }
+
+    Task<bool> IPersonalityService.DeletePersonalityAsync(Guid id)
+    {
+        throw new NotImplementedException("Deleting personalities not supported in current implementation");
     }
 }

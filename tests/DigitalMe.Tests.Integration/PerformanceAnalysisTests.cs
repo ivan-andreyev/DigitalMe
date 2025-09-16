@@ -72,7 +72,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
     public async Task IvanPersonality_Performance_ShouldGeneratePromptsQuickly()
     {
         // Arrange
-        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IPersonalityService>();
         var stopwatch = new Stopwatch();
         var iterations = 50;
 
@@ -81,14 +81,14 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
 
         for (int i = 0; i < iterations; i++)
         {
-            var personality = await ivanService.GetIvanPersonalityAsync();
-            var systemPrompt = ivanService.GenerateSystemPrompt(personality);
+            var personality = await ivanService.GetPersonalityAsync();
+            var systemPrompt = ivanService.GenerateSystemPrompt(personality.Value);
             var enhancedPrompt = await ivanService.GenerateEnhancedSystemPromptAsync();
 
             // Verify quality
             Assert.NotNull(personality);
-            Assert.NotEmpty(systemPrompt);
-            Assert.NotEmpty(enhancedPrompt);
+            Assert.NotEmpty(systemPrompt.Value);
+            Assert.NotEmpty(enhancedPrompt.Value);
         }
 
         stopwatch.Stop();
@@ -153,7 +153,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
         var iterations = 1000;
         var serviceTypes = new[]
         {
-            typeof(IIvanPersonalityService),
+            typeof(IPersonalityService),
             typeof(IIvanResponseStylingService),
             typeof(IFileProcessingService),
             typeof(IProfileDataParser)
@@ -185,7 +185,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
         // Arrange
         var initialMemory = GC.GetTotalMemory(true);
         var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
-        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IPersonalityService>();
 
         var testText = "Memory usage test for Ivan-Level Agent system performance analysis and optimization.";
         var context = new SituationalContext { ContextType = ContextType.Technical, UrgencyLevel = 0.5 };
@@ -197,7 +197,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
         {
             tasks.Add(Task.Run(async () =>
             {
-                var personality = await ivanService.GetIvanPersonalityAsync();
+                var personality = await ivanService.GetPersonalityAsync();
                 var styledText = await responseStylingService.StyleResponseAsync(testText, context);
                 var vocabularyPrefs = await responseStylingService.GetVocabularyPreferencesAsync(context);
 
@@ -225,7 +225,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
     public async Task EndToEnd_Performance_ShouldHandleComplexWorkflowEfficiently()
     {
         // Arrange - Complex Ivan-Level workflow simulation
-        var ivanService = _fixture.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanService = _fixture.ServiceProvider.GetRequiredService<IPersonalityService>();
         var responseStylingService = _fixture.ServiceProvider.GetRequiredService<IIvanResponseStylingService>();
         var fileService = _fixture.ServiceProvider.GetRequiredService<IFileProcessingService>();
 
@@ -238,7 +238,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
         for (int i = 0; i < iterations; i++)
         {
             // Step 1: Get Ivan personality
-            var personality = await ivanService.GetIvanPersonalityAsync();
+            var personality = await ivanService.GetPersonalityAsync();
 
             // Step 2: Generate enhanced system prompt
             var enhancedPrompt = await ivanService.GenerateEnhancedSystemPromptAsync();
@@ -269,7 +269,7 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
 
                 // Verify workflow completed successfully
                 Assert.NotNull(personality);
-                Assert.NotEmpty(enhancedPrompt);
+                Assert.NotEmpty(enhancedPrompt.Value);
                 Assert.Equal(3, styledResponses.Count);
                 Assert.NotEmpty(extractedText);
             }
@@ -288,3 +288,4 @@ public class PerformanceAnalysisTests : IClassFixture<ServiceIntegrationTestFixt
         Assert.True(stopwatch.ElapsedMilliseconds < 8000, $"Total workflow time should be <8s, but was {stopwatch.ElapsedMilliseconds}ms");
     }
 }
+

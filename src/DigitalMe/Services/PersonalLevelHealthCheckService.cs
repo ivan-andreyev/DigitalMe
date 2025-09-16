@@ -32,7 +32,7 @@ public interface IPersonalLevelHealthCheckService
 /// <summary>
 /// Implementation of Ivan-Level health check service.
 /// </summary>
-public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService
+public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService, IIvanLevelHealthCheckService
 {
     private readonly IFileProcessingService _fileProcessingService;
     private readonly IWebNavigationService _webNavigationService;

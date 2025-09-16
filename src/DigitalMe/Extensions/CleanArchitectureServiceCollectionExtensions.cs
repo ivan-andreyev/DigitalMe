@@ -40,19 +40,19 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<IPersonalLevelWorkflowService, PersonalLevelWorkflowService>();
         // Legacy compatibility
         services.AddScoped<IIvanLevelWorkflowService>(provider =>
-            provider.GetService<IPersonalLevelWorkflowService>()!);
+            (IIvanLevelWorkflowService)provider.GetService<IPersonalLevelWorkflowService>()!);
 
         // Personality Engine Services - SOLID Refactored Architecture
         services.AddScoped<DigitalMe.Services.IPersonalityService, DigitalMe.Services.PersonalityService>();
         // Legacy compatibility
         services.AddScoped<DigitalMe.Services.IIvanPersonalityService>(provider =>
-            provider.GetService<DigitalMe.Services.IPersonalityService>()!);
+            (DigitalMe.Services.IIvanPersonalityService)provider.GetService<DigitalMe.Services.IPersonalityService>()!);
         services.AddScoped<DigitalMe.Services.IPersonalityBehaviorMapper, DigitalMe.Services.PersonalityBehaviorMapper>();
         services.AddScoped<DigitalMe.Services.IProfileDataParser, DigitalMe.Services.ProfileDataParser>();
 
-        // Ivan-Specific Use Cases and Integration
-        services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Ivan.IIvanPersonalityUseCase,
-                          DigitalMe.Services.ApplicationServices.UseCases.Ivan.IvanPersonalityUseCase>();
+        // Ivan-Specific Use Cases and Integration - TODO: Create these classes
+        // services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Ivan.IIvanPersonalityUseCase,
+        //                   DigitalMe.Services.ApplicationServices.UseCases.Ivan.IvanPersonalityUseCase>();
 
         // Personal Response Styling Services - Generic and Reusable
         services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IPersonalVocabularyService,

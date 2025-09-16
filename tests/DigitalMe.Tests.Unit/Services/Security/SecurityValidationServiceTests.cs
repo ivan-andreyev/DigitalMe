@@ -60,9 +60,9 @@ public class SecurityValidationServiceTests
         var result = _service.SanitizeInput(maliciousInput);
 
         // Assert
-        result.Should().NotContain("<script>");
-        result.Should().NotContain("alert");
-        result.Should().Contain("Hello World");
+        result.Value.Should().NotContain("<script>");
+        result.Value.Should().NotContain("alert");
+        result.Value.Should().Contain("Hello World");
     }
 
     [Fact]
@@ -75,9 +75,9 @@ public class SecurityValidationServiceTests
         var result = _service.SanitizeInput(maliciousInput);
 
         // Assert
-        result.Should().NotContain("onclick");
+        result.Value.Should().NotContain("onclick");
         // Note: alert is HTML-encoded, not removed completely
-        result.Should().Contain("&#x27");
+        result.Value.Should().Contain("&#x27");
     }
 
     [Fact]
@@ -90,18 +90,18 @@ public class SecurityValidationServiceTests
         var result = _service.SanitizeInput(input);
 
         // Assert
-        result.Should().Contain("&ltdiv&gt");
-        result.Should().Contain("&quotquoted&quot");
-        result.Should().NotContain("<div>");
+        result.Value.Should().Contain("&ltdiv&gt");
+        result.Value.Should().Contain("&quotquoted&quot");
+        result.Value.Should().NotContain("<div>");
     }
 
     [Fact]
     public void SanitizeInput_ShouldHandleNullOrEmpty()
     {
         // Act & Assert
-        _service.SanitizeInput(null!).Should().BeNull();
-        _service.SanitizeInput("").Should().Be("");
-        _service.SanitizeInput("   ").Should().Be("");
+        _service.SanitizeInput(null!).Value.Should().BeNull();
+        _service.SanitizeInput("").Value.Should().Be("");
+        _service.SanitizeInput("   ").Value.Should().Be("");
     }
 
     [Theory]
@@ -117,7 +117,7 @@ public class SecurityValidationServiceTests
         var result = _service.ValidateApiKeyFormat(apiKey);
 
         // Assert
-        result.Should().Be(expected);
+        result.Value.Should().Be(expected);
     }
 
     [Fact]
@@ -129,9 +129,9 @@ public class SecurityValidationServiceTests
         var emptyPayload = "";
 
         // Act & Assert
-        (await _service.ValidateWebhookPayloadAsync(validPayload)).Should().BeTrue();
-        (await _service.ValidateWebhookPayloadAsync(invalidPayload)).Should().BeFalse();
-        (await _service.ValidateWebhookPayloadAsync(emptyPayload)).Should().BeFalse();
+        (await _service.ValidateWebhookPayloadAsync(validPayload)).Value.Should().BeTrue();
+        (await _service.ValidateWebhookPayloadAsync(invalidPayload)).Value.Should().BeFalse();
+        (await _service.ValidateWebhookPayloadAsync(emptyPayload)).Value.Should().BeFalse();
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class SecurityValidationServiceTests
         var result = await _service.ValidateWebhookPayloadAsync($"{{\"data\": \"{largePayload}\"}}", maxSize);
 
         // Assert
-        result.Should().BeFalse();
+        result.Value.Should().BeFalse();
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class SecurityValidationServiceTests
         var result = await _service.IsRateLimitExceededAsync(clientId, endpoint);
 
         // Assert
-        result.Should().BeTrue();
+        result.Value.Should().BeTrue();
         _performanceMock.Verify(x => x.ShouldRateLimitAsync("security", $"{clientId}:{endpoint}", 100), Times.Once);
     }
 
@@ -181,7 +181,7 @@ public class SecurityValidationServiceTests
         var result = await service.IsRateLimitExceededAsync("client", "endpoint");
 
         // Assert
-        result.Should().BeFalse();
+        result.Value.Should().BeFalse();
     }
 
     [Fact]
@@ -196,15 +196,15 @@ public class SecurityValidationServiceTests
         // Assert - Data annotation validation should catch the missing required field
         // If EnableInputSanitization is true, we get sanitized data back even if validation fails
         // We need to check if the service properly validates required fields
-        if (result.IsValid)
+        if (result.IsSuccess)
         {
             // If valid, it means sanitization was enabled and worked
-            result.SanitizedData.Should().NotBeNull();
+            result.Value.SanitizedData.Should().NotBeNull();
         }
         else
         {
             // If invalid, errors should be present
-            result.Errors.Should().HaveCountGreaterThan(0);
+            result.Error.Should().NotBeEmpty();
         }
     }
 
@@ -218,8 +218,8 @@ public class SecurityValidationServiceTests
         var result = await _service.ValidateRequestAsync(request);
 
         // Assert
-        result.IsValid.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
+        result.IsSuccess.Should().BeTrue();
+        result.Error.Should().BeEmpty();
     }
 
     [Fact]
@@ -232,8 +232,8 @@ public class SecurityValidationServiceTests
         var result = await _service.ValidateJwtTokenAsync(invalidToken);
 
         // Assert
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().NotBeEmpty();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeEmpty();
     }
 
     [Fact]
@@ -243,8 +243,8 @@ public class SecurityValidationServiceTests
         var result = await _service.ValidateJwtTokenAsync("");
 
         // Assert
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain("Missing JWT token");
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain("Missing JWT token");
     }
 
     [Fact]
@@ -264,8 +264,11 @@ public class SecurityValidationServiceTests
         // Act
         var result = service.SanitizeResponse(response);
 
-        // Assert
-        result.Should().BeSameAs(response);
+        // Assert - since EnableInputSanitization = false, should return original response unchanged
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal("<script>alert('xss')</script>", result.Value!.Message);
+        Assert.True(ReferenceEquals(result.Value, response), "Should return the same object reference when sanitization is disabled");
     }
 
     private class TestRequest

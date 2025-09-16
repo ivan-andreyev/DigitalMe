@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Integrations.MCP;
 using DigitalMe.Services;
@@ -16,20 +17,20 @@ public class AnthropicServiceTests
 {
     private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
     private readonly Mock<ILogger<AnthropicServiceSimple>> _mockLogger;
-    private readonly Mock<IIvanPersonalityService> _mockPersonalityService;
+    private readonly Mock<IPersonalityService> _mockPersonalityService;
     private readonly AnthropicServiceSimple _service;
 
     public AnthropicServiceTests()
     {
         this._mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         this._mockLogger = new Mock<ILogger<AnthropicServiceSimple>>();
-        this._mockPersonalityService = new Mock<IIvanPersonalityService>();
+        this._mockPersonalityService = new Mock<IPersonalityService>();
 
         // Setup mock to return test personality data
         var testPersonality = CreateTestPersonality();
         this._mockPersonalityService
-            .Setup(x => x.GetIvanPersonalityAsync())
-            .ReturnsAsync(testPersonality);
+            .Setup(x => x.GetPersonalityAsync())
+            .ReturnsAsync(Result<PersonalityProfile>.Success(testPersonality));
         this._mockPersonalityService
             .Setup(x => x.GenerateSystemPrompt(It.IsAny<PersonalityProfile>()))
             .Returns("You are Ivan, a Direct and Technical expert with analytical approach to problem-solving.");

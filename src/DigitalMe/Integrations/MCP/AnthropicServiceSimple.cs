@@ -162,17 +162,29 @@ public class AnthropicServiceSimple : IAnthropicService
     private async Task<string> GenerateSystemPromptAsync(PersonalityProfile? personality)
     {
         // Always use Ivan's real personality data
-        var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
-        var systemPrompt = _ivanPersonalityService.GenerateSystemPrompt(ivanProfile);
+        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        if (!ivanProfileResult.IsSuccess)
+        {
+            _logger.LogWarning("Failed to get Ivan's personality: {Error}", ivanProfileResult.Error);
+            return "Error generating system prompt";
+        }
 
-        _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfile.Traits?.Count ?? 0);
-        return systemPrompt;
+        var systemPromptResult = _ivanPersonalityService.GenerateSystemPrompt(ivanProfileResult.Value);
+        if (!systemPromptResult.IsSuccess)
+        {
+            _logger.LogWarning("Failed to generate system prompt: {Error}", systemPromptResult.Error);
+            return "Error generating system prompt";
+        }
+
+        _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfileResult.Value?.Traits?.Count ?? 0);
+        return systemPromptResult.Value;
     }
 
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityProfile? personality)
     {
         // Use Ivan's personality even in fallback responses
-        var ivanProfile = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfile = ivanProfileResult.IsSuccess ? ivanProfileResult.Value : null;
 
         // Use a consistent fallback response that contains all expected keywords for tests
         var response = "Проблема с подключением к Claude API. Сейчас работаю в fallback режиме, но это не то же самое что полный доступ к Claude. Настрой API как положено - я же Head of R&D, должен все работать правильно.";

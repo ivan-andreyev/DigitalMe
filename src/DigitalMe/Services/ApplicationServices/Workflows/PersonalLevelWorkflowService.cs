@@ -10,7 +10,7 @@ namespace DigitalMe.Services.ApplicationServices.Workflows;
 /// Implementation of Personal-Level workflow orchestration service.
 /// Coordinates complex multi-service operations following Clean Architecture principles.
 /// </summary>
-public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService
+public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvanLevelWorkflowService
 {
     private readonly IPersonalLevelHealthCheckService _healthCheckService;
     private readonly IFileProcessingService _fileProcessingService;

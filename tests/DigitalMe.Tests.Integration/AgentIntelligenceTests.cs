@@ -31,13 +31,13 @@ public class AgentIntelligenceTests : IClassFixture<CustomWebApplicationFactory<
         // Arrange - Test the Anthropic integration directly
         using var scope = _factory.Services.CreateScope();
         var anthropicService = scope.ServiceProvider.GetRequiredService<DigitalMe.Integrations.MCP.IAnthropicService>();
-        var ivanPersonalityService = scope.ServiceProvider.GetRequiredService<IIvanPersonalityService>();
+        var ivanPersonalityService = scope.ServiceProvider.GetRequiredService<IPersonalityService>();
         
-        var personality = await ivanPersonalityService.GetIvanPersonalityAsync();
+        var personality = await ivanPersonalityService.GetPersonalityAsync();
         personality.Should().NotBeNull("Ivan personality should exist");
         
         // Act - Test Anthropic service directly
-        var response = await anthropicService.SendMessageAsync("test", personality);
+        var response = await anthropicService.SendMessageAsync("test", personality.Value);
 
         // Assert - This should work after fixing P0
         response.Should().NotBeNullOrEmpty("Anthropic should return response");
@@ -97,3 +97,4 @@ public class AgentIntelligenceTests : IClassFixture<CustomWebApplicationFactory<
         }
     }
 }
+

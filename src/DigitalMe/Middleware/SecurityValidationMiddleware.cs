@@ -49,7 +49,8 @@ public class SecurityValidationMiddleware
             var clientId = GetClientIdentifier(context);
             var endpoint = $"{context.Request.Method}:{context.Request.Path}";
 
-            if (await securityService.IsRateLimitExceededAsync(clientId, endpoint))
+            var rateLimitResult = await securityService.IsRateLimitExceededAsync(clientId, endpoint);
+            if (rateLimitResult.IsSuccess && rateLimitResult.Value)
             {
                 _logger.LogWarning("Rate limit exceeded for {ClientId} on {Endpoint}", clientId, endpoint);
                 context.Response.StatusCode = 429; // Too Many Requests
@@ -62,7 +63,8 @@ public class SecurityValidationMiddleware
             {
                 var payload = await ReadRequestBodyAsync(context.Request);
 
-                if (!await securityService.ValidateWebhookPayloadAsync(payload, _securitySettings.MaxPayloadSizeBytes))
+                var payloadValidation = await securityService.ValidateWebhookPayloadAsync(payload, _securitySettings.MaxPayloadSizeBytes);
+                if (!payloadValidation.IsSuccess || !payloadValidation.Value)
                 {
                     _logger.LogWarning("Invalid webhook payload from {RemoteIp}", context.Connection.RemoteIpAddress);
                     context.Response.StatusCode = 400; // Bad Request
@@ -87,7 +89,7 @@ public class SecurityValidationMiddleware
                 }
 
                 var tokenValidation = await securityService.ValidateJwtTokenAsync(authHeader);
-                if (!tokenValidation.IsValid)
+                if (!tokenValidation.IsSuccess)
                 {
                     context.Response.StatusCode = 401; // Unauthorized
                     await context.Response.WriteAsync("Invalid token");
@@ -95,7 +97,7 @@ public class SecurityValidationMiddleware
                 }
 
                 // Add claims to context
-                foreach (var claim in tokenValidation.Claims)
+                foreach (var claim in tokenValidation.Value.Claims)
                 {
                     context.Items[$"claim:{claim.Key}"] = claim.Value;
                 }

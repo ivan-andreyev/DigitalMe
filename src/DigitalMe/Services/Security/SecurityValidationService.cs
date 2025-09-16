@@ -135,63 +135,55 @@ public class SecurityValidationService : ISecurityValidationService
 
     public async Task<Result<bool>> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = DefaultMaxPayloadSize)
     {
-        if (string.IsNullOrEmpty(payload))
+        return await ResultExtensions.TryAsync(async () =>
         {
-            _logger.LogWarning("Empty webhook payload received");
-            return false;
-        }
+            if (string.IsNullOrEmpty(payload))
+            {
+                _logger.LogWarning("Empty webhook payload received");
+                return false;
+            }
 
-        var payloadBytes = Encoding.UTF8.GetByteCount(payload);
-        if (payloadBytes > maxSizeBytes)
-        {
-            _logger.LogWarning("Webhook payload too large: {Size} bytes (max: {MaxSize})",
-                payloadBytes, maxSizeBytes);
-            return false;
-        }
+            var payloadBytes = Encoding.UTF8.GetByteCount(payload);
+            if (payloadBytes > maxSizeBytes)
+            {
+                _logger.LogWarning("Webhook payload too large: {Size} bytes (max: {MaxSize})",
+                    payloadBytes, maxSizeBytes);
+                return false;
+            }
 
-        try
-        {
-            JsonDocument.Parse(payload);
-            return true;
-        }
-        catch (JsonException)
-        {
-            _logger.LogWarning("Invalid JSON in webhook payload");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error validating webhook payload");
-            return false;
-        }
+            try
+            {
+                JsonDocument.Parse(payload);
+                return true;
+            }
+            catch (JsonException)
+            {
+                _logger.LogWarning("Invalid JSON in webhook payload");
+                return false;
+            }
+        }, "Error validating webhook payload");
     }
 
     private const int DefaultMaxPayloadSize = 1048576; // 1MB
 
     public async Task<Result<bool>> IsRateLimitExceededAsync(string clientIdentifier, string endpoint)
     {
-        if (!_securitySettings.EnableRateLimiting)
-            return false;
+        return await ResultExtensions.TryAsync(async () =>
+        {
+            if (!_securitySettings.EnableRateLimiting)
+                return false;
 
-        try
-        {
             return await _performanceService.ShouldRateLimitAsync("security", $"{clientIdentifier}:{endpoint}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking rate limit for {ClientId}:{Endpoint}",
-                clientIdentifier, endpoint);
-            return false; // Allow request on error to avoid blocking legitimate traffic
-        }
+        }, $"Error checking rate limit for {clientIdentifier}:{endpoint}");
     }
 
     public async Task<Result<SecurityValidationData>> ValidateJwtTokenAsync(string token)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                return SecurityValidationResult.Failure("Missing JWT token");
+                throw new ArgumentException("Missing JWT token");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -218,26 +210,11 @@ public class SecurityValidationService : ISecurityValidationService
 
             var claims = principal.Claims.ToDictionary(c => c.Type, c => (object)c.Value);
 
-            return new SecurityValidationResult
+            return new SecurityValidationData
             {
-                IsValid = true,
                 Claims = claims
             };
-        }
-        catch (SecurityTokenExpiredException)
-        {
-            return SecurityValidationResult.Failure("Token has expired");
-        }
-        catch (SecurityTokenException ex)
-        {
-            _logger.LogWarning("JWT validation failed: {Message}", ex.Message);
-            return SecurityValidationResult.Failure("Invalid token");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error validating JWT token");
-            return SecurityValidationResult.Failure("Token validation error");
-        }
+        }, "Error validating JWT token");
     }
 
     public Result<T> SanitizeResponse<T>(T response) where T : class

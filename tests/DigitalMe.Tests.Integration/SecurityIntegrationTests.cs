@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using Moq;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -19,6 +20,12 @@ public class SecurityIntegrationTests
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddCleanArchitectureServices();
+
+        // Mock IPerformanceOptimizationService for SecurityValidationService
+        var mockPerformanceService = new Mock<DigitalMe.Services.Optimization.IPerformanceOptimizationService>();
+        mockPerformanceService.Setup(x => x.ShouldRateLimitAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+                             .ReturnsAsync(false); // Never rate limit in tests
+        services.AddSingleton(mockPerformanceService.Object);
         services.Configure<SecuritySettings>(options =>
         {
             options.EnableInputSanitization = true;
@@ -63,7 +70,7 @@ public class SecurityIntegrationTests
         for (int i = 0; i < 5; i++)
         {
             var result = await _securityService.IsRateLimitExceededAsync(clientId, endpoint);
-            result.Should().BeFalse($"Request {i + 1} should be allowed");
+            result.Value.Should().BeFalse($"Request {i + 1} should be allowed");
         }
     }
 
@@ -82,9 +89,9 @@ public class SecurityIntegrationTests
         foreach (var input in maliciousInputs)
         {
             var result = _securityService.SanitizeInput(input);
-            result.Should().NotContain("script");
+            result.Value.Should().NotContain("script");
             // Note: SQL injection patterns are cleaned but words like "DROP" may remain
-            result.Should().NotContain("javascript:");
+            result.Value.Should().NotContain("javascript:");
             // Note: "alert" may be HTML-encoded, not completely removed
         }
     }
@@ -102,7 +109,7 @@ public class SecurityIntegrationTests
         foreach (var payload in validPayloads)
         {
             var result = await _securityService.ValidateWebhookPayloadAsync(payload);
-            result.Should().BeTrue($"Valid payload should be accepted: {payload}");
+            result.Value.Should().BeTrue($"Valid payload should be accepted: {payload}");
         }
     }
 
@@ -120,7 +127,7 @@ public class SecurityIntegrationTests
         foreach (var payload in invalidPayloads)
         {
             var result = await _securityService.ValidateWebhookPayloadAsync(payload ?? "");
-            result.Should().BeFalse($"Invalid payload should be rejected: {payload ?? "null"}");
+            result.Value.Should().BeFalse($"Invalid payload should be rejected: {payload ?? "null"}");
         }
     }
 
@@ -140,13 +147,13 @@ public class SecurityIntegrationTests
         };
 
         var validResult = await _securityService.ValidateRequestAsync(validRequest);
-        validResult.IsValid.Should().BeTrue();
+        validResult.IsSuccess.Should().BeTrue();
 
         var invalidResult = await _securityService.ValidateRequestAsync(invalidRequest);
         // Note: Service may return sanitized data even for invalid requests with EnableInputSanitization = true
-        if (!invalidResult.IsValid)
+        if (!invalidResult.IsSuccess)
         {
-            invalidResult.Errors.Should().NotBeEmpty();
+            invalidResult.Error.Should().NotBeEmpty();
         }
     }
 
@@ -160,7 +167,8 @@ public class SecurityIntegrationTests
     public void ApiKeyValidation_ShouldFollowSecurityRules(string apiKey, bool expectedValid)
     {
         var result = _securityService.ValidateApiKeyFormat(apiKey);
-        result.Should().Be(expectedValid);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().Be(expectedValid);
     }
 
     [Fact]
@@ -173,7 +181,8 @@ public class SecurityIntegrationTests
         };
 
         var sanitized = _securityService.SanitizeResponse(response);
-        sanitized.Should().NotBeNull();
+        sanitized.IsSuccess.Should().BeTrue();
+        sanitized.Value.Should().NotBeNull();
     }
 
     private class TestSecurityRequest

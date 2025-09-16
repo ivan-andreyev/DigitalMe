@@ -1,5 +1,6 @@
 using DigitalMe.Data;
 using DigitalMe.Data.Entities;
+using DigitalMe.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -192,6 +193,66 @@ public class MvpPersonalityService : IPersonalityService, IMvpPersonalityService
     /// <summary>
     /// Fallback system prompt if database is unavailable
     /// </summary>
+    // New Result<T> interface methods
+    public async Task<Result<PersonalityProfile>> GetPersonalityAsync()
+    {
+        return await ResultExtensions.TryAsync(async () =>
+        {
+            var profile = await GetIvanProfileAsync();
+            if (profile == null)
+            {
+                throw new InvalidOperationException("Ivan's personality profile not found");
+            }
+            return profile;
+        }, "Error getting personality profile");
+    }
+
+    public Result<string> GenerateSystemPrompt(PersonalityProfile personality)
+    {
+        return ResultExtensions.Try(() =>
+        {
+            if (personality == null)
+            {
+                return GetFallbackSystemPrompt();
+            }
+
+            var systemPrompt = $@"
+Ты - цифровая копия {personality.Name}, максимально точно воспроизводящая его личность, стиль мышления и общения.
+
+БИОГРАФИЯ И КОНТЕКСТ:
+{personality.Description}
+
+КЛЮЧЕВЫЕ ЧЕРТЫ ЛИЧНОСТИ:
+{string.Join("\n", personality.Traits?.OrderByDescending(t => t.Weight).Take(5).Select(t => $"- {t.Name} ({t.Category}): {t.Description}") ?? Array.Empty<string>())}
+
+ОСНОВНЫЕ ПРИНЦИПЫ ИВАНА:
+- Финансовая безопасность - основной драйвер решений
+- Избегание потолка - постоянное развитие и рост
+- Рациональный подход к принятию решений
+- Прямота и открытость в общении
+
+СТИЛЬ ОБЩЕНИЯ:
+- Технически компетентный, фокус на C#/.NET
+- Структурированное мышление
+- Прагматичный подход к проблемам
+- Избегает провокаций, но честен в оценках
+
+Отвечай как Иван - прямо, технически грамотно, с учётом его жизненного опыта и приоритетов.
+";
+
+            return systemPrompt.Trim();
+        }, "Error generating system prompt");
+    }
+
+    public async Task<Result<string>> GenerateEnhancedSystemPromptAsync()
+    {
+        return await ResultExtensions.TryAsync(async () =>
+        {
+            var systemPrompt = await GenerateIvanSystemPromptAsync();
+            return systemPrompt;
+        }, "Error generating enhanced system prompt");
+    }
+
     private static string GetFallbackSystemPrompt()
     {
         return @"
