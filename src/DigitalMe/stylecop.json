@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "DigitalMe",
+      "copyrightText": "Copyright (c) DigitalMe. All rights reserved.",
+      "xmlHeader": false,
+      "fileNamingConvention": "stylecop",
+      "documentInterfaces": false,
+      "documentExposedElements": false,
+      "documentInternalElements": false,
+      "documentPrivateElements": false,
+      "documentPrivateFields": false
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require",
+      "allowConsecutiveUsings": true,
+      "allowDoWhileOnClosingBrace": true
+    },
+    "maintainabilityRules": {
+      "topLevelTypes": ["class", "interface", "struct", "delegate", "enum"]
+    },
+    "namingRules": {
+      "allowCommonHungarianPrefixes": true,
+      "allowedHungarianPrefixes": ["id", "is", "to", "ui", "db", "api"],
+      "includeInferredTupleElementNames": false,
+      "tupleElementNameCasing": "camelCase"
+    },
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace",
+      "systemUsingDirectivesFirst": true,
+      "blankLinesBetweenUsingGroups": "allow"
+    },
+    "readabilityRules": {
+      "allowBuiltInTypeAliases": true,
+      "allowTrailingWhitespace": false
+    },
+    "spacingRules": {
+      "keywordsMustBeSpacedCorrectly": true,
+      "semicolonsMustBeSpacedCorrectly": true,
+      "symbolsMustBeSpacedCorrectly": true,
+      "commasMustBeSpacedCorrectly": true,
+      "operatorKeywordsMustBeFollowedBySpace": true,
+      "openingParenthesisMustBeSpacedCorrectly": false,
+      "closingParenthesisMustBeSpacedCorrectly": false,
+      "openingSquareBracketsMustBeSpacedCorrectly": false,
+      "closingSquareBracketsMustBeSpacedCorrectly": false,
+      "openingBracesMustBeSpacedCorrectly": false,
+      "closingBracesMustBeSpacedCorrectly": false,
+      "tabsMustNotBeUsed": true
+    }
+  }
+}
