@@ -45,6 +45,14 @@ ehthumbs.db
 Thumbs.db
 
 # Google Cloud Service Account keys - NEVER commit these!
-*.json
+# Note: We want to keep stylecop.json, so be specific about service account keys
+*-key.json
+*service-account*.json
 github-actions-key.json
 trigger.yaml
+
+# But keep these JSON files:
+!stylecop.json
+!package*.json
+!tsconfig*.json
+!appsettings*.json
