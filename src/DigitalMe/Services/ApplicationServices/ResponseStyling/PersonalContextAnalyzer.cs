@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.PersonalityEngine;
 using Microsoft.Extensions.Logging;
@@ -24,23 +25,23 @@ public class PersonalContextAnalyzer : IPersonalContextAnalyzer
         _logger = logger;
     }
 
-    public async Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context)
+    public async Task<Result<ContextualCommunicationStyle>> GetContextualStyleAsync(SituationalContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
-            var personality = await _personalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetIvanPersonalityAsync();
+
+            if (personalityResult.IsFailure)
+                throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
+
+            var personality = personalityResult.Value!;
             var style = _communicationStyleAnalyzer.DetermineOptimalCommunicationStyle(personality, context);
 
             // Apply personality-specific style adjustments
             ApplyPersonalityStyleAdjustments(style, context);
 
             return style;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error analyzing context for style determination");
-            return GetFallbackStyle(context);
-        }
+        }, $"Error analyzing context {context.ContextType} for style determination");
     }
 
     private static void ApplyPersonalityStyleAdjustments(ContextualCommunicationStyle style, SituationalContext context)

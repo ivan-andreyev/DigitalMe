@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
@@ -89,7 +90,12 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
         _logger.LogInformation("Adapting Ivan's personality for context: {ContextType}, urgency: {Urgency}",
             context.ContextType, context.UrgencyLevel);
 
-        var basePersonality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var basePersonalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+
+        if (basePersonalityResult.IsFailure)
+            throw new InvalidOperationException($"Failed to load base personality: {basePersonalityResult.Error}");
+
+        var basePersonality = basePersonalityResult.Value!;
         var adaptedPersonality = await _contextualPersonalityEngine.AdaptPersonalityToContextAsync(basePersonality, context);
 
         _logger.LogDebug("Personality adapted with {TraitCount} traits for {ContextType} context",

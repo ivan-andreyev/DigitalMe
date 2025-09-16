@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services.CaptchaSolving;
 using DigitalMe.Services.FileProcessing;
 using DigitalMe.Services.Voice;
@@ -256,12 +257,17 @@ public class IvanLevelHealthCheckService : IIvanLevelHealthCheckService
         try
         {
             // Test personality service and profile data loading
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-            var basicPrompt = _ivanPersonalityService.GenerateSystemPrompt(personality);
-            var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+            var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var basicPromptResult = personalityResult.IsSuccess ?
+                _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+                Result<string>.Failure("Cannot generate prompt - personality loading failed");
+            var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
 
-            var hasBasicData = !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan");
-            var hasEnhancedData = !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
+            var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;
+            var enhancedPrompt = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value : string.Empty;
+
+            var hasBasicData = basicPromptResult.IsSuccess && !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan");
+            var hasEnhancedData = enhancedPromptResult.IsSuccess && !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
 
             status.IsHealthy = hasBasicData && hasEnhancedData;
 

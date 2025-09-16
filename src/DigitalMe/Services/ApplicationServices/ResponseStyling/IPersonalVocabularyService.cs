@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -12,8 +13,8 @@ public interface IPersonalVocabularyService
     /// Gets personal vocabulary preferences for given context
     /// </summary>
     /// <param name="context">Situational context</param>
-    /// <returns>Personal vocabulary preferences</returns>
-    Task<PersonalVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context);
+    /// <returns>Result containing personal vocabulary preferences or error details</returns>
+    Task<Result<PersonalVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context);
 }
 
 /// <summary>

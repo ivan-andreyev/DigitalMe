@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,31 +29,31 @@ public class IvanController : ControllerBase
     [HttpGet("personality")]
     public async Task<ActionResult<object>> GetPersonality()
     {
-        try
+        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+
+        if (personalityResult.IsFailure)
         {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            _logger.LogError("Failed to retrieve Ivan's personality profile: {Error}", personalityResult.Error);
+            return StatusCode(500, new { message = "Failed to retrieve personality profile", error = personalityResult.Error });
+        }
 
-            _logger.LogInformation("Retrieved Ivan's personality profile with {TraitCount} traits",
-                personality.Traits?.Count ?? 0);
+        var personality = personalityResult.Value!;
 
-            return Ok(new
+        _logger.LogInformation("Retrieved Ivan's personality profile with {TraitCount} traits",
+            personality.Traits?.Count ?? 0);
+
+        return Ok(new
+        {
+            name = personality.Name,
+            description = personality.Description,
+            traits = personality.Traits?.Select(t => new
             {
-                name = personality.Name,
-                description = personality.Description,
-                traits = personality.Traits?.Select(t => new
-                {
-                    name = t.Name,
-                    description = t.Description,
-                    category = t.Category,
-                    weight = t.Weight
-                }).ToList()
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to retrieve Ivan's personality profile");
-            return StatusCode(500, new { message = "Failed to retrieve personality profile", error = ex.Message });
-        }
+                name = t.Name,
+                description = t.Description,
+                category = t.Category,
+                weight = t.Weight
+            }).ToList()
+        });
     }
 
     /// <summary>
@@ -61,24 +62,31 @@ public class IvanController : ControllerBase
     [HttpGet("prompt/basic")]
     public async Task<ActionResult<object>> GetBasicSystemPrompt()
     {
-        try
-        {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-            var prompt = _ivanPersonalityService.GenerateSystemPrompt(personality);
+        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
 
-            _logger.LogInformation("Generated basic system prompt ({PromptLength} characters)", prompt.Length);
-
-            return Ok(new {
-                prompt,
-                type = "basic",
-                generatedAt = DateTime.UtcNow
-            });
-        }
-        catch (Exception ex)
+        if (personalityResult.IsFailure)
         {
-            _logger.LogError(ex, "Failed to generate basic system prompt");
-            return StatusCode(500, new { message = "Failed to generate system prompt", error = ex.Message });
+            _logger.LogError("Failed to retrieve personality for prompt generation: {Error}", personalityResult.Error);
+            return StatusCode(500, new { message = "Failed to generate system prompt", error = personalityResult.Error });
         }
+
+        var promptResult = _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!);
+
+        if (promptResult.IsFailure)
+        {
+            _logger.LogError("Failed to generate system prompt: {Error}", promptResult.Error);
+            return StatusCode(500, new { message = "Failed to generate system prompt", error = promptResult.Error });
+        }
+
+        var prompt = promptResult.Value!;
+
+        _logger.LogInformation("Generated basic system prompt ({PromptLength} characters)", prompt.Length);
+
+        return Ok(new {
+            prompt,
+            type = "basic",
+            generatedAt = DateTime.UtcNow
+        });
     }
 
     /// <summary>
@@ -87,25 +95,25 @@ public class IvanController : ControllerBase
     [HttpGet("prompt/enhanced")]
     public async Task<ActionResult<object>> GetEnhancedSystemPrompt()
     {
-        try
-        {
-            var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
 
-            _logger.LogInformation("Generated enhanced system prompt with profile data ({PromptLength} characters)",
-                enhancedPrompt.Length);
-
-            return Ok(new {
-                prompt = enhancedPrompt,
-                type = "enhanced",
-                source = "IVAN_PROFILE_DATA.md",
-                generatedAt = DateTime.UtcNow
-            });
-        }
-        catch (Exception ex)
+        if (enhancedPromptResult.IsFailure)
         {
-            _logger.LogError(ex, "Failed to generate enhanced system prompt");
-            return StatusCode(500, new { message = "Failed to generate enhanced system prompt", error = ex.Message });
+            _logger.LogError("Failed to generate enhanced system prompt: {Error}", enhancedPromptResult.Error);
+            return StatusCode(500, new { message = "Failed to generate enhanced system prompt", error = enhancedPromptResult.Error });
         }
+
+        var enhancedPrompt = enhancedPromptResult.Value!;
+
+        _logger.LogInformation("Generated enhanced system prompt with profile data ({PromptLength} characters)",
+            enhancedPrompt.Length);
+
+        return Ok(new {
+            prompt = enhancedPrompt,
+            type = "enhanced",
+            source = "IVAN_PROFILE_DATA.md",
+            generatedAt = DateTime.UtcNow
+        });
     }
 
     /// <summary>
@@ -114,38 +122,35 @@ public class IvanController : ControllerBase
     [HttpGet("health")]
     public async Task<ActionResult<object>> GetHealthStatus()
     {
-        try
+        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var basicPromptResult = personalityResult.IsSuccess ?
+            _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+            Result<string>.Failure("Cannot generate prompt - personality loading failed");
+        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+
+        var personality = personalityResult.IsSuccess ? personalityResult.Value : null;
+        var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;
+        var enhancedPrompt = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value : string.Empty;
+
+        var health = new
         {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-            var basicPrompt = _ivanPersonalityService.GenerateSystemPrompt(personality);
-            var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+            status = personalityResult.IsSuccess && basicPromptResult.IsSuccess && enhancedPromptResult.IsSuccess ? "healthy" : "degraded",
+            personalityLoaded = personalityResult.IsSuccess,
+            personalityError = personalityResult.IsFailure ? personalityResult.Error : null,
+            traitCount = personality?.Traits?.Count ?? 0,
+            basicPromptGenerated = basicPromptResult.IsSuccess && !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan"),
+            basicPromptError = basicPromptResult.IsFailure ? basicPromptResult.Error : null,
+            basicPromptLength = basicPrompt?.Length ?? 0,
+            enhancedPromptGenerated = enhancedPromptResult.IsSuccess && !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan"),
+            enhancedPromptError = enhancedPromptResult.IsFailure ? enhancedPromptResult.Error : null,
+            enhancedPromptLength = enhancedPrompt?.Length ?? 0,
+            profileDataIntegrated = !string.IsNullOrEmpty(enhancedPrompt) && (enhancedPrompt.Contains("EllyAnalytics") || enhancedPrompt.Contains("Batumi")),
+            checkedAt = DateTime.UtcNow
+        };
 
-            var health = new
-            {
-                status = "healthy",
-                personalityLoaded = personality != null,
-                traitCount = personality?.Traits?.Count ?? 0,
-                basicPromptGenerated = !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan"),
-                basicPromptLength = basicPrompt.Length,
-                enhancedPromptGenerated = !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan"),
-                enhancedPromptLength = enhancedPrompt.Length,
-                profileDataIntegrated = enhancedPrompt.Contains("EllyAnalytics") || enhancedPrompt.Contains("Batumi"),
-                checkedAt = DateTime.UtcNow
-            };
+        _logger.LogInformation("Ivan personality health check: {Status}",
+            health.personalityLoaded && health.basicPromptGenerated && health.enhancedPromptGenerated ? "Healthy" : "Degraded");
 
-            _logger.LogInformation("Ivan personality health check: {Status}",
-                health.personalityLoaded && health.basicPromptGenerated && health.enhancedPromptGenerated ? "Healthy" : "Degraded");
-
-            return Ok(health);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ivan personality health check failed");
-            return StatusCode(500, new {
-                status = "unhealthy",
-                error = ex.Message,
-                checkedAt = DateTime.UtcNow
-            });
-        }
+        return Ok(health);
     }
 }

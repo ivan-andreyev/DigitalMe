@@ -1,5 +1,5 @@
 using DigitalMe.Data.Entities;
-using DigitalMe.Services.Optimization;
+using DigitalMe.Services.Performance;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -13,20 +13,20 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
     private readonly IIvanVocabularyService _vocabularyService;
     private readonly IIvanLinguisticPatternService _linguisticPatternService;
     private readonly IIvanContextAnalyzer _contextAnalyzer;
-    private readonly IPerformanceOptimizationService _performanceOptimizationService;
+    private readonly ICachingService _cachingService;
     private readonly ILogger<IvanResponseStylingServiceRefactored> _logger;
 
     public IvanResponseStylingServiceRefactored(
         IIvanVocabularyService vocabularyService,
         IIvanLinguisticPatternService linguisticPatternService,
         IIvanContextAnalyzer contextAnalyzer,
-        IPerformanceOptimizationService performanceOptimizationService,
+        ICachingService cachingService,
         ILogger<IvanResponseStylingServiceRefactored> logger)
     {
         _vocabularyService = vocabularyService;
         _linguisticPatternService = linguisticPatternService;
         _contextAnalyzer = contextAnalyzer;
-        _performanceOptimizationService = performanceOptimizationService;
+        _cachingService = cachingService;
         _logger = logger;
     }
 
@@ -67,7 +67,7 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
     public async Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context)
     {
         var cacheKey = $"communication_style_{context.ContextType}_{context.UrgencyLevel:F1}";
-        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
+        return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
             return await _contextAnalyzer.GetContextualStyleAsync(context);
         }, TimeSpan.FromMinutes(30));
@@ -81,7 +81,7 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
     public async Task<IvanVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context)
     {
         var cacheKey = $"vocabulary_prefs_{context.ContextType}";
-        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
+        return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
             return await _vocabularyService.GetVocabularyPreferencesAsync(context);
         }, TimeSpan.FromMinutes(15));

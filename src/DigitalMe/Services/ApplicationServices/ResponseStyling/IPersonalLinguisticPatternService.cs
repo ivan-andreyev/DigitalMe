@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -13,6 +14,6 @@ public interface IPersonalLinguisticPatternService
     /// </summary>
     /// <param name="text">Text to enhance with patterns</param>
     /// <param name="style">Communication style context</param>
-    /// <returns>Text enhanced with personal linguistic patterns</returns>
-    string ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style);
+    /// <returns>Result containing text enhanced with personal linguistic patterns or error details</returns>
+    Result<string> ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style);
 }

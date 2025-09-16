@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.PersonalityEngine;
 using Microsoft.Extensions.Logging;
@@ -21,11 +22,16 @@ public class PersonalVocabularyService : IPersonalVocabularyService
         _logger = logger;
     }
 
-    public async Task<PersonalVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context)
+    public async Task<Result<PersonalVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
-            var personality = await _personalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetIvanPersonalityAsync();
+
+            if (personalityResult.IsFailure)
+                throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
+
+            var personality = personalityResult.Value!;
 
             return context.ContextType switch
             {
@@ -34,12 +40,7 @@ public class PersonalVocabularyService : IPersonalVocabularyService
                 ContextType.Personal => GetPersonalVocabulary(personality),
                 _ => GetDefaultVocabulary(personality)
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting vocabulary preferences for context {ContextType}", context.ContextType);
-            return GetFallbackVocabulary();
-        }
+        }, $"Error getting vocabulary preferences for context {context.ContextType}");
     }
 
     private static PersonalVocabularyPreferences GetTechnicalVocabulary(PersonalityProfile personality)

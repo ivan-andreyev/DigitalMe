@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
@@ -17,9 +18,9 @@ public class PersonalLinguisticPatternService : IPersonalLinguisticPatternServic
         _logger = logger;
     }
 
-    public string ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style)
+    public Result<string> ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style)
     {
-        try
+        return ResultExtensions.Try(() =>
         {
             if (string.IsNullOrWhiteSpace(text))
                 return text;
@@ -33,12 +34,7 @@ public class PersonalLinguisticPatternService : IPersonalLinguisticPatternServic
             enhancedText = ApplyTechnicalPreferencePattern(enhancedText, style);
 
             return enhancedText;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error applying linguistic patterns to text");
-            return text; // Return original text on error
-        }
+        }, "Error applying personal linguistic patterns to text");
     }
 
     private static string ApplyDirectnessPattern(string text, ContextualCommunicationStyle style)

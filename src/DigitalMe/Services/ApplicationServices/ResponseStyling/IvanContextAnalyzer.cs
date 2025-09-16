@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.PersonalityEngine;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,12 @@ public class IvanContextAnalyzer : IIvanContextAnalyzer
     {
         try
         {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+
+            if (personalityResult.IsFailure)
+                throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
+
+            var personality = personalityResult.Value!;
             var style = _communicationStyleAnalyzer.DetermineOptimalCommunicationStyle(personality, context);
 
             // Apply Ivan-specific style adjustments

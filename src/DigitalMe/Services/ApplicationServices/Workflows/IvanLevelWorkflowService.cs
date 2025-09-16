@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services.FileProcessing;
 using DigitalMe.Services.Voice;
 using DigitalMe.Services.WebNavigation;
@@ -292,13 +293,19 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
     {
         _logger.LogInformation("Testing Ivan personality service availability");
 
-        var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-        var basicPrompt = _ivanPersonalityService.GenerateSystemPrompt(personality);
-        var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var basicPromptResult = personalityResult.IsSuccess ?
+            _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+            Result<string>.Failure("Cannot generate prompt - personality loading failed");
+        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
 
-        var personalityLoaded = personality != null;
-        var basicPromptGenerated = !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan");
-        var enhancedPromptGenerated = !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
+        var personality = personalityResult.IsSuccess ? personalityResult.Value : null;
+        var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;
+        var enhancedPrompt = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value : string.Empty;
+
+        var personalityLoaded = personalityResult.IsSuccess;
+        var basicPromptGenerated = basicPromptResult.IsSuccess && !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan");
+        var enhancedPromptGenerated = enhancedPromptResult.IsSuccess && !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
 
         return new ServiceAvailabilityWorkflowResult(
             Success: true,
@@ -311,8 +318,8 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
                 ["traitCount"] = personality?.Traits?.Count ?? 0,
                 ["basicPromptGenerated"] = basicPromptGenerated,
                 ["enhancedPromptGenerated"] = enhancedPromptGenerated,
-                ["basicPromptPreview"] = basicPrompt?.Length > 150 ? basicPrompt.Substring(0, 150) : basicPrompt ?? string.Empty,
-                ["enhancedPromptPreview"] = enhancedPrompt?.Length > 150 ? enhancedPrompt.Substring(0, 150) : enhancedPrompt ?? string.Empty
+                ["basicPromptPreview"] = !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Length > 150 ? basicPrompt.Substring(0, 150) : basicPrompt ?? string.Empty,
+                ["enhancedPromptPreview"] = !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Length > 150 ? enhancedPrompt.Substring(0, 150) : enhancedPrompt ?? string.Empty
             });
     }
 

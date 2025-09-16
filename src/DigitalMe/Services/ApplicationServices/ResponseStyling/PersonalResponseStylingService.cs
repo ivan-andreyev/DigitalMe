@@ -1,5 +1,6 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
-using DigitalMe.Services.Optimization;
+using DigitalMe.Services.Performance;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -13,77 +14,80 @@ public class PersonalResponseStylingService : IPersonalResponseStylingService
     private readonly IPersonalVocabularyService _vocabularyService;
     private readonly IPersonalLinguisticPatternService _linguisticPatternService;
     private readonly IPersonalContextAnalyzer _contextAnalyzer;
-    private readonly IPerformanceOptimizationService _performanceOptimizationService;
+    private readonly ICachingService _cachingService;
     private readonly ILogger<PersonalResponseStylingService> _logger;
 
     public PersonalResponseStylingService(
         IPersonalVocabularyService vocabularyService,
         IPersonalLinguisticPatternService linguisticPatternService,
         IPersonalContextAnalyzer contextAnalyzer,
-        IPerformanceOptimizationService performanceOptimizationService,
+        ICachingService cachingService,
         ILogger<PersonalResponseStylingService> logger)
     {
         _vocabularyService = vocabularyService;
         _linguisticPatternService = linguisticPatternService;
         _contextAnalyzer = contextAnalyzer;
-        _performanceOptimizationService = performanceOptimizationService;
+        _cachingService = cachingService;
         _logger = logger;
     }
 
-    public async Task<string> StyleResponseAsync(string input, SituationalContext context)
+    public async Task<Result<string>> StyleResponseAsync(string input, SituationalContext context)
     {
         _logger.LogInformation("Styling response for {ContextType} context ({InputLength} chars)",
             context.ContextType, input.Length);
 
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             if (string.IsNullOrWhiteSpace(input))
                 return input;
 
             // Get contextual communication style through specialized analyzer
-            var communicationStyle = await _contextAnalyzer.GetContextualStyleAsync(context);
+            var communicationStyleResult = await GetContextualStyleAsync(context);
+            if (communicationStyleResult.IsFailure)
+                throw new InvalidOperationException($"Failed to get communication style: {communicationStyleResult.Error}");
 
             // Apply linguistic patterns through specialized service
-            var enhancedText = _linguisticPatternService.ApplyPersonalLinguisticPatterns(input, communicationStyle);
+            var linguisticResult = ApplyPersonalLinguisticPatterns(input, communicationStyleResult.Value!);
+            if (linguisticResult.IsFailure)
+                throw new InvalidOperationException($"Failed to apply linguistic patterns: {linguisticResult.Error}");
 
             // Get vocabulary preferences for context enrichment
-            var vocabularyPrefs = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            var vocabularyResult = await GetVocabularyPreferencesAsync(context);
+            if (vocabularyResult.IsFailure)
+                throw new InvalidOperationException($"Failed to get vocabulary preferences: {vocabularyResult.Error}");
 
             // Apply vocabulary-based enhancements
-            enhancedText = ApplyVocabularyEnhancements(enhancedText, vocabularyPrefs);
+            var enhancedText = ApplyVocabularyEnhancements(linguisticResult.Value!, vocabularyResult.Value!);
 
             _logger.LogDebug("Response styling completed: {Original} -> {Enhanced}",
                 input.Length, enhancedText.Length);
 
             return enhancedText;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error styling response for context {ContextType}", context.ContextType);
-            return input; // Return original on error
-        }
+        }, $"Error styling response for context {context.ContextType}");
     }
 
-    public async Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context)
+    public async Task<Result<ContextualCommunicationStyle>> GetContextualStyleAsync(SituationalContext context)
     {
         var cacheKey = $"communication_style_{context.ContextType}_{context.UrgencyLevel:F1}";
-        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
+        return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
-            return await _contextAnalyzer.GetContextualStyleAsync(context);
+            var result = await _contextAnalyzer.GetContextualStyleAsync(context);
+            return result.ValueOrThrow(); // Unwrap Result<T> for caching
         }, TimeSpan.FromMinutes(30));
     }
 
-    public string ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style)
+    public Result<string> ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style)
     {
         return _linguisticPatternService.ApplyPersonalLinguisticPatterns(text, style);
     }
 
-    public async Task<PersonalVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context)
+    public async Task<Result<PersonalVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context)
     {
         var cacheKey = $"vocabulary_prefs_{context.ContextType}";
-        return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
+        return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
-            return await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            var result = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            return result.ValueOrThrow(); // Unwrap Result<T> for caching
         }, TimeSpan.FromMinutes(15));
     }
 

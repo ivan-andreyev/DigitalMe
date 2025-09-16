@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -12,6 +13,6 @@ public interface IPersonalContextAnalyzer
     /// Gets communication style parameters for given context
     /// </summary>
     /// <param name="context">Situational context</param>
-    /// <returns>Personal contextual communication style</returns>
-    Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context);
+    /// <returns>Result containing personal contextual communication style or error details</returns>
+    Task<Result<ContextualCommunicationStyle>> GetContextualStyleAsync(SituationalContext context);
 }

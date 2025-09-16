@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -13,28 +14,28 @@ public interface IPersonalResponseStylingService
     /// </summary>
     /// <param name="input">Raw response content</param>
     /// <param name="context">Situational context for styling</param>
-    /// <returns>Personality-styled response</returns>
-    Task<string> StyleResponseAsync(string input, SituationalContext context);
+    /// <returns>Result containing personality-styled response or error details</returns>
+    Task<Result<string>> StyleResponseAsync(string input, SituationalContext context);
 
     /// <summary>
     /// Gets communication style parameters for given context
     /// </summary>
     /// <param name="context">Situational context</param>
-    /// <returns>Personal contextual communication style</returns>
-    Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context);
+    /// <returns>Result containing personal contextual communication style or error details</returns>
+    Task<Result<ContextualCommunicationStyle>> GetContextualStyleAsync(SituationalContext context);
 
     /// <summary>
     /// Applies personal linguistic patterns to text
     /// </summary>
     /// <param name="text">Original text</param>
     /// <param name="style">Communication style to apply</param>
-    /// <returns>Text with personal linguistic patterns</returns>
-    string ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style);
+    /// <returns>Result containing text with personal linguistic patterns or error details</returns>
+    Result<string> ApplyPersonalLinguisticPatterns(string text, ContextualCommunicationStyle style);
 
     /// <summary>
     /// Gets personal vocabulary preferences for context
     /// </summary>
     /// <param name="context">Situational context</param>
-    /// <returns>Vocabulary recommendations</returns>
-    Task<PersonalVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context);
+    /// <returns>Result containing vocabulary recommendations or error details</returns>
+    Task<Result<PersonalVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context);
 }

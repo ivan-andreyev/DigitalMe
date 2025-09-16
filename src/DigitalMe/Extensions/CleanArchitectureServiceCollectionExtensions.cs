@@ -68,9 +68,11 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService,
                           DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingServiceRefactored>();
 
-        // Performance Optimization Services
-        services.AddSingleton<DigitalMe.Services.Optimization.IPerformanceOptimizationService,
-                           DigitalMe.Services.Optimization.PerformanceOptimizationService>();
+        // Performance Optimization Services - ISP Compliant
+        services.AddSingleton<DigitalMe.Services.Performance.ICachingService,
+                           DigitalMe.Services.Performance.CachingService>();
+        services.AddSingleton<DigitalMe.Services.Performance.IPerformanceOptimizationService,
+                           DigitalMe.Services.Performance.PerformanceOptimizationService>();
         services.AddMemoryCache(); // Add memory cache support
 
         // Security Services
@@ -82,8 +84,8 @@ public static class CleanArchitectureServiceCollectionExtensions
 
         // Strategy Pattern Services
         services.AddScoped<IPersonalityStrategyFactory, PersonalityStrategyFactory>();
-        services.AddScoped<IvanPersonalityStrategy>();
-        services.AddScoped<GenericPersonalityStrategy>();
+        services.AddScoped<IPersonalityAdapterStrategy, IvanPersonalityStrategy>();
+        services.AddScoped<IPersonalityAdapterStrategy, GenericPersonalityStrategy>();
 
         // Specialized Analyzer Services (SRP compliance)
         services.AddScoped<IPersonalityContextAdapter, PersonalityContextAdapter>();

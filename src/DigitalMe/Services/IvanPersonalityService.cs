@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,21 +14,21 @@ public interface IIvanPersonalityService
     /// <summary>
     /// Асинхронно загружает профиль личности Ивана.
     /// </summary>
-    /// <returns>Объект PersonalityProfile с данными личности Ивана</returns>
-    Task<PersonalityProfile> GetIvanPersonalityAsync();
+    /// <returns>Result containing PersonalityProfile с данными личности Ивана or error details</returns>
+    Task<Result<PersonalityProfile>> GetIvanPersonalityAsync();
 
     /// <summary>
     /// Генерирует системный промпт для LLM на основе профиля личности.
     /// </summary>
     /// <param name="personality">Профиль личности для генерации промпта</param>
-    /// <returns>Системный промпт в виде строки</returns>
-    string GenerateSystemPrompt(PersonalityProfile personality);
+    /// <returns>Result containing системный промпт в виде строки or error details</returns>
+    Result<string> GenerateSystemPrompt(PersonalityProfile personality);
 
     /// <summary>
     /// Генерирует расширенный системный промпт с интеграцией реальных данных профиля.
     /// </summary>
-    /// <returns>Улучшенный системный промпт с данными из файла профиля</returns>
-    Task<string> GenerateEnhancedSystemPromptAsync();
+    /// <returns>Result containing улучшенный системный промпт с данными из файла профиля or error details</returns>
+    Task<Result<string>> GenerateEnhancedSystemPromptAsync();
 }
 
 /// <summary>
@@ -52,16 +53,18 @@ public class IvanPersonalityService : IIvanPersonalityService
         _configuration = configuration;
     }
 
-    public Task<PersonalityProfile> GetIvanPersonalityAsync()
+    public Task<Result<PersonalityProfile>> GetIvanPersonalityAsync()
     {
-        if (_cachedProfile != null)
+        return ResultExtensions.TryAsync(async () =>
         {
-            return Task.FromResult(_cachedProfile);
-        }
+            if (_cachedProfile != null)
+            {
+                return _cachedProfile;
+            }
 
-        _logger.LogInformation("Loading Ivan's personality profile from data");
+            _logger.LogInformation("Loading Ivan's personality profile from data");
 
-        _cachedProfile = new PersonalityProfile
+            _cachedProfile = new PersonalityProfile
         {
             // Id, CreatedAt, UpdatedAt are handled by base constructor
             Name = "Ivan Digital Clone",
@@ -87,12 +90,13 @@ public class IvanPersonalityService : IIvanPersonalityService
 
         _logger.LogInformation("Ivan's personality profile loaded with {TraitCount} traits", _cachedProfile.Traits?.Count ?? 0);
 
-        return Task.FromResult(_cachedProfile);
+        return _cachedProfile;
+        }, "Error loading Ivan's personality profile");
     }
 
-    public string GenerateSystemPrompt(PersonalityProfile personality)
+    public Result<string> GenerateSystemPrompt(PersonalityProfile personality)
     {
-        return $"""
+        return ResultExtensions.Try(() => $"""
 You are Ivan, a 34-year-old Head of R&D at EllyAnalytics, originally from Orsk, Russia, now living in Batumi, Georgia with your wife Marina (33) and daughter Sofia (3.5).
 
 CORE PERSONALITY:
@@ -127,12 +131,12 @@ COMMUNICATION STYLE:
 - Balances confidence with realistic assessment of challenges
 
 Respond as Ivan would - rationally, structured, friendly but direct, with occasional insights about the tension between career ambitions and family life.
-""";
+""", "Error generating system prompt for personality profile");
     }
 
-    public async Task<string> GenerateEnhancedSystemPromptAsync()
+    public async Task<Result<string>> GenerateEnhancedSystemPromptAsync()
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             // Load real profile data if not cached
             if (_cachedProfileData == null)
@@ -201,14 +205,6 @@ When responding as Ivan:
 
 Respond as Ivan would - with analytical precision, technical expertise, family-conscious decision making, and the pragmatic confidence of someone who has rapidly advanced their career while managing significant life transitions.
 """;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to generate enhanced system prompt, falling back to basic version");
-            
-            // Fallback to existing implementation
-            var basicProfile = await GetIvanPersonalityAsync();
-            return GenerateSystemPrompt(basicProfile);
-        }
+        }, "Error generating enhanced system prompt");
     }
 }
