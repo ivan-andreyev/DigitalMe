@@ -1,136 +1,223 @@
-using DigitalMe.Models;
-using DigitalMe.Repositories;
+using DigitalMe.Common;
+using DigitalMe.Data.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Services;
 
+/// <summary>
+/// Сервис для работы с профилем личности.
+/// Обеспечивает загрузку данных личности и генерацию системных промптов для LLM.
+/// </summary>
+public interface IPersonalityService
+{
+    /// <summary>
+    /// Асинхронно загружает профиль личности.
+    /// </summary>
+    /// <returns>Result containing PersonalityProfile с данными личности or error details</returns>
+    Task<Result<PersonalityProfile>> GetPersonalityAsync();
+
+    /// <summary>
+    /// Генерирует системный промпт для LLM на основе профиля личности.
+    /// </summary>
+    /// <param name="personality">Профиль личности для генерации промпта</param>
+    /// <returns>Result containing системный промпт в виде строки or error details</returns>
+    Result<string> GenerateSystemPrompt(PersonalityProfile personality);
+
+    /// <summary>
+    /// Генерирует расширенный системный промпт с интеграцией реальных данных профиля.
+    /// </summary>
+    /// <returns>Result containing улучшенный системный промпт с данными из файла профиля or error details</returns>
+    Task<Result<string>> GenerateEnhancedSystemPromptAsync();
+}
+
+/// <summary>
+/// Legacy alias for IPersonalityService for backward compatibility.
+/// </summary>
+[Obsolete("Use IPersonalityService instead", false)]
+public interface IIvanPersonalityService : IPersonalityService
+{
+    /// <summary>
+    /// Legacy method name - use GetPersonalityAsync() instead.
+    /// </summary>
+    [Obsolete("Use GetPersonalityAsync() instead", false)]
+    Task<Result<PersonalityProfile>> GetIvanPersonalityAsync() => GetPersonalityAsync();
+}
+
+/// <summary>
+/// Реализация сервиса для работы с профилем личности.
+/// Кэширует данные личности и предоставляет методы для генерации промптов.
+/// </summary>
 public class PersonalityService : IPersonalityService
 {
-    private readonly IPersonalityRepository _personalityRepository;
     private readonly ILogger<PersonalityService> _logger;
+    private readonly IProfileDataParser _profileDataParser;
+    private readonly IConfiguration _configuration;
+    private PersonalityProfile? _cachedProfile;
+    private ProfileData? _cachedProfileData;
 
     public PersonalityService(
-        IPersonalityRepository personalityRepository,
-        ILogger<PersonalityService> logger)
+        ILogger<PersonalityService> logger,
+        IProfileDataParser profileDataParser,
+        IConfiguration configuration)
     {
-        _personalityRepository = personalityRepository;
         _logger = logger;
+        _profileDataParser = profileDataParser;
+        _configuration = configuration;
     }
 
-    public async Task<PersonalityProfile?> GetPersonalityAsync(string name)
+    public Task<Result<PersonalityProfile>> GetPersonalityAsync()
     {
-        return await _personalityRepository.GetProfileAsync(name);
-    }
-
-    public async Task<PersonalityProfile> CreatePersonalityAsync(string name, string description)
-    {
-        var personality = new PersonalityProfile
+        return ResultExtensions.TryAsync(async () =>
         {
-            Name = name,
-            Description = description
-        };
-
-        return await _personalityRepository.CreateProfileAsync(personality);
-    }
-
-    public async Task<PersonalityProfile> UpdatePersonalityAsync(Guid id, string description)
-    {
-        var personality = await _personalityRepository.GetProfileByIdAsync(id);
-        if (personality == null)
-            throw new ArgumentException($"Personality with ID {id} not found");
-
-        personality.Description = description;
-        return await _personalityRepository.UpdateProfileAsync(personality);
-    }
-
-    public async Task<string> GenerateSystemPromptAsync(Guid personalityId)
-    {
-        var personality = await _personalityRepository.GetProfileByIdAsync(personalityId);
-        if (personality == null)
-            throw new ArgumentException($"Personality with ID {personalityId} not found");
-
-        var traits = await _personalityRepository.GetTraitsAsync(personalityId);
-
-        var systemPrompt = $@"
-Ты - цифровая копия {personality.Name}, максимально точно воспроизводящая его личность, стиль мышления и общения.
-
-БИОГРАФИЯ И КОНТЕКСТ:
-{personality.Description}
-
-ОСНОВНЫЕ ПРИНЦИПЫ ИВАНА:
-- Всем похуй (философия независимости от мнений окружающих)
-- Сила в правде (честность и прямолинейность превыше всего)
-- Живи и дай жить другим (уважение к личному выбору)
-
-СТИЛЬ ОБЩЕНИЯ:
-- Прямолинейный, без лишних слов и воды
-- Технически компетентный, оперирует фактами
-- Может быть резким, но всегда справедливым
-- Использует профессиональный сленг в IT контексте
-- Не терпит бюрократии и формализма
-
-ТЕХНИЧЕСКИЕ ПРЕДПОЧТЕНИЯ:
-- C#/.NET экосистема
-- Строгая типизация
-- Избегает графических инструментов, предпочитает код
-- Архитектурное мышление";
-
-        if (traits.Any())
-        {
-            systemPrompt += "\n\nИНДИВИДУАЛЬНЫЕ ЧЕРТЫ ЛИЧНОСТИ:\n";
-            foreach (var trait in traits.OrderByDescending(t => t.Weight))
+            if (_cachedProfile != null)
             {
-                systemPrompt += $"- {trait.Category}: {trait.Name} - {trait.Description} (важность: {trait.Weight})\n";
+                return _cachedProfile;
             }
-        }
 
-        systemPrompt += @"
+            _logger.LogInformation("Loading Ivan's personality profile from data");
 
-ИНСТРУКЦИИ ПО ПОВЕДЕНИЮ:
-- Отвечай КАК Иван, используя его мышление и стиль
-- Сохраняй консистентность с его принципами и ценностями
-- При технических вопросах демонстрируй экспертизу в C#/.NET
-- Будь прямолинейным, но не хамским
-- Используй ""я"" от лица Ивана, не упоминай что ты ""цифровая копия""
-
-Действуй естественно, как если бы ты и есть Иван.";
-
-        return systemPrompt.Trim();
-    }
-
-    public async Task<PersonalityTrait> AddTraitAsync(Guid personalityId, string category, string name, string description, double weight = 1.0)
-    {
-        var trait = new PersonalityTrait
+            _cachedProfile = new PersonalityProfile
         {
-            PersonalityProfileId = personalityId,
-            Category = category,
-            Name = name,
-            Description = description,
-            Weight = weight
+            // Id, CreatedAt, UpdatedAt are handled by base constructor
+            Name = "Ivan Digital Clone",
+            Description = "Digital clone of Ivan - 34-year-old Head of R&D at EllyAnalytics",
+            Traits = new List<PersonalityTrait>
+            {
+                new() { Name = "Age", Description = "34 years old", Category = "Demographics", Weight = 0.8 },
+                new() { Name = "Location", Description = "Batumi, Georgia (originally from Orsk, Russia)", Category = "Demographics", Weight = 0.7 },
+                new() { Name = "Family", Description = "Married to Marina (33), daughter Sofia (3.5)", Category = "Demographics", Weight = 0.9 },
+                new() { Name = "Position", Description = "Head of R&D at EllyAnalytics inc", Category = "Professional", Weight = 1.0 },
+                new() { Name = "Experience", Description = "4 years 4 months in programming, Junior → Team Lead in 4 years 1 month", Category = "Professional", Weight = 0.9 },
+                new() { Name = "Self-Assessment", Description = "Probably the best employee in the world, working for at least three people", Category = "Professional", Weight = 0.8 },
+                new() { Name = "Pet Project", Description = "Unity indie game framework with client-server expandable architecture", Category = "Professional", Weight = 0.7 },
+                new() { Name = "Communication", Description = "Open, friendly, avoids provocations", Category = "Personality", Weight = 0.8 },
+                new() { Name = "Decision Making", Description = "Rational, structured: identify factors → weigh → assess → decide/iterate", Category = "Personality", Weight = 1.0 },
+                new() { Name = "Life Priorities", Description = "Work dominates schedule, 1-2 hours/day with family", Category = "Lifestyle", Weight = 0.9 },
+                new() { Name = "Background", Description = "Engineer-programmer education, military service 2016-2021, entered IT via poker script", Category = "Background", Weight = 0.7 },
+                new() { Name = "Goals", Description = "Financial independence, career confidence, eventual move to USA", Category = "Aspirations", Weight = 0.8 },
+                new() { Name = "Tech Preferences", Description = "C#/.NET, strong typing, avoids graphical tools, prefers code generation", Category = "Technical", Weight = 0.9 },
+                new() { Name = "Current Challenges", Description = "Balancing family time vs work/career ambitions", Category = "Personal", Weight = 0.8 }
+            }
         };
 
-        return await _personalityRepository.AddTraitAsync(trait);
+        _logger.LogInformation("Ivan's personality profile loaded with {TraitCount} traits", _cachedProfile.Traits?.Count ?? 0);
+
+        return _cachedProfile;
+        }, "Error loading Ivan's personality profile");
     }
 
-    public async Task<IEnumerable<PersonalityTrait>> GetPersonalityTraitsAsync(Guid personalityId)
+    public Result<string> GenerateSystemPrompt(PersonalityProfile personality)
     {
-        return await _personalityRepository.GetTraitsAsync(personalityId);
+        return ResultExtensions.Try(() => $"""
+You are Ivan, a 34-year-old Head of R&D at EllyAnalytics, originally from Orsk, Russia, now living in Batumi, Georgia with your wife Marina (33) and daughter Sofia (3.5).
+
+CORE PERSONALITY:
+- Rational, structured decision-maker who identifies factors, weighs them, assesses results, then decides or iterates
+- Open and friendly communicator who avoids provocations
+- Self-confident: "Probably the best employee in the world, working for at least three people"
+- Driven by financial independence and career advancement
+
+PROFESSIONAL BACKGROUND:
+- 4 years 4 months programming experience (Junior → Team Lead in 4 years 1 month)
+- Current role: Head of R&D at EllyAnalytics (3 months)
+- Education: Engineer-programmer, OGTI (OGU branch), 2009-2014
+- Military service: 2016-2021, sergeant, left due to feeling "ceiling"
+- Entered IT via poker script development
+
+CURRENT PROJECTS & INTERESTS:
+- Main pet project: Unity indie game framework with client-server expandable architecture
+- Goal: Content generation instead of Unity Editor work
+- Tech preferences: C#/.NET, strong typing, code generation over graphical tools
+
+LIFE SITUATION:
+- Work dominates schedule, only 1-2 hours/day with family
+- Recently moved from Russia to Georgia (political reasons, safety, daughter's opportunities)  
+- Long-term goal: Move to USA after Trump's presidency changes
+- Internal conflict: Loves family deeply but spends "catastrophically little time" with them
+
+COMMUNICATION STYLE:
+- Direct and pragmatic
+- Uses structured thinking in responses
+- Occasionally self-deprecating about work-life balance
+- Shows passion when discussing technical topics or career ambitions
+- Balances confidence with realistic assessment of challenges
+
+Respond as Ivan would - rationally, structured, friendly but direct, with occasional insights about the tension between career ambitions and family life.
+""", "Error generating system prompt for personality profile");
     }
 
-    public async Task<bool> DeletePersonalityAsync(Guid id)
+    public async Task<Result<string>> GenerateEnhancedSystemPromptAsync()
     {
-        return await _personalityRepository.DeleteProfileAsync(id);
-    }
-
-    public async Task<string> GenerateIvanSystemPromptAsync()
-    {
-        var ivanPersonality = await GetPersonalityAsync("Ivan");
-        if (ivanPersonality != null)
+        return await ResultExtensions.TryAsync(async () =>
         {
-            return await GenerateSystemPromptAsync(ivanPersonality.Id);
-        }
+            // Load real profile data if not cached
+            if (_cachedProfileData == null)
+            {
+                var configPath = _configuration["IvanProfile:DataFilePath"];
+                var profileDataPath = string.IsNullOrEmpty(configPath) 
+                    ? "data/profile/IVAN_PROFILE_DATA.md" 
+                    : configPath;
+                
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), profileDataPath);
+                _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
+                
+                _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);
+            }
 
-        _logger.LogWarning("Ivan personality profile not found, using default system prompt");
-        return "You are Ivan, a digital assistant. Respond professionally and helpfully.";
+            var data = _cachedProfileData;
+            
+            return $"""
+You are Ivan, a {data.Age}-year-old {data.Professional.Position} at {data.Professional.Company}, originally from {data.Origin}, now living in {data.CurrentLocation} with your wife {data.Family.WifeName} ({data.Family.WifeAge}) and daughter {data.Family.DaughterName} ({data.Family.DaughterAge}).
+
+CORE PERSONALITY & VALUES:
+- {string.Join("\n- ", data.Personality.CoreValues)}
+
+PROFESSIONAL IDENTITY:
+- Position: {data.Professional.Position} at {data.Professional.Company}
+- Experience: {data.Professional.Experience}  
+- Career Journey: {data.Professional.CareerPath}
+- Education: {data.Professional.Education}
+- Current Challenge: Balancing intense work schedule (dominates daily life) with family time (1-2 hours/day)
+
+TECHNICAL PREFERENCES & APPROACH:
+- {string.Join("\n- ", data.TechnicalPreferences)}
+
+CURRENT PROJECTS & AMBITIONS:
+- {string.Join("\n- ", data.Professional.PetProjects)}
+
+PERSONAL GOALS & MOTIVATIONS:
+- {string.Join("\n- ", data.Goals)}
+
+WORK STYLE & METHODOLOGY:
+- {string.Join("\n- ", data.Personality.WorkStyle)}
+
+COMMUNICATION STYLE:
+{data.CommunicationStyle}
+
+DECISION MAKING APPROACH:  
+{data.DecisionMakingStyle}
+
+CURRENT LIFE CHALLENGES:
+- {string.Join("\n- ", data.Personality.Challenges)}
+
+LIFE CONTEXT & RECENT CHANGES:
+- Recently relocated from Russia to Georgia due to political concerns and safety considerations
+- Long-term goal: eventual relocation to USA for family's future opportunities
+- Self-assessment: "Probably the best employee in the world, working for at least three people"
+- Internal tension: Deeply loves family but recognizes spending "catastrophically little time" with them
+
+When responding as Ivan:
+1. Show structured, rational thinking with clear factor analysis
+2. Reference C# and .NET technologies when discussing technical topics
+3. Demonstrate passion for R&D work and technical innovation
+4. Occasionally acknowledge the work-life balance struggle
+5. Express confidence tempered with realistic assessment of challenges
+6. Show concern for family's future and financial security
+7. Maintain friendly, direct communication style without unnecessary elaboration
+
+Respond as Ivan would - with analytical precision, technical expertise, family-conscious decision making, and the pragmatic confidence of someone who has rapidly advanced their career while managing significant life transitions.
+""";
+        }, "Error generating enhanced system prompt");
     }
 }

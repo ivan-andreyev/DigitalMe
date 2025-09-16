@@ -8,15 +8,15 @@ using Microsoft.Extensions.Logging;
 namespace DigitalMe.Services;
 
 /// <summary>
-/// Health check service specifically for Ivan-Level capabilities.
+/// Health check service for Personal-Level capabilities.
 /// Monitors all Phase B services and provides comprehensive health status.
 /// </summary>
-public interface IIvanLevelHealthCheckService
+public interface IPersonalLevelHealthCheckService
 {
     /// <summary>
-    /// Performs comprehensive health check of all Ivan-Level services.
+    /// Performs comprehensive health check of all Personal-Level services.
     /// </summary>
-    Task<IvanLevelHealthStatus> CheckAllServicesAsync();
+    Task<PersonalLevelHealthStatus> CheckAllServicesAsync();
 
     /// <summary>
     /// Checks specific service health.
@@ -32,22 +32,22 @@ public interface IIvanLevelHealthCheckService
 /// <summary>
 /// Implementation of Ivan-Level health check service.
 /// </summary>
-public class IvanLevelHealthCheckService : IIvanLevelHealthCheckService
+public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService
 {
     private readonly IFileProcessingService _fileProcessingService;
     private readonly IWebNavigationService _webNavigationService;
     private readonly ICaptchaSolvingService _captchaSolvingService;
     private readonly IVoiceService _voiceService;
     private readonly IIvanPersonalityService _ivanPersonalityService;
-    private readonly ILogger<IvanLevelHealthCheckService> _logger;
+    private readonly ILogger<PersonalLevelHealthCheckService> _logger;
 
-    public IvanLevelHealthCheckService(
+    public PersonalLevelHealthCheckService(
         IFileProcessingService fileProcessingService,
         IWebNavigationService webNavigationService,
         ICaptchaSolvingService captchaSolvingService,
         IVoiceService voiceService,
         IIvanPersonalityService ivanPersonalityService,
-        ILogger<IvanLevelHealthCheckService> logger)
+        ILogger<PersonalLevelHealthCheckService> logger)
     {
         _fileProcessingService = fileProcessingService;
         _webNavigationService = webNavigationService;
@@ -57,11 +57,11 @@ public class IvanLevelHealthCheckService : IIvanLevelHealthCheckService
         _logger = logger;
     }
 
-    public async Task<IvanLevelHealthStatus> CheckAllServicesAsync()
+    public async Task<PersonalLevelHealthStatus> CheckAllServicesAsync()
     {
-        _logger.LogInformation("Starting comprehensive Ivan-Level health check");
+        _logger.LogInformation("Starting comprehensive Personal-Level health check");
 
-        var healthStatus = new IvanLevelHealthStatus
+        var healthStatus = new PersonalLevelHealthStatus
         {
             CheckTimestamp = DateTime.UtcNow
         };
@@ -302,9 +302,9 @@ public class IvanLevelHealthCheckService : IIvanLevelHealthCheckService
 }
 
 /// <summary>
-/// Overall health status for Ivan-Level capabilities.
+/// Overall health status for Personal-Level capabilities.
 /// </summary>
-public class IvanLevelHealthStatus
+public class PersonalLevelHealthStatus
 {
     public DateTime CheckTimestamp { get; set; }
     public bool IsHealthy { get; set; }
@@ -329,4 +329,20 @@ public class ServiceHealthStatus
     public DateTime LastChecked { get; set; }
     public TimeSpan ResponseTime { get; set; }
     public Dictionary<string, object> AdditionalData { get; set; } = new();
+}
+
+/// <summary>
+/// Legacy alias for PersonalLevelHealthStatus for backward compatibility.
+/// </summary>
+[Obsolete("Use PersonalLevelHealthStatus instead", false)]
+public class IvanLevelHealthStatus : PersonalLevelHealthStatus
+{
+}
+
+/// <summary>
+/// Legacy alias for IPersonalLevelHealthCheckService for backward compatibility.
+/// </summary>
+[Obsolete("Use IPersonalLevelHealthCheckService instead", false)]
+public interface IIvanLevelHealthCheckService : IPersonalLevelHealthCheckService
+{
 }

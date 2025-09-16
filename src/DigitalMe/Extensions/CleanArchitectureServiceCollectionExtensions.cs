@@ -40,7 +40,10 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<IIvanLevelWorkflowService, IvanLevelWorkflowService>();
 
         // Personality Engine Services - SOLID Refactored Architecture
-        services.AddScoped<DigitalMe.Services.IIvanPersonalityService, DigitalMe.Services.IvanPersonalityService>();
+        services.AddScoped<DigitalMe.Services.IPersonalityService, DigitalMe.Services.PersonalityService>();
+        // Legacy compatibility
+        services.AddScoped<DigitalMe.Services.IIvanPersonalityService>(provider =>
+            provider.GetService<DigitalMe.Services.IPersonalityService>()!);
         services.AddScoped<DigitalMe.Services.IPersonalityBehaviorMapper, DigitalMe.Services.PersonalityBehaviorMapper>();
         services.AddScoped<DigitalMe.Services.IProfileDataParser, DigitalMe.Services.ProfileDataParser>();
 
