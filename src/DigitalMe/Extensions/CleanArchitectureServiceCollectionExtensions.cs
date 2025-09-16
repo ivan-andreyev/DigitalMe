@@ -68,9 +68,17 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService,
                           DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingServiceRefactored>();
 
-        // Performance Optimization Services - ISP Compliant
-        services.AddSingleton<DigitalMe.Services.Performance.ICachingService,
-                           DigitalMe.Services.Performance.CachingService>();
+        // Performance Optimization Services - Interface Segregation Principle Applied
+        services.AddSingleton<DigitalMe.Services.Performance.ICacheService,
+                           DigitalMe.Services.Performance.CacheService>();
+        services.AddSingleton<DigitalMe.Services.Performance.IRateLimitService,
+                           DigitalMe.Services.Performance.RateLimitService>();
+        services.AddSingleton<DigitalMe.Services.Performance.IBatchProcessingService,
+                           DigitalMe.Services.Performance.BatchProcessingService>();
+        services.AddSingleton<DigitalMe.Services.Performance.IPerformanceMonitoringService,
+                           DigitalMe.Services.Performance.PerformanceMonitoringService>();
+
+        // Facade service implementing all performance interfaces for backward compatibility
         services.AddSingleton<DigitalMe.Services.Performance.IPerformanceOptimizationService,
                            DigitalMe.Services.Performance.PerformanceOptimizationService>();
         services.AddMemoryCache(); // Add memory cache support
