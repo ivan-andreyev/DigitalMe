@@ -91,7 +91,8 @@ public class AnthropicServiceTests
         var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
-        result.Should().Be(expectedResponse, "should return the content from Anthropic response");
+        result.IsSuccess.Should().BeTrue("should successfully process Anthropic response");
+        result.Value.Should().Be(expectedResponse, "should return the content from Anthropic response");
 
         // Verify correct API call was made
         this._mockHttpMessageHandler.Protected()
@@ -137,8 +138,9 @@ public class AnthropicServiceTests
         var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
-        result.Should().NotBeNullOrEmpty("should return fallback response on API error");
-        result.Should().Contain("Claude", "fallback should mention connection issue");
+        result.IsSuccess.Should().BeTrue("should return success even with fallback response");
+        result.Value.Should().NotBeNullOrEmpty("should return fallback response on API error");
+        result.Value.Should().Contain("Claude", "fallback should mention connection issue");
 
         // Verify warning was logged
         this._mockLogger.Verify(
@@ -169,8 +171,9 @@ public class AnthropicServiceTests
         var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
-        result.Should().NotBeNullOrEmpty("should return fallback response on network error");
-        result.Should().MatchRegex("подключени[ем]", "fallback should mention connection issue in Russian");
+        result.IsSuccess.Should().BeTrue("should return success even with fallback response");
+        result.Value.Should().NotBeNullOrEmpty("should return fallback response on network error");
+        result.Value.Should().MatchRegex("подключени[ем]", "fallback should mention connection issue in Russian");
 
         // Verify error was logged
         this._mockLogger.Verify(
@@ -218,7 +221,8 @@ public class AnthropicServiceTests
         var result = await this._service.SendMessageAsync("", personality);
 
         // Assert
-        result.Should().NotBeNullOrEmpty("should handle empty message gracefully");
+        result.IsSuccess.Should().BeTrue("should handle empty message gracefully");
+        result.Value.Should().NotBeNullOrEmpty("should handle empty message gracefully");
     }
 
     [Fact]
@@ -265,7 +269,8 @@ public class AnthropicServiceTests
         var result = await this._service.SendMessageAsync(message, personality);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNullOrEmpty();
 
         capturedRequestBody.Should().NotBeNull("should send request body");
         capturedRequestBody.Should().Contain("Ivan", "should include personality name in request");
@@ -298,8 +303,9 @@ public class AnthropicServiceTests
         var result = await service.SendMessageAsync(message, personality);
 
         // Assert
-        result.Should().NotBeNullOrEmpty("should return fallback when API key is missing");
-        result.Should().Contain("API", "fallback should mention API issue");
+        result.IsSuccess.Should().BeTrue("should return success even with fallback response");
+        result.Value.Should().NotBeNullOrEmpty("should return fallback when API key is missing");
+        result.Value.Should().Contain("API", "fallback should mention API issue");
 
         // Reset for other tests
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", "test-api-key-sk-ant-test");

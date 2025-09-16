@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data;
 using DigitalMe.Data.Entities;
 using DigitalMe.Integrations.MCP.Models;
@@ -105,15 +106,15 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                 
                 // Mock InitializeAsync
                 mockService.Setup(x => x.InitializeAsync())
-                          .ReturnsAsync(true);
+                          .ReturnsAsync(Result<bool>.Success(true));
                 
                 // Mock SendMessageAsync with Ivan-style responses
                 mockService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<PersonalityContext>()))
-                          .ReturnsAsync("Mock Ivan: система работает через MCP протокол, структурированный подход!");
+                          .ReturnsAsync(Result<string>.Success("Mock Ivan: система работает через MCP протокол, структурированный подход!"));
                 
                 // Mock CallToolAsync for tool testing
                 mockService.Setup(x => x.CallToolAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, object>>()))
-                          .ReturnsAsync(new McpResponse 
+                          .ReturnsAsync(Result<McpResponse>.Success(new McpResponse
                           {
                               JsonRpc = "2.0",
                               Id = Guid.NewGuid().ToString(),
@@ -123,15 +124,15 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
                                   Metadata = new Dictionary<string, object> { ["source"] = "mock" }
                               },
                               Error = null
-                          });
+                          }));
                 
                 // Mock IsConnectedAsync
                 mockService.Setup(x => x.IsConnectedAsync())
-                          .ReturnsAsync(true);
+                          .ReturnsAsync(Result<bool>.Success(true));
                 
                 // Mock DisconnectAsync
                 mockService.Setup(x => x.DisconnectAsync())
-                          .Returns(Task.CompletedTask);
+                          .ReturnsAsync(Result<bool>.Success(true));
                 
                 return mockService.Object;
             });

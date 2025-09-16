@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
@@ -9,8 +10,8 @@ namespace DigitalMe.Integrations.MCP;
 
 public interface IAnthropicService
 {
-    Task<string> SendMessageAsync(string message, PersonalityProfile? personality = null);
-    Task<bool> IsConnectedAsync();
+    Task<Result<string>> SendMessageAsync(string message, PersonalityProfile? personality = null);
+    Task<Result<bool>> IsConnectedAsync();
 }
 
 public class AnthropicConfiguration
@@ -66,17 +67,18 @@ public class AnthropicServiceSimple : IAnthropicService
         return string.Empty;
     }
 
-    public async Task<string> SendMessageAsync(string message, PersonalityProfile? personality = null)
+    public async Task<Result<string>> SendMessageAsync(string message, PersonalityProfile? personality = null)
     {
-        var apiKey = GetApiKey();
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            _logger.LogWarning("Anthropic API key not configured. Using fallback response.");
-            return await GenerateFallbackResponseAsync(message, personality);
-        }
-
         try
         {
+            var apiKey = GetApiKey();
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                _logger.LogWarning("Anthropic API key not configured. Using fallback response.");
+                var fallback = await GenerateFallbackResponseAsync(message, personality);
+                return Result<string>.Success(fallback);
+            }
+
             _logger.LogInformation("Sending message to Anthropic API: {Message}", message.Substring(0, Math.Min(100, message.Length)));
 
             var systemPrompt = await GenerateSystemPromptAsync(personality);
@@ -108,7 +110,7 @@ public class AnthropicServiceSimple : IAnthropicService
                 {
                     var result = textElement.GetString() ?? "Empty response";
                     _logger.LogInformation("Received response from Anthropic API, length: {Length}", result.Length);
-                    return result;
+                    return Result<string>.Success(result);
                 }
             }
             else
@@ -118,24 +120,26 @@ public class AnthropicServiceSimple : IAnthropicService
                 _logger.LogWarning("Error details: {ErrorText}", errorText);
             }
 
-            return await GenerateFallbackResponseAsync(message, personality);
+            var fallbackResponse = await GenerateFallbackResponseAsync(message, personality);
+            return Result<string>.Success(fallbackResponse);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send message to Anthropic API");
-            return await GenerateFallbackResponseAsync(message, personality);
+            var fallbackResponse = await GenerateFallbackResponseAsync(message, personality);
+            return Result<string>.Success(fallbackResponse);
         }
     }
 
-    public async Task<bool> IsConnectedAsync()
+    public async Task<Result<bool>> IsConnectedAsync()
     {
-        if (string.IsNullOrEmpty(_config.ApiKey))
+        return await ResultExtensions.TryAsync(async () =>
         {
-            return false;
-        }
+            if (string.IsNullOrEmpty(_config.ApiKey))
+            {
+                return false;
+            }
 
-        try
-        {
             // Simple connectivity test
             var request = new
             {
@@ -152,11 +156,7 @@ public class AnthropicServiceSimple : IAnthropicService
 
             var response = await _httpClient.PostAsync("v1/messages", content);
             return response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
+        }, "Failed to check Anthropic API connectivity");
     }
 
     private async Task<string> GenerateSystemPromptAsync(PersonalityProfile? personality)

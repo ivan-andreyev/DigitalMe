@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services.ApplicationServices.Commands;
 using DigitalMe.Services.ApplicationServices.Queries;
 
@@ -13,7 +14,7 @@ public interface IFileProcessingUseCase : IApplicationService
     /// <summary>
     /// Executes file processing workflow with comprehensive testing.
     /// </summary>
-    Task<FileProcessingResult> ExecuteAsync(FileProcessingCommand command);
+    Task<Result<FileProcessingResult>> ExecuteAsync(FileProcessingCommand command);
 }
 
 /// <summary>

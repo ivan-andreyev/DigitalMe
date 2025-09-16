@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services.ApplicationServices.Commands;
 using DigitalMe.Services.ApplicationServices.Queries;
 
@@ -12,7 +13,7 @@ public interface IServiceAvailabilityUseCase : IApplicationService
     /// <summary>
     /// Executes service availability check workflow.
     /// </summary>
-    Task<ServiceAvailabilityResult> ExecuteAsync(ServiceAvailabilityQuery query);
+    Task<Result<ServiceAvailabilityResult>> ExecuteAsync(ServiceAvailabilityQuery query);
 }
 
 /// <summary>

@@ -40,13 +40,14 @@ public class AgentIntelligenceTests : IClassFixture<CustomWebApplicationFactory<
         var response = await anthropicService.SendMessageAsync("test", personality.Value);
 
         // Assert - This should work after fixing P0
-        response.Should().NotBeNullOrEmpty("Anthropic should return response");
-        response.Should().NotContain("техническая проблема", "should not be technical error");
-        
+        response.IsSuccess.Should().BeTrue("Anthropic call should succeed");
+        response.Value.Should().NotBeNullOrEmpty("Anthropic should return response");
+        response.Value.Should().NotContain("техническая проблема", "should not be technical error");
+
         // For tests, fallback response is acceptable
-        if (response.Contains("API ключа"))
+        if (response.Value.Contains("API ключа"))
         {
-            response.Should().Contain("Head of R&D", "fallback should be in Ivan's style");
+            response.Value.Should().Contain("Head of R&D", "fallback should be in Ivan's style");
         }
     }
 

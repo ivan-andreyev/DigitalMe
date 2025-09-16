@@ -36,7 +36,15 @@ public class WorkflowOrchestrator : IWorkflowOrchestrator
     public async Task<FileProcessingResult> ExecuteFileProcessingWorkflowAsync(FileProcessingCommand command)
     {
         _logger.LogInformation("Orchestrating file processing workflow");
-        return await _fileProcessingUseCase.ExecuteAsync(command);
+        var result = await _fileProcessingUseCase.ExecuteAsync(command);
+        return result.IsSuccess ? result.Value : new FileProcessingResult(
+            Success: false,
+            PdfCreated: false,
+            TextExtracted: false,
+            ContentMatch: false,
+            FileId: null,
+            ExtractedTextPreview: null,
+            ErrorMessage: result.Error);
     }
 
     public async Task<WebNavigationResult> ExecuteWebNavigationWorkflowAsync()
@@ -48,12 +56,22 @@ public class WorkflowOrchestrator : IWorkflowOrchestrator
     public async Task<ServiceAvailabilityResult> ExecuteServiceAvailabilityWorkflowAsync(ServiceAvailabilityQuery query)
     {
         _logger.LogInformation("Orchestrating service availability workflow for {ServiceName}", query.ServiceName);
-        return await _serviceAvailabilityUseCase.ExecuteAsync(query);
+        var result = await _serviceAvailabilityUseCase.ExecuteAsync(query);
+        return result.IsSuccess ? result.Value : new ServiceAvailabilityResult(
+            Success: false,
+            ServiceName: query.ServiceName,
+            ServiceAvailable: false,
+            ErrorMessage: result.Error);
     }
 
     public async Task<ComprehensiveHealthCheckResult> ExecuteComprehensiveHealthCheckWorkflowAsync(ComprehensiveHealthCheckCommand command)
     {
         _logger.LogInformation("Orchestrating comprehensive health check workflow");
-        return await _healthCheckUseCase.ExecuteAsync(command);
+        var result = await _healthCheckUseCase.ExecuteAsync(command);
+        return result.IsSuccess ? result.Value : new ComprehensiveHealthCheckResult(
+            OverallSuccess: false,
+            Timestamp: DateTime.UtcNow,
+            TestResults: new Dictionary<string, object> { ["error"] = result.Error },
+            Summary: new ComprehensiveTestSummary(0, 0, 1));
     }
 }

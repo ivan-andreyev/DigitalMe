@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services;
 using DigitalMe.Services.ApplicationServices.UseCases.FileProcessing;
 using DigitalMe.Services.ApplicationServices.UseCases.ServiceAvailability;
@@ -28,9 +29,9 @@ public class HealthCheckUseCase : IHealthCheckUseCase
         _logger = logger;
     }
 
-    public async Task<ComprehensiveHealthCheckResult> ExecuteAsync(ComprehensiveHealthCheckCommand command)
+    public async Task<Result<ComprehensiveHealthCheckResult>> ExecuteAsync(ComprehensiveHealthCheckCommand command)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             _logger.LogInformation("Starting comprehensive Ivan-Level services health check workflow");
 
@@ -41,9 +42,9 @@ public class HealthCheckUseCase : IHealthCheckUseCase
             try
             {
                 var healthStatus = await _healthCheckService.CheckAllServicesAsync();
-                results["healthCheck"] = new 
-                { 
-                    success = healthStatus.IsHealthy, 
+                results["healthCheck"] = new
+                {
+                    success = healthStatus.IsHealthy,
                     score = healthStatus.OverallHealth,
                     details = healthStatus.ServiceStatuses.Select(s => new { s.ServiceName, s.IsHealthy, s.ErrorMessage })
                 };
@@ -63,16 +64,18 @@ public class HealthCheckUseCase : IHealthCheckUseCase
             {
                 var testContent = command.TestContent ?? "Ivan-Level comprehensive test document content";
                 var fileCommand = new FileProcessingCommand(testContent, "Comprehensive Test");
-                var fileResult = await _fileProcessingUseCase.ExecuteAsync(fileCommand);
-                
-                results["fileProcessing"] = new 
-                { 
-                    success = fileResult.Success,
-                    pdfCreated = fileResult.PdfCreated,
-                    textExtracted = fileResult.TextExtracted
+                var fileResultResponse = await _fileProcessingUseCase.ExecuteAsync(fileCommand);
+                var fileResult = fileResultResponse.IsSuccess ? fileResultResponse.Value : null;
+
+                results["fileProcessing"] = new
+                {
+                    success = fileResult?.Success ?? false,
+                    pdfCreated = fileResult?.PdfCreated ?? false,
+                    textExtracted = fileResult?.TextExtracted ?? false,
+                    error = fileResultResponse.IsFailure ? fileResultResponse.Error : null
                 };
-                
-                if (!fileResult.Success)
+
+                if (fileResultResponse.IsFailure || !(fileResult?.Success ?? false))
                 {
                     overallSuccess = false;
                 }
@@ -87,15 +90,18 @@ public class HealthCheckUseCase : IHealthCheckUseCase
             try
             {
                 var personalityQuery = new ServiceAvailabilityQuery("personality");
-                var personalityResult = await _serviceAvailabilityUseCase.ExecuteAsync(personalityQuery);
-                results["personality"] = new 
-                { 
-                    success = personalityResult.Success,
-                    personalityLoaded = personalityResult.ServiceAvailable,
-                    enhancedPromptGenerated = personalityResult.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false)
+                var personalityResultResponse = await _serviceAvailabilityUseCase.ExecuteAsync(personalityQuery);
+                var personalityResult = personalityResultResponse.IsSuccess ? personalityResultResponse.Value : null;
+
+                results["personality"] = new
+                {
+                    success = personalityResult?.Success ?? false,
+                    personalityLoaded = personalityResult?.ServiceAvailable ?? false,
+                    enhancedPromptGenerated = personalityResult?.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false) ?? false,
+                    error = personalityResultResponse.IsFailure ? personalityResultResponse.Error : null
                 };
-                
-                if (!personalityResult.Success)
+
+                if (personalityResultResponse.IsFailure || !(personalityResult?.Success ?? false))
                 {
                     overallSuccess = false;
                 }
@@ -124,15 +130,6 @@ public class HealthCheckUseCase : IHealthCheckUseCase
                 Timestamp: DateTime.UtcNow,
                 TestResults: results,
                 Summary: summary);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Comprehensive health check workflow failed");
-            return new ComprehensiveHealthCheckResult(
-                OverallSuccess: false,
-                Timestamp: DateTime.UtcNow,
-                TestResults: new Dictionary<string, object> { ["error"] = ex.Message },
-                Summary: new ComprehensiveTestSummary(0, 0, 1));
-        }
+        }, "Comprehensive health check workflow failed");
     }
 }

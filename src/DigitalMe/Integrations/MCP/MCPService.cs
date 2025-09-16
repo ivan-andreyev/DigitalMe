@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Integrations.MCP.Tools;
 using DigitalMe.Models;
@@ -22,39 +23,40 @@ public class McpService : IMcpService
         _toolExecutor = toolExecutor;
     }
 
-    public async Task<string> SendMessageAsync(string message, PersonalityContext context)
+    public async Task<Result<string>> SendMessageAsync(string message, PersonalityContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             _logger.LogInformation("Отправляем сообщение через MCP (Anthropic): {MessageLength} символов", message.Length);
 
             // Use the real Anthropic service
-            var response = await _anthropicService.SendMessageAsync(message, context.Profile);
-
-            _logger.LogInformation("Получен ответ от Anthropic: {ResponseLength} символов", response.Length);
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка отправки через MCP/Anthropic");
-            return GenerateFallbackResponse(message, context);
-        }
+            var responseResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+            if (responseResult.IsSuccess)
+            {
+                _logger.LogInformation("Получен ответ от Anthropic: {ResponseLength} символов", responseResult.Value!.Length);
+                return responseResult.Value!;
+            }
+            else
+            {
+                _logger.LogWarning("Ошибка от Anthropic: {Error}", responseResult.Error);
+                return GenerateFallbackResponse(message, context);
+            }
+        }, $"Failed to send message via MCP/Anthropic: {message.Substring(0, Math.Min(50, message.Length))}");
     }
 
-    public async Task<bool> InitializeAsync()
+    public async Task<Result<bool>> InitializeAsync()
     {
         return await _anthropicService.IsConnectedAsync();
     }
 
-    public async Task<bool> IsConnectedAsync()
+    public async Task<Result<bool>> IsConnectedAsync()
     {
         return await _anthropicService.IsConnectedAsync();
     }
 
-    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<Result<McpResponse>> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             var result = await _toolExecutor.ExecuteToolAsync(toolName, parameters);
             return new McpResponse
@@ -65,25 +67,17 @@ public class McpService : IMcpService
                     ToolCalls = new List<McpToolCall>()
                 }
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error executing tool {ToolName}", toolName);
-            return new McpResponse
-            {
-                Error = new McpError
-                {
-                    Code = -1,
-                    Message = $"Tool execution failed: {ex.Message}"
-                }
-            };
-        }
+        }, $"Failed to execute tool: {toolName}");
     }
 
-    public async Task DisconnectAsync()
+    public async Task<Result<bool>> DisconnectAsync()
     {
-        // Nothing to disconnect for Anthropic service
-        await Task.CompletedTask;
+        return await ResultExtensions.TryAsync(async () =>
+        {
+            // Nothing to disconnect for Anthropic service
+            await Task.CompletedTask;
+            return true;
+        }, "Failed to disconnect MCP service");
     }
 
     private string GenerateFallbackResponse(string message, PersonalityContext context)

@@ -60,8 +60,8 @@ public class AgentBehaviorEngine : IAgentBehaviorEngine
             }
 
             // Get MCP response with enhanced context
-            var mcpResponse = await _mcpService.SendMessageAsync(message, context);
-            response.Content = mcpResponse;
+            var mcpResponseResult = await _mcpService.SendMessageAsync(message, context);
+            response.Content = mcpResponseResult.IsSuccess ? mcpResponseResult.Value : "I'm having trouble generating a response right now. Please try again.";
 
             // Calculate confidence based on various factors
             response.ConfidenceScore = CalculateConfidenceScore(message, context, response.Mood);

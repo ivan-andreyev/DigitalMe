@@ -61,11 +61,12 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
         var response = await mcpService.SendMessageAsync("test", context);
 
         // Assert
-        response.Should().NotBeNullOrEmpty("MCP service should return response");
-        
+        response.IsSuccess.Should().BeTrue("MCP service call should succeed");
+        response.Value.Should().NotBeNullOrEmpty("MCP service should return response");
+
         // Should be Russian response from Ivan
-        response.Should().Contain("система работает", "should get test response from Ivan");
-        response.Should().Contain("MCP протокол", "should mention MCP protocol");
+        response.Value.Should().Contain("система работает", "should get test response from Ivan");
+        response.Value.Should().Contain("MCP протокол", "should mention MCP protocol");
     }
 
     [Fact]

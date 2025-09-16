@@ -29,9 +29,9 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
         _logger = logger;
     }
 
-    public async Task<ServiceAvailabilityResult> ExecuteAsync(ServiceAvailabilityQuery query)
+    public async Task<Result<ServiceAvailabilityResult>> ExecuteAsync(ServiceAvailabilityQuery query)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             return query.ServiceName.ToLowerInvariant() switch
             {
@@ -44,16 +44,7 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
                     ServiceAvailable: false,
                     ErrorMessage: "Unknown service")
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Service availability workflow failed for {ServiceName}", query.ServiceName);
-            return new ServiceAvailabilityResult(
-                Success: false,
-                ServiceName: query.ServiceName,
-                ServiceAvailable: false,
-                ErrorMessage: ex.Message);
-        }
+        }, $"Service availability workflow failed for {query.ServiceName}");
     }
 
     private async Task<ServiceAvailabilityResult> CheckCaptchaSolvingAvailabilityAsync()

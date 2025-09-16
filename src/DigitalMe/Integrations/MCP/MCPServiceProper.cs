@@ -1,4 +1,5 @@
 using System.Text.Json;
+using DigitalMe.Common;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Models;
 using DigitalMe.Services;
@@ -25,12 +26,12 @@ public class McpServiceProper : IMcpService
         _personalityService = personalityService;
     }
 
-    public async Task<bool> InitializeAsync()
+    public async Task<Result<bool>> InitializeAsync()
     {
-        _logger.LogInformation("🚀 Initializing MCP Service (proper implementation)");
-
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
+            _logger.LogInformation("🚀 Initializing MCP Service (proper implementation)");
+
             // Try MCP first
             var mcpConnected = await _mcpClient.InitializeAsync();
             if (mcpConnected)
@@ -41,9 +42,9 @@ public class McpServiceProper : IMcpService
 
             // Fallback to direct Anthropic
             _logger.LogWarning("⚠️ MCP server unavailable, checking direct Anthropic fallback");
-            var anthropicConnected = await _anthropicService.IsConnectedAsync();
+            var anthropicConnectedResult = await _anthropicService.IsConnectedAsync();
 
-            if (anthropicConnected)
+            if (anthropicConnectedResult.IsSuccess && anthropicConnectedResult.Value)
             {
                 _logger.LogInformation("✅ Using direct Anthropic as fallback");
                 return true;
@@ -51,17 +52,12 @@ public class McpServiceProper : IMcpService
 
             _logger.LogError("❌ Both MCP and Anthropic are unavailable");
             return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "💥 Failed to initialize MCP Service");
-            return false;
-        }
+        }, "Failed to initialize MCP Service");
     }
 
-    public async Task<string> SendMessageAsync(string message, PersonalityContext context)
+    public async Task<Result<string>> SendMessageAsync(string message, PersonalityContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             _logger.LogInformation("🔍 SendMessageAsync called with message: '{Message}', MCP IsConnected: {IsConnected}", message, _mcpClient.IsConnected);
 
@@ -80,14 +76,18 @@ public class McpServiceProper : IMcpService
             else
             {
                 _logger.LogInformation("📞 Using Anthropic fallback (MCP unavailable)");
-                return await _anthropicService.SendMessageAsync(message, context.Profile);
+                var anthropicResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+                if (anthropicResult.IsSuccess)
+                {
+                    return anthropicResult.Value;
+                }
+                else
+                {
+                    _logger.LogWarning("Anthropic fallback failed: {Error}", anthropicResult.Error);
+                    return await GenerateFallbackResponseAsync(message, context);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "💥 Failed to send message via MCP");
-            return await GenerateFallbackResponseAsync(message, context);
-        }
+        }, $"Failed to send message via MCP: {message.Substring(0, Math.Min(50, message.Length))}");
     }
 
     private async Task<string> SendMessageViaMcpAsync(string message, PersonalityContext context)
@@ -134,7 +134,8 @@ public class McpServiceProper : IMcpService
                     response.Error.Code, response.Error.Message);
 
                 // Fallback to direct Anthropic
-                return await _anthropicService.SendMessageAsync(message, context.Profile);
+                var anthropicFallbackResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+                return anthropicFallbackResult.IsSuccess ? anthropicFallbackResult.Value : await GenerateFallbackResponseAsync(message, context);
             }
 
             if (response.Result?.Content != null)
@@ -145,50 +146,63 @@ public class McpServiceProper : IMcpService
             }
 
             _logger.LogWarning("⚠️ Empty MCP response, using fallback");
-            return await _anthropicService.SendMessageAsync(message, context.Profile);
+            var anthropicEmptyResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+            return anthropicEmptyResult.IsSuccess ? anthropicEmptyResult.Value : await GenerateFallbackResponseAsync(message, context);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "💥 MCP protocol error, falling back to Anthropic");
-            return await _anthropicService.SendMessageAsync(message, context.Profile);
+            var anthropicErrorResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+            return anthropicErrorResult.IsSuccess ? anthropicErrorResult.Value : await GenerateFallbackResponseAsync(message, context);
         }
     }
 
-    public async Task<McpResponse> CallToolAsync(string toolName, Dictionary<string, object> parameters)
+    public async Task<Result<McpResponse>> CallToolAsync(string toolName, Dictionary<string, object> parameters)
     {
-        if (_mcpClient.IsConnected)
+        return await ResultExtensions.TryAsync(async () =>
         {
-            _logger.LogInformation("🔧 Calling MCP tool: {ToolName}", toolName);
-            return await _mcpClient.CallToolAsync(toolName, parameters);
-        }
-        else
-        {
-            _logger.LogWarning("⚠️ MCP not connected, cannot call tool: {ToolName}", toolName);
-            return new McpResponse
+            if (_mcpClient.IsConnected)
             {
-                Error = new McpError
+                _logger.LogInformation("🔧 Calling MCP tool: {ToolName}", toolName);
+                return await _mcpClient.CallToolAsync(toolName, parameters);
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ MCP not connected, cannot call tool: {ToolName}", toolName);
+                return new McpResponse
                 {
-                    Code = -32001,
-                    Message = "MCP server not connected"
-                }
-            };
-        }
+                    Error = new McpError
+                    {
+                        Code = -32001,
+                        Message = "MCP server not connected"
+                    }
+                };
+            }
+        }, $"Failed to call MCP tool: {toolName}");
     }
 
-    public async Task<bool> IsConnectedAsync()
+    public async Task<Result<bool>> IsConnectedAsync()
     {
-        if (_mcpClient.IsConnected)
+        return await ResultExtensions.TryAsync(async () =>
         {
-            return true;
-        }
+            if (_mcpClient.IsConnected)
+            {
+                return true;
+            }
 
-        // Check fallback Anthropic connection
-        return await _anthropicService.IsConnectedAsync();
+            // Check fallback Anthropic connection
+            var anthropicResult = await _anthropicService.IsConnectedAsync();
+            return anthropicResult.IsSuccess && anthropicResult.Value;
+        }, "Failed to check MCP service connection status");
     }
 
-    public async Task DisconnectAsync()
+    public async Task<Result<bool>> DisconnectAsync()
     {
-        await _mcpClient.DisconnectAsync();
+        return await ResultExtensions.TryAsync(async () =>
+        {
+            await _mcpClient.DisconnectAsync();
+            return true;
+        }, "Failed to disconnect MCP service");
     }
 
     private string ExtractContentFromMcpResult(string resultContent)

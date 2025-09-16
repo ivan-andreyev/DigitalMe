@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services.ApplicationServices.Commands;
 using DigitalMe.Services.ApplicationServices.Queries;
 
@@ -12,7 +13,7 @@ public interface IHealthCheckUseCase : IApplicationService
     /// <summary>
     /// Executes comprehensive health check across all services.
     /// </summary>
-    Task<ComprehensiveHealthCheckResult> ExecuteAsync(ComprehensiveHealthCheckCommand command);
+    Task<Result<ComprehensiveHealthCheckResult>> ExecuteAsync(ComprehensiveHealthCheckCommand command);
 }
 
 /// <summary>

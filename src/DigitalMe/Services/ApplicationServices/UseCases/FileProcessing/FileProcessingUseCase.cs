@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Infrastructure;
 using DigitalMe.Services.FileProcessing;
 using Microsoft.Extensions.Logging;
@@ -24,22 +25,22 @@ public class FileProcessingUseCase : IFileProcessingUseCase
         _logger = logger;
     }
 
-    public async Task<FileProcessingResult> ExecuteAsync(FileProcessingCommand command)
+    public async Task<Result<FileProcessingResult>> ExecuteAsync(FileProcessingCommand command)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
-            _logger.LogInformation("Executing file processing workflow with content: {ContentPreview}...", 
+            _logger.LogInformation("Executing file processing workflow with content: {ContentPreview}...",
                 command.Content.Substring(0, Math.Min(50, command.Content.Length)));
 
             // Step 1: Create temporary file through repository (infrastructure abstraction)
             var tempFile = await _fileRepository.CreateTemporaryFileAsync(".pdf");
-            
-            var parameters = new Dictionary<string, object> 
-            { 
-                ["content"] = command.Content, 
-                ["title"] = command.Title ?? "Test Document" 
+
+            var parameters = new Dictionary<string, object>
+            {
+                ["content"] = command.Content,
+                ["title"] = command.Title ?? "Test Document"
             };
-            
+
             // Step 2: Create PDF using business service
             var pdfResult = await _fileProcessingService.ProcessPdfAsync("create", tempFile.FilePath, parameters);
             if (!pdfResult.Success)
@@ -79,18 +80,6 @@ public class FileProcessingUseCase : IFileProcessingUseCase
                 ContentMatch: contentMatch,
                 FileId: tempFile.FileId,
                 ExtractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "File processing workflow failed");
-            return new FileProcessingResult(
-                Success: false,
-                PdfCreated: false,
-                TextExtracted: false,
-                ContentMatch: false,
-                FileId: null,
-                ExtractedTextPreview: null,
-                ErrorMessage: $"Workflow failed: {ex.Message}");
-        }
+        }, $"File processing workflow failed for content: {command.Content.Substring(0, Math.Min(30, command.Content.Length))}");
     }
 }
