@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Services;
 using DigitalMe.Services.CaptchaSolving;
 using DigitalMe.Services.Voice;
@@ -13,13 +14,13 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
 {
     private readonly ICaptchaSolvingService _captchaSolvingService;
     private readonly IVoiceService _voiceService;
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _ivanPersonalityService;
     private readonly ILogger<ServiceAvailabilityUseCase> _logger;
 
     public ServiceAvailabilityUseCase(
         ICaptchaSolvingService captchaSolvingService,
         IVoiceService voiceService,
-        IIvanPersonalityService ivanPersonalityService,
+        IPersonalityService ivanPersonalityService,
         ILogger<ServiceAvailabilityUseCase> logger)
     {
         _captchaSolvingService = captchaSolvingService;
@@ -107,13 +108,19 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
     {
         _logger.LogInformation("Testing Ivan personality service availability");
 
-        var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
-        var basicPrompt = _ivanPersonalityService.GenerateSystemPrompt(personality);
-        var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var personalityResult = await _ivanPersonalityService.GetPersonalityAsync();
+        var basicPromptResult = personalityResult.IsSuccess
+            ? _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!)
+            : Result<string>.Failure("Personality not loaded");
+        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
 
-        var personalityLoaded = personality != null;
-        var basicPromptGenerated = !string.IsNullOrEmpty(basicPrompt) && basicPrompt.Contains("Ivan");
-        var enhancedPromptGenerated = !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
+        var personalityLoaded = personalityResult.IsSuccess;
+        var basicPromptGenerated = basicPromptResult.IsSuccess &&
+                                   !string.IsNullOrEmpty(basicPromptResult.Value) &&
+                                   basicPromptResult.Value.Contains("Ivan");
+        var enhancedPromptGenerated = enhancedPromptResult.IsSuccess &&
+                                      !string.IsNullOrEmpty(enhancedPromptResult.Value) &&
+                                      enhancedPromptResult.Value.Contains("Ivan");
 
         return new ServiceAvailabilityResult(
             Success: true,
@@ -122,12 +129,16 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
             AdditionalData: new Dictionary<string, object>
             {
                 ["personalityLoaded"] = personalityLoaded,
-                ["personalityName"] = personality?.Name ?? "Unknown",
-                ["traitCount"] = personality?.Traits?.Count ?? 0,
+                ["personalityName"] = personalityResult.IsSuccess ? personalityResult.Value!.Name : "Unknown",
+                ["traitCount"] = personalityResult.IsSuccess ? personalityResult.Value!.Traits?.Count ?? 0 : 0,
                 ["basicPromptGenerated"] = basicPromptGenerated,
                 ["enhancedPromptGenerated"] = enhancedPromptGenerated,
-                ["basicPromptPreview"] = basicPrompt?.Length > 150 ? basicPrompt.Substring(0, 150) : basicPrompt ?? string.Empty,
-                ["enhancedPromptPreview"] = enhancedPrompt?.Length > 150 ? enhancedPrompt.Substring(0, 150) : enhancedPrompt ?? string.Empty
+                ["basicPromptPreview"] = basicPromptResult.IsSuccess && basicPromptResult.Value?.Length > 150
+                    ? basicPromptResult.Value.Substring(0, 150)
+                    : basicPromptResult.IsSuccess ? basicPromptResult.Value ?? string.Empty : string.Empty,
+                ["enhancedPromptPreview"] = enhancedPromptResult.IsSuccess && enhancedPromptResult.Value?.Length > 150
+                    ? enhancedPromptResult.Value.Substring(0, 150)
+                    : enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value ?? string.Empty : string.Empty
             });
     }
 }

@@ -11,25 +11,25 @@ namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
 /// </summary>
 public class IvanContextAnalyzer : IIvanContextAnalyzer
 {
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ICommunicationStyleAnalyzer _communicationStyleAnalyzer;
     private readonly ILogger<IvanContextAnalyzer> _logger;
 
     public IvanContextAnalyzer(
-        IIvanPersonalityService ivanPersonalityService,
+        IPersonalityService personalityService,
         ICommunicationStyleAnalyzer communicationStyleAnalyzer,
         ILogger<IvanContextAnalyzer> logger)
     {
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _communicationStyleAnalyzer = communicationStyleAnalyzer;
         _logger = logger;
     }
 
-    public async Task<ContextualCommunicationStyle> GetContextualStyleAsync(SituationalContext context)
+    public async Task<Result<ContextualCommunicationStyle>> GetContextualStyleAsync(SituationalContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
-            var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetPersonalityAsync();
 
             if (personalityResult.IsFailure)
                 throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
@@ -41,12 +41,7 @@ public class IvanContextAnalyzer : IIvanContextAnalyzer
             ApplyIvanStyleAdjustments(style, context);
 
             return style;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error analyzing context for style determination");
-            return GetFallbackStyle(context);
-        }
+        }, $"Error analyzing context for style determination: {context.ContextType}");
     }
 
     private static void ApplyIvanStyleAdjustments(ContextualCommunicationStyle style, SituationalContext context)

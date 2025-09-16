@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 using DigitalMe.Services.PersonalityEngine;
 using Microsoft.Extensions.Logging;
@@ -10,22 +11,29 @@ namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
 /// </summary>
 public class IvanVocabularyService : IIvanVocabularyService
 {
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ILogger<IvanVocabularyService> _logger;
 
     public IvanVocabularyService(
-        IIvanPersonalityService ivanPersonalityService,
+        IPersonalityService personalityService,
         ILogger<IvanVocabularyService> logger)
     {
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _logger = logger;
     }
 
-    public async Task<IvanVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context)
+    public async Task<Result<IvanVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context)
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetPersonalityAsync();
+            if (!personalityResult.IsSuccess)
+            {
+                _logger.LogError("Failed to get personality: {Error}", personalityResult.Error);
+                throw new InvalidOperationException($"Failed to get personality: {personalityResult.Error}");
+            }
+
+            var personality = personalityResult.Value!;
 
             return context.ContextType switch
             {
@@ -34,12 +42,7 @@ public class IvanVocabularyService : IIvanVocabularyService
                 ContextType.Personal => GetPersonalVocabulary(personality),
                 _ => GetDefaultVocabulary(personality)
             };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting vocabulary preferences for context {ContextType}", context.ContextType);
-            return GetFallbackVocabulary();
-        }
+        }, $"Failed to get vocabulary preferences for context {context.ContextType}");
     }
 
     private static IvanVocabularyPreferences GetTechnicalVocabulary(PersonalityProfile personality)

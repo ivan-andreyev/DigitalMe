@@ -38,15 +38,9 @@ public static class CleanArchitectureServiceCollectionExtensions
         services.AddScoped<IWebNavigationWorkflowService, WebNavigationWorkflowService>();
         services.AddScoped<ICaptchaWorkflowService, CaptchaWorkflowService>();
         services.AddScoped<IPersonalLevelWorkflowService, PersonalLevelWorkflowService>();
-        // Legacy compatibility
-        services.AddScoped<IIvanLevelWorkflowService>(provider =>
-            (IIvanLevelWorkflowService)provider.GetService<IPersonalLevelWorkflowService>()!);
 
-        // Personality Engine Services - SOLID Refactored Architecture
+        // Personality Engine Services - Clean Result<T> Architecture
         services.AddScoped<DigitalMe.Services.IPersonalityService, DigitalMe.Services.PersonalityService>();
-        // Legacy compatibility
-        services.AddScoped<DigitalMe.Services.IIvanPersonalityService>(provider =>
-            (DigitalMe.Services.IIvanPersonalityService)provider.GetService<DigitalMe.Services.IPersonalityService>()!);
         services.AddScoped<DigitalMe.Services.IPersonalityBehaviorMapper, DigitalMe.Services.PersonalityBehaviorMapper>();
         services.AddScoped<DigitalMe.Services.IProfileDataParser, DigitalMe.Services.ProfileDataParser>();
 

@@ -41,16 +41,26 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
                 return input;
 
             // Get contextual communication style through specialized analyzer
-            var communicationStyle = await _contextAnalyzer.GetContextualStyleAsync(context);
+            var styleResult = await _contextAnalyzer.GetContextualStyleAsync(context);
+            if (!styleResult.IsSuccess)
+            {
+                _logger.LogError("Failed to get communication style: {Error}", styleResult.Error);
+                return input; // Return original on style error
+            }
 
             // Apply linguistic patterns through specialized service
-            var enhancedText = _linguisticPatternService.ApplyIvanLinguisticPatterns(input, communicationStyle);
+            var enhancedText = _linguisticPatternService.ApplyIvanLinguisticPatterns(input, styleResult.Value);
 
             // Get vocabulary preferences for context enrichment
-            var vocabularyPrefs = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            var vocabularyResult = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            if (!vocabularyResult.IsSuccess)
+            {
+                _logger.LogError("Failed to get vocabulary preferences: {Error}", vocabularyResult.Error);
+                return input; // Return original on vocabulary error
+            }
 
             // Apply vocabulary-based enhancements
-            enhancedText = ApplyVocabularyEnhancements(enhancedText, vocabularyPrefs);
+            enhancedText = ApplyVocabularyEnhancements(enhancedText, vocabularyResult.Value);
 
             _logger.LogDebug("Response styling completed: {Original} -> {Enhanced}",
                 input.Length, enhancedText.Length);
@@ -69,7 +79,12 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
         var cacheKey = $"communication_style_{context.ContextType}_{context.UrgencyLevel:F1}";
         return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
-            return await _contextAnalyzer.GetContextualStyleAsync(context);
+            var result = await _contextAnalyzer.GetContextualStyleAsync(context);
+            if (!result.IsSuccess)
+            {
+                throw new InvalidOperationException($"Failed to get contextual style: {result.Error}");
+            }
+            return result.Value;
         }, TimeSpan.FromMinutes(30));
     }
 
@@ -83,7 +98,12 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
         var cacheKey = $"vocabulary_prefs_{context.ContextType}";
         return await _cachingService.GetOrSetAsync(cacheKey, async () =>
         {
-            return await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            var result = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            if (!result.IsSuccess)
+            {
+                throw new InvalidOperationException($"Failed to get vocabulary preferences: {result.Error}");
+            }
+            return result.Value;
         }, TimeSpan.FromMinutes(15));
     }
 

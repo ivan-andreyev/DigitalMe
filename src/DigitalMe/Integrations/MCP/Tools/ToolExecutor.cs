@@ -60,23 +60,25 @@ public class ToolExecutor
 
     private async Task<object> GetPersonalityTraits(Dictionary<string, object> parameters)
     {
-        var personality = await _personalityService.GetPersonalityAsync("Ivan");
-        if (personality == null)
-            return new { error = "Ivan's personality not found" };
+        var personalityResult = await _personalityService.GetPersonalityAsync();
+        if (!personalityResult.IsSuccess)
+            return new { error = "Ivan's personality not found", details = personalityResult.Error };
 
-        var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
+        var personality = personalityResult.Value!;
+        var traits = personality.Traits ?? new List<PersonalityTrait>();
+        var filteredTraits = traits.AsEnumerable();
 
         if (parameters.ContainsKey("category"))
         {
             var category = parameters["category"].ToString();
-            traits = traits.Where(t => t.Category.Contains(category!, StringComparison.OrdinalIgnoreCase));
+            filteredTraits = filteredTraits.Where(t => t.Category.Contains(category!, StringComparison.OrdinalIgnoreCase));
         }
 
         return new
         {
             personality_id = personality.Id,
             name = personality.Name,
-            traits = traits.Select(t => new
+            traits = filteredTraits.Select(t => new
             {
                 category = t.Category,
                 name = t.Name,

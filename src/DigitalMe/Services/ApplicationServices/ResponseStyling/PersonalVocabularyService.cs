@@ -11,11 +11,11 @@ namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
 /// </summary>
 public class PersonalVocabularyService : IPersonalVocabularyService
 {
-    private readonly IIvanPersonalityService _personalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ILogger<PersonalVocabularyService> _logger;
 
     public PersonalVocabularyService(
-        IIvanPersonalityService personalityService,
+        IPersonalityService personalityService,
         ILogger<PersonalVocabularyService> logger)
     {
         _personalityService = personalityService;
@@ -26,9 +26,9 @@ public class PersonalVocabularyService : IPersonalVocabularyService
     {
         return await ResultExtensions.TryAsync(async () =>
         {
-            var personalityResult = await _personalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetPersonalityAsync();
 
-            if (personalityResult.IsFailure)
+            if (!personalityResult.IsSuccess)
                 throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
 
             var personality = personalityResult.Value!;

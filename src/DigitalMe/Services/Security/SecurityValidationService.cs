@@ -241,14 +241,14 @@ public class SecurityValidationService : ISecurityValidationService
         try
         {
             var json = JsonSerializer.Serialize(obj);
-            var sanitizedJson = SanitizeInput(json);
+            var sanitizedJsonResult = SanitizeInput(json);
 
             // Only return sanitized version if it's different and still valid JSON
-            if (sanitizedJson != json)
+            if (sanitizedJsonResult.IsSuccess && sanitizedJsonResult.Value != json)
             {
                 try
                 {
-                    return JsonSerializer.Deserialize<T>(sanitizedJson);
+                    return JsonSerializer.Deserialize<T>(sanitizedJsonResult.Value!);
                 }
                 catch (JsonException)
                 {

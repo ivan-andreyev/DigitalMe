@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.Data.Entities;
 
 namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
@@ -12,8 +13,8 @@ public interface IIvanVocabularyService
     /// Gets Ivan's vocabulary preferences for given context
     /// </summary>
     /// <param name="context">Situational context</param>
-    /// <returns>Ivan's vocabulary preferences</returns>
-    Task<IvanVocabularyPreferences> GetVocabularyPreferencesAsync(SituationalContext context);
+    /// <returns>Result containing Ivan's vocabulary preferences or error details</returns>
+    Task<Result<IvanVocabularyPreferences>> GetVocabularyPreferencesAsync(SituationalContext context);
 }
 
 /// <summary>

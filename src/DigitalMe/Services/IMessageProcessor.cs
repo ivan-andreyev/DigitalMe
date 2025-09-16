@@ -1,3 +1,4 @@
+using DigitalMe.Common;
 using DigitalMe.DTOs;
 using DigitalMe.Models;
 using DigitalMe.Services.AgentBehavior;
@@ -6,8 +7,8 @@ namespace DigitalMe.Services;
 
 public interface IMessageProcessor
 {
-    Task<ProcessMessageResult> ProcessUserMessageAsync(ChatRequestDto request);
-    Task<ProcessAgentResponseResult> ProcessAgentResponseAsync(ChatRequestDto request, Guid conversationId);
+    Task<Result<ProcessMessageResult>> ProcessUserMessageAsync(ChatRequestDto request);
+    Task<Result<ProcessAgentResponseResult>> ProcessAgentResponseAsync(ChatRequestDto request, Guid conversationId);
 }
 
 public record ProcessMessageResult(

@@ -90,7 +90,7 @@ PROFESSIONAL BACKGROUND:
 CURRENT PROJECTS & INTERESTS:
 - Main pet project: Unity indie game framework with client-server expandable architecture
 - Goal: Content generation instead of Unity Editor work
-- Tech preferences: C#/.NET, strong typing, code generation over graphical tools
+- Technical Preferences: C#/.NET, strong typing, code generation over graphical tools
 
 LIFE SITUATION:
 - Work dominates schedule, only 1-2 hours/day with family
@@ -117,18 +117,18 @@ Respond as Ivan would - rationally, structured, friendly but direct, with occasi
             if (_cachedProfileData == null)
             {
                 var configPath = _configuration["IvanProfile:DataFilePath"];
-                var profileDataPath = string.IsNullOrEmpty(configPath) 
-                    ? "data/profile/IVAN_PROFILE_DATA.md" 
+                var profileDataPath = string.IsNullOrEmpty(configPath)
+                    ? "data/profile/IVAN_PROFILE_DATA.md"
                     : configPath;
-                
+
                 var fullPath = Path.Combine(Directory.GetCurrentDirectory(), profileDataPath);
                 _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
-                
+
                 _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);
             }
 
             var data = _cachedProfileData;
-            
+
             return $"""
 You are Ivan, a {data.Age}-year-old {data.Professional.Position} at {data.Professional.Company}, originally from {data.Origin}, now living in {data.CurrentLocation} with your wife {data.Family.WifeName} ({data.Family.WifeAge}) and daughter {data.Family.DaughterName} ({data.Family.DaughterAge}).
 
@@ -137,7 +137,7 @@ CORE PERSONALITY & VALUES:
 
 PROFESSIONAL IDENTITY:
 - Position: {data.Professional.Position} at {data.Professional.Company}
-- Experience: {data.Professional.Experience}  
+- Experience: {data.Professional.Experience}
 - Career Journey: {data.Professional.CareerPath}
 - Education: {data.Professional.Education}
 - Current Challenge: Balancing intense work schedule (dominates daily life) with family time (1-2 hours/day)
@@ -157,7 +157,7 @@ WORK STYLE & METHODOLOGY:
 COMMUNICATION STYLE:
 {data.CommunicationStyle}
 
-DECISION MAKING APPROACH:  
+DECISION MAKING APPROACH:
 {data.DecisionMakingStyle}
 
 CURRENT LIFE CHALLENGES:
@@ -183,60 +183,4 @@ Respond as Ivan would - with analytical precision, technical expertise, family-c
         }, "Error generating enhanced system prompt");
     }
 
-    // Legacy database-oriented interface methods for backward compatibility
-    async Task<PersonalityProfile?> IPersonalityService.GetPersonalityAsync(string name)
-    {
-        // For legacy compatibility, if requesting Ivan, return from the Result<T> version
-        if (name.Equals("Ivan", StringComparison.OrdinalIgnoreCase) ||
-            name.Equals("Ivan Digital Clone", StringComparison.OrdinalIgnoreCase))
-        {
-            var result = await GetPersonalityAsync(); // Call the Result<T> version
-            return result.IsSuccess ? result.Value : null;
-        }
-
-        _logger.LogWarning("Requested personality '{Name}' not supported in current implementation", name);
-        return null;
-    }
-
-    Task<PersonalityProfile> IPersonalityService.CreatePersonalityAsync(string name, string description)
-    {
-        throw new NotImplementedException("Creating personalities not supported in current implementation");
-    }
-
-    Task<PersonalityProfile> IPersonalityService.UpdatePersonalityAsync(Guid id, string description)
-    {
-        throw new NotImplementedException("Updating personalities not supported in current implementation");
-    }
-
-    async Task<string> IPersonalityService.GenerateSystemPromptAsync(Guid personalityId)
-    {
-        // For legacy compatibility, always generate enhanced system prompt regardless of ID
-        var result = await GenerateEnhancedSystemPromptAsync();
-        return result.IsSuccess ? result.Value : "Error generating system prompt";
-    }
-
-    async Task<string> IPersonalityService.GenerateIvanSystemPromptAsync()
-    {
-        var result = await GenerateEnhancedSystemPromptAsync();
-        return result.IsSuccess ? result.Value : "Error generating Ivan system prompt";
-    }
-
-    Task<PersonalityTrait> IPersonalityService.AddTraitAsync(Guid personalityId, string category, string name, string description, double weight = 1.0)
-    {
-        throw new NotImplementedException("Adding traits not supported in current implementation");
-    }
-
-    async Task<IEnumerable<PersonalityTrait>> IPersonalityService.GetPersonalityTraitsAsync(Guid personalityId)
-    {
-        // For legacy compatibility, return traits from current personality profile
-        var result = await GetPersonalityAsync();
-        return result.IsSuccess && result.Value?.Traits != null
-            ? result.Value.Traits
-            : new List<PersonalityTrait>();
-    }
-
-    Task<bool> IPersonalityService.DeletePersonalityAsync(Guid id)
-    {
-        throw new NotImplementedException("Deleting personalities not supported in current implementation");
-    }
 }

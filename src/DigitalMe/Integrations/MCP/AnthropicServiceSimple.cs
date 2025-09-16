@@ -28,14 +28,14 @@ public class AnthropicServiceSimple : IAnthropicService
     private readonly HttpClient _httpClient;
     private readonly AnthropicConfiguration _config;
     private readonly ILogger<AnthropicServiceSimple> _logger;
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
 
-    public AnthropicServiceSimple(HttpClient httpClient, IOptions<AnthropicConfiguration> config, ILogger<AnthropicServiceSimple> logger, IIvanPersonalityService ivanPersonalityService)
+    public AnthropicServiceSimple(HttpClient httpClient, IOptions<AnthropicConfiguration> config, ILogger<AnthropicServiceSimple> logger, IPersonalityService personalityService)
     {
         _httpClient = httpClient;
         _config = config.Value;
         _logger = logger;
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
 
         // Try to get API key from environment variable if not set in config
         var apiKey = GetApiKey();
@@ -162,14 +162,14 @@ public class AnthropicServiceSimple : IAnthropicService
     private async Task<string> GenerateSystemPromptAsync(PersonalityProfile? personality)
     {
         // Always use Ivan's real personality data
-        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfileResult = await _personalityService.GetPersonalityAsync();
         if (!ivanProfileResult.IsSuccess)
         {
             _logger.LogWarning("Failed to get Ivan's personality: {Error}", ivanProfileResult.Error);
             return "Error generating system prompt";
         }
 
-        var systemPromptResult = _ivanPersonalityService.GenerateSystemPrompt(ivanProfileResult.Value);
+        var systemPromptResult = _personalityService.GenerateSystemPrompt(ivanProfileResult.Value);
         if (!systemPromptResult.IsSuccess)
         {
             _logger.LogWarning("Failed to generate system prompt: {Error}", systemPromptResult.Error);
@@ -183,7 +183,7 @@ public class AnthropicServiceSimple : IAnthropicService
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityProfile? personality)
     {
         // Use Ivan's personality even in fallback responses
-        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfileResult = await _personalityService.GetPersonalityAsync();
         var ivanProfile = ivanProfileResult.IsSuccess ? ivanProfileResult.Value : null;
 
         // Use a consistent fallback response that contains all expected keywords for tests

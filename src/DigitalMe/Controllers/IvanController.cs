@@ -12,14 +12,14 @@ namespace DigitalMe.Controllers;
 [Route("api/[controller]")]
 public class IvanController : ControllerBase
 {
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ILogger<IvanController> _logger;
 
     public IvanController(
-        IIvanPersonalityService ivanPersonalityService,
+        IPersonalityService personalityService,
         ILogger<IvanController> logger)
     {
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _logger = logger;
     }
 
@@ -29,7 +29,7 @@ public class IvanController : ControllerBase
     [HttpGet("personality")]
     public async Task<ActionResult<object>> GetPersonality()
     {
-        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var personalityResult = await _personalityService.GetPersonalityAsync();
 
         if (personalityResult.IsFailure)
         {
@@ -62,7 +62,7 @@ public class IvanController : ControllerBase
     [HttpGet("prompt/basic")]
     public async Task<ActionResult<object>> GetBasicSystemPrompt()
     {
-        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var personalityResult = await _personalityService.GetPersonalityAsync();
 
         if (personalityResult.IsFailure)
         {
@@ -70,7 +70,7 @@ public class IvanController : ControllerBase
             return StatusCode(500, new { message = "Failed to generate system prompt", error = personalityResult.Error });
         }
 
-        var promptResult = _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!);
+        var promptResult = _personalityService.GenerateSystemPrompt(personalityResult.Value!);
 
         if (promptResult.IsFailure)
         {
@@ -95,7 +95,7 @@ public class IvanController : ControllerBase
     [HttpGet("prompt/enhanced")]
     public async Task<ActionResult<object>> GetEnhancedSystemPrompt()
     {
-        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
         if (enhancedPromptResult.IsFailure)
         {
@@ -122,11 +122,11 @@ public class IvanController : ControllerBase
     [HttpGet("health")]
     public async Task<ActionResult<object>> GetHealthStatus()
     {
-        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var personalityResult = await _personalityService.GetPersonalityAsync();
         var basicPromptResult = personalityResult.IsSuccess ?
-            _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+            _personalityService.GenerateSystemPrompt(personalityResult.Value!) :
             Result<string>.Failure("Cannot generate prompt - personality loading failed");
-        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
         var personality = personalityResult.IsSuccess ? personalityResult.Value : null;
         var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;

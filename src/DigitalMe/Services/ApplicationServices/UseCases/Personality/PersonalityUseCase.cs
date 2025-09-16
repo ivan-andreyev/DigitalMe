@@ -194,21 +194,24 @@ public class PersonalityUseCase : IPersonalityUseCase
         try
         {
             // Test basic personality loading
-            var personality = await _personalityService.GetPersonalityAsync();
-            result.ProfileDataLoaded = personality != null && personality.Traits?.Any() == true;
+            var personalityResult = await _personalityService.GetPersonalityAsync();
+            result.ProfileDataLoaded = personalityResult.IsSuccess &&
+                                       personalityResult.Value != null &&
+                                       personalityResult.Value.Traits?.Any() == true;
             if (!result.ProfileDataLoaded)
             {
-                issues.Add("Base personality profile not loaded or has no traits");
+                issues.Add($"Base personality profile not loaded or has no traits: {personalityResult.Error ?? "Unknown error"}");
             }
 
             // Test enhanced prompt generation
-            var enhancedPrompt = await _personalityService.GenerateEnhancedSystemPromptAsync();
-            result.EnhancedPromptsWorking = !string.IsNullOrEmpty(enhancedPrompt) &&
-                                            enhancedPrompt.Contains("Ivan") &&
-                                            (enhancedPrompt.Contains("EllyAnalytics") || enhancedPrompt.Contains("Head of R&D"));
+            var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
+            result.EnhancedPromptsWorking = enhancedPromptResult.IsSuccess &&
+                                            !string.IsNullOrEmpty(enhancedPromptResult.Value) &&
+                                            enhancedPromptResult.Value.Contains("Ivan") &&
+                                            (enhancedPromptResult.Value.Contains("EllyAnalytics") || enhancedPromptResult.Value.Contains("Head of R&D"));
             if (!result.EnhancedPromptsWorking)
             {
-                issues.Add("Enhanced system prompt generation not working properly");
+                issues.Add($"Enhanced system prompt generation not working properly: {enhancedPromptResult.Error ?? "Unknown error"}");
             }
 
             // Test contextual adaptation
@@ -219,9 +222,9 @@ public class PersonalityUseCase : IPersonalityUseCase
                 TimeOfDay = TimeOfDay.Afternoon
             };
 
-            if (personality != null)
+            if (personalityResult.IsSuccess)
             {
-                var adaptedPersonality = await _contextualPersonalityEngine.AdaptPersonalityToContextAsync(personality, testContext);
+                var adaptedPersonality = await _contextualPersonalityEngine.AdaptPersonalityToContextAsync(personalityResult.Value!, testContext);
                 result.ContextAdaptationWorking = adaptedPersonality != null && adaptedPersonality.Traits?.Any() == true;
                 if (!result.ContextAdaptationWorking)
                 {
@@ -236,8 +239,8 @@ public class PersonalityUseCase : IPersonalityUseCase
             // Add metrics
             result.Metrics = new Dictionary<string, object>
             {
-                ["traitCount"] = personality?.Traits?.Count ?? 0,
-                ["enhancedPromptLength"] = enhancedPrompt?.Length ?? 0,
+                ["traitCount"] = personalityResult.IsSuccess ? personalityResult.Value!.Traits?.Count ?? 0 : 0,
+                ["enhancedPromptLength"] = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value?.Length ?? 0 : 0,
                 ["testContextType"] = testContext.ContextType.ToString(),
                 ["validationTimestamp"] = DateTime.UtcNow
             };

@@ -47,7 +47,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMessageProcessor, MessageProcessor>();
         services.AddScoped<IMvpMessageProcessor, MvpMessageProcessor>();
         services.AddScoped<IHealthChecker, HealthChecker>();
-        services.AddScoped<IIvanLevelHealthCheckService, PersonalLevelHealthCheckService>();
         services.AddScoped<IPersonalLevelHealthCheckService, PersonalLevelHealthCheckService>();
 
         // Resilience services
@@ -128,8 +127,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.Email.ISmtpService, DigitalMe.Services.Email.SmtpService>();
         services.AddScoped<DigitalMe.Services.Email.IImapService, DigitalMe.Services.Email.ImapService>();
 
-        // Application Services layer - Clean Architecture compliance
-        services.AddScoped<DigitalMe.Services.ApplicationServices.Workflows.IIvanLevelWorkflowService, DigitalMe.Services.ApplicationServices.Workflows.PersonalLevelWorkflowService>();
+        // Application Services layer - Clean Architecture compliance - Personal level workflow handled in CleanArchitectureServiceCollectionExtensions
 
         // Orchestrators - Clean Architecture Application Services
         services.AddScoped<DigitalMe.Services.ApplicationServices.Orchestrators.IWorkflowOrchestrator, DigitalMe.Services.ApplicationServices.Orchestrators.WorkflowOrchestrator>();

@@ -1,3 +1,4 @@
+using DigitalMe.Data.Entities;
 using DigitalMe.Models;
 using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
@@ -56,28 +57,30 @@ public class PersonalityToolStrategy : BaseToolStrategy
         {
             var category = GetParameter<string>(parameters, "category", "");
 
-            var personality = await _personalityService.GetPersonalityAsync("Ivan");
-            if (personality == null)
+            var personalityResult = await _personalityService.GetPersonalityAsync();
+            if (!personalityResult.IsSuccess)
             {
-                Logger.LogWarning("Ivan's personality not found in database");
+                Logger.LogWarning("Ivan's personality not found: {Error}", personalityResult.Error);
                 return new
                 {
                     success = false,
-                    error = "Ivan's personality not found",
+                    error = personalityResult.Error,
                     tool_name = ToolName
                 };
             }
 
-            var traits = await _personalityService.GetPersonalityTraitsAsync(personality.Id);
+            var personality = personalityResult.Value!;
+            var traits = personality.Traits ?? new List<PersonalityTrait>();
 
             // Фильтруем по категории если указана
+            var filteredTraits = traits.AsEnumerable();
             if (!string.IsNullOrWhiteSpace(category))
             {
-                traits = traits.Where(t => t.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
+                filteredTraits = filteredTraits.Where(t => t.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
                 Logger.LogDebug("Filtering personality traits by category: {Category}", category);
             }
 
-            var traitsList = traits.ToList();
+            var traitsList = filteredTraits.ToList();
 
             var result = new
             {

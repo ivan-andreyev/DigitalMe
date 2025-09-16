@@ -60,16 +60,25 @@ public class ChatHub : Hub
             // Process user message through MessageProcessor
             var result = await _messageProcessor.ProcessUserMessageAsync(request);
 
-            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
-                result.GroupName);
-
-            await Clients.Group(result.GroupName).SendAsync("MessageReceived", new MessageDto
+            if (!result.IsSuccess)
             {
-                Id = result.UserMessage.Id,
-                ConversationId = result.UserMessage.ConversationId,
-                Role = result.UserMessage.Role,
-                Content = result.UserMessage.Content,
-                Timestamp = result.UserMessage.Timestamp,
+                _logger.LogError("❌ Failed to process user message: {Error}", result.Error);
+                await Clients.Caller.SendAsync("Error", new { message = "Failed to process message", error = result.Error });
+                return;
+            }
+
+            var processResult = result.Value;
+
+            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
+                processResult.GroupName);
+
+            await Clients.Group(processResult.GroupName).SendAsync("MessageReceived", new MessageDto
+            {
+                Id = processResult.UserMessage.Id,
+                ConversationId = processResult.UserMessage.ConversationId,
+                Role = processResult.UserMessage.Role,
+                Content = processResult.UserMessage.Content,
+                Timestamp = processResult.UserMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
                     ["isRealTime"] = true,
@@ -79,8 +88,8 @@ public class ChatHub : Hub
 
             // Show typing indicator
             _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
-                result.GroupName);
-            await Clients.Group(result.GroupName).SendAsync("TypingIndicator", new
+                processResult.GroupName);
+            await Clients.Group(processResult.GroupName).SendAsync("TypingIndicator", new
             {
                 IsTyping = true,
                 User = "Ivan",
@@ -88,7 +97,7 @@ public class ChatHub : Hub
             });
 
             // Process agent response synchronously for integration tests reliability
-            await ProcessAgentResponseAsync(request, result.Conversation.Id, result.GroupName);
+            await ProcessAgentResponseAsync(request, processResult.Conversation.Id, processResult.GroupName);
 
             _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}",
                 request.UserId);
@@ -114,6 +123,15 @@ public class ChatHub : Hub
             // Process agent response through MessageProcessor
             var result = await _messageProcessor.ProcessAgentResponseAsync(request, conversationId);
 
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("❌ Failed to process agent response: {Error}", result.Error);
+                await Clients.Group(groupName).SendAsync("Error", new { message = "Failed to process agent response", error = result.Error });
+                return;
+            }
+
+            var agentResult = result.Value;
+
             // Hide typing indicator
             _logger.LogInformation("⏹️ STEP 7: Hiding typing indicator");
             await Clients.Group(groupName).SendAsync("TypingIndicator", new
@@ -127,17 +145,17 @@ public class ChatHub : Hub
                 groupName);
             await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
             {
-                Id = result.AssistantMessage.Id,
-                ConversationId = result.AssistantMessage.ConversationId,
-                Role = result.AssistantMessage.Role,
-                Content = result.AssistantMessage.Content,
-                Timestamp = result.AssistantMessage.Timestamp,
+                Id = agentResult.AssistantMessage.Id,
+                ConversationId = agentResult.AssistantMessage.ConversationId,
+                Role = agentResult.AssistantMessage.Role,
+                Content = agentResult.AssistantMessage.Content,
+                Timestamp = agentResult.AssistantMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
-                    ["mood"] = result.AgentResponse.Mood.PrimaryMood,
-                    ["moodIntensity"] = result.AgentResponse.Mood.Intensity,
-                    ["confidence"] = result.AgentResponse.ConfidenceScore,
-                    ["triggeredTools"] = result.AgentResponse.TriggeredTools,
+                    ["mood"] = agentResult.AgentResponse.Mood.PrimaryMood,
+                    ["moodIntensity"] = agentResult.AgentResponse.Mood.Intensity,
+                    ["confidence"] = agentResult.AgentResponse.ConfidenceScore,
+                    ["triggeredTools"] = agentResult.AgentResponse.TriggeredTools,
                     ["isRealTime"] = true,
                     ["backgroundProcessed"] = true
                 }

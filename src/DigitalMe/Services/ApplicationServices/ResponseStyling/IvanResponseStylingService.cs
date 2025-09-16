@@ -189,13 +189,10 @@ public class IvanResponseStylingService : IIvanResponseStylingService
 
         return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
         {
-            try
+            var result = await _contextAnalyzer.GetContextualStyleAsync(context);
+            if (!result.IsSuccess)
             {
-                return await _contextAnalyzer.GetContextualStyleAsync(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get contextual style, using default");
+                _logger.LogError("Failed to get contextual style: {Error}, using default", result.Error);
                 return new ContextualCommunicationStyle
                 {
                     Context = context,
@@ -207,6 +204,8 @@ public class IvanResponseStylingService : IIvanResponseStylingService
                     RecommendedTone = "Direct, rational, structured with occasional self-awareness"
                 };
             }
+
+            return result.Value;
         }, TimeSpan.FromMinutes(30)); // Cache for 30 minutes
     }
 
@@ -224,7 +223,19 @@ public class IvanResponseStylingService : IIvanResponseStylingService
 
         return await _performanceOptimizationService.GetOrSetAsync(cacheKey, async () =>
         {
-            return await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            var result = await _vocabularyService.GetVocabularyPreferencesAsync(context);
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to get vocabulary preferences: {Error}, using fallback", result.Error);
+                return new IvanVocabularyPreferences
+                {
+                    PreferredTechnicalTerms = new List<string> { "structured", "systematic", "pragmatic" },
+                    PreferredCasualPhrases = new List<string> { "honestly", "frankly", "here's the thing" },
+                    SignatureExpressions = new List<string> { "Ivan's perspective", "from experience" }
+                };
+            }
+
+            return result.Value;
         }, TimeSpan.FromHours(2)); // Cache for 2 hours - vocabulary preferences are very stable
     }
 

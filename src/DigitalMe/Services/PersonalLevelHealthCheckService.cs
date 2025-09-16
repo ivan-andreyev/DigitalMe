@@ -38,7 +38,7 @@ public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService,
     private readonly IWebNavigationService _webNavigationService;
     private readonly ICaptchaSolvingService _captchaSolvingService;
     private readonly IVoiceService _voiceService;
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ILogger<PersonalLevelHealthCheckService> _logger;
 
     public PersonalLevelHealthCheckService(
@@ -46,14 +46,14 @@ public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService,
         IWebNavigationService webNavigationService,
         ICaptchaSolvingService captchaSolvingService,
         IVoiceService voiceService,
-        IIvanPersonalityService ivanPersonalityService,
+        IPersonalityService personalityService,
         ILogger<PersonalLevelHealthCheckService> logger)
     {
         _fileProcessingService = fileProcessingService;
         _webNavigationService = webNavigationService;
         _captchaSolvingService = captchaSolvingService;
         _voiceService = voiceService;
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _logger = logger;
     }
 
@@ -257,11 +257,11 @@ public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService,
         try
         {
             // Test personality service and profile data loading
-            var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetPersonalityAsync();
             var basicPromptResult = personalityResult.IsSuccess ?
-                _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+                _personalityService.GenerateSystemPrompt(personalityResult.Value!) :
                 Result<string>.Failure("Cannot generate prompt - personality loading failed");
-            var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+            var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
             var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;
             var enhancedPrompt = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value : string.Empty;

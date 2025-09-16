@@ -5,7 +5,7 @@ namespace DigitalMe.Services;
 
 /// <summary>
 /// Service for working with personality profiles and generating system prompts for LLM agents.
-/// Provides methods for loading personality data and generating personalized prompts.
+/// Uses Result<T> pattern for consistent error handling.
 /// </summary>
 public interface IPersonalityService
 {
@@ -27,27 +27,4 @@ public interface IPersonalityService
     /// </summary>
     /// <returns>Result containing enhanced system prompt with profile file data or error details</returns>
     Task<Result<string>> GenerateEnhancedSystemPromptAsync();
-
-    // Legacy database-oriented methods for backward compatibility
-    Task<PersonalityProfile?> GetPersonalityAsync(string name);
-    Task<PersonalityProfile> CreatePersonalityAsync(string name, string description);
-    Task<PersonalityProfile> UpdatePersonalityAsync(Guid id, string description);
-    Task<string> GenerateSystemPromptAsync(Guid personalityId);
-    Task<string> GenerateIvanSystemPromptAsync();
-    Task<PersonalityTrait> AddTraitAsync(Guid personalityId, string category, string name, string description, double weight = 1.0);
-    Task<IEnumerable<PersonalityTrait>> GetPersonalityTraitsAsync(Guid personalityId);
-    Task<bool> DeletePersonalityAsync(Guid id);
-}
-
-/// <summary>
-/// Legacy alias for IPersonalityService for backward compatibility.
-/// </summary>
-[Obsolete("Use IPersonalityService instead", false)]
-public interface IIvanPersonalityService : IPersonalityService
-{
-    /// <summary>
-    /// Legacy method name - use GetPersonalityAsync() instead.
-    /// </summary>
-    [Obsolete("Use GetPersonalityAsync() instead", false)]
-    Task<Result<PersonalityProfile>> GetIvanPersonalityAsync() => GetPersonalityAsync();
 }

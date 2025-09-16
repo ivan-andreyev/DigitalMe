@@ -36,13 +36,15 @@ public class MvpMessageProcessor : IMvpMessageProcessor
             _logger.LogInformation("🔄 Processing user message (length: {MessageLength})", userMessage.Length);
 
             // Step 1: Get Ivan's personality context - используем интерфейсный метод для SOLID compliance
-            var systemPrompt = await _personalityService.GenerateIvanSystemPromptAsync();
+            var systemPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
-            if (string.IsNullOrWhiteSpace(systemPrompt))
+            if (!systemPromptResult.IsSuccess)
             {
-                _logger.LogError("❌ Failed to generate system prompt - personality service returned empty result");
-                throw new PersonalityServiceException("Failed to generate Ivan's personality context");
+                _logger.LogError("❌ Failed to generate system prompt: {Error}", systemPromptResult.Error);
+                throw new PersonalityServiceException($"Failed to generate Ivan's personality context: {systemPromptResult.Error}");
             }
+
+            var systemPrompt = systemPromptResult.Value!;
 
             _logger.LogInformation("✅ System prompt generated (length: {PromptLength})", systemPrompt.Length);
 

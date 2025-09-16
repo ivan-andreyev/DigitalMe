@@ -11,12 +11,12 @@ namespace DigitalMe.Services.ApplicationServices.ResponseStyling;
 /// </summary>
 public class PersonalContextAnalyzer : IPersonalContextAnalyzer
 {
-    private readonly IIvanPersonalityService _personalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly ICommunicationStyleAnalyzer _communicationStyleAnalyzer;
     private readonly ILogger<PersonalContextAnalyzer> _logger;
 
     public PersonalContextAnalyzer(
-        IIvanPersonalityService personalityService,
+        IPersonalityService personalityService,
         ICommunicationStyleAnalyzer communicationStyleAnalyzer,
         ILogger<PersonalContextAnalyzer> logger)
     {
@@ -29,9 +29,9 @@ public class PersonalContextAnalyzer : IPersonalContextAnalyzer
     {
         return await ResultExtensions.TryAsync(async () =>
         {
-            var personalityResult = await _personalityService.GetIvanPersonalityAsync();
+            var personalityResult = await _personalityService.GetPersonalityAsync();
 
-            if (personalityResult.IsFailure)
+            if (!personalityResult.IsSuccess)
                 throw new InvalidOperationException($"Failed to load personality profile: {personalityResult.Error}");
 
             var personality = personalityResult.Value!;

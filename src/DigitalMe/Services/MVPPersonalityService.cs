@@ -9,7 +9,7 @@ namespace DigitalMe.Services;
 /// <summary>
 /// Simple MVP personality service with direct DbContext access
 /// No repository pattern - direct database operations for simplicity
-/// Implements both IPersonalityService (for compatibility) and IMVPPersonalityService (ISP compliance)
+/// Uses Result<T> pattern for consistent error handling
 /// </summary>
 public class MvpPersonalityService : IPersonalityService, IMvpPersonalityService
 {
@@ -103,48 +103,9 @@ public class MvpPersonalityService : IPersonalityService, IMvpPersonalityService
         return systemPrompt.Trim();
     }
 
-    /// <summary>
-    /// Legacy interface compatibility - maps to Ivan for MVP
-    /// </summary>
-    public async Task<PersonalityProfile?> GetPersonalityAsync(string name)
-    {
-        // For MVP, we only support Ivan
-        if (name.Equals("Ivan", StringComparison.OrdinalIgnoreCase))
-        {
-            return await GetIvanProfileAsync();
-        }
-
-        _logger.LogWarning("Requested personality '{Name}' not supported in MVP (only Ivan)", name);
-        return null;
-    }
 
     /// <summary>
-    /// Legacy interface compatibility - not implemented in MVP
-    /// </summary>
-    public async Task<PersonalityProfile> CreatePersonalityAsync(string name, string description)
-    {
-        throw new NotImplementedException("Creating personalities not supported in MVP - use data seeder");
-    }
-
-    /// <summary>
-    /// Legacy interface compatibility - not implemented in MVP
-    /// </summary>
-    public async Task<PersonalityProfile> UpdatePersonalityAsync(Guid id, string description)
-    {
-        throw new NotImplementedException("Updating personalities not supported in MVP - use data seeder");
-    }
-
-    /// <summary>
-    /// Legacy interface compatibility - maps to Ivan system prompt
-    /// </summary>
-    public async Task<string> GenerateSystemPromptAsync(Guid personalityId)
-    {
-        // For MVP, always generate Ivan's prompt regardless of ID
-        return await GenerateIvanSystemPromptAsync();
-    }
-
-    /// <summary>
-    /// Get all personality traits for Ivan - useful for debugging
+    /// Get all personality traits for Ivan - specific to MVP interface
     /// </summary>
     public async Task<List<PersonalityTrait>> GetIvanTraitsAsync()
     {
@@ -165,35 +126,7 @@ public class MvpPersonalityService : IPersonalityService, IMvpPersonalityService
         }
     }
 
-    /// <summary>
-    /// Legacy interface compatibility - not implemented in MVP
-    /// </summary>
-    public async Task<PersonalityTrait> AddTraitAsync(Guid personalityId, string category, string name, string description, double weight = 1.0)
-    {
-        throw new NotImplementedException("Adding traits not supported in MVP - use data seeder");
-    }
-
-    /// <summary>
-    /// Legacy interface compatibility - maps to Ivan traits
-    /// </summary>
-    public async Task<IEnumerable<PersonalityTrait>> GetPersonalityTraitsAsync(Guid personalityId)
-    {
-        // For MVP, always return Ivan's traits regardless of ID
-        return await GetIvanTraitsAsync();
-    }
-
-    /// <summary>
-    /// Legacy interface compatibility - not implemented in MVP
-    /// </summary>
-    public async Task<bool> DeletePersonalityAsync(Guid id)
-    {
-        throw new NotImplementedException("Deleting personalities not supported in MVP");
-    }
-
-    /// <summary>
-    /// Fallback system prompt if database is unavailable
-    /// </summary>
-    // New Result<T> interface methods
+    // Result<T> interface methods
     public async Task<Result<PersonalityProfile>> GetPersonalityAsync()
     {
         return await ResultExtensions.TryAsync(async () =>

@@ -120,17 +120,20 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
 
         // Act - Process through MessageProcessor which should use MCP
         var userResult = await messageProcessor.ProcessUserMessageAsync(chatRequest);
-        var agentResult = await messageProcessor.ProcessAgentResponseAsync(chatRequest, userResult.Conversation.Id);
+        userResult.IsSuccess.Should().BeTrue("should successfully process user message");
+
+        var agentResult = await messageProcessor.ProcessAgentResponseAsync(chatRequest, userResult.Value.Conversation.Id);
+        agentResult.IsSuccess.Should().BeTrue("should successfully process agent response");
 
         // Assert
-        userResult.Should().NotBeNull("should process user message");
-        agentResult.Should().NotBeNull("should process agent response");
-        
-        agentResult.AgentResponse.Content.Should().NotBeNullOrEmpty("should have agent response content");
-        agentResult.AgentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
-        
+        userResult.Value.Should().NotBeNull("should process user message");
+        agentResult.Value.Should().NotBeNull("should process agent response");
+
+        agentResult.Value.AgentResponse.Content.Should().NotBeNullOrEmpty("should have agent response content");
+        agentResult.Value.AgentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
+
         // Should contain Ivan's personal approach
-        agentResult.AgentResponse.Content.Should().Contain("figuring this out", "should mention Ivan's personal honesty");
+        agentResult.Value.AgentResponse.Content.Should().Contain("figuring this out", "should mention Ivan's personal honesty");
     }
 
     public ValueTask DisposeAsync()

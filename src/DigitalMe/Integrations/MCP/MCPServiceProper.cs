@@ -11,18 +11,18 @@ public class McpServiceProper : IMcpService
     private readonly IMcpClient _mcpClient;
     private readonly IAnthropicService _anthropicService; // Fallback
     private readonly ILogger<McpServiceProper> _logger;
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
 
     public McpServiceProper(
         IMcpClient mcpClient,
         IAnthropicService anthropicService,
         ILogger<McpServiceProper> logger,
-        IIvanPersonalityService ivanPersonalityService)
+        IPersonalityService personalityService)
     {
         _mcpClient = mcpClient;
         _anthropicService = anthropicService;
         _logger = logger;
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
     }
 
     public async Task<bool> InitializeAsync()
@@ -97,9 +97,9 @@ public class McpServiceProper : IMcpService
         try
         {
             // Get Ivan's personality for system prompt
-            var ivanPersonalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var ivanPersonalityResult = await _personalityService.GetPersonalityAsync();
             var systemPrompt = ivanPersonalityResult.IsSuccess
-                ? _ivanPersonalityService.GenerateSystemPrompt(ivanPersonalityResult.Value).Value ?? "System prompt unavailable"
+                ? _personalityService.GenerateSystemPrompt(ivanPersonalityResult.Value).Value ?? "System prompt unavailable"
                 : "Error loading personality profile";
 
             // Prepare MCP request for conversation
@@ -235,7 +235,7 @@ public class McpServiceProper : IMcpService
 
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityContext context)
     {
-        var ivanProfileResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var ivanProfileResult = await _personalityService.GetPersonalityAsync();
         var ivanProfile = ivanProfileResult.IsSuccess ? ivanProfileResult.Value : null;
 
         var responses = new[]

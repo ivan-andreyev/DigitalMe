@@ -50,11 +50,11 @@ public interface IPersonalityBehaviorMapper
 public class PersonalityBehaviorMapper : IPersonalityBehaviorMapper
 {
     private readonly ILogger<PersonalityBehaviorMapper> _logger;
-    private readonly IIvanPersonalityService _personalityService;
+    private readonly IPersonalityService _personalityService;
 
     public PersonalityBehaviorMapper(
         ILogger<PersonalityBehaviorMapper> logger,
-        IIvanPersonalityService personalityService)
+        IPersonalityService personalityService)
     {
         _logger = logger;
         _personalityService = personalityService;
