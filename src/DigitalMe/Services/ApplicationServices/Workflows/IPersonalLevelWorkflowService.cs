@@ -4,10 +4,10 @@ using DigitalMe.Services.ApplicationServices.Queries;
 namespace DigitalMe.Services.ApplicationServices.Workflows;
 
 /// <summary>
-/// Service for orchestrating complex Ivan-Level workflows across multiple services.
+/// Service for orchestrating complex Personal-Level workflows across multiple services.
 /// Implements Clean Architecture Application Services layer patterns.
 /// </summary>
-public interface IIvanLevelWorkflowService : IApplicationService
+public interface IPersonalLevelWorkflowService : IApplicationService
 {
     /// <summary>
     /// Executes file processing workflow with comprehensive testing.
@@ -160,3 +160,11 @@ public record SiteRegistrationStepResult(bool Success, string Message, bool User
 public record FormFillingStepResult(bool Success, string Message, Dictionary<string, bool>? FieldsFilled = null, string? ErrorMessage = null);
 public record DocumentDownloadStepResult(bool Success, string Message, string? DownloadedFilePath = null, long? FileSizeBytes = null, string? ErrorMessage = null);
 public record PdfConversionStepResult(bool Success, string Message, string? PdfFilePath = null, int? PageCount = null, string? ErrorMessage = null);
+
+/// <summary>
+/// Legacy alias for IPersonalLevelWorkflowService for backward compatibility.
+/// </summary>
+[Obsolete("Use IPersonalLevelWorkflowService instead", false)]
+public interface IIvanLevelWorkflowService : IPersonalLevelWorkflowService
+{
+}

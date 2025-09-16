@@ -7,34 +7,34 @@ using Microsoft.Extensions.Logging;
 namespace DigitalMe.Services.ApplicationServices.Workflows;
 
 /// <summary>
-/// Implementation of Ivan-Level workflow orchestration service.
+/// Implementation of Personal-Level workflow orchestration service.
 /// Coordinates complex multi-service operations following Clean Architecture principles.
 /// </summary>
-public class IvanLevelWorkflowService : IIvanLevelWorkflowService
+public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService
 {
-    private readonly IIvanLevelHealthCheckService _healthCheckService;
+    private readonly IPersonalLevelHealthCheckService _healthCheckService;
     private readonly IFileProcessingService _fileProcessingService;
     private readonly IWebNavigationWorkflowService _webNavigationWorkflowService;
     private readonly ICaptchaWorkflowService _captchaWorkflowService;
     private readonly IVoiceService _voiceService;
-    private readonly IIvanPersonalityService _ivanPersonalityService;
-    private readonly ILogger<IvanLevelWorkflowService> _logger;
+    private readonly IPersonalityService _personalityService;
+    private readonly ILogger<PersonalLevelWorkflowService> _logger;
 
-    public IvanLevelWorkflowService(
-        IIvanLevelHealthCheckService healthCheckService,
+    public PersonalLevelWorkflowService(
+        IPersonalLevelHealthCheckService healthCheckService,
         IFileProcessingService fileProcessingService,
         IWebNavigationWorkflowService webNavigationWorkflowService,
         ICaptchaWorkflowService captchaWorkflowService,
         IVoiceService voiceService,
-        IIvanPersonalityService ivanPersonalityService,
-        ILogger<IvanLevelWorkflowService> logger)
+        IPersonalityService personalityService,
+        ILogger<PersonalLevelWorkflowService> logger)
     {
         _healthCheckService = healthCheckService;
         _fileProcessingService = fileProcessingService;
         _webNavigationWorkflowService = webNavigationWorkflowService;
         _captchaWorkflowService = captchaWorkflowService;
         _voiceService = voiceService;
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _logger = logger;
     }
 
@@ -293,11 +293,11 @@ public class IvanLevelWorkflowService : IIvanLevelWorkflowService
     {
         _logger.LogInformation("Testing Ivan personality service availability");
 
-        var personalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var personalityResult = await _personalityService.GetPersonalityAsync();
         var basicPromptResult = personalityResult.IsSuccess ?
-            _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!) :
+            _personalityService.GenerateSystemPrompt(personalityResult.Value!) :
             Result<string>.Failure("Cannot generate prompt - personality loading failed");
-        var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
         var personality = personalityResult.IsSuccess ? personalityResult.Value : null;
         var basicPrompt = basicPromptResult.IsSuccess ? basicPromptResult.Value : string.Empty;

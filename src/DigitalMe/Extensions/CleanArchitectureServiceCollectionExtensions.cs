@@ -37,7 +37,10 @@ public static class CleanArchitectureServiceCollectionExtensions
         // Application Layer - Workflow Services (TRUE integration)
         services.AddScoped<IWebNavigationWorkflowService, WebNavigationWorkflowService>();
         services.AddScoped<ICaptchaWorkflowService, CaptchaWorkflowService>();
-        services.AddScoped<IIvanLevelWorkflowService, IvanLevelWorkflowService>();
+        services.AddScoped<IPersonalLevelWorkflowService, PersonalLevelWorkflowService>();
+        // Legacy compatibility
+        services.AddScoped<IIvanLevelWorkflowService>(provider =>
+            provider.GetService<IPersonalLevelWorkflowService>()!);
 
         // Personality Engine Services - SOLID Refactored Architecture
         services.AddScoped<DigitalMe.Services.IPersonalityService, DigitalMe.Services.PersonalityService>();

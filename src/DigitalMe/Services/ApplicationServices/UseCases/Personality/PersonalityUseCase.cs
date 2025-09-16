@@ -3,13 +3,13 @@ using DigitalMe.Data.Entities;
 using DigitalMe.Services;
 using Microsoft.Extensions.Logging;
 
-namespace DigitalMe.Services.ApplicationServices.UseCases.Ivan;
+namespace DigitalMe.Services.ApplicationServices.UseCases.Personality;
 
 /// <summary>
-/// Use case interface for Ivan-specific personality operations.
+/// Use case interface for personality operations.
 /// Orchestrates personality-aware business logic following Clean Architecture principles.
 /// </summary>
-public interface IIvanPersonalityUseCase
+public interface IPersonalityUseCase
 {
     /// <summary>
     /// Gets contextually-adapted Ivan personality for specific situation
@@ -69,18 +69,18 @@ public class IvanPersonalityHealthResult
 /// Implementation of Ivan-specific personality use case.
 /// Integrates personality services with contextual adaptation and profile data.
 /// </summary>
-public class IvanPersonalityUseCase : IIvanPersonalityUseCase
+public class PersonalityUseCase : IPersonalityUseCase
 {
-    private readonly IIvanPersonalityService _ivanPersonalityService;
+    private readonly IPersonalityService _personalityService;
     private readonly IContextualPersonalityEngine _contextualPersonalityEngine;
-    private readonly ILogger<IvanPersonalityUseCase> _logger;
+    private readonly ILogger<PersonalityUseCase> _logger;
 
-    public IvanPersonalityUseCase(
-        IIvanPersonalityService ivanPersonalityService,
+    public PersonalityUseCase(
+        IPersonalityService personalityService,
         IContextualPersonalityEngine contextualPersonalityEngine,
-        ILogger<IvanPersonalityUseCase> logger)
+        ILogger<PersonalityUseCase> logger)
     {
-        _ivanPersonalityService = ivanPersonalityService;
+        _personalityService = personalityService;
         _contextualPersonalityEngine = contextualPersonalityEngine;
         _logger = logger;
     }
@@ -90,7 +90,7 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
         _logger.LogInformation("Adapting Ivan's personality for context: {ContextType}, urgency: {Urgency}",
             context.ContextType, context.UrgencyLevel);
 
-        var basePersonalityResult = await _ivanPersonalityService.GetIvanPersonalityAsync();
+        var basePersonalityResult = await _personalityService.GetPersonalityAsync();
 
         if (basePersonalityResult.IsFailure)
             throw new InvalidOperationException($"Failed to load base personality: {basePersonalityResult.Error}");
@@ -109,7 +109,7 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
         _logger.LogInformation("Generating contextual system prompt for {ContextType} situation", context.ContextType);
 
         // Get enhanced prompt as base
-        var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+        var enhancedPrompt = await _personalityService.GenerateEnhancedSystemPromptAsync();
 
         // Add contextual modifications
         var contextualAdditions = GenerateContextualAdditions(context);
@@ -194,7 +194,7 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
         try
         {
             // Test basic personality loading
-            var personality = await _ivanPersonalityService.GetIvanPersonalityAsync();
+            var personality = await _personalityService.GetPersonalityAsync();
             result.ProfileDataLoaded = personality != null && personality.Traits?.Any() == true;
             if (!result.ProfileDataLoaded)
             {
@@ -202,7 +202,7 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
             }
 
             // Test enhanced prompt generation
-            var enhancedPrompt = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
+            var enhancedPrompt = await _personalityService.GenerateEnhancedSystemPromptAsync();
             result.EnhancedPromptsWorking = !string.IsNullOrEmpty(enhancedPrompt) &&
                                             enhancedPrompt.Contains("Ivan") &&
                                             (enhancedPrompt.Contains("EllyAnalytics") || enhancedPrompt.Contains("Head of R&D"));
@@ -291,4 +291,12 @@ public class IvanPersonalityUseCase : IIvanPersonalityUseCase
 
         return string.Join("\n", additions);
     }
+}
+
+/// <summary>
+/// Legacy alias for IPersonalityUseCase for backward compatibility.
+/// </summary>
+[Obsolete("Use IPersonalityUseCase instead", false)]
+public interface IIvanPersonalityUseCase : IPersonalityUseCase
+{
 }
