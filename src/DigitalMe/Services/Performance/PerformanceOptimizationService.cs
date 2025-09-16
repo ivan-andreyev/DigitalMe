@@ -31,29 +31,43 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
     #region Caching - Delegate to CacheService
 
     public async Task<T?> GetCachedResponseAsync<T>(string cacheKey, TimeSpan? expiration = null) where T : class
-        => await _cacheService.GetCachedResponseAsync<T>(cacheKey, expiration);
+    {
+        return await _cacheService.GetCachedResponseAsync<T>(cacheKey, expiration);
+    }
 
     public async Task SetCachedResponseAsync<T>(string cacheKey, T value, TimeSpan? expiration = null) where T : class
-        => await _cacheService.SetCachedResponseAsync(cacheKey, value, expiration);
+    {
+        await _cacheService.SetCachedResponseAsync(cacheKey, value, expiration);
+    }
 
     public async Task RemoveCachedResponseAsync(string cacheKey)
-        => await _cacheService.RemoveCachedResponseAsync(cacheKey);
+    {
+        await _cacheService.RemoveCachedResponseAsync(cacheKey);
+    }
 
     public async Task<T> GetOrSetCachedResponseAsync<T>(string cacheKey, Func<Task<T>> factory, TimeSpan? expiration = null) where T : class
-        => await _cacheService.GetOrSetCachedResponseAsync(cacheKey, factory, expiration);
+    {
+        return await _cacheService.GetOrSetCachedResponseAsync(cacheKey, factory, expiration);
+    }
 
     #endregion
 
     #region Rate Limiting - Delegate to RateLimitService
 
     public async Task<bool> ShouldRateLimitAsync(string serviceName, string identifier)
-        => await _rateLimitService.ShouldRateLimitAsync(serviceName, identifier);
+    {
+        return await _rateLimitService.ShouldRateLimitAsync(serviceName, identifier);
+    }
 
     public async Task RecordRateLimitUsageAsync(string serviceName, string identifier)
-        => await _rateLimitService.RecordRateLimitUsageAsync(serviceName, identifier);
+    {
+        await _rateLimitService.RecordRateLimitUsageAsync(serviceName, identifier);
+    }
 
     public async Task<RateLimitStatus> GetRateLimitStatusAsync(string serviceName, string identifier)
-        => await _rateLimitService.GetRateLimitStatusAsync(serviceName, identifier);
+    {
+        return await _rateLimitService.GetRateLimitStatusAsync(serviceName, identifier);
+    }
 
     #endregion
 
@@ -63,17 +77,23 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
         IEnumerable<TInput> inputs,
         Func<IEnumerable<TInput>, Task<IEnumerable<TResult>>> batchProcessor,
         int batchSize = 50)
-        => await _batchProcessingService.BatchOperationsAsync(inputs, batchProcessor, batchSize);
+    {
+        return await _batchProcessingService.BatchOperationsAsync(inputs, batchProcessor, batchSize);
+    }
 
     #endregion
 
     #region Performance Monitoring - Delegate to PerformanceMonitoringService
 
     public async Task<HttpClientPoolStats> GetHttpClientPoolStatsAsync()
-        => await _monitoringService.GetHttpClientPoolStatsAsync();
+    {
+        return await _monitoringService.GetHttpClientPoolStatsAsync();
+    }
 
     public void RecordRequestMetrics(string serviceName, TimeSpan responseTime, bool success)
-        => _monitoringService.RecordRequestMetrics(serviceName, responseTime, success);
+    {
+        _monitoringService.RecordRequestMetrics(serviceName, responseTime, success);
+    }
 
     #endregion
 }
