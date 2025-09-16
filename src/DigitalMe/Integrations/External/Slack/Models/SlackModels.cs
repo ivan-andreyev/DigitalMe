@@ -168,6 +168,27 @@ public class SlackFile
     public string? User { get; set; }
 }
 
+/// <summary>
+/// Slack files list response
+/// </summary>
+public class SlackFilesResponse : SlackApiResponse
+{
+    [JsonPropertyName("files")]
+    public IEnumerable<SlackFile> Files { get; set; } = Enumerable.Empty<SlackFile>();
+
+    [JsonPropertyName("paging")]
+    public SlackResponseMetadata? Paging { get; set; }
+}
+
+/// <summary>
+/// Slack file info response
+/// </summary>
+public class SlackFileInfoResponse : SlackApiResponse
+{
+    [JsonPropertyName("file")]
+    public SlackFile? File { get; set; }
+}
+
 #endregion
 
 #region Channel Types
@@ -399,6 +420,30 @@ public class SlackUserResponse : SlackApiResponse
 {
     [JsonPropertyName("user")]
     public SlackUser? User { get; set; }
+}
+
+/// <summary>
+/// Slack user presence response
+/// </summary>
+public class SlackUserPresenceResponse : SlackApiResponse
+{
+    [JsonPropertyName("presence")]
+    public string? Presence { get; set; }
+
+    [JsonPropertyName("online")]
+    public bool? Online { get; set; }
+
+    [JsonPropertyName("auto_away")]
+    public bool? AutoAway { get; set; }
+
+    [JsonPropertyName("manual_away")]
+    public bool? ManualAway { get; set; }
+
+    [JsonPropertyName("connection_count")]
+    public int? ConnectionCount { get; set; }
+
+    [JsonPropertyName("last_activity")]
+    public long? LastActivity { get; set; }
 }
 
 /// <summary>

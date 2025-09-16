@@ -93,4 +93,40 @@ public class SlackConnectionService : ISlackConnectionService
             return false;
         }
     }
+
+    public async Task<SlackUser> GetBotInfoAsync()
+    {
+        try
+        {
+            _logger.LogDebug("Getting bot info...");
+
+            var response = await _apiClient.GetAsync<SlackAuthResponse>("auth.test");
+
+            if (response != null && response.Ok)
+            {
+                _logger.LogDebug("Bot info retrieved - Bot: {BotId}, User: {UserId}, Team: {TeamName}",
+                    response.BotId ?? "Unknown",
+                    response.UserId ?? "Unknown",
+                    response.Team ?? "Unknown");
+
+                // Return a minimal SlackUser representing the bot
+                return new SlackUser
+                {
+                    Id = response.UserId ?? "",
+                    Name = response.User ?? "Bot",
+                    IsBot = true
+                };
+            }
+            else
+            {
+                _logger.LogError("Failed to get bot info - Response: {@Response}", response);
+                throw new InvalidOperationException($"Failed to get bot info: {response?.Error ?? "Unknown error"}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting bot info");
+            throw;
+        }
+    }
 }

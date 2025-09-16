@@ -10,7 +10,7 @@ namespace DigitalMe.Integrations.External.Slack.Services;
 /// <summary>
 /// Low-level HTTP client for Slack API with rate limiting and authentication
 /// </summary>
-public class SlackApiClient : IDisposable
+public class SlackApiClient : ISlackApiClient
 {
     private readonly ILogger<SlackApiClient> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -64,7 +64,7 @@ public class SlackApiClient : IDisposable
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(content, JsonSerializerOptions.Web);
+            var result = JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             return result;
         }
         catch (Exception ex)
@@ -92,7 +92,7 @@ public class SlackApiClient : IDisposable
             HttpContent content;
             if (data != null)
             {
-                var json = JsonSerializer.Serialize(data, JsonSerializerOptions.Web);
+                var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                 content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             else
@@ -109,7 +109,7 @@ public class SlackApiClient : IDisposable
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(responseContent, JsonSerializerOptions.Web);
+            var result = JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             return result;
         }
         catch (Exception ex)
@@ -138,7 +138,7 @@ public class SlackApiClient : IDisposable
 
             // Add file
             var fileContent = new StreamContent(fileStream);
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
             content.Add(fileContent, "file", filename);
 
             // Add form data
@@ -159,7 +159,7 @@ public class SlackApiClient : IDisposable
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(responseContent, JsonSerializerOptions.Web);
+            var result = JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             return result;
         }
         catch (Exception ex)
