@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using DigitalMe.Common;
 using DigitalMe.Configuration;
 using DigitalMe.Services.Optimization;
 using Microsoft.Extensions.Caching.Memory;
@@ -46,9 +47,9 @@ public class SecurityValidationService : ISecurityValidationService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public async Task<SecurityValidationResult> ValidateRequestAsync<T>(T request) where T : class
+    public async Task<Result<SecurityValidationData>> ValidateRequestAsync<T>(T request) where T : class
     {
-        try
+        return await ResultExtensions.TryAsync(async () =>
         {
             var errors = new List<string>();
 
@@ -61,41 +62,31 @@ public class SecurityValidationService : ISecurityValidationService
                 errors.AddRange(validationResults.Select(vr => vr.ErrorMessage ?? "Validation error"));
             }
 
-            // 2. Input sanitization if enabled
-            if (_securitySettings.EnableInputSanitization)
-            {
-                var sanitizedRequest = SanitizeObject(request);
-                if (sanitizedRequest != null)
-                {
-                    return SecurityValidationResult.Success(sanitizedRequest);
-                }
-            }
-
             if (errors.Any())
             {
-                _logger.LogWarning("Request validation failed: {Errors}", string.Join(", ", errors));
-                return SecurityValidationResult.Failure(errors.ToArray());
+                throw new ValidationException(string.Join("; ", errors));
             }
 
-            return SecurityValidationResult.Success(request);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error validating request of type {RequestType}", typeof(T).Name);
-            return SecurityValidationResult.Failure("Validation error occurred");
-        }
+            // 2. Input sanitization if enabled
+            var sanitizedData = _securitySettings.EnableInputSanitization ? SanitizeObject(request) : request;
+
+            return new SecurityValidationData
+            {
+                SanitizedData = sanitizedData
+            };
+        }, $"Error validating request of type {typeof(T).Name}");
     }
 
-    public string SanitizeInput(string input)
+    public Result<string> SanitizeInput(string input)
     {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
-        if (string.IsNullOrWhiteSpace(input))
-            return string.Empty;
-
-        try
+        return ResultExtensions.Try(() =>
         {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
             // Remove script tags
             input = _scriptPattern.Replace(input, string.Empty);
 
@@ -120,31 +111,29 @@ public class SecurityValidationService : ISecurityValidationService
             }
 
             return input.Trim();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error sanitizing input: {Input}", input);
-            return string.Empty; // Return empty string on error for safety
-        }
+        }, $"Error sanitizing input");
     }
 
-    public bool ValidateApiKeyFormat(string apiKey)
+    public Result<bool> ValidateApiKeyFormat(string apiKey)
     {
-        if (string.IsNullOrWhiteSpace(apiKey))
-            return false;
+        return ResultExtensions.Try(() =>
+        {
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return false;
 
-        // API key should be at least MinimumApiKeyLength characters and contain alphanumeric + allowed special chars
-        if (apiKey.Length < MinimumApiKeyLength)
-            return false;
+            // API key should be at least MinimumApiKeyLength characters and contain alphanumeric + allowed special chars
+            if (apiKey.Length < MinimumApiKeyLength)
+                return false;
 
-        // Check for reasonable API key pattern (no whitespace, reasonable characters)
-        var apiKeyPattern = new Regex(@"^[a-zA-Z0-9\-_\.]+$", RegexOptions.Compiled);
-        return apiKeyPattern.IsMatch(apiKey);
+            // Check for reasonable API key pattern (no whitespace, reasonable characters)
+            var apiKeyPattern = new Regex(@"^[a-zA-Z0-9\-_\.]+$", RegexOptions.Compiled);
+            return apiKeyPattern.IsMatch(apiKey);
+        }, "Error validating API key format");
     }
 
     private const int MinimumApiKeyLength = 32;
 
-    public async Task<bool> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = DefaultMaxPayloadSize)
+    public async Task<Result<bool>> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = DefaultMaxPayloadSize)
     {
         if (string.IsNullOrEmpty(payload))
         {
@@ -179,7 +168,7 @@ public class SecurityValidationService : ISecurityValidationService
 
     private const int DefaultMaxPayloadSize = 1048576; // 1MB
 
-    public async Task<bool> IsRateLimitExceededAsync(string clientIdentifier, string endpoint)
+    public async Task<Result<bool>> IsRateLimitExceededAsync(string clientIdentifier, string endpoint)
     {
         if (!_securitySettings.EnableRateLimiting)
             return false;
@@ -196,7 +185,7 @@ public class SecurityValidationService : ISecurityValidationService
         }
     }
 
-    public async Task<SecurityValidationResult> ValidateJwtTokenAsync(string token)
+    public async Task<Result<SecurityValidationData>> ValidateJwtTokenAsync(string token)
     {
         try
         {
@@ -251,7 +240,7 @@ public class SecurityValidationService : ISecurityValidationService
         }
     }
 
-    public T SanitizeResponse<T>(T response) where T : class
+    public Result<T> SanitizeResponse<T>(T response) where T : class
     {
         if (!_securitySettings.EnableInputSanitization)
             return response;

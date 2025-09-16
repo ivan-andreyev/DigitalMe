@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DigitalMe.Common;
 
 namespace DigitalMe.Services.Security;
 
@@ -10,42 +11,52 @@ public interface ISecurityValidationService
     /// <summary>
     /// Validates and sanitizes incoming request data
     /// </summary>
-    Task<SecurityValidationResult> ValidateRequestAsync<T>(T request) where T : class;
+    Task<Result<SecurityValidationData>> ValidateRequestAsync<T>(T request) where T : class;
 
     /// <summary>
     /// Sanitizes string input to prevent XSS and injection attacks
     /// </summary>
-    string SanitizeInput(string input);
+    Result<string> SanitizeInput(string input);
 
     /// <summary>
     /// Validates API key format and strength
     /// </summary>
-    bool ValidateApiKeyFormat(string apiKey);
+    Result<bool> ValidateApiKeyFormat(string apiKey);
 
     /// <summary>
     /// Validates webhook payload size and structure
     /// </summary>
-    Task<bool> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = 1024 * 1024); // 1MB default
+    Task<Result<bool>> ValidateWebhookPayloadAsync(string payload, int maxSizeBytes = 1024 * 1024); // 1MB default
 
     /// <summary>
     /// Checks if request rate limit is exceeded
     /// </summary>
-    Task<bool> IsRateLimitExceededAsync(string clientIdentifier, string endpoint);
+    Task<Result<bool>> IsRateLimitExceededAsync(string clientIdentifier, string endpoint);
 
     /// <summary>
     /// Validates JWT token and returns claims if valid
     /// </summary>
-    Task<SecurityValidationResult> ValidateJwtTokenAsync(string token);
+    Task<Result<SecurityValidationData>> ValidateJwtTokenAsync(string token);
 
     /// <summary>
     /// Sanitizes response data before sending to client
     /// </summary>
-    T SanitizeResponse<T>(T response) where T : class;
+    Result<T> SanitizeResponse<T>(T response) where T : class;
 }
 
 /// <summary>
-/// Result of security validation
+/// Data container for security validation results when using Result<T> pattern
 /// </summary>
+public class SecurityValidationData
+{
+    public Dictionary<string, object> Claims { get; set; } = new();
+    public object? SanitizedData { get; set; }
+}
+
+/// <summary>
+/// Legacy SecurityValidationResult for backward compatibility
+/// </summary>
+[Obsolete("Use Result<SecurityValidationData> pattern instead", false)]
 public class SecurityValidationResult
 {
     public bool IsValid { get; set; }
