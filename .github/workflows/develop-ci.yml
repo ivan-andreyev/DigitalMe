@@ -44,11 +44,19 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: 🔄 Restore Dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: 🔄 Restore Dependencies (excluding MAUI)
+      run: |
+        dotnet restore src/DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
-    - name: 🔨 Quick Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: 🔨 Quick Build (excluding MAUI)
+      run: |
+        dotnet build src/DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: 🧪 Run Unit Tests Only
       run: |
@@ -71,11 +79,19 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 🔄 Restore Dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: 🔄 Restore Dependencies (excluding MAUI)
+      run: |
+        dotnet restore src/DigitalMe/DigitalMe.csproj
+        dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj
+        dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+        dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
-    - name: 🔍 Build for Analysis
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Debug --no-restore
+    - name: 🔍 Build for Analysis (excluding MAUI)
+      run: |
+        dotnet build src/DigitalMe/DigitalMe.csproj --configuration Debug --no-restore
+        dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Debug --no-restore
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration Debug --no-restore
+        dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Debug --no-restore
 
     - name: 💡 Check Code Style
       run: |

@@ -167,8 +167,7 @@ jobs:
     name: Build Docker Images
     runs-on: ubuntu-latest
     needs: [build]
-    # Temporarily disabled due to potential permission issues
-    if: false # github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
     - name: 🚀 Checkout Code
