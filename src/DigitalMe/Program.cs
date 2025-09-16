@@ -241,7 +241,6 @@ builder.Services.Configure<DigitalMe.Integrations.External.GitHub.GitHubConfigur
     builder.Configuration.GetSection("GitHub"));
 builder.Services.AddScoped<DigitalMe.Integrations.External.GitHub.IGitHubService, DigitalMe.Integrations.External.GitHub.GitHubService>();
 
-builder.Services.AddHttpClient<DigitalMe.Integrations.External.Telegram.TelegramService>();
 builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
 
 // Telegram Services - Refactored for SOLID compliance
