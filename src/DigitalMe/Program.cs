@@ -243,6 +243,10 @@ builder.Services.AddScoped<DigitalMe.Integrations.External.GitHub.IGitHubService
 
 builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
 
+// Slack Services
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient, DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
+
 // Telegram Services - Refactored for SOLID compliance
 builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramMessageDispatcher, DigitalMe.Services.Telegram.TelegramMessageDispatcher>();
 builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramCommandHandler, DigitalMe.Services.Telegram.TelegramCommandHandler>();
