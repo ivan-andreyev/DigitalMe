@@ -63,7 +63,11 @@ public class ChatHub : Hub
             if (!result.IsSuccess)
             {
                 _logger.LogError("❌ Failed to process user message: {Error}", result.Error);
-                await Clients.Caller.SendAsync("Error", new { message = "Failed to process message", error = result.Error });
+                await Clients.Caller.SendAsync("Error", new
+                {
+                    code = "PROCESSING_ERROR",
+                    message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
+                });
                 return;
             }
 
@@ -109,9 +113,8 @@ public class ChatHub : Hub
 
             await Clients.Caller.SendAsync("Error", new
             {
-                Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
-                Code = "PROCESSING_ERROR",
-                Details = ex.Message
+                code = "PROCESSING_ERROR",
+                message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
             });
         }
     }
@@ -126,7 +129,11 @@ public class ChatHub : Hub
             if (!result.IsSuccess)
             {
                 _logger.LogError("❌ Failed to process agent response: {Error}", result.Error);
-                await Clients.Group(groupName).SendAsync("Error", new { message = "Failed to process agent response", error = result.Error });
+                await Clients.Group(groupName).SendAsync("Error", new
+                {
+                    code = "PROCESSING_ERROR",
+                    message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
+                });
                 return;
             }
 
@@ -178,9 +185,8 @@ public class ChatHub : Hub
 
             await Clients.Group(groupName).SendAsync("Error", new
             {
-                Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
-                Code = "PROCESSING_ERROR",
-                Details = ex.Message
+                code = "PROCESSING_ERROR",
+                message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
             });
         }
     }

@@ -286,6 +286,12 @@ builder.Services.AddScoped<DigitalMe.Services.Monitoring.IHealthCheckService, Di
 // Add metrics collection as required by MVP Phase 6 plan
 builder.Services.AddSingleton<DigitalMe.Services.Monitoring.IMetricsLogger, DigitalMe.Services.Monitoring.MetricsLogger>();
 
+// Ivan Response Styling Services - Application layer services for personality simulation
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanContextAnalyzer>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyService>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanLinguisticPatternService>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingServiceRefactored>();
+
 // API Security - Rate Limiting Configuration
 builder.Services.AddRateLimiter(options =>
 {

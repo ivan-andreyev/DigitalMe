@@ -404,6 +404,51 @@ Direct and pragmatic with structured thinking.
                 return mockSlackService.Object;
             });
 
+            // Mock Ivan Response Styling Services BEFORE Program.cs to avoid DI conflicts
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer>(provider =>
+            {
+                var mockAnalyzer = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer>();
+
+                mockAnalyzer.Setup(x => x.GetContextualStyleAsync(It.IsAny<DigitalMe.Services.SituationalContext>()))
+                           .ReturnsAsync(DigitalMe.Common.Result<DigitalMe.Data.Entities.ContextualCommunicationStyle>.Success(
+                               new DigitalMe.Data.Entities.ContextualCommunicationStyle
+                               {
+                                   FormalityLevel = 0.7,
+                                   TechnicalDepth = 0.8,
+                                   EmotionalTone = 0.6
+                               }));
+
+                return mockAnalyzer.Object;
+            });
+
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService>(provider =>
+            {
+                var mockVocabulary = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService>();
+
+                mockVocabulary.Setup(x => x.GetVocabularyPreferencesAsync(It.IsAny<DigitalMe.Services.SituationalContext>()))
+                             .ReturnsAsync(DigitalMe.Common.Result<DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyPreferences>.Success(
+                                 new DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyPreferences
+                                 {
+                                     PreferredTechnicalTerms = new List<string> { "C#/.NET", "strongly-typed", "technical precision" },
+                                     PreferredCasualPhrases = new List<string> { "struggle to balance", "family time" },
+                                     PreferredProfessionalPhrases = new List<string> { "professional", "business approach", "systematic" },
+                                     SignatureExpressions = new List<string> { "technical approach", "Marina and Sofia" }
+                                 }));
+
+                return mockVocabulary.Object;
+            });
+
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService>(provider =>
+            {
+                var mockPattern = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService>();
+
+                mockPattern.Setup(x => x.ApplyIvanLinguisticPatterns(It.IsAny<string>(), It.IsAny<DigitalMe.Data.Entities.ContextualCommunicationStyle>()))
+                          .Returns((string text, DigitalMe.Data.Entities.ContextualCommunicationStyle style) =>
+                              text + " [Ivan linguistic patterns applied]");
+
+                return mockPattern.Object;
+            });
+
             // Mock IIvanResponseStylingService for response styling tests
             var responseStylingDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService)).ToList();
             foreach (var descriptor in responseStylingDescriptors)
