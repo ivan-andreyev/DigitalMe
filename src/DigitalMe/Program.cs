@@ -273,6 +273,7 @@ builder.Services.AddHttpClient<DigitalMe.Integrations.External.Google.CalendarSe
 builder.Services.AddScoped<DigitalMe.Integrations.External.Google.ICalendarService, DigitalMe.Integrations.External.Google.CalendarService>();
 
 // Performance & Monitoring Services - All scoped to avoid lifecycle issues
+builder.Services.AddScoped<DigitalMe.Services.Performance.ICachingService, DigitalMe.Services.Performance.CachingService>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.MetricsAggregator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.SystemMetricsCalculator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
