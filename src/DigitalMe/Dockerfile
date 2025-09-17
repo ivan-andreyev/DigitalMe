@@ -12,14 +12,14 @@ WORKDIR /src
 COPY ["DigitalMe.sln", "."]
 
 # Copy project files
-COPY ["DigitalMe/DigitalMe.csproj", "DigitalMe/"]
+COPY ["src/DigitalMe/DigitalMe.csproj", "src/DigitalMe/"]
 
 # Restore dependencies  
-RUN dotnet restore "DigitalMe/DigitalMe.csproj"
+RUN dotnet restore "src/DigitalMe/DigitalMe.csproj"
 
 # Copy source code
 COPY . .
-WORKDIR "/src/DigitalMe"
+WORKDIR "/src/src/DigitalMe"
 
 # Build application
 RUN dotnet build "./DigitalMe.csproj" -c $BUILD_CONFIGURATION -o /app/build
