@@ -243,8 +243,18 @@ builder.Services.AddScoped<DigitalMe.Integrations.External.GitHub.IGitHubService
 
 builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
 
-// Slack Services
+// Slack Services - Complete DI registration
 builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient, DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackConnectionService, DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>();
+// Register all specialized Slack services required by SlackService
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackMessageService, DigitalMe.Integrations.External.Slack.Services.SlackMessageService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackChannelService, DigitalMe.Integrations.External.Slack.Services.SlackChannelService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackFileService, DigitalMe.Integrations.External.Slack.Services.SlackFileService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackUserService, DigitalMe.Integrations.External.Slack.Services.SlackUserService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackReactionService, DigitalMe.Integrations.External.Slack.Services.SlackReactionService>();
+// Main Slack service - registered here to avoid circular dependency with SlackWebhookService
 builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
 
 // Telegram Services - Refactored for SOLID compliance

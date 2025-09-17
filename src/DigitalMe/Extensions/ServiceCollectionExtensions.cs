@@ -190,8 +190,8 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddNewIntegrations(this IServiceCollection services, IConfiguration configuration)
     {
-        // Slack Integration - COMPLETED ✅
-        services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
+        // Slack Integration - MOVED TO Program.cs to avoid circular dependency
+        // ISlackService registration moved to Program.cs
         services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackWebhookService, DigitalMe.Integrations.External.Slack.SlackWebhookService>();
 
         // ClickUp Integration - COMPLETED ✅
