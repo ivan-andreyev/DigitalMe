@@ -48,27 +48,27 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
         try
         {
             _logger.LogInformation("Executing file processing workflow with content: {ContentPreview}...", 
-                request.Content.Substring(0, Math.Min(50, request.Content.Length)));
+                request.content.Substring(0, Math.Min(50, request.content.Length)));
 
             // Step 1: Create PDF
             var tempFilePath = Path.GetTempFileName() + ".pdf";
             var parameters = new Dictionary<string, object> 
             { 
-                ["content"] = request.Content, 
-                ["title"] = request.Title ?? "Test Document" 
+                ["content"] = request.content, 
+                ["title"] = request.title ?? "Test Document" 
             };
             
             var pdfResult = await _fileProcessingService.ProcessPdfAsync("create", tempFilePath, parameters);
             if (!pdfResult.Success)
             {
                 return new FileProcessingWorkflowResult(
-                    Success: false,
-                    PdfCreated: false,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FilePath: null,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: $"PDF creation failed: {pdfResult.Message}");
+                    success: false,
+                    pdfCreated: false,
+                    textExtracted: false,
+                    contentMatch: false,
+                    filePath: null,
+                    extractedTextPreview: null,
+                    errorMessage: $"PDF creation failed: {pdfResult.Message}");
             }
 
             // Step 2: Extract text back
@@ -76,37 +76,37 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
             if (string.IsNullOrEmpty(extractedText))
             {
                 return new FileProcessingWorkflowResult(
-                    Success: false,
-                    PdfCreated: true,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FilePath: tempFilePath,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: "Text extraction failed: No text extracted");
+                    success: false,
+                    pdfCreated: true,
+                    textExtracted: false,
+                    contentMatch: false,
+                    filePath: tempFilePath,
+                    extractedTextPreview: null,
+                    errorMessage: "Text extraction failed: No text extracted");
             }
 
             // Step 3: Verify content matches
-            var contentMatch = extractedText.Contains(request.Content.Substring(0, Math.Min(20, request.Content.Length)));
+            var contentMatch = extractedText.Contains(request.content.Substring(0, Math.Min(20, request.content.Length)));
 
             return new FileProcessingWorkflowResult(
-                Success: true,
-                PdfCreated: pdfResult.Success,
-                TextExtracted: !string.IsNullOrEmpty(extractedText),
-                ContentMatch: contentMatch,
-                FilePath: tempFilePath,
-                ExtractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
+                success: true,
+                pdfCreated: pdfResult.Success,
+                textExtracted: !string.IsNullOrEmpty(extractedText),
+                contentMatch: contentMatch,
+                filePath: tempFilePath,
+                extractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "File processing workflow failed");
             return new FileProcessingWorkflowResult(
-                Success: false,
-                PdfCreated: false,
-                TextExtracted: false,
-                ContentMatch: false,
-                FilePath: null,
-                ExtractedTextPreview: null,
-                ErrorMessage: $"Workflow failed: {ex.Message}");
+                success: false,
+                pdfCreated: false,
+                textExtracted: false,
+                contentMatch: false,
+                filePath: null,
+                extractedTextPreview: null,
+                errorMessage: $"Workflow failed: {ex.Message}");
         }
     }
 
@@ -134,20 +134,20 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
                 "voice" => await ExecuteVoiceServiceAvailabilityAsync(),
                 "personality" => await ExecutePersonalityServiceAvailabilityAsync(),
                 _ => new ServiceAvailabilityWorkflowResult(
-                    Success: false,
-                    ServiceName: serviceName,
-                    ServiceAvailable: false,
-                    ErrorMessage: "Unknown service")
+                    success: false,
+                    serviceName: serviceName,
+                    serviceAvailable: false,
+                    errorMessage: "Unknown service")
             };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Service availability workflow failed for {ServiceName}", serviceName);
             return new ServiceAvailabilityWorkflowResult(
-                Success: false,
-                ServiceName: serviceName,
-                ServiceAvailable: false,
-                ErrorMessage: ex.Message);
+                success: false,
+                serviceName: serviceName,
+                serviceAvailable: false,
+                errorMessage: ex.Message);
         }
     }
 
@@ -189,18 +189,18 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
             // Test 2: File Processing
             try
             {
-                var testContent = request.TestContent ?? "Ivan-Level comprehensive test document content";
+                var testContent = request.testContent ?? "Ivan-Level comprehensive test document content";
                 var fileWorkflowResult = await ExecuteFileProcessingWorkflowAsync(
                     new FileProcessingWorkflowRequest(testContent, "Comprehensive Test"));
                 
                 results["fileProcessing"] = new 
                 { 
-                    success = fileWorkflowResult.Success,
-                    pdfCreated = fileWorkflowResult.PdfCreated,
-                    textExtracted = fileWorkflowResult.TextExtracted
+                    success = fileWorkflowResult.success,
+                    pdfCreated = fileWorkflowResult.pdfCreated,
+                    textExtracted = fileWorkflowResult.textExtracted
                 };
                 
-                if (!fileWorkflowResult.Success)
+                if (!fileWorkflowResult.success)
                 {
                     overallSuccess = false;
                 }
@@ -217,12 +217,12 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
                 var personalityResult = await ExecutePersonalityServiceAvailabilityAsync();
                 results["personality"] = new 
                 { 
-                    success = personalityResult.Success,
-                    personalityLoaded = personalityResult.ServiceAvailable,
-                    enhancedPromptGenerated = personalityResult.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false)
+                    success = personalityResult.success,
+                    personalityLoaded = personalityResult.serviceAvailable,
+                    enhancedPromptGenerated = personalityResult.additionalData?.GetValueOrDefault("enhancedPromptGenerated", false)
                 };
                 
-                if (!personalityResult.Success)
+                if (!personalityResult.success)
                 {
                     overallSuccess = false;
                 }
@@ -242,24 +242,24 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
             };
 
             var summary = new ComprehensiveTestSummary(
-                TotalTests: results.Count,
-                PassedTests: results.Values.Count(r => ((dynamic)r).success == true),
-                FailedTests: results.Values.Count(r => ((dynamic)r).success == false));
+                totalTests: results.Count,
+                passedTests: results.Values.Count(r => ((dynamic)r).success == true),
+                failedTests: results.Values.Count(r => ((dynamic)r).success == false));
 
             return new ComprehensiveTestWorkflowResult(
-                OverallSuccess: overallSuccess,
-                Timestamp: DateTime.UtcNow,
-                TestResults: results,
-                Summary: summary);
+                overallSuccess: overallSuccess,
+                timestamp: DateTime.UtcNow,
+                testResults: results,
+                summary: summary);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Comprehensive test workflow failed");
             return new ComprehensiveTestWorkflowResult(
-                OverallSuccess: false,
-                Timestamp: DateTime.UtcNow,
-                TestResults: new Dictionary<string, object> { ["error"] = ex.Message },
-                Summary: new ComprehensiveTestSummary(0, 0, 1));
+                overallSuccess: false,
+                timestamp: DateTime.UtcNow,
+                testResults: new Dictionary<string, object> { ["error"] = ex.Message },
+                summary: new ComprehensiveTestSummary(0, 0, 1));
         }
     }
 
@@ -276,17 +276,17 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
         var formats = new[] { "mp3", "opus", "aac", "flac", "wav" };
 
         return new ServiceAvailabilityWorkflowResult(
-            Success: true,
-            ServiceName: "Voice",
-            ServiceAvailable: isAvailable,
-            AdditionalData: new Dictionary<string, object>
+            success: true,
+            serviceName: "Voice",
+            serviceAvailable: isAvailable,
+            additionalData: new Dictionary<string, object>
             {
                 ["availableVoices"] = voices,
                 ["supportedFormats"] = formats,
                 ["voiceCount"] = voices.Length,
                 ["formatCount"] = formats.Length
             },
-            Message: isAvailable ? "Voice service is fully functional" : "Voice service is not available (check API key)");
+            message: isAvailable ? "Voice service is fully functional" : "Voice service is not available (check API key)");
     }
 
     private async Task<ServiceAvailabilityWorkflowResult> ExecutePersonalityServiceAvailabilityAsync()
@@ -308,10 +308,10 @@ public class PersonalLevelWorkflowService : IPersonalLevelWorkflowService, IIvan
         var enhancedPromptGenerated = enhancedPromptResult.IsSuccess && !string.IsNullOrEmpty(enhancedPrompt) && enhancedPrompt.Contains("Ivan");
 
         return new ServiceAvailabilityWorkflowResult(
-            Success: true,
-            ServiceName: "IvanPersonality",
-            ServiceAvailable: personalityLoaded && basicPromptGenerated && enhancedPromptGenerated,
-            AdditionalData: new Dictionary<string, object>
+            success: true,
+            serviceName: "IvanPersonality",
+            serviceAvailable: personalityLoaded && basicPromptGenerated && enhancedPromptGenerated,
+            additionalData: new Dictionary<string, object>
             {
                 ["personalityLoaded"] = personalityLoaded,
                 ["personalityName"] = personality?.Name ?? "Unknown",

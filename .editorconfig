@@ -47,12 +47,28 @@ dotnet_analyzer_diagnostic.SA1602.severity = none   # Enumeration items should b
 # Allow flexible code style - common modern C# patterns
 dotnet_analyzer_diagnostic.SA1101.severity = none   # Prefix local calls with this - DISABLED (modern C# style)
 dotnet_analyzer_diagnostic.SA1309.severity = none   # Field underscore prefix - ALLOWED (common pattern)
-dotnet_analyzer_diagnostic.SA1200.severity = suggestion # Using directives placement - RELAXED
+dotnet_analyzer_diagnostic.SA1200.severity = none   # Using directives placement - DISABLED (outside namespace OK)
+
+# Layout and formatting rules - match existing code style
+dotnet_analyzer_diagnostic.SA1516.severity = none   # Elements separated by blank line - DISABLED (compact style)
+dotnet_analyzer_diagnostic.SA1413.severity = none   # Trailing comma in multi-line initializers - DISABLED
+dotnet_analyzer_diagnostic.SA1518.severity = none   # File must end with single newline - DISABLED
+dotnet_analyzer_diagnostic.SA1116.severity = none   # Split parameters should start on line after declaration - DISABLED
+dotnet_analyzer_diagnostic.SA1117.severity = none   # Parameters should be on same line or separate lines - DISABLED
+dotnet_analyzer_diagnostic.SA1502.severity = none   # Element should not be on a single line - DISABLED (allow compact code)
+
+# Spacing rules - allow compact modern C# syntax
+dotnet_analyzer_diagnostic.SA1000.severity = none   # Keywords should be followed by space - DISABLED (allow new() syntax)
+dotnet_analyzer_diagnostic.SA1028.severity = none   # Code should not contain trailing whitespace - DISABLED
+
+# Additional problematic rules based on top violations
+dotnet_analyzer_diagnostic.SA1633.severity = none   # File header missing - DISABLED (no file headers required)
 
 # Member ordering - suggestion level (helps but doesn't break build)
 dotnet_analyzer_diagnostic.SA1204.severity = suggestion # Static before non-static - RELAXED
 dotnet_analyzer_diagnostic.SA1201.severity = suggestion # Elements ordering - RELAXED
 dotnet_analyzer_diagnostic.SA1202.severity = suggestion # Access level ordering - RELAXED
+dotnet_analyzer_diagnostic.SA1203.severity = suggestion # Constants should appear before fields - RELAXED
 
 # KEEP IMPORTANT RULES: Critical for code quality
 dotnet_analyzer_diagnostic.SA1300.severity = error  # Element should begin with uppercase

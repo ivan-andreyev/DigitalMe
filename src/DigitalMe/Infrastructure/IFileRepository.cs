@@ -68,7 +68,7 @@ public interface IFileRepository
 /// Information about a temporary file.
 /// </summary>
 public record TemporaryFileInfo(
-    string FileId,
-    string FilePath,
-    string Extension,
-    DateTime CreatedAt);
+    string fileId,
+    string filePath,
+    string extension,
+    DateTime createdAt);

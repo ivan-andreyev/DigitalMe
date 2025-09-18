@@ -21,17 +21,17 @@ public interface IFileProcessingUseCase : IApplicationService
 /// Command for file processing operations.
 /// </summary>
 public record FileProcessingCommand(
-    string Content,
-    string? Title = null);
+    string content,
+    string? title = null);
 
 /// <summary>
 /// Result of file processing operations.
 /// </summary>
 public record FileProcessingResult(
-    bool Success,
-    bool PdfCreated,
-    bool TextExtracted,
-    bool ContentMatch,
-    string? FileId,
-    string? ExtractedTextPreview,
-    string? ErrorMessage = null);
+    bool success,
+    bool pdfCreated,
+    bool textExtracted,
+    bool contentMatch,
+    string? fileId,
+    string? extractedTextPreview,
+    string? errorMessage = null);

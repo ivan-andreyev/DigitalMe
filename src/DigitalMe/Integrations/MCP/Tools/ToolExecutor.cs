@@ -64,7 +64,9 @@ public class ToolExecutor
         if (!personalityResult.IsSuccess)
             return new { error = "Ivan's personality not found", details = personalityResult.Error };
 
-        var personality = personalityResult.Value!;
+        var personality = personalityResult.Value;
+        if (personality == null)
+            return new { error = "Personality data is null", details = "Retrieved personality is null" };
         var traits = personality.Traits ?? new List<PersonalityTrait>();
         var filteredTraits = traits.AsEnumerable();
 

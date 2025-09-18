@@ -37,7 +37,12 @@ public class IvanController : ControllerBase
             return StatusCode(500, new { message = "Failed to retrieve personality profile", error = personalityResult.Error });
         }
 
-        var personality = personalityResult.Value!;
+        var personality = personalityResult.Value;
+        if (personality == null)
+        {
+            _logger.LogError("Personality data is null");
+            return StatusCode(500, new { message = "Personality data is null" });
+        }
 
         _logger.LogInformation("Retrieved Ivan's personality profile with {TraitCount} traits",
             personality.Traits?.Count ?? 0);
@@ -70,7 +75,9 @@ public class IvanController : ControllerBase
             return StatusCode(500, new { message = "Failed to generate system prompt", error = personalityResult.Error });
         }
 
-        var promptResult = _personalityService.GenerateSystemPrompt(personalityResult.Value!);
+        var promptResult = personalityResult.Value != null ?
+            _personalityService.GenerateSystemPrompt(personalityResult.Value) :
+            Result<string>.Failure("Personality is null");
 
         if (promptResult.IsFailure)
         {
@@ -78,7 +85,12 @@ public class IvanController : ControllerBase
             return StatusCode(500, new { message = "Failed to generate system prompt", error = promptResult.Error });
         }
 
-        var prompt = promptResult.Value!;
+        var prompt = promptResult.Value;
+        if (string.IsNullOrEmpty(prompt))
+        {
+            _logger.LogError("Generated prompt is null or empty");
+            return StatusCode(500, new { message = "Generated prompt is null or empty" });
+        }
 
         _logger.LogInformation("Generated basic system prompt ({PromptLength} characters)", prompt.Length);
 
@@ -103,7 +115,12 @@ public class IvanController : ControllerBase
             return StatusCode(500, new { message = "Failed to generate enhanced system prompt", error = enhancedPromptResult.Error });
         }
 
-        var enhancedPrompt = enhancedPromptResult.Value!;
+        var enhancedPrompt = enhancedPromptResult.Value;
+        if (string.IsNullOrEmpty(enhancedPrompt))
+        {
+            _logger.LogError("Generated enhanced prompt is null or empty");
+            return StatusCode(500, new { message = "Generated enhanced prompt is null or empty" });
+        }
 
         _logger.LogInformation("Generated enhanced system prompt with profile data ({PromptLength} characters)",
             enhancedPrompt.Length);
@@ -123,8 +140,8 @@ public class IvanController : ControllerBase
     public async Task<ActionResult<object>> GetHealthStatus()
     {
         var personalityResult = await _personalityService.GetPersonalityAsync();
-        var basicPromptResult = personalityResult.IsSuccess ?
-            _personalityService.GenerateSystemPrompt(personalityResult.Value!) :
+        var basicPromptResult = personalityResult.IsSuccess && personalityResult.Value != null ?
+            _personalityService.GenerateSystemPrompt(personalityResult.Value) :
             Result<string>.Failure("Cannot generate prompt - personality loading failed");
         var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 

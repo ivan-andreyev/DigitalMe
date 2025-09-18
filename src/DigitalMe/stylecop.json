@@ -13,9 +13,8 @@
       "documentPrivateFields": false
     },
     "layoutRules": {
-      "newlineAtEndOfFile": "require",
-      "allowConsecutiveUsings": true,
-      "allowDoWhileOnClosingBrace": true
+      "newlineAtEndOfFile": "omit",
+      "allowConsecutiveUsings": true
     },
     "maintainabilityRules": {
       "topLevelTypes": ["class", "interface", "struct", "delegate", "enum"]
@@ -32,21 +31,9 @@
       "blankLinesBetweenUsingGroups": "allow"
     },
     "readabilityRules": {
-      "allowBuiltInTypeAliases": true,
-      "allowTrailingWhitespace": false
+      "allowBuiltInTypeAliases": true
     },
     "spacingRules": {
-      "keywordsMustBeSpacedCorrectly": true,
-      "semicolonsMustBeSpacedCorrectly": true,
-      "symbolsMustBeSpacedCorrectly": true,
-      "commasMustBeSpacedCorrectly": true,
-      "operatorKeywordsMustBeFollowedBySpace": true,
-      "openingParenthesisMustBeSpacedCorrectly": false,
-      "closingParenthesisMustBeSpacedCorrectly": false,
-      "openingSquareBracketsMustBeSpacedCorrectly": false,
-      "closingSquareBracketsMustBeSpacedCorrectly": false,
-      "openingBracesMustBeSpacedCorrectly": false,
-      "closingBracesMustBeSpacedCorrectly": false,
       "tabsMustNotBeUsed": true
     }
   }

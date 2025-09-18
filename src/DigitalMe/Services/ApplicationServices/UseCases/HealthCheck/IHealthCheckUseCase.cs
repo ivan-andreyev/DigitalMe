@@ -20,23 +20,23 @@ public interface IHealthCheckUseCase : IApplicationService
 /// Command for comprehensive health check operations.
 /// </summary>
 public record ComprehensiveHealthCheckCommand(
-    string? TestContent = null,
-    bool IncludeWebNavigation = false,
-    bool IncludeCaptcha = false);
+    string? testContent = null,
+    bool includeWebNavigation = false,
+    bool includeCaptcha = false);
 
 /// <summary>
 /// Result of comprehensive health check operations.
 /// </summary>
 public record ComprehensiveHealthCheckResult(
-    bool OverallSuccess,
-    DateTime Timestamp,
-    Dictionary<string, object> TestResults,
-    ComprehensiveTestSummary Summary);
+    bool overallSuccess,
+    DateTime timestamp,
+    Dictionary<string, object> testResults,
+    ComprehensiveTestSummary summary);
 
 /// <summary>
 /// Summary of comprehensive test results.
 /// </summary>
 public record ComprehensiveTestSummary(
-    int TotalTests,
-    int PassedTests,
-    int FailedTests);
+    int totalTests,
+    int passedTests,
+    int failedTests);

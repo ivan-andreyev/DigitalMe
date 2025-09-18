@@ -258,8 +258,8 @@ public class PersonalLevelHealthCheckService : IPersonalLevelHealthCheckService,
         {
             // Test personality service and profile data loading
             var personalityResult = await _personalityService.GetPersonalityAsync();
-            var basicPromptResult = personalityResult.IsSuccess ?
-                _personalityService.GenerateSystemPrompt(personalityResult.Value!) :
+            var basicPromptResult = personalityResult.IsSuccess && personalityResult.Value != null ?
+                _personalityService.GenerateSystemPrompt(personalityResult.Value) :
                 Result<string>.Failure("Cannot generate prompt - personality loading failed");
             var enhancedPromptResult = await _personalityService.GenerateEnhancedSystemPromptAsync();
 

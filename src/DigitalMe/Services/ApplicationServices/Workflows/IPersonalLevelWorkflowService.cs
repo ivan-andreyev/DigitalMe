@@ -46,120 +46,120 @@ public interface IPersonalLevelWorkflowService : IApplicationService
 /// Request for file processing workflow.
 /// </summary>
 public record FileProcessingWorkflowRequest(
-    string Content,
-    string? Title = null);
+    string content,
+    string? title = null);
 
 /// <summary>
 /// Result of file processing workflow.
 /// </summary>
 public record FileProcessingWorkflowResult(
-    bool Success,
-    bool PdfCreated,
-    bool TextExtracted,
-    bool ContentMatch,
-    string? FilePath,
-    string? ExtractedTextPreview,
-    string? ErrorMessage = null);
+    bool success,
+    bool pdfCreated,
+    bool textExtracted,
+    bool contentMatch,
+    string? filePath,
+    string? extractedTextPreview,
+    string? errorMessage = null);
 
 /// <summary>
 /// Request for comprehensive test workflow.
 /// </summary>
 public record ComprehensiveTestWorkflowRequest(
-    string? TestContent = null,
-    bool IncludeWebNavigation = false,
-    bool IncludeCaptcha = false);
+    string? testContent = null,
+    bool includeWebNavigation = false,
+    bool includeCaptcha = false);
 
 /// <summary>
 /// Result of comprehensive test workflow.
 /// </summary>
 public record ComprehensiveTestWorkflowResult(
-    bool OverallSuccess,
-    DateTime Timestamp,
-    Dictionary<string, object> TestResults,
-    ComprehensiveTestSummary Summary);
+    bool overallSuccess,
+    DateTime timestamp,
+    Dictionary<string, object> testResults,
+    ComprehensiveTestSummary summary);
 
 /// <summary>
 /// Summary of comprehensive test results.
 /// </summary>
 public record ComprehensiveTestSummary(
-    int TotalTests,
-    int PassedTests,
-    int FailedTests);
+    int totalTests,
+    int passedTests,
+    int failedTests);
 
 /// <summary>
 /// Result of web navigation workflow.
 /// </summary>
 public record WebNavigationWorkflowResult(
-    bool Success,
-    bool BrowserInitialized,
-    string Message,
-    string? ErrorMessage = null);
+    bool success,
+    bool browserInitialized,
+    string message,
+    string? errorMessage = null);
 
 /// <summary>
 /// Result of service availability workflow.
 /// </summary>
 public record ServiceAvailabilityWorkflowResult(
-    bool Success,
-    string ServiceName,
-    bool ServiceAvailable,
-    Dictionary<string, object>? AdditionalData = null,
-    string? Message = null,
-    string? ErrorMessage = null);
+    bool success,
+    string serviceName,
+    bool serviceAvailable,
+    Dictionary<string, object>? additionalData = null,
+    string? message = null,
+    string? errorMessage = null);
 
 /// <summary>
 /// CRITICAL: Request for WebNavigation → CAPTCHA → File → Voice workflow.
 /// </summary>
 public record WebToCaptchaToFileToVoiceRequest(
-    string TargetUrl,
-    string ExpectedContent,
-    bool ProcessCaptcha = true,
-    bool GenerateVoiceNarration = true,
-    string? VoiceText = null);
+    string targetUrl,
+    string expectedContent,
+    bool processCaptcha = true,
+    bool generateVoiceNarration = true,
+    string? voiceText = null);
 
 /// <summary>
 /// CRITICAL: Result of WebNavigation → CAPTCHA → File → Voice workflow.
 /// </summary>
 public record WebToCaptchaToFileToVoiceWorkflowResult(
-    bool OverallSuccess,
-    WebNavigationStepResult WebNavigationStep,
-    CaptchaStepResult CaptchaStep,
-    FileProcessingStepResult FileProcessingStep,
-    VoiceNarrationStepResult VoiceStep,
-    DateTime Timestamp,
-    string? ErrorMessage = null);
+    bool overallSuccess,
+    WebNavigationStepResult webNavigationStep,
+    CaptchaStepResult captchaStep,
+    FileProcessingStepResult fileProcessingStep,
+    VoiceNarrationStepResult voiceStep,
+    DateTime timestamp,
+    string? errorMessage = null);
 
 /// <summary>
 /// CRITICAL: Request for Site registration → Form filling → Document → PDF workflow.
 /// </summary>
 public record SiteRegistrationToDocumentRequest(
-    string RegistrationUrl,
-    Dictionary<string, string> UserData,
-    string DocumentDownloadPath,
-    bool ConvertToPdf = true);
+    string registrationUrl,
+    Dictionary<string, string> userData,
+    string documentDownloadPath,
+    bool convertToPdf = true);
 
 /// <summary>
 /// CRITICAL: Result of Site registration → Form filling → Document → PDF workflow.
 /// </summary>
 public record SiteRegistrationToDocumentWorkflowResult(
-    bool OverallSuccess,
-    SiteRegistrationStepResult RegistrationStep,
-    FormFillingStepResult FormFillingStep,
-    DocumentDownloadStepResult DocumentStep,
-    PdfConversionStepResult PdfConversionStep,
-    DateTime Timestamp,
-    string? ErrorMessage = null);
+    bool overallSuccess,
+    SiteRegistrationStepResult registrationStep,
+    FormFillingStepResult formFillingStep,
+    DocumentDownloadStepResult documentStep,
+    PdfConversionStepResult pdfConversionStep,
+    DateTime timestamp,
+    string? errorMessage = null);
 
 /// <summary>
 /// Step results for TRUE integration workflows.
 /// </summary>
-public record WebNavigationStepResult(bool Success, string Message, string? ContentExtracted = null, string? ErrorMessage = null);
-public record CaptchaStepResult(bool Success, string Message, bool CaptchaDetected = false, bool CaptchaSolved = false, string? ErrorMessage = null);
-public record FileProcessingStepResult(bool Success, string Message, string? FilePath = null, string? ExtractedText = null, string? ErrorMessage = null);
-public record VoiceNarrationStepResult(bool Success, string Message, string? AudioFilePath = null, double? AudioDurationSeconds = null, string? ErrorMessage = null);
-public record SiteRegistrationStepResult(bool Success, string Message, bool UserRegistered = false, string? ErrorMessage = null);
-public record FormFillingStepResult(bool Success, string Message, Dictionary<string, bool>? FieldsFilled = null, string? ErrorMessage = null);
-public record DocumentDownloadStepResult(bool Success, string Message, string? DownloadedFilePath = null, long? FileSizeBytes = null, string? ErrorMessage = null);
-public record PdfConversionStepResult(bool Success, string Message, string? PdfFilePath = null, int? PageCount = null, string? ErrorMessage = null);
+public record WebNavigationStepResult(bool success, string message, string? contentExtracted = null, string? errorMessage = null);
+public record CaptchaStepResult(bool success, string message, bool captchaDetected = false, bool captchaSolved = false, string? errorMessage = null);
+public record FileProcessingStepResult(bool success, string message, string? filePath = null, string? extractedText = null, string? errorMessage = null);
+public record VoiceNarrationStepResult(bool success, string message, string? audioFilePath = null, double? audioDurationSeconds = null, string? errorMessage = null);
+public record SiteRegistrationStepResult(bool success, string message, bool userRegistered = false, string? errorMessage = null);
+public record FormFillingStepResult(bool success, string message, Dictionary<string, bool>? fieldsFilled = null, string? errorMessage = null);
+public record DocumentDownloadStepResult(bool success, string message, string? downloadedFilePath = null, long? fileSizeBytes = null, string? errorMessage = null);
+public record PdfConversionStepResult(bool success, string message, string? pdfFilePath = null, int? pageCount = null, string? errorMessage = null);
 
 /// <summary>
 /// Legacy alias for IPersonalLevelWorkflowService for backward compatibility.

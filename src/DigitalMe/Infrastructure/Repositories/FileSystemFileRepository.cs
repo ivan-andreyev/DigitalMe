@@ -129,10 +129,10 @@ public class FileSystemFileRepository : IFileRepository
         File.Move(tempFilePath, finalPath);
         
         var fileInfo = new TemporaryFileInfo(
-            FileId: fileId,
-            FilePath: finalPath,
-            Extension: extension,
-            CreatedAt: DateTime.UtcNow);
+            fileId: fileId,
+            filePath: finalPath,
+            extension: extension,
+            createdAt: DateTime.UtcNow);
             
         _fileRegistry[fileId] = fileInfo;
         
@@ -146,14 +146,14 @@ public class FileSystemFileRepository : IFileRepository
         {
             try
             {
-                if (File.Exists(fileInfo.FilePath))
+                if (File.Exists(fileInfo.filePath))
                 {
-                    File.Delete(fileInfo.FilePath);
+                    File.Delete(fileInfo.filePath);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error deleting temporary file: {FilePath}", fileInfo.FilePath);
+                _logger.LogWarning(ex, "Error deleting temporary file: {FilePath}", fileInfo.filePath);
                 // Don't throw - temporary file cleanup shouldn't fail the operation
             }
             finally

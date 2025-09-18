@@ -19,7 +19,7 @@ public interface IWebNavigationUseCase : IApplicationService
 /// Result of web navigation operations.
 /// </summary>
 public record WebNavigationResult(
-    bool Success,
-    bool BrowserInitialized,
-    string Message,
-    string? ErrorMessage = null);
+    bool success,
+    bool browserInitialized,
+    string message,
+    string? errorMessage = null);

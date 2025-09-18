@@ -421,19 +421,19 @@ public class SystemHealthMetrics
     public int ApiResponseTime { get; set; }
     public int ActiveConnections { get; set; }
     public int MemoryUsage { get; set; }
-    public string ApiTrend { get; set; } = "";
-    public string ConnectionTrend { get; set; } = "";
-    public string MemoryTrend { get; set; } = "";
-    public string SystemStatus { get; set; } = "";
+    public string ApiTrend { get; set; } = string.Empty;
+    public string ConnectionTrend { get; set; } = string.Empty;
+    public string MemoryTrend { get; set; } = string.Empty;
+    public string SystemStatus { get; set; } = string.Empty;
     public bool IsHealthy { get; set; }
     public DateTime LastUpdate { get; set; }
 }
 
 public class IntegrationStatus
 {
-    public string Name { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string Status { get; set; } = "";
+    public string Name { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
     public int LastResponseTime { get; set; }
     public int RequestsToday { get; set; }
     public DateTime LastChecked { get; set; }
@@ -455,7 +455,7 @@ public class BusinessMetrics
     public int ComponentsBuilt { get; set; }
     public int IntegrationsReady { get; set; }
     public int TimeToMarket { get; set; }
-    public string TechnicalDebt { get; set; } = "";
+    public string TechnicalDebt { get; set; } = string.Empty;
     public int DevelopmentVelocity { get; set; }
     public double RoiPercentage { get; set; }
 }
@@ -463,10 +463,10 @@ public class BusinessMetrics
 public class ActivityLog
 {
     public DateTime Time { get; set; }
-    public string Type { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string Message { get; set; } = "";
-    public string Metric { get; set; } = "";
+    public string Type { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string Metric { get; set; } = string.Empty;
 }
 
 #endregion

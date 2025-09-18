@@ -73,18 +73,18 @@ public class ChatHub : Hub
 
             var processResult = result.Value;
 
-            if (processResult != null && !string.IsNullOrEmpty(processResult.GroupName))
+            if (processResult != null && !string.IsNullOrEmpty(processResult.groupName))
             {
                 _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
-                    processResult.GroupName);
+                    processResult.groupName);
 
-                await Clients.Group(processResult.GroupName).SendAsync("MessageReceived", new MessageDto
+                await Clients.Group(processResult.groupName).SendAsync("MessageReceived", new MessageDto
             {
-                Id = processResult.UserMessage.Id,
-                ConversationId = processResult.UserMessage.ConversationId,
-                Role = processResult.UserMessage.Role,
-                Content = processResult.UserMessage.Content,
-                Timestamp = processResult.UserMessage.Timestamp,
+                Id = processResult.userMessage.Id,
+                ConversationId = processResult.userMessage.ConversationId,
+                Role = processResult.userMessage.Role,
+                Content = processResult.userMessage.Content,
+                Timestamp = processResult.userMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
                     ["isRealTime"] = true,
@@ -94,8 +94,8 @@ public class ChatHub : Hub
 
                 // Show typing indicator
                 _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
-                    processResult.GroupName);
-                await Clients.Group(processResult.GroupName).SendAsync("TypingIndicator", new
+                    processResult.groupName);
+                await Clients.Group(processResult.groupName).SendAsync("TypingIndicator", new
                 {
                     IsTyping = true,
                     User = "Ivan",
@@ -103,7 +103,7 @@ public class ChatHub : Hub
                 });
 
                 // Process agent response synchronously for integration tests reliability
-                await ProcessAgentResponseAsync(request, processResult.Conversation.Id, processResult.GroupName);
+                await ProcessAgentResponseAsync(request, processResult.conversation.Id, processResult.groupName);
             }
 
             _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}",
@@ -151,23 +151,23 @@ public class ChatHub : Hub
             });
 
             // Send agent response to all clients in group
-            if (agentResult != null && agentResult.AssistantMessage != null)
+            if (agentResult != null && agentResult.assistantMessage != null)
             {
                 _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
                     groupName);
                 await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
                 {
-                    Id = agentResult.AssistantMessage.Id,
-                    ConversationId = agentResult.AssistantMessage.ConversationId,
-                    Role = agentResult.AssistantMessage.Role,
-                    Content = agentResult.AssistantMessage.Content,
-                    Timestamp = agentResult.AssistantMessage.Timestamp,
+                    Id = agentResult.assistantMessage.Id,
+                    ConversationId = agentResult.assistantMessage.ConversationId,
+                    Role = agentResult.assistantMessage.Role,
+                    Content = agentResult.assistantMessage.Content,
+                    Timestamp = agentResult.assistantMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
-                    ["mood"] = agentResult.AgentResponse.Mood.PrimaryMood,
-                    ["moodIntensity"] = agentResult.AgentResponse.Mood.Intensity,
-                    ["confidence"] = agentResult.AgentResponse.ConfidenceScore,
-                    ["triggeredTools"] = agentResult.AgentResponse.TriggeredTools,
+                    ["mood"] = agentResult.agentResponse.Mood.PrimaryMood,
+                    ["moodIntensity"] = agentResult.agentResponse.Mood.Intensity,
+                    ["confidence"] = agentResult.agentResponse.ConfidenceScore,
+                    ["triggeredTools"] = agentResult.agentResponse.TriggeredTools,
                     ["isRealTime"] = true,
                     ["backgroundProcessed"] = true
                 }

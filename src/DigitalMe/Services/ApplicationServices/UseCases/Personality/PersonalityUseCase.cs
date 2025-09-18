@@ -239,7 +239,7 @@ public class PersonalityUseCase : IPersonalityUseCase
             // Add metrics
             result.Metrics = new Dictionary<string, object>
             {
-                ["traitCount"] = personalityResult.IsSuccess ? personalityResult.Value!.Traits?.Count ?? 0 : 0,
+                ["traitCount"] = personalityResult.IsSuccess && personalityResult.Value != null ? personalityResult.Value.Traits?.Count ?? 0 : 0,
                 ["enhancedPromptLength"] = enhancedPromptResult.IsSuccess ? enhancedPromptResult.Value?.Length ?? 0 : 0,
                 ["testContextType"] = testContext.ContextType.ToString(),
                 ["validationTimestamp"] = DateTime.UtcNow

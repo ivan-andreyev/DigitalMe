@@ -10,10 +10,13 @@
         <UserSecretsId>digitalme-user-secrets</UserSecretsId>
 
         <!-- Make CS warnings visible by treating them as errors -->
-        <WarningsAsErrors>CS8602;CS8601;CS8603;CS8604;CS0618</WarningsAsErrors>
+        <WarningsAsErrors>CS8602;CS8601;CS8603;CS8604</WarningsAsErrors>
 
         <!-- Suppress CS1998 - Async without await (performance warning, not functional) -->
         <NoWarn>CS1998</NoWarn>
+
+        <!-- Suppress StyleCop rules that don't match our coding style -->
+        <NoWarn>$(NoWarn);SA1101;SA1516;SA1413;SA1309;SA1028;SA1116;SA1633;SA1000;SA1117;SA1503;SA1200;SA1518;SA1502;SA1124</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

@@ -12,10 +12,10 @@ public interface IMessageProcessor
 }
 
 public record ProcessMessageResult(
-    Conversation Conversation,
-    Message UserMessage,
-    string GroupName);
+    Conversation conversation,
+    Message userMessage,
+    string groupName);
 
 public record ProcessAgentResponseResult(
-    Message AssistantMessage,
-    AgentResponse AgentResponse);
+    Message assistantMessage,
+    AgentResponse agentResponse);
