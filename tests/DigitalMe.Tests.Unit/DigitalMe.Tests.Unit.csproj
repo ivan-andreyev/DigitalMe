@@ -7,12 +7,16 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    
+
     <!-- Enable analyzers and show violations -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
     <WarningsAsErrors />
     <WarningsNotAsErrors>SA0001</WarningsNotAsErrors>
+
+    <!-- Suppress warnings in test projects -->
+    <NoWarn>CS1998;CS0618;CS8619;CS8602;CS8604;CS8601;ASP0000;xunit1013;xunit1026;xunit1031;xunit2002;xunit2012;xunit2020</NoWarn>
+    <NoWarn>$(NoWarn);SA0001;SA1000;SA1008;SA1009;SA1011;SA1013;SA1025;SA1101;SA1107;SA1108;SA1111;SA1116;SA1117;SA1119;SA1122;SA1124;SA1127;SA1128;SA1137;SA1200;SA1201;SA1202;SA1203;SA1204;SA1208;SA1210;SA1214;SA1309;SA1401;SA1407;SA1413;SA1500;SA1501;SA1502;SA1503;SA1505;SA1507;SA1508;SA1512;SA1513;SA1515;SA1516;SA1518;SA1633;SA1028</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
