@@ -121,11 +121,7 @@ Respond as Ivan would - rationally, structured, friendly but direct, with occasi
                     ? "data/profile/IVAN_PROFILE_DATA.md"
                     : configPath;
 
-                // Use path relative to the application base directory, not current working directory
-                // This ensures consistency between local development and CI/CD environments
-                var baseDirectory = AppContext.BaseDirectory;
-                var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", ".."));
-                var fullPath = Path.Combine(projectRoot, profileDataPath);
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), profileDataPath);
                 _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
 
                 _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);
