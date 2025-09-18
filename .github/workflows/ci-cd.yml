@@ -101,6 +101,9 @@ jobs:
           --results-directory TestResults
       env:
         ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=digitalme_test;Username=postgres;Password=postgres"
+        ANTHROPIC_API_KEY: "test-api-key-sk-ant-test"
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+        ASPNETCORE_ENVIRONMENT: "Testing"
 
     - name: 📊 Upload Test Results
       uses: actions/upload-artifact@v4
