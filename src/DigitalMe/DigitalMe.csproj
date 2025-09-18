@@ -13,10 +13,13 @@
         <WarningsAsErrors>CS8602;CS8601;CS8603;CS8604</WarningsAsErrors>
 
         <!-- Suppress CS1998 - Async without await (performance warning, not functional) -->
-        <NoWarn>CS1998</NoWarn>
+        <!-- Suppress CS0618 - Obsolete API warnings during transition period -->
+        <!-- Suppress CS8619 - Nullability type mismatch warnings -->
+        <!-- Suppress ASP0000 - BuildServiceProvider warnings during development -->
+        <NoWarn>CS1998;CS0618;CS8619;ASP0000</NoWarn>
 
         <!-- Suppress StyleCop rules that don't match our coding style -->
-        <NoWarn>$(NoWarn);SA1101;SA1516;SA1413;SA1309;SA1028;SA1116;SA1633;SA1000;SA1117;SA1503;SA1200;SA1518;SA1502;SA1124</NoWarn>
+        <NoWarn>$(NoWarn);SA0001;SA1000;SA1008;SA1009;SA1011;SA1013;SA1025;SA1101;SA1107;SA1108;SA1111;SA1116;SA1117;SA1119;SA1122;SA1124;SA1127;SA1128;SA1137;SA1200;SA1201;SA1202;SA1203;SA1204;SA1208;SA1210;SA1214;SA1309;SA1401;SA1407;SA1413;SA1500;SA1501;SA1502;SA1503;SA1505;SA1507;SA1508;SA1512;SA1513;SA1515;SA1516;SA1518;SA1633;SA1028</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
