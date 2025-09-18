@@ -1,5 +1,6 @@
 using DigitalMe.Common;
 using DigitalMe.Data.Entities;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -15,17 +16,20 @@ public class PersonalityService : IPersonalityService
     private readonly ILogger<PersonalityService> _logger;
     private readonly IProfileDataParser _profileDataParser;
     private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _environment;
     private PersonalityProfile? _cachedProfile;
     private ProfileData? _cachedProfileData;
 
     public PersonalityService(
         ILogger<PersonalityService> logger,
         IProfileDataParser profileDataParser,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         _logger = logger;
         _profileDataParser = profileDataParser;
         _configuration = configuration;
+        _environment = environment;
     }
 
     public Task<Result<PersonalityProfile>> GetPersonalityAsync()
@@ -121,7 +125,7 @@ Respond as Ivan would - rationally, structured, friendly but direct, with occasi
                     ? "data/profile/IVAN_PROFILE_DATA.md"
                     : configPath;
 
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), profileDataPath);
+                var fullPath = Path.Combine(_environment.ContentRootPath, profileDataPath);
                 _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
 
                 _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);

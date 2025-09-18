@@ -559,6 +559,17 @@ Direct and pragmatic with structured thinking.
                 return mockService.Object;
             });
 
+            // Mock IWebHostEnvironment for PersonalityService path resolution
+            var webHostEnvironmentDescriptors = services.Where(d => d.ServiceType == typeof(IWebHostEnvironment)).ToList();
+            foreach (var descriptor in webHostEnvironmentDescriptors)
+                services.Remove(descriptor);
+
+            services.AddScoped<IWebHostEnvironment>(provider =>
+            {
+                var mockEnvironment = new Mock<IWebHostEnvironment>();
+                mockEnvironment.Setup(x => x.ContentRootPath).Returns(Directory.GetCurrentDirectory());
+                return mockEnvironment.Object;
+            });
 
             // Configure SignalR for testing - disable problematic features
             services.Configure<Microsoft.AspNetCore.SignalR.HubOptions>(options =>

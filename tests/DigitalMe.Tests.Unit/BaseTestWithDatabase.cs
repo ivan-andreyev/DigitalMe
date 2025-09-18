@@ -1,8 +1,8 @@
+namespace DigitalMe.Tests.Unit;
+
 using DigitalMe.Data;
 using DigitalMe.Tests.Unit.Fixtures;
 using Microsoft.EntityFrameworkCore;
-
-namespace DigitalMe.Tests.Unit;
 
 public abstract class BaseTestWithDatabase : IDisposable
 {

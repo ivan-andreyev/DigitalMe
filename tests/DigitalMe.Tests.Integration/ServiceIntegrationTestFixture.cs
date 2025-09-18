@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -57,6 +58,14 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
 
         // Add Clean Architecture services (contains Learning Infrastructure Services)
         services.AddCleanArchitectureServices();
+
+        // Add IWebHostEnvironment for PersonalityService
+        services.AddScoped<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(provider =>
+        {
+            var mockEnvironment = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+            mockEnvironment.Setup(x => x.ContentRootPath).Returns(System.IO.Directory.GetCurrentDirectory());
+            return mockEnvironment.Object;
+        });
 
         // Build service provider
         var serviceProvider = services.BuildServiceProvider();

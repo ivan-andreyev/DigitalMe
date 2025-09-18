@@ -1,6 +1,6 @@
-using DigitalMe.Tests.Unit.Controllers;
-
 namespace DigitalMe.Tests.Unit.Controllers;
+
+using DigitalMe.Tests.Unit.Controllers;
 
 [CollectionDefinition("ChatController")]
 public class ChatControllerCollection : ICollectionFixture<TestWebApplicationFactory<Program>>

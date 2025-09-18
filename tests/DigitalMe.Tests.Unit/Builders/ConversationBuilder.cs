@@ -1,6 +1,6 @@
-using DigitalMe.Data.Entities;
-
 namespace DigitalMe.Tests.Unit.Builders;
+
+using DigitalMe.Data.Entities;
 
 public class ConversationBuilder
 {
@@ -11,7 +11,7 @@ public class ConversationBuilder
         this._conversation = new Conversation();
     }
 
-    public static ConversationBuilder Create() => new();
+    public static ConversationBuilder Create() => new ();
 
     public ConversationBuilder WithId(Guid id)
     {

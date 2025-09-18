@@ -13,6 +13,9 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <WarningsAsErrors />
     <WarningsNotAsErrors>SA0001</WarningsNotAsErrors>
+    
+    <!-- Suppress StyleCop warnings for test project -->
+    <NoWarn>$(NoWarn);SA1633;SA1200;SA1000;SA1011;SA1309;SA1201;SA1202;SA1204;SA1508;SA1505;SA1127;SA1516;SA1210;SA1208;SA1124;SA1413;SA1101;SA1122;SA1117;xUnit1013;SA1503;SA1111;SA1407;xUnit1031;SA1009;SA1502;SA1107;xUnit2012;xUnit2002;SA1515;SA1513;SA1507;SA0001;SA1501</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
