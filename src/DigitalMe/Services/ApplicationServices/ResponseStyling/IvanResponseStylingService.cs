@@ -244,7 +244,12 @@ public class IvanResponseStylingService : IIvanResponseStylingService
                 };
             }
 
-            return result.Value;
+            return result.Value ?? new IvanVocabularyPreferences
+            {
+                PreferredTechnicalTerms = new List<string> { "structured", "systematic", "pragmatic" },
+                PreferredCasualPhrases = new List<string> { "honestly", "frankly", "here's the thing" },
+                SignatureExpressions = new List<string> { "Ivan's perspective", "from experience" }
+            };
         }, TimeSpan.FromHours(2)); // Cache for 2 hours - vocabulary preferences are very stable
     }
 
