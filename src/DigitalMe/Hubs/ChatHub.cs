@@ -73,10 +73,12 @@ public class ChatHub : Hub
 
             var processResult = result.Value;
 
-            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
-                processResult.GroupName);
+            if (processResult != null && !string.IsNullOrEmpty(processResult.GroupName))
+            {
+                _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
+                    processResult.GroupName);
 
-            await Clients.Group(processResult.GroupName).SendAsync("MessageReceived", new MessageDto
+                await Clients.Group(processResult.GroupName).SendAsync("MessageReceived", new MessageDto
             {
                 Id = processResult.UserMessage.Id,
                 ConversationId = processResult.UserMessage.ConversationId,
@@ -90,18 +92,19 @@ public class ChatHub : Hub
                 }
             });
 
-            // Show typing indicator
-            _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
-                processResult.GroupName);
-            await Clients.Group(processResult.GroupName).SendAsync("TypingIndicator", new
-            {
-                IsTyping = true,
-                User = "Ivan",
-                Message = "Иван печатает..."
-            });
+                // Show typing indicator
+                _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
+                    processResult.GroupName);
+                await Clients.Group(processResult.GroupName).SendAsync("TypingIndicator", new
+                {
+                    IsTyping = true,
+                    User = "Ivan",
+                    Message = "Иван печатает..."
+                });
 
-            // Process agent response synchronously for integration tests reliability
-            await ProcessAgentResponseAsync(request, processResult.Conversation.Id, processResult.GroupName);
+                // Process agent response synchronously for integration tests reliability
+                await ProcessAgentResponseAsync(request, processResult.Conversation.Id, processResult.GroupName);
+            }
 
             _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}",
                 request.UserId);
@@ -148,15 +151,17 @@ public class ChatHub : Hub
             });
 
             // Send agent response to all clients in group
-            _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
-                groupName);
-            await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
+            if (agentResult != null && agentResult.AssistantMessage != null)
             {
-                Id = agentResult.AssistantMessage.Id,
-                ConversationId = agentResult.AssistantMessage.ConversationId,
-                Role = agentResult.AssistantMessage.Role,
-                Content = agentResult.AssistantMessage.Content,
-                Timestamp = agentResult.AssistantMessage.Timestamp,
+                _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
+                    groupName);
+                await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
+                {
+                    Id = agentResult.AssistantMessage.Id,
+                    ConversationId = agentResult.AssistantMessage.ConversationId,
+                    Role = agentResult.AssistantMessage.Role,
+                    Content = agentResult.AssistantMessage.Content,
+                    Timestamp = agentResult.AssistantMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
                     ["mood"] = agentResult.AgentResponse.Mood.PrimaryMood,
@@ -167,6 +172,7 @@ public class ChatHub : Hub
                     ["backgroundProcessed"] = true
                 }
             });
+            }
 
             _logger.LogInformation("🎉 Background processing COMPLETED SUCCESSFULLY for user {UserId}",
                 request.UserId);

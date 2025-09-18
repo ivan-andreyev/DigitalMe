@@ -169,7 +169,7 @@ public class AnthropicServiceSimple : IAnthropicService
             return "Error generating system prompt";
         }
 
-        var systemPromptResult = _personalityService.GenerateSystemPrompt(ivanProfileResult.Value);
+        var systemPromptResult = _personalityService.GenerateSystemPrompt(ivanProfileResult.Value!);
         if (!systemPromptResult.IsSuccess)
         {
             _logger.LogWarning("Failed to generate system prompt: {Error}", systemPromptResult.Error);
@@ -177,7 +177,7 @@ public class AnthropicServiceSimple : IAnthropicService
         }
 
         _logger.LogInformation("Generated system prompt for Ivan's personality with {TraitCount} traits", ivanProfileResult.Value?.Traits?.Count ?? 0);
-        return systemPromptResult.Value;
+        return systemPromptResult.Value ?? "Default system prompt for Ivan personality";
     }
 
     private async Task<string> GenerateFallbackResponseAsync(string message, PersonalityProfile? personality)

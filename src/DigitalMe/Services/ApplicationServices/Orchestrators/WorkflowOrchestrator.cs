@@ -37,7 +37,7 @@ public class WorkflowOrchestrator : IWorkflowOrchestrator
     {
         _logger.LogInformation("Orchestrating file processing workflow");
         var result = await _fileProcessingUseCase.ExecuteAsync(command);
-        return result.IsSuccess ? result.Value : new FileProcessingResult(
+        return result.IsSuccess && result.Value != null ? result.Value : new FileProcessingResult(
             Success: false,
             PdfCreated: false,
             TextExtracted: false,
@@ -57,7 +57,7 @@ public class WorkflowOrchestrator : IWorkflowOrchestrator
     {
         _logger.LogInformation("Orchestrating service availability workflow for {ServiceName}", query.ServiceName);
         var result = await _serviceAvailabilityUseCase.ExecuteAsync(query);
-        return result.IsSuccess ? result.Value : new ServiceAvailabilityResult(
+        return result.IsSuccess && result.Value != null ? result.Value : new ServiceAvailabilityResult(
             Success: false,
             ServiceName: query.ServiceName,
             ServiceAvailable: false,
@@ -68,7 +68,7 @@ public class WorkflowOrchestrator : IWorkflowOrchestrator
     {
         _logger.LogInformation("Orchestrating comprehensive health check workflow");
         var result = await _healthCheckUseCase.ExecuteAsync(command);
-        return result.IsSuccess ? result.Value : new ComprehensiveHealthCheckResult(
+        return result.IsSuccess && result.Value != null ? result.Value : new ComprehensiveHealthCheckResult(
             OverallSuccess: false,
             Timestamp: DateTime.UtcNow,
             TestResults: new Dictionary<string, object> { ["error"] = result.Error },

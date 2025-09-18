@@ -1,0 +1,292 @@
+Сборка начата 9/18/2025 12:48:20 PM.
+     1>Проект "C:\Sources\DigitalMe\DigitalMe.sln" в узле 1 (целевые объекты Restore).
+     1>ValidateSolutionConfiguration:
+         Создание конфигурации решения "Debug|Any CPU".
+       _GetAllRestoreProjectPathItems:
+         Определение проектов для восстановления...
+       Restore:
+         При проверке цепочки сертификатов X.509 будет использоваться хранилище доверия по умолчанию, выбранное .NET для подписывания кода.
+         При проверке цепочки сертификатов X.509 будет использоваться хранилище доверия по умолчанию, выбранное .NET для установки метки времени.
+         Файл ресурсов не был изменен. Пропуск записи файла ресурсов. Путь: C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\project.assets.json
+         Восстановлен C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj (за 33 мс).
+         Файл ресурсов не был изменен. Пропуск записи файла ресурсов. Путь: C:\Sources\DigitalMe\src\DigitalMe.Web\obj\project.assets.json
+         Файл ресурсов не был изменен. Пропуск записи файла ресурсов. Путь: C:\Sources\DigitalMe\src\DigitalMe\obj\project.assets.json
+         Восстановлен C:\Sources\DigitalMe\src\DigitalMe.Web\DigitalMe.Web.csproj (за 36 мс).
+         Восстановлен C:\Sources\DigitalMe\src\DigitalMe\DigitalMe.csproj (за 36 мс).
+         Файл ресурсов не был изменен. Пропуск записи файла ресурсов. Путь: C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\obj\project.assets.json
+         Файл ресурсов не был изменен. Пропуск записи файла ресурсов. Путь: C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\obj\project.assets.json
+         Восстановлен C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\DigitalMe.Tests.Unit.csproj (за 37 мс).
+         Восстановлен C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj (за 37 мс).
+         
+         Использованные файлы конфигурации NuGet:
+             C:\Users\mrred\AppData\Roaming\NuGet\NuGet.Config
+         
+         Использованные веб-каналы:
+             https://api.nuget.org/v3/index.json
+             C:\Program Files\dotnet\library-packs
+         Все проекты обновлены для восстановления.
+     1>Сборка проекта "C:\Sources\DigitalMe\DigitalMe.sln" завершена (целевые объекты Restore).
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" в узле 1 (целевые объекты по умолчанию).
+     1>ValidateSolutionConfiguration:
+         Создание конфигурации решения "Debug|Any CPU".
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" (1:2) выполняет сборку "C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj" (2:10) в узле 3 (целевые объекты по умолчанию).
+     2>StaticWebAssetsUpdateCrossTargetingBuildProjects:
+         Evaluating rules for target framework: 'net8.0-windows10.0.19041.0'
+  2:10>Проект "C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj" (2:10) выполняет сборку "C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj" (2:12) в узле 3 (целевые объекты Build).
+     2>_GenerateScopedCssFiles:
+       Целевой объект "_GenerateScopedCssFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _BuildCopyStaticWebAssetsPreserveNewest:
+       Целевой объект "_BuildCopyStaticWebAssetsPreserveNewest" пропускается из-за отсутствия выходных файлов.
+       MauiGeneratePackageAppxManifest:
+       Целевой объект "MauiGeneratePackageAppxManifest" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       MarkupCompilePass1:
+         "C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\tools\net6.0\..\net472\XamlCompiler.exe" "obj\Debug\net8.0-windows10.0.19041.0\win-x64\\input.json" "obj\Debug\net8.0-windows10.0.19041.0\win-x64\\output.json"
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" (1:2) выполняет сборку "C:\Sources\DigitalMe\src\DigitalMe\DigitalMe.csproj" (6:9) в узле 1 (целевые объекты по умолчанию).
+     6>_DiscoverMvcApplicationParts:
+       Целевой объект "_DiscoverMvcApplicationParts" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _GenerateSourceLinkFile:
+         Файл Source Link "obj\Debug\net8.0\DigitalMe.sourcelink.json" обновлен.
+       CoreCompile:
+       Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _CreateAppHost:
+       Целевой объект "_CreateAppHost" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     2>MarkupCompilePass1:
+         (Out) GeneratedCodeFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs'
+         (Out) GeneratedXamlFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xaml'
+         (Out) GeneratedXbfFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf'
+         (Out) Compile: 'App.xaml.cs;Data\WeatherForecast.cs;Data\WeatherForecastService.cs;MainPage.xaml.cs;MauiProgram.cs;Models\ChatModels.cs;Models\MauiConfiguration.cs;Platforms\Android\MainActivity.cs;Platforms\Android\MainApplication.cs;Platforms\iOS\AppDelegate.cs;Platforms\iOS\Program.cs;Platforms\MacCatalyst\AppDelegate.cs;Platforms\MacCatalyst\Program.cs;Platforms\Tizen\Main.cs;Platforms\Windows\App.xaml.cs;Services\AuthService.cs;Services\IPlatformService.cs;Services\NotificationService.cs;Services\PlatformService.cs;Services\SignalRChatService.cs;C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\include\MddBootstrapAutoInitializer.cs;C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs;obj\Debug\net8.0-windows10.0.19041.0\win-x64\DigitalMe.MAUI.GlobalUsings.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs'
+       XamlPreCompile:
+       Целевой объект "XamlPreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     6>_GenerateScopedCssFiles:
+       Целевой объект "_GenerateScopedCssFiles" пропускается из-за отсутствия выходных файлов.
+       _GenerateScopedCssFiles:
+       Целевой объект "_GenerateScopedCssFiles" пропускается из-за отсутствия выходных файлов.
+     2>MarkupCompilePass2:
+         "C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\tools\net6.0\..\net472\XamlCompiler.exe" "obj\Debug\net8.0-windows10.0.19041.0\win-x64\\input.json" "obj\Debug\net8.0-windows10.0.19041.0\win-x64\\output.json"
+     6>_BuildCopyStaticWebAssetsPreserveNewest:
+       Целевой объект "_BuildCopyStaticWebAssetsPreserveNewest" пропускается из-за отсутствия выходных файлов.
+       _CopyOutOfDateSourceItemsToOutputDirectory:
+       Целевой объект "_CopyOutOfDateSourceItemsToOutputDirectory" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildDependencyFile:
+       Целевой объект "GenerateBuildDependencyFile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildRuntimeConfigurationFiles:
+       Целевой объект "GenerateBuildRuntimeConfigurationFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CopyFilesToOutputDirectory:
+         DigitalMe -> C:\Sources\DigitalMe\src\DigitalMe\bin\Debug\net8.0\DigitalMe.dll
+     6>Сборка проекта "C:\Sources\DigitalMe\src\DigitalMe\DigitalMe.csproj" завершена (целевые объекты по умолчанию).
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" (1:2) выполняет сборку "C:\Sources\DigitalMe\src\DigitalMe.Web\DigitalMe.Web.csproj" (5:7) в узле 5 (целевые объекты по умолчанию).
+     5>GenerateTargetFrameworkMonikerAttribute:
+       Целевой объект "GenerateTargetFrameworkMonikerAttribute" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CoreGenerateAssemblyInfo:
+       Целевой объект "CoreGenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _DiscoverMvcApplicationParts:
+       Целевой объект "_DiscoverMvcApplicationParts" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _CoreGenerateRazorAssemblyInfo:
+       Целевой объект "_CoreGenerateRazorAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _GenerateSourceLinkFile:
+         Файл Source Link "obj\Debug\net8.0\DigitalMe.Web.sourcelink.json" обновлен.
+       CoreCompile:
+       Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _CreateAppHost:
+       Целевой объект "_CreateAppHost" пропускается, так как все выходные файлы актуальны по отношению к входным.
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" (1:2) выполняет сборку "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\DigitalMe.Tests.Unit.csproj" (4:7) в узле 4 (целевые объекты по умолчанию).
+     4>GenerateTargetFrameworkMonikerAttribute:
+       Целевой объект "GenerateTargetFrameworkMonikerAttribute" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CoreGenerateAssemblyInfo:
+       Целевой объект "CoreGenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _GenerateSourceLinkFile:
+         Файл Source Link "obj\Debug\net8.0\DigitalMe.Tests.Unit.sourcelink.json" обновлен.
+       CoreCompile:
+       Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     5>_GenerateScopedCssFiles:
+       Целевой объект "_GenerateScopedCssFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _BuildCopyStaticWebAssetsPreserveNewest:
+       Целевой объект "_BuildCopyStaticWebAssetsPreserveNewest" пропускается из-за отсутствия выходных файлов.
+     4>_CopyOutOfDateSourceItemsToOutputDirectory:
+       Частичное создание целевого объекта "_CopyOutOfDateSourceItemsToOutputDirectory", так как некоторые выходные файлы устарели по отношению к входным.
+         Копирование файла из "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\obj\Debug\net8.0\MvcTestingAppManifest.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\bin\Debug\net8.0\MvcTestingAppManifest.json".
+       GenerateBuildDependencyFile:
+       Целевой объект "GenerateBuildDependencyFile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildRuntimeConfigurationFiles:
+       Целевой объект "GenerateBuildRuntimeConfigurationFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CopyFilesToOutputDirectory:
+         DigitalMe.Tests.Unit -> C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\bin\Debug\net8.0\DigitalMe.Tests.Unit.dll
+     5>_CopyOutOfDateSourceItemsToOutputDirectory:
+       Целевой объект "_CopyOutOfDateSourceItemsToOutputDirectory" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildDependencyFile:
+       Целевой объект "GenerateBuildDependencyFile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildRuntimeConfigurationFiles:
+       Целевой объект "GenerateBuildRuntimeConfigurationFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CopyFilesToOutputDirectory:
+         DigitalMe.Web -> C:\Sources\DigitalMe\src\DigitalMe.Web\bin\Debug\net8.0\DigitalMe.Web.dll
+     5>Сборка проекта "C:\Sources\DigitalMe\src\DigitalMe.Web\DigitalMe.Web.csproj" завершена (целевые объекты по умолчанию).
+     4>_MvcCopyDependencyFiles:
+         Копирование файла из "C:\Sources\DigitalMe\src\DigitalMe\bin\Debug\net8.0\DigitalMe.deps.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\bin\Debug\net8.0\DigitalMe.deps.json".
+     4>Сборка проекта "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\DigitalMe.Tests.Unit.csproj" завершена (целевые объекты по умолчанию).
+     2>MarkupCompilePass2:
+         (Out) GeneratedCodeFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs'
+         (Out) GeneratedXamlFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xaml;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xaml'
+         (Out) GeneratedXbfFiles: 'C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf'
+         (Out) GeneratedXamlPagesFiles: ''
+         (Out) Compile: 'App.xaml.cs;Data\WeatherForecast.cs;Data\WeatherForecastService.cs;MainPage.xaml.cs;MauiProgram.cs;Models\ChatModels.cs;Models\MauiConfiguration.cs;Platforms\Windows\App.xaml.cs;Services\AuthService.cs;Services\IPlatformService.cs;Services\NotificationService.cs;Services\PlatformService.cs;Services\SignalRChatService.cs;C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\include\MddBootstrapAutoInitializer.cs;C:\Users\mrred\.nuget\packages\microsoft.windowsappsdk\1.5.240802000\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs;obj\Debug\net8.0-windows10.0.19041.0\win-x64\DigitalMe.MAUI.GlobalUsings.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.i.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.g.cs;C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\XamlTypeInfo.g.cs'
+       ProcessMauiSplashScreens:
+       Целевой объект "ProcessMauiSplashScreens" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       ProcessMauiFonts:
+       Целевой объект "ProcessMauiFonts" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       ResizetizeImages:
+       Целевой объект "ResizetizeImages" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateTargetFrameworkMonikerAttribute:
+       Целевой объект "GenerateTargetFrameworkMonikerAttribute" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CoreGenerateAssemblyInfo:
+       Целевой объект "CoreGenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _GenerateSourceLinkFile:
+         Файл Source Link "obj\Debug\net8.0-windows10.0.19041.0\win-x64\DigitalMe.MAUI.sourcelink.json" обновлен.
+       CoreCompile:
+       Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       _CreateAppHost:
+       Целевой объект "_CreateAppHost" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       XamlC:
+       Целевой объект "XamlC" пропускается, так как все выходные файлы актуальны по отношению к входным.
+   1:2>Проект "C:\Sources\DigitalMe\DigitalMe.sln" (1:2) выполняет сборку "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj" (3:6) в узле 2 (целевые объекты по умолчанию).
+     3>GenerateTargetFrameworkMonikerAttribute:
+       Целевой объект "GenerateTargetFrameworkMonikerAttribute" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     2>ComputeProcessXamlFiles:
+         (Out) ProcessedXamlFiles == bin\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
+       CustomOutputGroupForPackaging:
+         (Out) Project='DigitalMe.MAUI' ProcessedXamlFiles == bin\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
+         (Out) XamlPackagingRootFolder == bin\Debug\net8.0-windows10.0.19041.0\win-x64\\
+         (Out) ProcessedXamlFilesFullPath == C:\Sources\DigitalMe\src\DigitalMe.MAUI\bin\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
+         (Out) Project='DigitalMe.MAUI' CustomOutputGroupForPackagingOutput == C:\Sources\DigitalMe\src\DigitalMe.MAUI\bin\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf
+     3>CoreGenerateAssemblyInfo:
+       Целевой объект "CoreGenerateAssemblyInfo" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     2>GetPriOutputs:
+         DigitalMe.MAUI : DigitalMe.MAUI.PriFilesOutputGroup : C:\Users\mrred\.nuget\packages\microsoft.maui.controls.compatibility\8.0.100\lib\net8.0-windows10.0.19041\Microsoft.Maui.Controls.Compatibility.pri -> Microsoft.Maui.Controls.Compatibility.pri
+         DigitalMe.MAUI : DigitalMe.MAUI.PriFilesOutputGroup : C:\Users\mrred\.nuget\packages\microsoft.maui.controls.core\8.0.100\lib\net8.0-windows10.0.19041\Microsoft.Maui.Controls.pri -> Microsoft.Maui.Controls.pri
+         DigitalMe.MAUI : DigitalMe.MAUI.PriFilesOutputGroup : C:\Users\mrred\.nuget\packages\microsoft.maui.core\8.0.100\lib\net8.0-windows10.0.19041\Microsoft.Maui.pri -> Microsoft.Maui.pri
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\Resources\Raw\AboutAssets.txt -> AboutAssets.txt
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\scopedcss\bundle\DigitalMe.MAUI.styles.css -> wwwroot\DigitalMe.MAUI.styles.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\scopedcss\projectbundle\DigitalMe.MAUI.bundle.scp.css -> wwwroot\DigitalMe.MAUI.bundle.scp.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\app.css -> wwwroot\css\app.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\bootstrap\bootstrap.min.css -> wwwroot\css\bootstrap\bootstrap.min.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\bootstrap\bootstrap.min.css.map -> wwwroot\css\bootstrap\bootstrap.min.css.map
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\FONT-LICENSE -> wwwroot\css\open-iconic\FONT-LICENSE
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css -> wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\fonts\open-iconic.eot -> wwwroot\css\open-iconic\font\fonts\open-iconic.eot
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\fonts\open-iconic.otf -> wwwroot\css\open-iconic\font\fonts\open-iconic.otf
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\fonts\open-iconic.svg -> wwwroot\css\open-iconic\font\fonts\open-iconic.svg
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\fonts\open-iconic.ttf -> wwwroot\css\open-iconic\font\fonts\open-iconic.ttf
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\font\fonts\open-iconic.woff -> wwwroot\css\open-iconic\font\fonts\open-iconic.woff
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\ICON-LICENSE -> wwwroot\css\open-iconic\ICON-LICENSE
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\css\open-iconic\README.md -> wwwroot\css\open-iconic\README.md
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\favicon.ico -> wwwroot\favicon.ico
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\wwwroot\index.html -> wwwroot\index.html
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-100.png -> splashSplashScreen.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-125.png -> splashSplashScreen.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-150.png -> splashSplashScreen.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-200.png -> splashSplashScreen.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\sp\splashSplashScreen.scale-400.png -> splashSplashScreen.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\f\OpenSans-Regular.ttf -> OpenSans-Regular.ttf
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appicon.ico -> appicon.ico
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLargeTile.scale-100.png -> appiconLargeTile.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLargeTile.scale-125.png -> appiconLargeTile.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLargeTile.scale-150.png -> appiconLargeTile.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLargeTile.scale-200.png -> appiconLargeTile.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLargeTile.scale-400.png -> appiconLargeTile.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-lightunplated_targetsize-16.png -> appiconLogo.altform-lightunplated_targetsize-16.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-lightunplated_targetsize-24.png -> appiconLogo.altform-lightunplated_targetsize-24.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-lightunplated_targetsize-256.png -> appiconLogo.altform-lightunplated_targetsize-256.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-lightunplated_targetsize-32.png -> appiconLogo.altform-lightunplated_targetsize-32.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-lightunplated_targetsize-48.png -> appiconLogo.altform-lightunplated_targetsize-48.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-unplated_targetsize-16.png -> appiconLogo.altform-unplated_targetsize-16.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-unplated_targetsize-24.png -> appiconLogo.altform-unplated_targetsize-24.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-unplated_targetsize-256.png -> appiconLogo.altform-unplated_targetsize-256.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-unplated_targetsize-32.png -> appiconLogo.altform-unplated_targetsize-32.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.altform-unplated_targetsize-48.png -> appiconLogo.altform-unplated_targetsize-48.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.scale-100.png -> appiconLogo.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.scale-125.png -> appiconLogo.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.scale-150.png -> appiconLogo.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.scale-200.png -> appiconLogo.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.scale-400.png -> appiconLogo.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.targetsize-16.png -> appiconLogo.targetsize-16.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.targetsize-24.png -> appiconLogo.targetsize-24.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.targetsize-256.png -> appiconLogo.targetsize-256.png
+     3>_GenerateSourceLinkFile:
+         Файл Source Link "obj\Debug\net8.0\DigitalMe.Tests.Integration.sourcelink.json" обновлен.
+     2>GetPriOutputs:
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.targetsize-32.png -> appiconLogo.targetsize-32.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconLogo.targetsize-48.png -> appiconLogo.targetsize-48.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconMediumTile.scale-100.png -> appiconMediumTile.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconMediumTile.scale-125.png -> appiconMediumTile.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconMediumTile.scale-150.png -> appiconMediumTile.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconMediumTile.scale-200.png -> appiconMediumTile.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconMediumTile.scale-400.png -> appiconMediumTile.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconSmallTile.scale-100.png -> appiconSmallTile.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconSmallTile.scale-125.png -> appiconSmallTile.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconSmallTile.scale-150.png -> appiconSmallTile.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconSmallTile.scale-200.png -> appiconSmallTile.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconSmallTile.scale-400.png -> appiconSmallTile.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconStoreLogo.scale-100.png -> appiconStoreLogo.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconStoreLogo.scale-125.png -> appiconStoreLogo.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconStoreLogo.scale-150.png -> appiconStoreLogo.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconStoreLogo.scale-200.png -> appiconStoreLogo.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconStoreLogo.scale-400.png -> appiconStoreLogo.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconWideTile.scale-100.png -> appiconWideTile.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconWideTile.scale-125.png -> appiconWideTile.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconWideTile.scale-150.png -> appiconWideTile.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconWideTile.scale-200.png -> appiconWideTile.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\appiconWideTile.scale-400.png -> appiconWideTile.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\dotnet_bot.scale-100.png -> dotnet_bot.scale-100.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\dotnet_bot.scale-125.png -> dotnet_bot.scale-125.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\dotnet_bot.scale-150.png -> dotnet_bot.scale-150.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\dotnet_bot.scale-200.png -> dotnet_bot.scale-200.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\obj\Debug\net8.0-windows10.0.19041.0\win-x64\resizetizer\r\dotnet_bot.scale-400.png -> dotnet_bot.scale-400.png
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\appsettings.json -> appsettings.json
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\Shared\MainLayout.razor.css -> Shared\MainLayout.razor.css
+         DigitalMe.MAUI : DigitalMe.MAUI.ContentFilesProjectOutputGroup : C:\Sources\DigitalMe\src\DigitalMe.MAUI\Shared\NavMenu.razor.css -> Shared\NavMenu.razor.css
+         DigitalMe.MAUI : DigitalMe.MAUI.EmbedOutputGroupForPackaging : C:\Sources\DigitalMe\src\DigitalMe.MAUI\bin\Debug\net8.0-windows10.0.19041.0\win-x64\Platforms\Windows\App.xbf -> Platforms\Windows\App.xbf
+     3>CoreCompile:
+       Целевой объект "CoreCompile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     2>_CopyOutOfDateSourceItemsToOutputDirectory:
+       Целевой объект "_CopyOutOfDateSourceItemsToOutputDirectory" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildDependencyFile:
+       Целевой объект "GenerateBuildDependencyFile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildRuntimeConfigurationFiles:
+       Целевой объект "GenerateBuildRuntimeConfigurationFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CopyFilesToOutputDirectory:
+         DigitalMe.MAUI -> C:\Sources\DigitalMe\src\DigitalMe.MAUI\bin\Debug\net8.0-windows10.0.19041.0\win-x64\DigitalMe.MAUI.dll
+       _GenerateProjectPriConfigurationFiles:
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\priconfig.xml
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\unfiltered.layout.resfiles
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\filtered.layout.resfiles
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\excluded.layout.resfiles
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\resources.resfiles
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\pri.resfiles
+         DigitalMe.MAUI -> 
+         DigitalMe.MAUI -> obj\Debug\net8.0-windows10.0.19041.0\win-x64\embed\embed.resfiles
+       _GenerateProjectPriFileCore:
+       Целевой объект "_GenerateProjectPriFileCore" пропускается, так как все выходные файлы актуальны по отношению к входным.
+     2>Сборка проекта "C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj" завершена (целевые объекты Build).
+     2>Сборка проекта "C:\Sources\DigitalMe\src\DigitalMe.MAUI\DigitalMe.MAUI.csproj" завершена (целевые объекты по умолчанию).
+     3>_CopyOutOfDateSourceItemsToOutputDirectory:
+       Частичное создание целевого объекта "_CopyOutOfDateSourceItemsToOutputDirectory", так как некоторые выходные файлы устарели по отношению к входным.
+         Копирование файла из "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\obj\Debug\net8.0\MvcTestingAppManifest.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\bin\Debug\net8.0\MvcTestingAppManifest.json".
+       GenerateBuildDependencyFile:
+       Целевой объект "GenerateBuildDependencyFile" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       GenerateBuildRuntimeConfigurationFiles:
+       Целевой объект "GenerateBuildRuntimeConfigurationFiles" пропускается, так как все выходные файлы актуальны по отношению к входным.
+       CopyFilesToOutputDirectory:
+         DigitalMe.Tests.Integration -> C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\bin\Debug\net8.0\DigitalMe.Tests.Integration.dll
+       _MvcCopyDependencyFiles:
+         Копирование файла из "C:\Sources\DigitalMe\src\DigitalMe\bin\Debug\net8.0\DigitalMe.deps.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\bin\Debug\net8.0\DigitalMe.deps.json".
+         Копирование файла из "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Unit\bin\Debug\net8.0\DigitalMe.Tests.Unit.deps.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\bin\Debug\net8.0\DigitalMe.Tests.Unit.deps.json".
+         Копирование файла из "C:\Sources\DigitalMe\src\DigitalMe.Web\bin\Debug\net8.0\DigitalMe.Web.deps.json" в "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\bin\Debug\net8.0\DigitalMe.Web.deps.json".
+     3>Сборка проекта "C:\Sources\DigitalMe\tests\DigitalMe.Tests.Integration\DigitalMe.Tests.Integration.csproj" завершена (целевые объекты по умолчанию).
+     1>Сборка проекта "C:\Sources\DigitalMe\DigitalMe.sln" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:01.29
+
+Доступны обновления рабочей нагрузки. Для получения дополнительных сведений запустите `dotnet workload list`.

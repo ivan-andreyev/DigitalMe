@@ -135,7 +135,9 @@ public class McpServiceProper : IMcpService
 
                 // Fallback to direct Anthropic
                 var anthropicFallbackResult = await _anthropicService.SendMessageAsync(message, context.Profile);
-                return anthropicFallbackResult.IsSuccess ? anthropicFallbackResult.Value : await GenerateFallbackResponseAsync(message, context);
+                return anthropicFallbackResult.IsSuccess && anthropicFallbackResult.Value != null
+                    ? anthropicFallbackResult.Value
+                    : await GenerateFallbackResponseAsync(message, context);
             }
 
             if (response.Result?.Content != null)

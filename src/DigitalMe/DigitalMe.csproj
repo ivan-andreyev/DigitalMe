@@ -8,6 +8,12 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <UserSecretsId>digitalme-user-secrets</UserSecretsId>
+
+        <!-- Make CS warnings visible by treating them as errors -->
+        <WarningsAsErrors>CS8602;CS8601;CS8603;CS8604;CS0618</WarningsAsErrors>
+
+        <!-- Suppress CS1998 - Async without await (performance warning, not functional) -->
+        <NoWarn>CS1998</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

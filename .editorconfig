@@ -61,13 +61,18 @@ dotnet_analyzer_diagnostic.SA1303.severity = error  # Const field names should b
 dotnet_analyzer_diagnostic.SA1500.severity = error  # Braces for multi-line statements
 dotnet_analyzer_diagnostic.SA1028.severity = error  # Trailing whitespace
 
-# Nullable reference types - ENABLE warnings for technical debt tracking
-dotnet_analyzer_diagnostic.CS8601.severity = warning  # Possible null reference assignment
-dotnet_analyzer_diagnostic.CS8602.severity = warning  # Dereference of possibly null reference
-dotnet_analyzer_diagnostic.CS8603.severity = warning  # Possible null reference return
-dotnet_analyzer_diagnostic.CS8604.severity = warning  # Possible null reference argument
-dotnet_analyzer_diagnostic.CS8618.severity = warning  # Non-nullable field must contain non-null value
-dotnet_analyzer_diagnostic.CS8625.severity = warning  # Cannot convert null literal to non-nullable reference type
+# CS#### warnings - MAKE VISIBLE for technical debt tracking
+# Changed from 'warning' to 'error' to make them visible in build output
+dotnet_analyzer_diagnostic.CS8601.severity = error    # Possible null reference assignment
+dotnet_analyzer_diagnostic.CS8602.severity = error    # Dereference of possibly null reference
+dotnet_analyzer_diagnostic.CS8603.severity = error    # Possible null reference return
+dotnet_analyzer_diagnostic.CS8604.severity = error    # Possible null reference argument
+dotnet_analyzer_diagnostic.CS8618.severity = error    # Non-nullable field must contain non-null value
+dotnet_analyzer_diagnostic.CS8625.severity = error    # Cannot convert null literal to non-nullable reference type
+
+# Additional CS warnings to make visible
+dotnet_analyzer_diagnostic.CS0618.severity = error    # Obsolete types/methods
+dotnet_analyzer_diagnostic.CS1998.severity = error    # Async methods without await
 
 # Test project specific settings - even more relaxed
 [tests/**/*.cs]
