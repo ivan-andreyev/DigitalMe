@@ -36,18 +36,24 @@ jobs:
         dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --no-restore --configuration Release
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --no-restore --configuration Release
     
-    # Temporarily skip tests to force deployment while fixing test issues
-    # - name: Run Unit Tests
-    #   run: dotnet test tests/DigitalMe.Tests.Unit --no-build --configuration Release --verbosity normal
-    #   env:
-    #     JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
-    #     ASPNETCORE_ENVIRONMENT: Testing
+    - name: 🎭 Install Playwright Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2
+        dotnet tool install --global Microsoft.Playwright.CLI
+        ~/.dotnet/tools/playwright install chromium --with-deps
 
-    # - name: Run Integration Tests
-    #   run: dotnet test tests/DigitalMe.Tests.Integration --no-build --configuration Release --verbosity normal
-    #   env:
-    #     JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
-    #     ASPNETCORE_ENVIRONMENT: Testing
+    - name: Run Unit Tests
+      run: dotnet test tests/DigitalMe.Tests.Unit --no-build --configuration Release --verbosity normal
+      env:
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+        ASPNETCORE_ENVIRONMENT: Testing
+
+    - name: Run Integration Tests
+      run: dotnet test tests/DigitalMe.Tests.Integration --no-build --configuration Release --verbosity normal
+      env:
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+        ASPNETCORE_ENVIRONMENT: Testing
 
   deploy:
     name: Deploy to Cloud Run

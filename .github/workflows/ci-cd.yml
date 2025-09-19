@@ -81,8 +81,13 @@ jobs:
         dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
 
-    - name: 🎭 Install Playwright Browsers
+    - name: 🎭 Install Playwright Browsers & Dependencies
       run: |
+        # Install system dependencies for Linux CI
+        sudo apt-get update
+        sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2
+
+        # Install Playwright
         cd src/DigitalMe
         dotnet tool install --global Microsoft.Playwright.CLI
         $HOME/.dotnet/tools/playwright install chromium --with-deps
