@@ -189,4 +189,4 @@ public enum ScreenshotFormat
 /// <summary>
 /// Position coordinates
 /// </summary>
-public record Position(double X, double Y);
+public record Position(double x, double y);

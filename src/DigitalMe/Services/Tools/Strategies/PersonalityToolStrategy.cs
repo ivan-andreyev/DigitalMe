@@ -69,7 +69,16 @@ public class PersonalityToolStrategy : BaseToolStrategy
                 };
             }
 
-            var personality = personalityResult.Value!;
+            var personality = personalityResult.Value;
+            if (personality == null)
+            {
+                return new
+                {
+                    success = false,
+                    error = "Personality data is null",
+                    tool_name = ToolName
+                };
+            }
             var traits = personality.Traits ?? new List<PersonalityTrait>();
 
             // Фильтруем по категории если указана

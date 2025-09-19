@@ -49,7 +49,9 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
             }
 
             // Apply linguistic patterns through specialized service
-            var enhancedText = _linguisticPatternService.ApplyIvanLinguisticPatterns(input, styleResult.Value);
+            var enhancedText = styleResult.Value != null
+                ? _linguisticPatternService.ApplyIvanLinguisticPatterns(input, styleResult.Value)
+                : input;
 
             // Get vocabulary preferences for context enrichment
             var vocabularyResult = await _vocabularyService.GetVocabularyPreferencesAsync(context);
@@ -60,7 +62,9 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
             }
 
             // Apply vocabulary-based enhancements
-            enhancedText = ApplyVocabularyEnhancements(enhancedText, vocabularyResult.Value);
+            enhancedText = vocabularyResult.Value != null
+                ? ApplyVocabularyEnhancements(enhancedText, vocabularyResult.Value)
+                : enhancedText;
 
             _logger.LogDebug("Response styling completed: {Original} -> {Enhanced}",
                 input.Length, enhancedText.Length);
@@ -84,7 +88,7 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
             {
                 throw new InvalidOperationException($"Failed to get contextual style: {result.Error}");
             }
-            return result.Value;
+            return result.Value!;
         }, TimeSpan.FromMinutes(30));
     }
 
@@ -103,7 +107,7 @@ public class IvanResponseStylingServiceRefactored : IIvanResponseStylingService
             {
                 throw new InvalidOperationException($"Failed to get vocabulary preferences: {result.Error}");
             }
-            return result.Value;
+            return result.Value!;
         }, TimeSpan.FromMinutes(15));
     }
 

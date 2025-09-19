@@ -199,7 +199,7 @@ public class SecurityValidationServiceTests
         if (result.IsSuccess)
         {
             // If valid, it means sanitization was enabled and worked
-            result.Value.SanitizedData.Should().NotBeNull();
+            result.Value?.SanitizedData.Should().NotBeNull();
         }
         else
         {

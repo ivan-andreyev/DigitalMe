@@ -19,15 +19,15 @@ public interface IServiceAvailabilityUseCase : IApplicationService
 /// <summary>
 /// Query for service availability checking.
 /// </summary>
-public record ServiceAvailabilityQuery(string ServiceName);
+public record ServiceAvailabilityQuery(string serviceName);
 
 /// <summary>
 /// Result of service availability operations.
 /// </summary>
 public record ServiceAvailabilityResult(
-    bool Success,
-    string ServiceName,
-    bool ServiceAvailable,
-    Dictionary<string, object>? AdditionalData = null,
-    string? Message = null,
-    string? ErrorMessage = null);
+    bool success,
+    string serviceName,
+    bool serviceAvailable,
+    Dictionary<string, object>? additionalData = null,
+    string? message = null,
+    string? errorMessage = null);

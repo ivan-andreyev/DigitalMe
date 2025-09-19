@@ -25,7 +25,12 @@ jobs:
   build:
     name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+
+    env:
+      ANTHROPIC_API_KEY: "test-api-key-sk-ant-test"
+      JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+      ASPNETCORE_ENVIRONMENT: "Testing"
 
     services:
       postgres:
@@ -73,8 +78,14 @@ jobs:
         echo "Building projects with warnings suppressed..."
         dotnet build src/DigitalMe/DigitalMe.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
-        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal  
+        dotnet build tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
         dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --verbosity minimal
+
+    - name: 🎭 Install Playwright Browsers
+      run: |
+        cd src/DigitalMe
+        dotnet tool install --global Microsoft.Playwright.CLI
+        $HOME/.dotnet/tools/playwright install chromium --with-deps
 
     - name: 🧪 Run Unit Tests
       run: |
@@ -95,6 +106,9 @@ jobs:
           --results-directory TestResults
       env:
         ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=digitalme_test;Username=postgres;Password=postgres"
+        ANTHROPIC_API_KEY: "test-api-key-sk-ant-test"
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+        ASPNETCORE_ENVIRONMENT: "Testing"
 
     - name: 📊 Upload Test Results
       uses: actions/upload-artifact@v4

@@ -51,7 +51,7 @@ public class CommunicationContextAnalysis
     /// <summary>
     /// Рекомендуемый тон общения.
     /// </summary>
-    public string RecommendedTone { get; set; } = "";
+    public string RecommendedTone { get; set; } = string.Empty;
 
     /// <summary>
     /// Рекомендации по стилю общения для данного контекста.

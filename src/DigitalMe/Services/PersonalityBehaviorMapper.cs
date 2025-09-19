@@ -482,8 +482,8 @@ public class BehaviorModifiers
 /// </summary>
 public class CommunicationStyle
 {
-    public string BasePersonality { get; set; } = "";
-    public string PreferredTone { get; set; } = "";
+    public string BasePersonality { get; set; } = string.Empty;
+    public string PreferredTone { get; set; } = string.Empty;
     public double FormalityLevel { get; set; } = 0.5;
     public double TechnicalLanguageUsage { get; set; } = 0.5;
     public double ExplanationDepth { get; set; } = 0.5;
@@ -533,10 +533,10 @@ public class WeightedTrait
 public class InteractionContext
 {
     public InteractionType Type { get; set; }
-    public string Topic { get; set; } = "";
+    public string Topic { get; set; } = string.Empty;
     public int ComplexityLevel { get; set; } = 1; // 1-5 scale
     public bool IsUrgent { get; set; } = false;
-    public string UserRole { get; set; } = ""; // colleague, family, friend, etc.
+    public string UserRole { get; set; } = string.Empty; // colleague, family, friend, etc.
 }
 
 /// <summary>
@@ -546,7 +546,7 @@ public class EmotionalContext
 {
     public EmotionalState PrimaryEmotion { get; set; }
     public double Intensity { get; set; } = 0.5; // 0.0-1.0
-    public string Trigger { get; set; } = "";
+    public string Trigger { get; set; } = string.Empty;
 }
 
 /// <summary>

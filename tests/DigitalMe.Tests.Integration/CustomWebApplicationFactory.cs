@@ -39,7 +39,7 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             {
                 services.Remove(descriptor);
             }
-            
+
             // Add only the MemoryToolStrategy which has minimal dependencies (only logging)
             services.AddScoped<IToolStrategy, MemoryToolStrategy>();
             
@@ -336,6 +336,177 @@ Direct and pragmatic with structured thinking.
                 return mockEngine.Object;
             });
 
+            // PRIORITY REGISTRATION: Mock ICachingService early to avoid conflicts
+            services.AddScoped<DigitalMe.Services.Performance.ICachingService>(provider =>
+            {
+                var mockService = new Mock<DigitalMe.Services.Performance.ICachingService>();
+
+                // Mock all async methods to return default values
+                mockService.Setup(x => x.GetCachedResponseAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<TimeSpan?>()))
+                          .ReturnsAsync(() => default);
+
+                mockService.Setup(x => x.SetCachedResponseAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<TimeSpan?>()))
+                          .Returns(Task.CompletedTask);
+
+                mockService.Setup(x => x.RemoveCachedResponseAsync(It.IsAny<string>()))
+                          .Returns(Task.CompletedTask);
+
+                mockService.Setup(x => x.GetOrSetCachedResponseAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<Func<Task<It.IsAnyType>>>(), It.IsAny<TimeSpan?>()))
+                          .Returns<string, Func<Task<It.IsAnyType>>, TimeSpan?>((key, factory, expiration) => factory());
+
+                mockService.Setup(x => x.GetOrSetAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<Func<Task<It.IsAnyType>>>(), It.IsAny<TimeSpan?>()))
+                          .Returns<string, Func<Task<It.IsAnyType>>, TimeSpan?>((key, factory, expiration) => factory());
+
+                return mockService.Object;
+            });
+
+            // PRIORITY REGISTRATION: Mock ISlackApiClient BEFORE Program.cs to avoid DI conflicts
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient>(provider =>
+            {
+                var mockClient = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient>();
+
+                // Mock SetBotToken method
+                mockClient.Setup(x => x.SetBotToken(It.IsAny<string>()));
+
+                // Mock GET requests to return default values
+                mockClient.Setup(x => x.GetAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(() => default);
+
+                // Mock POST requests to return default values
+                mockClient.Setup(x => x.PostAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(() => default);
+
+                // Mock file upload to return default values
+                mockClient.Setup(x => x.UploadFileAsync<It.IsAnyType>(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(() => default);
+
+                return mockClient.Object;
+            });
+
+            // Mock ISlackService BEFORE Program.cs registration to avoid DI issues
+            services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService>(provider =>
+            {
+                var mockSlackService = new Mock<DigitalMe.Integrations.External.Slack.ISlackService>();
+
+                // Mock basic connection methods
+                mockSlackService.Setup(x => x.InitializeAsync(It.IsAny<string>())).ReturnsAsync(true);
+                mockSlackService.Setup(x => x.IsConnectedAsync()).ReturnsAsync(true);
+                mockSlackService.Setup(x => x.DisconnectAsync()).Returns(Task.CompletedTask);
+
+                // Mock message methods
+                mockSlackService.Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<string>()))
+                               .ReturnsAsync(new DigitalMe.Integrations.External.Slack.Models.SlackMessageResponse { Ok = true, Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() });
+
+                // Mock other methods to return default/empty responses
+                mockSlackService.Setup(x => x.GetChannelsAsync()).ReturnsAsync(new List<DigitalMe.Integrations.External.Slack.Models.SlackChannel>());
+                mockSlackService.Setup(x => x.GetUsersAsync()).ReturnsAsync(new List<DigitalMe.Integrations.External.Slack.Models.SlackUser>());
+
+                return mockSlackService.Object;
+            });
+
+            // PRIORITY REGISTRATION: Mock SlackConnectionService BEFORE Program.cs to avoid DI conflicts
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>(provider =>
+            {
+                var mockApiClient = new Mock<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>(
+                    Mock.Of<ILogger<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>>());
+                return mockApiClient.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackConnectionService>(provider =>
+            {
+                var mockConnection = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackConnectionService>();
+                mockConnection.Setup(x => x.InitializeAsync(It.IsAny<string>())).ReturnsAsync(true);
+                mockConnection.Setup(x => x.DisconnectAsync()).Returns(Task.CompletedTask);
+                mockConnection.Setup(x => x.IsConnectedAsync()).ReturnsAsync(true);
+                mockConnection.Setup(x => x.TestConnectionAsync()).ReturnsAsync(true);
+                return mockConnection.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>(provider =>
+            {
+                var mockConnectionClass = new Mock<DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>(
+                    Mock.Of<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>(),
+                    Mock.Of<ILogger<DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>>());
+                return mockConnectionClass.Object;
+            });
+
+            // PRIORITY REGISTRATION: Mock ALL specialized Slack services BEFORE Program.cs to avoid DI conflicts
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackMessageService>(provider =>
+            {
+                var mockMessageService = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackMessageService>();
+                // Use basic mocking without complex expression trees
+                return mockMessageService.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackChannelService>(provider =>
+            {
+                var mockChannelService = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackChannelService>();
+                return mockChannelService.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackFileService>(provider =>
+            {
+                var mockFileService = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackFileService>();
+                return mockFileService.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackUserService>(provider =>
+            {
+                var mockUserService = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackUserService>();
+                return mockUserService.Object;
+            });
+
+            services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackReactionService>(provider =>
+            {
+                var mockReactionService = new Mock<DigitalMe.Integrations.External.Slack.Services.ISlackReactionService>();
+                return mockReactionService.Object;
+            });
+
+            // Mock Ivan Response Styling Services BEFORE Program.cs to avoid DI conflicts
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer>(provider =>
+            {
+                var mockAnalyzer = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer>();
+
+                mockAnalyzer.Setup(x => x.GetContextualStyleAsync(It.IsAny<DigitalMe.Services.SituationalContext>()))
+                           .ReturnsAsync(DigitalMe.Common.Result<DigitalMe.Services.ContextualCommunicationStyle>.Success(
+                               new DigitalMe.Services.ContextualCommunicationStyle
+                               {
+                                   FormalityLevel = 0.7,
+                                   TechnicalDepth = 0.8,
+                                   EmotionalTone = 0.6
+                               }));
+
+                return mockAnalyzer.Object;
+            });
+
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService>(provider =>
+            {
+                var mockVocabulary = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService>();
+
+                mockVocabulary.Setup(x => x.GetVocabularyPreferencesAsync(It.IsAny<DigitalMe.Services.SituationalContext>()))
+                             .ReturnsAsync(DigitalMe.Common.Result<DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyPreferences>.Success(
+                                 new DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyPreferences
+                                 {
+                                     PreferredTechnicalTerms = new List<string> { "C#/.NET", "strongly-typed", "technical precision" },
+                                     PreferredCasualPhrases = new List<string> { "struggle to balance", "family time" },
+                                     PreferredProfessionalPhrases = new List<string> { "professional", "business approach", "systematic" },
+                                     SignatureExpressions = new List<string> { "technical approach", "Marina and Sofia" }
+                                 }));
+
+                return mockVocabulary.Object;
+            });
+
+            services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService>(provider =>
+            {
+                var mockPattern = new Mock<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService>();
+
+                mockPattern.Setup(x => x.ApplyIvanLinguisticPatterns(It.IsAny<string>(), It.IsAny<DigitalMe.Services.ContextualCommunicationStyle>()))
+                          .Returns((string text, DigitalMe.Services.ContextualCommunicationStyle style) =>
+                              text + " [Ivan linguistic patterns applied]");
+
+                return mockPattern.Object;
+            });
+
             // Mock IIvanResponseStylingService for response styling tests
             var responseStylingDescriptors = services.Where(d => d.ServiceType == typeof(DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService)).ToList();
             foreach (var descriptor in responseStylingDescriptors)
@@ -388,6 +559,17 @@ Direct and pragmatic with structured thinking.
                 return mockService.Object;
             });
 
+            // Mock IWebHostEnvironment for PersonalityService path resolution
+            var webHostEnvironmentDescriptors = services.Where(d => d.ServiceType == typeof(IWebHostEnvironment)).ToList();
+            foreach (var descriptor in webHostEnvironmentDescriptors)
+                services.Remove(descriptor);
+
+            services.AddScoped<IWebHostEnvironment>(provider =>
+            {
+                var mockEnvironment = new Mock<IWebHostEnvironment>();
+                mockEnvironment.Setup(x => x.ContentRootPath).Returns(Directory.GetCurrentDirectory());
+                return mockEnvironment.Object;
+            });
 
             // Configure SignalR for testing - disable problematic features
             services.Configure<Microsoft.AspNetCore.SignalR.HubOptions>(options =>
@@ -398,7 +580,8 @@ Direct and pragmatic with structured thinking.
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
             });
         });
-        
+
+
         // Configure test-specific middleware behavior
         builder.ConfigureAppConfiguration((context, config) =>
         {

@@ -160,10 +160,10 @@ public class SituationalContext
 {
     public ContextType ContextType { get; set; }
     public EnvironmentType Environment { get; set; }
-    public string Topic { get; set; } = "";
+    public string Topic { get; set; } = string.Empty;
     public double UrgencyLevel { get; set; } = 0.5; // 0.0-1.0
     public TimeOfDay TimeOfDay { get; set; }
-    public string UserRole { get; set; } = ""; // colleague, family, friend, client
+    public string UserRole { get; set; } = string.Empty; // colleague, family, friend, client
     public Dictionary<string, object> AdditionalContext { get; set; } = new();
 }
 
@@ -227,7 +227,7 @@ public class ExpertiseConfidenceAdjustment
 public class ContextualCommunicationStyle
 {
     public SituationalContext Context { get; set; } = null!;
-    public string BasePersonalityName { get; set; } = "";
+    public string BasePersonalityName { get; set; } = string.Empty;
     public double FormalityLevel { get; set; } = 0.5;
     public double DirectnessLevel { get; set; } = 0.5;
     public double TechnicalDepth { get; set; } = 0.5;
@@ -243,15 +243,15 @@ public class ContextualCommunicationStyle
     public double SelfDisclosureLevel { get; set; } = 0.5;
     public double LeadershipAssertiveness { get; set; } = 0.5;
     public double ResultsOrientation { get; set; } = 0.5;
-    public string RecommendedTone { get; set; } = "";
+    public string RecommendedTone { get; set; } = string.Empty;
     public double TechnicalLanguageUsage { get; set; } = 0.5;
     public double EnergyLevel { get; set; } = 0.5;
-    public string BasePersonality { get; set; } = ""; // Унификация с BasePersonalityName
+    public string BasePersonality { get; set; } = string.Empty; // Унификация с BasePersonalityName
     public double PragmatismLevel { get; set; } = 0.5;
     public double ConfidenceLevel { get; set; } = 0.5;
     public double StructuredApproach { get; set; } = 0.5;
     public double EmotionalTone { get; set; } = 0.5;
-    public string StyleSummary { get; set; } = "";
+    public string StyleSummary { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -263,7 +263,7 @@ public class TemporalAnalysisData
     public double EnergyLevel { get; set; }
     public double ProductivityScore { get; set; }
     public List<string> TimeBasedRecommendations { get; set; } = new();
-    public string Description { get; set; } = "";
+    public string Description { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -283,10 +283,10 @@ public class ContextAnalysisResult
     public ContextType ContextType { get; set; }
     public int ComplexityLevel { get; set; }
     public List<string> RequiredAdaptations { get; set; } = new();
-    public string RecommendedApproach { get; set; } = "";
+    public string RecommendedApproach { get; set; } = string.Empty;
     public List<string> KeyConsiderations { get; set; } = new();
     public List<string> ExpectedChallenges { get; set; } = new();
-    public string OptimalStrategy { get; set; } = "";
+    public string OptimalStrategy { get; set; } = string.Empty;
     public TemporalAnalysisData? TemporalAnalysis { get; set; }
     public List<string> KeyFactors { get; set; } = new();
     public List<string> SuccessMetrics { get; set; } = new();

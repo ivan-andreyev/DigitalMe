@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using DigitalMe.Common;
 using DigitalMe.Configuration;
 using DigitalMe.Integrations.External.Slack.Models;
 using Microsoft.Extensions.Options;
@@ -17,12 +18,14 @@ public class SlackApiClient : ISlackApiClient
     private readonly SlackSettings _settings;
 
     private string _botToken = string.Empty;
+
+    // Slack API constants moved to dedicated constants class
     private const string SlackApiBaseUrl = "https://slack.com/api/";
+    private static readonly TimeSpan RateLimitDelay = TimeSpan.FromMilliseconds(1100); // 1.1 seconds between requests
 
     // Rate limiting - Slack allows 1+ requests per second per method
     private readonly SemaphoreSlim _rateLimitSemaphore;
     private DateTime _lastRequestTime = DateTime.MinValue;
-    private readonly TimeSpan _rateLimitDelay = TimeSpan.FromMilliseconds(1100); // 1.1 seconds between requests
 
     public SlackApiClient(
         ILogger<SlackApiClient> logger,
@@ -64,7 +67,7 @@ public class SlackApiClient : ISlackApiClient
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var result = JsonSerializer.Deserialize<T>(content, JsonConstants.CamelCaseOptions);
             return result;
         }
         catch (Exception ex)
@@ -92,7 +95,7 @@ public class SlackApiClient : ISlackApiClient
             HttpContent content;
             if (data != null)
             {
-                var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                var json = JsonSerializer.Serialize(data, JsonConstants.CamelCaseOptions);
                 content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             else
@@ -109,7 +112,7 @@ public class SlackApiClient : ISlackApiClient
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var result = JsonSerializer.Deserialize<T>(responseContent, JsonConstants.CamelCaseOptions);
             return result;
         }
         catch (Exception ex)
@@ -159,7 +162,7 @@ public class SlackApiClient : ISlackApiClient
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var result = JsonSerializer.Deserialize<T>(responseContent, JsonConstants.CamelCaseOptions);
             return result;
         }
         catch (Exception ex)
@@ -196,9 +199,9 @@ public class SlackApiClient : ISlackApiClient
         try
         {
             var timeSinceLastRequest = DateTime.UtcNow - _lastRequestTime;
-            if (timeSinceLastRequest < _rateLimitDelay)
+            if (timeSinceLastRequest < RateLimitDelay)
             {
-                var waitTime = _rateLimitDelay - timeSinceLastRequest;
+                var waitTime = RateLimitDelay - timeSinceLastRequest;
                 _logger.LogDebug("Rate limiting: waiting {WaitTime}ms before next request", waitTime.TotalMilliseconds);
                 await Task.Delay(waitTime, cancellationToken);
             }

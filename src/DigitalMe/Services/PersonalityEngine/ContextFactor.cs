@@ -8,12 +8,12 @@ public class ContextFactor
     /// <summary>
     /// Название фактора контекста.
     /// </summary>
-    public string Name { get; set; } = "";
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Значение фактора контекста.
     /// </summary>
-    public string Value { get; set; } = "";
+    public string Value { get; set; } = string.Empty;
 
     /// <summary>
     /// Уровень влияния фактора на поведение.
@@ -23,5 +23,5 @@ public class ContextFactor
     /// <summary>
     /// Подробное описание фактора и его влияния.
     /// </summary>
-    public string Description { get; set; } = "";
+    public string Description { get; set; } = string.Empty;
 }

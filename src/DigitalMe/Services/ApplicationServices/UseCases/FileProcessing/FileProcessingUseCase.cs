@@ -30,56 +30,56 @@ public class FileProcessingUseCase : IFileProcessingUseCase
         return await ResultExtensions.TryAsync(async () =>
         {
             _logger.LogInformation("Executing file processing workflow with content: {ContentPreview}...",
-                command.Content.Substring(0, Math.Min(50, command.Content.Length)));
+                command.content.Substring(0, Math.Min(50, command.content.Length)));
 
             // Step 1: Create temporary file through repository (infrastructure abstraction)
             var tempFile = await _fileRepository.CreateTemporaryFileAsync(".pdf");
 
             var parameters = new Dictionary<string, object>
             {
-                ["content"] = command.Content,
-                ["title"] = command.Title ?? "Test Document"
+                ["content"] = command.content,
+                ["title"] = command.title ?? "Test Document"
             };
 
             // Step 2: Create PDF using business service
-            var pdfResult = await _fileProcessingService.ProcessPdfAsync("create", tempFile.FilePath, parameters);
+            var pdfResult = await _fileProcessingService.ProcessPdfAsync("create", tempFile.filePath, parameters);
             if (!pdfResult.Success)
             {
-                await _fileRepository.DeleteFileAsync(tempFile.FileId);
+                await _fileRepository.DeleteFileAsync(tempFile.fileId);
                 return new FileProcessingResult(
-                    Success: false,
-                    PdfCreated: false,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FileId: null,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: $"PDF creation failed: {pdfResult.Message}");
+                    success: false,
+                    pdfCreated: false,
+                    textExtracted: false,
+                    contentMatch: false,
+                    fileId: null,
+                    extractedTextPreview: null,
+                    errorMessage: $"PDF creation failed: {pdfResult.Message}");
             }
 
             // Step 3: Extract text back
-            var extractedText = await _fileProcessingService.ExtractTextAsync(tempFile.FilePath);
+            var extractedText = await _fileProcessingService.ExtractTextAsync(tempFile.filePath);
             if (string.IsNullOrEmpty(extractedText))
             {
                 return new FileProcessingResult(
-                    Success: false,
-                    PdfCreated: true,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FileId: tempFile.FileId,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: "Text extraction failed: No text extracted");
+                    success: false,
+                    pdfCreated: true,
+                    textExtracted: false,
+                    contentMatch: false,
+                    fileId: tempFile.fileId,
+                    extractedTextPreview: null,
+                    errorMessage: "Text extraction failed: No text extracted");
             }
 
             // Step 4: Verify content matches
-            var contentMatch = extractedText.Contains(command.Content.Substring(0, Math.Min(20, command.Content.Length)));
+            var contentMatch = extractedText.Contains(command.content.Substring(0, Math.Min(20, command.content.Length)));
 
             return new FileProcessingResult(
-                Success: true,
-                PdfCreated: pdfResult.Success,
-                TextExtracted: !string.IsNullOrEmpty(extractedText),
-                ContentMatch: contentMatch,
-                FileId: tempFile.FileId,
-                ExtractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
-        }, $"File processing workflow failed for content: {command.Content.Substring(0, Math.Min(30, command.Content.Length))}");
+                success: true,
+                pdfCreated: pdfResult.Success,
+                textExtracted: !string.IsNullOrEmpty(extractedText),
+                contentMatch: contentMatch,
+                fileId: tempFile.fileId,
+                extractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
+        }, $"File processing workflow failed for content: {command.content.Substring(0, Math.Min(30, command.content.Length))}");
     }
 }

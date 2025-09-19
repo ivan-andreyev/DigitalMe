@@ -44,20 +44,20 @@ public class CaptchaWorkflowService : ICaptchaWorkflowService
             };
 
             return new ServiceAvailabilityWorkflowResult(
-                Success: true,
-                ServiceName: "CaptchaSolving",
-                ServiceAvailable: isAvailable,
-                AdditionalData: new Dictionary<string, object> { ["supportedTypes"] = supportedTypes },
-                Message: isAvailable ? "CAPTCHA service is available" : "CAPTCHA service is not available (check API key)");
+                success: true,
+                serviceName: "CaptchaSolving",
+                serviceAvailable: isAvailable,
+                additionalData: new Dictionary<string, object> { ["supportedTypes"] = supportedTypes },
+                message: isAvailable ? "CAPTCHA service is available" : "CAPTCHA service is not available (check API key)");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "CAPTCHA service availability check failed");
             return new ServiceAvailabilityWorkflowResult(
-                Success: false,
-                ServiceName: "CaptchaSolving",
-                ServiceAvailable: false,
-                ErrorMessage: $"Service availability check failed: {ex.Message}");
+                success: false,
+                serviceName: "CaptchaSolving",
+                serviceAvailable: false,
+                errorMessage: $"Service availability check failed: {ex.Message}");
         }
     }
 

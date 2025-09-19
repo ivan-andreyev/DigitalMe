@@ -205,7 +205,16 @@ public class IvanResponseStylingService : IIvanResponseStylingService
                 };
             }
 
-            return result.Value;
+            return result.Value ?? new ContextualCommunicationStyle
+            {
+                Context = context,
+                BasePersonalityName = "Ivan",
+                DirectnessLevel = 0.75,
+                SelfReflection = 0.8,
+                ExplanationDepth = 0.7,
+                TechnicalDepth = 0.6,
+                RecommendedTone = "Direct, rational, structured with occasional self-awareness"
+            };
         }, TimeSpan.FromMinutes(30)); // Cache for 30 minutes
     }
 
@@ -235,7 +244,12 @@ public class IvanResponseStylingService : IIvanResponseStylingService
                 };
             }
 
-            return result.Value;
+            return result.Value ?? new IvanVocabularyPreferences
+            {
+                PreferredTechnicalTerms = new List<string> { "structured", "systematic", "pragmatic" },
+                PreferredCasualPhrases = new List<string> { "honestly", "frankly", "here's the thing" },
+                SignatureExpressions = new List<string> { "Ivan's perspective", "from experience" }
+            };
         }, TimeSpan.FromHours(2)); // Cache for 2 hours - vocabulary preferences are very stable
     }
 

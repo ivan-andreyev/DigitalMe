@@ -1,6 +1,6 @@
-using DigitalMe.Data.Entities;
-
 namespace DigitalMe.Tests.Unit.Builders;
+
+using DigitalMe.Data.Entities;
 
 public class MessageBuilder
 {
@@ -11,7 +11,7 @@ public class MessageBuilder
         this._message = new Message();
     }
 
-    public static MessageBuilder Create() => new();
+    public static MessageBuilder Create() => new ();
 
     public MessageBuilder WithId(Guid id)
     {

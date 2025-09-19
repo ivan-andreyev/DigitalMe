@@ -1,0 +1,28 @@
+﻿DRY VIOLATIONS AUDIT REPORT
+===========================
+Generated: 2025-09-17 18:11:44
+Project: DigitalMe
+Command: 
+
+SUMMARY:
+- Total Files with Violations: 223 (baseline: 203)
+- Overall Reduction: -9.9%
+- Success Target: ≤41 files (80% reduction)
+- Status: 🔴 NO PROGRESS YET
+
+DETAILED RESULTS:
+Manual ArgumentNullException implementations:
+- Files: 54 (was 51)
+- Occurrences: 168
+- Reduction: -5.9%
+- Target: Guard.NotNull() usage
+Generic exception handling blocks:
+- Files: 137 (was 119)
+- Occurrences: 519
+- Reduction: -15.1%
+- Target: BaseService.ExecuteAsync() usage
+Hardcoded timeout magic values:
+- Files: 32 (was 33)
+- Occurrences: 92
+- Reduction: 3%
+- Target: HttpConstants/TimeoutConstants usage

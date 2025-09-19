@@ -241,8 +241,21 @@ builder.Services.Configure<DigitalMe.Integrations.External.GitHub.GitHubConfigur
     builder.Configuration.GetSection("GitHub"));
 builder.Services.AddScoped<DigitalMe.Integrations.External.GitHub.IGitHubService, DigitalMe.Integrations.External.GitHub.GitHubService>();
 
-builder.Services.AddHttpClient<DigitalMe.Integrations.External.Telegram.TelegramService>();
 builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
+
+// Slack Services - Complete DI registration
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient, DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackConnectionService, DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.SlackConnectionService>();
+// Register all specialized Slack services required by SlackService
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackMessageService, DigitalMe.Integrations.External.Slack.Services.SlackMessageService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackChannelService, DigitalMe.Integrations.External.Slack.Services.SlackChannelService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackFileService, DigitalMe.Integrations.External.Slack.Services.SlackFileService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackUserService, DigitalMe.Integrations.External.Slack.Services.SlackUserService>();
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackReactionService, DigitalMe.Integrations.External.Slack.Services.SlackReactionService>();
+// Main Slack service - registered here to avoid circular dependency with SlackWebhookService
+builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.ISlackService, DigitalMe.Integrations.External.Slack.SlackService>();
 
 // Telegram Services - Refactored for SOLID compliance
 builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramMessageDispatcher, DigitalMe.Services.Telegram.TelegramMessageDispatcher>();
@@ -274,6 +287,7 @@ builder.Services.AddHttpClient<DigitalMe.Integrations.External.Google.CalendarSe
 builder.Services.AddScoped<DigitalMe.Integrations.External.Google.ICalendarService, DigitalMe.Integrations.External.Google.CalendarService>();
 
 // Performance & Monitoring Services - All scoped to avoid lifecycle issues
+builder.Services.AddScoped<DigitalMe.Services.Performance.ICachingService, DigitalMe.Services.Performance.CachingService>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.MetricsAggregator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.SystemMetricsCalculator>();
 builder.Services.AddScoped<DigitalMe.Services.Monitoring.IPerformanceMetricsService, DigitalMe.Services.Monitoring.PerformanceMetricsService>();
@@ -281,6 +295,12 @@ builder.Services.AddScoped<DigitalMe.Services.Monitoring.IHealthCheckService, Di
 
 // Add metrics collection as required by MVP Phase 6 plan
 builder.Services.AddSingleton<DigitalMe.Services.Monitoring.IMetricsLogger, DigitalMe.Services.Monitoring.MetricsLogger>();
+
+// Ivan Response Styling Services - Application layer services for personality simulation
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanContextAnalyzer, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanContextAnalyzer>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanVocabularyService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanVocabularyService>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanLinguisticPatternService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanLinguisticPatternService>();
+builder.Services.AddScoped<DigitalMe.Services.ApplicationServices.ResponseStyling.IIvanResponseStylingService, DigitalMe.Services.ApplicationServices.ResponseStyling.IvanResponseStylingServiceRefactored>();
 
 // API Security - Rate Limiting Configuration
 builder.Services.AddRateLimiter(options =>

@@ -63,22 +63,28 @@ public class ChatHub : Hub
             if (!result.IsSuccess)
             {
                 _logger.LogError("❌ Failed to process user message: {Error}", result.Error);
-                await Clients.Caller.SendAsync("Error", new { message = "Failed to process message", error = result.Error });
+                await Clients.Caller.SendAsync("Error", new
+                {
+                    code = "PROCESSING_ERROR",
+                    message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
+                });
                 return;
             }
 
             var processResult = result.Value;
 
-            _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
-                processResult.GroupName);
-
-            await Clients.Group(processResult.GroupName).SendAsync("MessageReceived", new MessageDto
+            if (processResult != null && !string.IsNullOrEmpty(processResult.groupName))
             {
-                Id = processResult.UserMessage.Id,
-                ConversationId = processResult.UserMessage.ConversationId,
-                Role = processResult.UserMessage.Role,
-                Content = processResult.UserMessage.Content,
-                Timestamp = processResult.UserMessage.Timestamp,
+                _logger.LogInformation("📡 STEP 3: Notifying group {GroupName} about user message",
+                    processResult.groupName);
+
+                await Clients.Group(processResult.groupName).SendAsync("MessageReceived", new MessageDto
+            {
+                Id = processResult.userMessage.Id,
+                ConversationId = processResult.userMessage.ConversationId,
+                Role = processResult.userMessage.Role,
+                Content = processResult.userMessage.Content,
+                Timestamp = processResult.userMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
                     ["isRealTime"] = true,
@@ -86,18 +92,19 @@ public class ChatHub : Hub
                 }
             });
 
-            // Show typing indicator
-            _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
-                processResult.GroupName);
-            await Clients.Group(processResult.GroupName).SendAsync("TypingIndicator", new
-            {
-                IsTyping = true,
-                User = "Ivan",
-                Message = "Иван печатает..."
-            });
+                // Show typing indicator
+                _logger.LogInformation("⏳ STEP 4: Showing typing indicator for group {GroupName}",
+                    processResult.groupName);
+                await Clients.Group(processResult.groupName).SendAsync("TypingIndicator", new
+                {
+                    IsTyping = true,
+                    User = "Ivan",
+                    Message = "Иван печатает..."
+                });
 
-            // Process agent response synchronously for integration tests reliability
-            await ProcessAgentResponseAsync(request, processResult.Conversation.Id, processResult.GroupName);
+                // Process agent response synchronously for integration tests reliability
+                await ProcessAgentResponseAsync(request, processResult.conversation.Id, processResult.groupName);
+            }
 
             _logger.LogInformation("🎉 ChatHub.SendMessage COMPLETED (background processing started) for user {UserId}",
                 request.UserId);
@@ -109,9 +116,8 @@ public class ChatHub : Hub
 
             await Clients.Caller.SendAsync("Error", new
             {
-                Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
-                Code = "PROCESSING_ERROR",
-                Details = ex.Message
+                code = "PROCESSING_ERROR",
+                message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
             });
         }
     }
@@ -126,7 +132,11 @@ public class ChatHub : Hub
             if (!result.IsSuccess)
             {
                 _logger.LogError("❌ Failed to process agent response: {Error}", result.Error);
-                await Clients.Group(groupName).SendAsync("Error", new { message = "Failed to process agent response", error = result.Error });
+                await Clients.Group(groupName).SendAsync("Error", new
+                {
+                    code = "PROCESSING_ERROR",
+                    message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
+                });
                 return;
             }
 
@@ -141,25 +151,28 @@ public class ChatHub : Hub
             });
 
             // Send agent response to all clients in group
-            _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
-                groupName);
-            await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
+            if (agentResult != null && agentResult.assistantMessage != null)
             {
-                Id = agentResult.AssistantMessage.Id,
-                ConversationId = agentResult.AssistantMessage.ConversationId,
-                Role = agentResult.AssistantMessage.Role,
-                Content = agentResult.AssistantMessage.Content,
-                Timestamp = agentResult.AssistantMessage.Timestamp,
+                _logger.LogInformation("📡 STEP 9: Sending agent response to group {GroupName}",
+                    groupName);
+                await Clients.Group(groupName).SendAsync("MessageReceived", new MessageDto
+                {
+                    Id = agentResult.assistantMessage.Id,
+                    ConversationId = agentResult.assistantMessage.ConversationId,
+                    Role = agentResult.assistantMessage.Role,
+                    Content = agentResult.assistantMessage.Content,
+                    Timestamp = agentResult.assistantMessage.Timestamp,
                 Metadata = new Dictionary<string, object>
                 {
-                    ["mood"] = agentResult.AgentResponse.Mood.PrimaryMood,
-                    ["moodIntensity"] = agentResult.AgentResponse.Mood.Intensity,
-                    ["confidence"] = agentResult.AgentResponse.ConfidenceScore,
-                    ["triggeredTools"] = agentResult.AgentResponse.TriggeredTools,
+                    ["mood"] = agentResult.agentResponse.Mood.PrimaryMood,
+                    ["moodIntensity"] = agentResult.agentResponse.Mood.Intensity,
+                    ["confidence"] = agentResult.agentResponse.ConfidenceScore,
+                    ["triggeredTools"] = agentResult.agentResponse.TriggeredTools,
                     ["isRealTime"] = true,
                     ["backgroundProcessed"] = true
                 }
             });
+            }
 
             _logger.LogInformation("🎉 Background processing COMPLETED SUCCESSFULLY for user {UserId}",
                 request.UserId);
@@ -178,9 +191,8 @@ public class ChatHub : Hub
 
             await Clients.Group(groupName).SendAsync("Error", new
             {
-                Message = "Произошла ошибка при обработке сообщения. Попробуйте снова.",
-                Code = "PROCESSING_ERROR",
-                Details = ex.Message
+                code = "PROCESSING_ERROR",
+                message = "Произошла ошибка при обработке сообщения. Попробуйте снова."
             });
         }
     }

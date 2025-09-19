@@ -44,7 +44,12 @@ public class MvpMessageProcessor : IMvpMessageProcessor
                 throw new PersonalityServiceException($"Failed to generate Ivan's personality context: {systemPromptResult.Error}");
             }
 
-            var systemPrompt = systemPromptResult.Value!;
+            var systemPrompt = systemPromptResult.Value;
+            if (string.IsNullOrEmpty(systemPrompt))
+            {
+                _logger.LogError("System prompt is null or empty");
+                throw new InvalidOperationException("System prompt is null or empty");
+            }
 
             _logger.LogInformation("✅ System prompt generated (length: {PromptLength})", systemPrompt.Length);
 

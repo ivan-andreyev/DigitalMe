@@ -98,7 +98,7 @@ public class McpServiceProper : IMcpService
         {
             // Get Ivan's personality for system prompt
             var ivanPersonalityResult = await _personalityService.GetPersonalityAsync();
-            var systemPrompt = ivanPersonalityResult.IsSuccess
+            var systemPrompt = ivanPersonalityResult.IsSuccess && ivanPersonalityResult.Value != null
                 ? _personalityService.GenerateSystemPrompt(ivanPersonalityResult.Value).Value ?? "System prompt unavailable"
                 : "Error loading personality profile";
 
@@ -135,7 +135,9 @@ public class McpServiceProper : IMcpService
 
                 // Fallback to direct Anthropic
                 var anthropicFallbackResult = await _anthropicService.SendMessageAsync(message, context.Profile);
-                return anthropicFallbackResult.IsSuccess ? anthropicFallbackResult.Value : await GenerateFallbackResponseAsync(message, context);
+                return anthropicFallbackResult.IsSuccess && anthropicFallbackResult.Value != null
+                    ? anthropicFallbackResult.Value
+                    : await GenerateFallbackResponseAsync(message, context);
             }
 
             if (response.Result?.Content != null)
@@ -147,13 +149,17 @@ public class McpServiceProper : IMcpService
 
             _logger.LogWarning("⚠️ Empty MCP response, using fallback");
             var anthropicEmptyResult = await _anthropicService.SendMessageAsync(message, context.Profile);
-            return anthropicEmptyResult.IsSuccess ? anthropicEmptyResult.Value : await GenerateFallbackResponseAsync(message, context);
+            return anthropicEmptyResult.IsSuccess && anthropicEmptyResult.Value != null
+                ? anthropicEmptyResult.Value
+                : await GenerateFallbackResponseAsync(message, context);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "💥 MCP protocol error, falling back to Anthropic");
             var anthropicErrorResult = await _anthropicService.SendMessageAsync(message, context.Profile);
-            return anthropicErrorResult.IsSuccess ? anthropicErrorResult.Value : await GenerateFallbackResponseAsync(message, context);
+            return anthropicErrorResult.IsSuccess && anthropicErrorResult.Value != null
+                ? anthropicErrorResult.Value
+                : await GenerateFallbackResponseAsync(message, context);
         }
     }
 

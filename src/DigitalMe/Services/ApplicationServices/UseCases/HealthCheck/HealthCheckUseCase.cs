@@ -62,20 +62,20 @@ public class HealthCheckUseCase : IHealthCheckUseCase
             // Test 2: File Processing
             try
             {
-                var testContent = command.TestContent ?? "Ivan-Level comprehensive test document content";
+                var testContent = command.testContent ?? "Ivan-Level comprehensive test document content";
                 var fileCommand = new FileProcessingCommand(testContent, "Comprehensive Test");
                 var fileResultResponse = await _fileProcessingUseCase.ExecuteAsync(fileCommand);
                 var fileResult = fileResultResponse.IsSuccess ? fileResultResponse.Value : null;
 
                 results["fileProcessing"] = new
                 {
-                    success = fileResult?.Success ?? false,
-                    pdfCreated = fileResult?.PdfCreated ?? false,
-                    textExtracted = fileResult?.TextExtracted ?? false,
+                    success = fileResult?.success ?? false,
+                    pdfCreated = fileResult?.pdfCreated ?? false,
+                    textExtracted = fileResult?.textExtracted ?? false,
                     error = fileResultResponse.IsFailure ? fileResultResponse.Error : null
                 };
 
-                if (fileResultResponse.IsFailure || !(fileResult?.Success ?? false))
+                if (fileResultResponse.IsFailure || !(fileResult?.success ?? false))
                 {
                     overallSuccess = false;
                 }
@@ -95,13 +95,13 @@ public class HealthCheckUseCase : IHealthCheckUseCase
 
                 results["personality"] = new
                 {
-                    success = personalityResult?.Success ?? false,
-                    personalityLoaded = personalityResult?.ServiceAvailable ?? false,
-                    enhancedPromptGenerated = personalityResult?.AdditionalData?.GetValueOrDefault("enhancedPromptGenerated", false) ?? false,
+                    success = personalityResult?.success ?? false,
+                    personalityLoaded = personalityResult?.serviceAvailable ?? false,
+                    enhancedPromptGenerated = personalityResult?.additionalData?.GetValueOrDefault("enhancedPromptGenerated", false) ?? false,
                     error = personalityResultResponse.IsFailure ? personalityResultResponse.Error : null
                 };
 
-                if (personalityResultResponse.IsFailure || !(personalityResult?.Success ?? false))
+                if (personalityResultResponse.IsFailure || !(personalityResult?.success ?? false))
                 {
                     overallSuccess = false;
                 }
@@ -121,15 +121,15 @@ public class HealthCheckUseCase : IHealthCheckUseCase
             };
 
             var summary = new ComprehensiveTestSummary(
-                TotalTests: results.Count,
-                PassedTests: results.Values.Count(r => ((dynamic)r).success == true),
-                FailedTests: results.Values.Count(r => ((dynamic)r).success == false));
+                totalTests: results.Count,
+                passedTests: results.Values.Count(r => ((dynamic)r).success == true),
+                failedTests: results.Values.Count(r => ((dynamic)r).success == false));
 
             return new ComprehensiveHealthCheckResult(
-                OverallSuccess: overallSuccess,
-                Timestamp: DateTime.UtcNow,
-                TestResults: results,
-                Summary: summary);
+                overallSuccess: overallSuccess,
+                timestamp: DateTime.UtcNow,
+                testResults: results,
+                summary: summary);
         }, "Comprehensive health check workflow failed");
     }
 }

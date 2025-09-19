@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace DigitalMe.Tests.Integration;
 
@@ -34,7 +35,7 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
                 ["Anthropic:ApiKey"] = "test-api-key",
                 ["OpenAI:ApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 ["TwoCaptcha:ApiKey"] = "0123456789abcdef0123456789abcdef",
-                ["IvanProfile:DataFilePath"] = "C:\\Sources\\DigitalMe\\data\\profile\\IVAN_PROFILE_DATA.md",
+                ["IvanProfile:DataFilePath"] = "data/profile/IVAN_PROFILE_DATA.md",
                 ["Voice:OpenAiApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 ["Voice:DefaultTimeout"] = "30000",
                 ["Voice:EnableDetailedLogging"] = "true",
@@ -57,6 +58,16 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
 
         // Add Clean Architecture services (contains Learning Infrastructure Services)
         services.AddCleanArchitectureServices();
+
+        // Add IWebHostEnvironment for PersonalityService
+        services.AddScoped<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(provider =>
+        {
+            var mockEnvironment = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+            // Find project root by looking for .sln file
+            var projectRoot = FindProjectRoot(System.IO.Directory.GetCurrentDirectory());
+            mockEnvironment.Setup(x => x.ContentRootPath).Returns(projectRoot);
+            return mockEnvironment.Object;
+        });
 
         // Build service provider
         var serviceProvider = services.BuildServiceProvider();
@@ -91,5 +102,30 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
             disposableProvider.Dispose();
         }
         GC.SuppressFinalize(this);
+    }
+
+    private static string FindProjectRoot(string startPath)
+    {
+        var currentDir = new DirectoryInfo(startPath);
+
+        while (currentDir != null)
+        {
+            // Look for solution file
+            if (currentDir.GetFiles("*.sln").Any())
+            {
+                return currentDir.FullName;
+            }
+
+            // Look for data directory (fallback)
+            if (currentDir.GetDirectories("data").Any())
+            {
+                return currentDir.FullName;
+            }
+
+            currentDir = currentDir.Parent;
+        }
+
+        // Fallback to current directory
+        return startPath;
     }
 }

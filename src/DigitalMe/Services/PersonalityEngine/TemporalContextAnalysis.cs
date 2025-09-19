@@ -15,7 +15,7 @@ public class TemporalContextAnalysis
     /// <summary>
     /// Категория времени (Morning, Afternoon, Evening, Late Hours).
     /// </summary>
-    public string TimeCategory { get; set; } = "";
+    public string TimeCategory { get; set; } = string.Empty;
 
     /// <summary>
     /// Указывает, является ли время рабочими часами.
@@ -45,5 +45,5 @@ public class TemporalContextAnalysis
     /// <summary>
     /// Рекомендуемый темп общения/работы.
     /// </summary>
-    public string RecommendedPacing { get; set; } = "";
+    public string RecommendedPacing { get; set; } = string.Empty;
 }

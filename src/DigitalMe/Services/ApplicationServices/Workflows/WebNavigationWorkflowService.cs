@@ -46,28 +46,28 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             if (!initResult.Success || !isReady)
             {
                 return new WebNavigationWorkflowResult(
-                    Success: false,
-                    BrowserInitialized: false,
-                    Message: "Browser failed to initialize",
-                    ErrorMessage: initResult.Message);
+                    success: false,
+                    browserInitialized: false,
+                    message: "Browser failed to initialize",
+                    errorMessage: initResult.Message);
             }
 
             // Step 2: Clean up
             await _webNavigationService.DisposeBrowserAsync();
 
             return new WebNavigationWorkflowResult(
-                Success: true,
-                BrowserInitialized: true,
-                Message: "Web navigation service is functional");
+                success: true,
+                browserInitialized: true,
+                message: "Web navigation service is functional");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Web navigation workflow failed");
             return new WebNavigationWorkflowResult(
-                Success: false,
-                BrowserInitialized: false,
-                Message: "Web navigation workflow failed",
-                ErrorMessage: ex.Message);
+                success: false,
+                browserInitialized: false,
+                message: "Web navigation workflow failed",
+                errorMessage: ex.Message);
         }
     }
 
@@ -77,7 +77,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
     /// </summary>
     public async Task<WebToCaptchaToFileToVoiceWorkflowResult> ExecuteWebToCaptchaToFileToVoiceWorkflowAsync(WebToCaptchaToFileToVoiceRequest request)
     {
-        _logger.LogInformation("🚨 CRITICAL: Starting TRUE INTEGRATION workflow: WebNavigation → CAPTCHA → File → Voice for URL: {TargetUrl}", request.TargetUrl);
+        _logger.LogInformation("🚨 CRITICAL: Starting TRUE INTEGRATION workflow: WebNavigation → CAPTCHA → File → Voice for URL: {TargetUrl}", request.targetUrl);
         var timestamp = DateTime.UtcNow;
 
         var webStep = new WebNavigationStepResult(false, "Not started");
@@ -88,7 +88,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
         try
         {
             // STEP 1: Web Navigation - Navigate to target URL and extract content
-            _logger.LogInformation("Step 1/4: Initializing web browser and navigating to {TargetUrl}", request.TargetUrl);
+            _logger.LogInformation("Step 1/4: Initializing web browser and navigating to {TargetUrl}", request.targetUrl);
             
             var browserInit = await _webNavigationService.InitializeBrowserAsync();
             if (!browserInit.Success)
@@ -97,7 +97,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
                 return CreateFailedResult(webStep, captchaStep, fileStep, voiceStep, timestamp, "Browser initialization failed");
             }
 
-            var navigateResult = await _webNavigationService.NavigateToAsync(request.TargetUrl);
+            var navigateResult = await _webNavigationService.NavigateToAsync(request.targetUrl);
             if (!navigateResult.Success)
             {
                 webStep = new WebNavigationStepResult(false, "Navigation failed", null, navigateResult.Message);
@@ -114,7 +114,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             // STEP 2: CAPTCHA Detection and Solving
             _logger.LogInformation("Step 2/4: Checking for CAPTCHA challenges");
             
-            if (request.ProcessCaptcha)
+            if (request.processCaptcha)
             {
                 // Check for CAPTCHA elements on the page
                 var captchaDetected = await _webNavigationService.WaitForElementAsync("img[alt*='captcha'], [class*='captcha'], [id*='captcha'], .g-recaptcha", ElementState.Visible, 1000);
@@ -153,34 +153,34 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             // STEP 3: File Processing - Create document from extracted content
             _logger.LogInformation("Step 3/4: Processing extracted content into document");
             
-            var contentToProcess = !string.IsNullOrEmpty(extractedContent) ? extractedContent : request.ExpectedContent;
+            var contentToProcess = !string.IsNullOrEmpty(extractedContent) ? extractedContent : request.expectedContent;
             var fileWorkflowRequest = new FileProcessingWorkflowRequest(
                 contentToProcess, 
-                $"Web Content from {new Uri(request.TargetUrl).Host}");
+                $"Web Content from {new Uri(request.targetUrl).Host}");
 
             var fileResult = await ExecuteFileProcessingWorkflowAsync(fileWorkflowRequest);
-            if (fileResult.Success)
+            if (fileResult.success)
             {
-                fileStep = new FileProcessingStepResult(true, "Document created and text verified", fileResult.FilePath, fileResult.ExtractedTextPreview);
-                _logger.LogInformation("✅ Step 3/4: Document processing successful. File: {FilePath}", fileResult.FilePath);
+                fileStep = new FileProcessingStepResult(true, "Document created and text verified", fileResult.filePath, fileResult.extractedTextPreview);
+                _logger.LogInformation("✅ Step 3/4: Document processing successful. File: {FilePath}", fileResult.filePath);
             }
             else
             {
-                fileStep = new FileProcessingStepResult(false, "Document processing failed", null, null, fileResult.ErrorMessage);
-                _logger.LogError("❌ Step 3/4: Document processing failed: {Error}", fileResult.ErrorMessage);
+                fileStep = new FileProcessingStepResult(false, "Document processing failed", null, null, fileResult.errorMessage);
+                _logger.LogError("❌ Step 3/4: Document processing failed: {Error}", fileResult.errorMessage);
             }
 
             // STEP 4: Voice Narration - Generate audio narration of the content
             _logger.LogInformation("Step 4/4: Generating voice narration");
             
-            if (request.GenerateVoiceNarration)
+            if (request.generateVoiceNarration)
             {
                 var voiceServiceAvailable = await _voiceService.IsServiceAvailableAsync();
                 if (voiceServiceAvailable)
                 {
-                    var voiceText = request.VoiceText ?? 
-                        $"Web navigation completed successfully. Extracted content from {new Uri(request.TargetUrl).Host}. " +
-                        $"Document processing completed. {(captchaStep.CaptchaDetected ? "CAPTCHA challenges were resolved. " : "")}" +
+                    var voiceText = request.voiceText ?? 
+                        $"Web navigation completed successfully. Extracted content from {new Uri(request.targetUrl).Host}. " +
+                        $"Document processing completed. {(captchaStep.captchaDetected ? "CAPTCHA challenges were resolved. " : "")}" +
                         $"End-to-end Ivan-Level workflow execution successful.";
 
                     var tempAudioFile = Path.GetTempFileName() + ".mp3";
@@ -220,19 +220,19 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             await _webNavigationService.DisposeBrowserAsync();
 
             // Determine overall success
-            var overallSuccess = webStep.Success && captchaStep.Success && fileStep.Success && voiceStep.Success;
+            var overallSuccess = webStep.success && captchaStep.success && fileStep.success && voiceStep.success;
             
             _logger.LogInformation("🎯 TRUE INTEGRATION WORKFLOW COMPLETE: Overall Success = {OverallSuccess}", overallSuccess);
             _logger.LogInformation("Results: Web={WebSuccess}, CAPTCHA={CaptchaSuccess}, File={FileSuccess}, Voice={VoiceSuccess}",
-                webStep.Success, captchaStep.Success, fileStep.Success, voiceStep.Success);
+                webStep.success, captchaStep.success, fileStep.success, voiceStep.success);
 
             return new WebToCaptchaToFileToVoiceWorkflowResult(
-                OverallSuccess: overallSuccess,
-                WebNavigationStep: webStep,
-                CaptchaStep: captchaStep,
-                FileProcessingStep: fileStep,
-                VoiceStep: voiceStep,
-                Timestamp: timestamp);
+                overallSuccess: overallSuccess,
+                webNavigationStep: webStep,
+                captchaStep: captchaStep,
+                fileProcessingStep: fileStep,
+                voiceStep: voiceStep,
+                timestamp: timestamp);
         }
         catch (Exception ex)
         {
@@ -251,7 +251,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
     /// </summary>
     public async Task<SiteRegistrationToDocumentWorkflowResult> ExecuteSiteRegistrationToDocumentWorkflowAsync(SiteRegistrationToDocumentRequest request)
     {
-        _logger.LogInformation("🚨 CRITICAL: Starting TRUE INTEGRATION workflow: Site Registration → Form Filling → Document → PDF for URL: {RegistrationUrl}", request.RegistrationUrl);
+        _logger.LogInformation("🚨 CRITICAL: Starting TRUE INTEGRATION workflow: Site Registration → Form Filling → Document → PDF for URL: {RegistrationUrl}", request.registrationUrl);
         var timestamp = DateTime.UtcNow;
 
         var registrationStep = new SiteRegistrationStepResult(false, "Not started");
@@ -262,7 +262,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
         try
         {
             // STEP 1: Site Registration - Navigate and register user
-            _logger.LogInformation("Step 1/4: Initializing browser for site registration at {RegistrationUrl}", request.RegistrationUrl);
+            _logger.LogInformation("Step 1/4: Initializing browser for site registration at {RegistrationUrl}", request.registrationUrl);
             
             var browserInit = await _webNavigationService.InitializeBrowserAsync();
             if (!browserInit.Success)
@@ -271,7 +271,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
                 return CreateSiteWorkflowFailedResult(registrationStep, formFillingStep, documentStep, pdfStep, timestamp, "Browser initialization failed");
             }
 
-            var navigateResult = await _webNavigationService.NavigateToAsync(request.RegistrationUrl);
+            var navigateResult = await _webNavigationService.NavigateToAsync(request.registrationUrl);
             if (!navigateResult.Success)
             {
                 registrationStep = new SiteRegistrationStepResult(false, "Navigation to registration page failed", false, navigateResult.Message);
@@ -286,7 +286,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             _logger.LogInformation("Step 2/4: Filling registration form with user data");
             
             var filledFields = new Dictionary<string, bool>();
-            foreach (var field in request.UserData)
+            foreach (var field in request.userData)
             {
                 // Simulate form field filling
                 var fieldResult = await _webNavigationService.WaitForElementAsync($"[name='{field.Key}'], #{field.Key}", ElementState.Visible, 1000);
@@ -301,8 +301,8 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             _logger.LogInformation("Step 3/4: Simulating document download");
             
             // For this proof-of-concept, we'll create a test document instead of downloading
-            var testDocumentContent = $"Registration completed for user: {string.Join(", ", request.UserData.Select(kv => $"{kv.Key}: {kv.Value}"))}\\n" +
-                                    $"Registration URL: {request.RegistrationUrl}\\n" +
+            var testDocumentContent = $"Registration completed for user: {string.Join(", ", request.userData.Select(kv => $"{kv.Key}: {kv.Value}"))}\\n" +
+                                    $"Registration URL: {request.registrationUrl}\\n" +
                                     $"Registration Date: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}\\n\\n" +
                                     $"This is a test document generated as part of the Ivan-Level TRUE integration workflow.";
 
@@ -316,7 +316,7 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             // STEP 4: PDF Conversion - Convert the downloaded document to PDF
             _logger.LogInformation("Step 4/4: Converting document to PDF");
             
-            if (request.ConvertToPdf)
+            if (request.convertToPdf)
             {
                 var pdfFilePath = Path.GetTempFileName() + ".pdf";
                 var pdfParameters = new Dictionary<string, object> 
@@ -347,19 +347,19 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             await _webNavigationService.DisposeBrowserAsync();
 
             // Determine overall success
-            var overallSuccess = registrationStep.Success && formFillingStep.Success && documentStep.Success && pdfStep.Success;
+            var overallSuccess = registrationStep.success && formFillingStep.success && documentStep.success && pdfStep.success;
             
             _logger.LogInformation("🎯 SITE REGISTRATION WORKFLOW COMPLETE: Overall Success = {OverallSuccess}", overallSuccess);
             _logger.LogInformation("Results: Registration={RegSuccess}, Form={FormSuccess}, Document={DocSuccess}, PDF={PdfSuccess}",
-                registrationStep.Success, formFillingStep.Success, documentStep.Success, pdfStep.Success);
+                registrationStep.success, formFillingStep.success, documentStep.success, pdfStep.success);
 
             return new SiteRegistrationToDocumentWorkflowResult(
-                OverallSuccess: overallSuccess,
-                RegistrationStep: registrationStep,
-                FormFillingStep: formFillingStep,
-                DocumentStep: documentStep,
-                PdfConversionStep: pdfStep,
-                Timestamp: timestamp);
+                overallSuccess: overallSuccess,
+                registrationStep: registrationStep,
+                formFillingStep: formFillingStep,
+                documentStep: documentStep,
+                pdfConversionStep: pdfStep,
+                timestamp: timestamp);
         }
         catch (Exception ex)
         {
@@ -381,27 +381,27 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
         try
         {
             _logger.LogInformation("Executing file processing workflow with content: {ContentPreview}...", 
-                request.Content.Substring(0, Math.Min(50, request.Content.Length)));
+                request.content.Substring(0, Math.Min(50, request.content.Length)));
 
             // Step 1: Create PDF
             var tempFilePath = Path.GetTempFileName() + ".pdf";
             var parameters = new Dictionary<string, object> 
             { 
-                ["content"] = request.Content, 
-                ["title"] = request.Title ?? "Test Document" 
+                ["content"] = request.content, 
+                ["title"] = request.title ?? "Test Document" 
             };
             
             var pdfResult = await _fileProcessingService.ProcessPdfAsync("create", tempFilePath, parameters);
             if (!pdfResult.Success)
             {
                 return new FileProcessingWorkflowResult(
-                    Success: false,
-                    PdfCreated: false,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FilePath: null,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: $"PDF creation failed: {pdfResult.Message}");
+                    success: false,
+                    pdfCreated: false,
+                    textExtracted: false,
+                    contentMatch: false,
+                    filePath: null,
+                    extractedTextPreview: null,
+                    errorMessage: $"PDF creation failed: {pdfResult.Message}");
             }
 
             // Step 2: Extract text back
@@ -409,37 +409,37 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
             if (string.IsNullOrEmpty(extractedText))
             {
                 return new FileProcessingWorkflowResult(
-                    Success: false,
-                    PdfCreated: true,
-                    TextExtracted: false,
-                    ContentMatch: false,
-                    FilePath: tempFilePath,
-                    ExtractedTextPreview: null,
-                    ErrorMessage: "Text extraction failed: No text extracted");
+                    success: false,
+                    pdfCreated: true,
+                    textExtracted: false,
+                    contentMatch: false,
+                    filePath: tempFilePath,
+                    extractedTextPreview: null,
+                    errorMessage: "Text extraction failed: No text extracted");
             }
 
             // Step 3: Verify content matches
-            var contentMatch = extractedText.Contains(request.Content.Substring(0, Math.Min(20, request.Content.Length)));
+            var contentMatch = extractedText.Contains(request.content.Substring(0, Math.Min(20, request.content.Length)));
 
             return new FileProcessingWorkflowResult(
-                Success: true,
-                PdfCreated: pdfResult.Success,
-                TextExtracted: !string.IsNullOrEmpty(extractedText),
-                ContentMatch: contentMatch,
-                FilePath: tempFilePath,
-                ExtractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
+                success: true,
+                pdfCreated: pdfResult.Success,
+                textExtracted: !string.IsNullOrEmpty(extractedText),
+                contentMatch: contentMatch,
+                filePath: tempFilePath,
+                extractedTextPreview: extractedText.Substring(0, Math.Min(100, extractedText.Length)));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "File processing workflow failed");
             return new FileProcessingWorkflowResult(
-                Success: false,
-                PdfCreated: false,
-                TextExtracted: false,
-                ContentMatch: false,
-                FilePath: null,
-                ExtractedTextPreview: null,
-                ErrorMessage: $"Workflow failed: {ex.Message}");
+                success: false,
+                pdfCreated: false,
+                textExtracted: false,
+                contentMatch: false,
+                filePath: null,
+                extractedTextPreview: null,
+                errorMessage: $"Workflow failed: {ex.Message}");
         }
     }
 
@@ -452,13 +452,13 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
         string errorMessage)
     {
         return new WebToCaptchaToFileToVoiceWorkflowResult(
-            OverallSuccess: false,
-            WebNavigationStep: webStep,
-            CaptchaStep: captchaStep,
-            FileProcessingStep: fileStep,
-            VoiceStep: voiceStep,
-            Timestamp: timestamp,
-            ErrorMessage: errorMessage);
+            overallSuccess: false,
+            webNavigationStep: webStep,
+            captchaStep: captchaStep,
+            fileProcessingStep: fileStep,
+            voiceStep: voiceStep,
+            timestamp: timestamp,
+            errorMessage: errorMessage);
     }
 
     private static SiteRegistrationToDocumentWorkflowResult CreateSiteWorkflowFailedResult(
@@ -470,12 +470,12 @@ public class WebNavigationWorkflowService : IWebNavigationWorkflowService
         string errorMessage)
     {
         return new SiteRegistrationToDocumentWorkflowResult(
-            OverallSuccess: false,
-            RegistrationStep: registrationStep,
-            FormFillingStep: formFillingStep,
-            DocumentStep: documentStep,
-            PdfConversionStep: pdfStep,
-            Timestamp: timestamp,
-            ErrorMessage: errorMessage);
+            overallSuccess: false,
+            registrationStep: registrationStep,
+            formFillingStep: formFillingStep,
+            documentStep: documentStep,
+            pdfConversionStep: pdfStep,
+            timestamp: timestamp,
+            errorMessage: errorMessage);
     }
 }

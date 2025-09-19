@@ -33,28 +33,28 @@ public class WebNavigationUseCase : IWebNavigationUseCase
             if (!initResult.Success || !isReady)
             {
                 return new WebNavigationResult(
-                    Success: false,
-                    BrowserInitialized: false,
-                    Message: "Browser failed to initialize",
-                    ErrorMessage: initResult.Message);
+                    success: false,
+                    browserInitialized: false,
+                    message: "Browser failed to initialize",
+                    errorMessage: initResult.Message);
             }
 
             // Step 2: Clean up
             await _webNavigationService.DisposeBrowserAsync();
 
             return new WebNavigationResult(
-                Success: true,
-                BrowserInitialized: true,
-                Message: "Web navigation service is functional");
+                success: true,
+                browserInitialized: true,
+                message: "Web navigation service is functional");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Web navigation workflow failed");
             return new WebNavigationResult(
-                Success: false,
-                BrowserInitialized: false,
-                Message: "Web navigation workflow failed",
-                ErrorMessage: ex.Message);
+                success: false,
+                browserInitialized: false,
+                message: "Web navigation workflow failed",
+                errorMessage: ex.Message);
         }
     }
 }

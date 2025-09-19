@@ -1,7 +1,7 @@
+namespace DigitalMe.Tests.Unit.Builders;
+
 using System.Collections.Generic;
 using DigitalMe.Data.Entities;
-
-namespace DigitalMe.Tests.Unit.Builders;
 
 public class PersonalityProfileBuilder
 {

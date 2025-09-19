@@ -4,6 +4,7 @@ using DigitalMe.Repositories;
 using DigitalMe.Services;
 using DigitalMe.Tests.Unit.Builders;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,6 +17,7 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
     private readonly Mock<ILogger<PersonalityService>> _mockLogger;
     private readonly Mock<IProfileDataParser> _mockProfileDataParser;
     private readonly Mock<IConfiguration> _mockConfiguration;
+    private readonly Mock<IWebHostEnvironment> _mockEnvironment;
     private readonly PersonalityService _personalityService;
     private readonly IPersonalityRepository _personalityRepository;
 
@@ -24,8 +26,9 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         this._mockLogger = new Mock<ILogger<PersonalityService>>();
         this._mockProfileDataParser = new Mock<IProfileDataParser>();
         this._mockConfiguration = new Mock<IConfiguration>();
+        this._mockEnvironment = new Mock<IWebHostEnvironment>();
         this._personalityRepository = new PersonalityRepository(this.Context);
-        this._personalityService = new PersonalityService(this._mockLogger.Object, this._mockProfileDataParser.Object, this._mockConfiguration.Object);
+        this._personalityService = new PersonalityService(this._mockLogger.Object, this._mockProfileDataParser.Object, this._mockConfiguration.Object, this._mockEnvironment.Object);
     }
 
     public async Task InitializeAsync()

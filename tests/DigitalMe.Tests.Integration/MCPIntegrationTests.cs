@@ -123,18 +123,18 @@ public class McpIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pro
         var userResult = await messageProcessor.ProcessUserMessageAsync(chatRequest);
         userResult.IsSuccess.Should().BeTrue("should successfully process user message");
 
-        var agentResult = await messageProcessor.ProcessAgentResponseAsync(chatRequest, userResult.Value.Conversation.Id);
+        var agentResult = await messageProcessor.ProcessAgentResponseAsync(chatRequest, userResult.Value.conversation.Id);
         agentResult.IsSuccess.Should().BeTrue("should successfully process agent response");
 
         // Assert
         userResult.Value.Should().NotBeNull("should process user message");
         agentResult.Value.Should().NotBeNull("should process agent response");
 
-        agentResult.Value.AgentResponse.Content.Should().NotBeNullOrEmpty("should have agent response content");
-        agentResult.Value.AgentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
+        agentResult.Value.agentResponse.Content.Should().NotBeNullOrEmpty("should have agent response content");
+        agentResult.Value.agentResponse.ConfidenceScore.Should().BeGreaterThan(0, "should have confidence score");
 
         // Should contain Ivan's personal approach
-        agentResult.Value.AgentResponse.Content.Should().Contain("figuring this out", "should mention Ivan's personal honesty");
+        agentResult.Value.agentResponse.Content.Should().Contain("figuring this out", "should mention Ivan's personal honesty");
     }
 
     public ValueTask DisposeAsync()

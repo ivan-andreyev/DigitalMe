@@ -123,19 +123,19 @@ public class IvanLevelController : ControllerBase
             var command = new FileProcessingCommand(request.Content, request.Title);
             var result = await _workflowOrchestrator.ExecuteFileProcessingWorkflowAsync(command);
             
-            if (!result.Success)
+            if (!result.success)
             {
-                return BadRequest(new { error = result.ErrorMessage });
+                return BadRequest(new { error = result.errorMessage });
             }
 
             return Ok(new
             {
-                success = result.Success,
-                pdfCreated = result.PdfCreated,
-                textExtracted = result.TextExtracted,
-                contentMatch = result.ContentMatch,
-                fileId = result.FileId,
-                extractedTextPreview = result.ExtractedTextPreview
+                success = result.success,
+                pdfCreated = result.pdfCreated,
+                textExtracted = result.textExtracted,
+                contentMatch = result.contentMatch,
+                fileId = result.fileId,
+                extractedTextPreview = result.extractedTextPreview
             });
         }
         catch (Exception ex)
@@ -155,16 +155,16 @@ public class IvanLevelController : ControllerBase
         {
             var result = await _workflowOrchestrator.ExecuteWebNavigationWorkflowAsync();
             
-            if (!result.Success)
+            if (!result.success)
             {
-                return BadRequest(new { error = result.ErrorMessage });
+                return BadRequest(new { error = result.errorMessage });
             }
 
             return Ok(new
             {
-                success = result.Success,
-                browserInitialized = result.BrowserInitialized,
-                message = result.Message
+                success = result.success,
+                browserInitialized = result.browserInitialized,
+                message = result.message
             });
         }
         catch (Exception ex)
@@ -185,17 +185,17 @@ public class IvanLevelController : ControllerBase
             var query = new ServiceAvailabilityQuery("captcha-solving");
             var result = await _workflowOrchestrator.ExecuteServiceAvailabilityWorkflowAsync(query);
             
-            if (!result.Success)
+            if (!result.success)
             {
-                return StatusCode(500, new { error = result.ErrorMessage });
+                return StatusCode(500, new { error = result.errorMessage });
             }
 
             return Ok(new
             {
-                success = result.Success,
-                serviceAvailable = result.ServiceAvailable,
-                supportedTypes = result.AdditionalData?["supportedTypes"],
-                message = result.Message
+                success = result.success,
+                serviceAvailable = result.serviceAvailable,
+                supportedTypes = result.additionalData?["supportedTypes"],
+                message = result.message
             });
         }
         catch (Exception ex)
@@ -216,20 +216,20 @@ public class IvanLevelController : ControllerBase
             var query = new ServiceAvailabilityQuery("voice");
             var result = await _workflowOrchestrator.ExecuteServiceAvailabilityWorkflowAsync(query);
             
-            if (!result.Success)
+            if (!result.success)
             {
-                return StatusCode(500, new { error = result.ErrorMessage });
+                return StatusCode(500, new { error = result.errorMessage });
             }
 
             return Ok(new
             {
-                success = result.Success,
-                serviceAvailable = result.ServiceAvailable,
-                availableVoices = result.AdditionalData?["availableVoices"],
-                supportedFormats = result.AdditionalData?["supportedFormats"],
-                voiceCount = result.AdditionalData?["voiceCount"],
-                formatCount = result.AdditionalData?["formatCount"],
-                message = result.Message
+                success = result.success,
+                serviceAvailable = result.serviceAvailable,
+                availableVoices = result.additionalData?["availableVoices"],
+                supportedFormats = result.additionalData?["supportedFormats"],
+                voiceCount = result.additionalData?["voiceCount"],
+                formatCount = result.additionalData?["formatCount"],
+                message = result.message
             });
         }
         catch (Exception ex)
@@ -250,21 +250,21 @@ public class IvanLevelController : ControllerBase
             var query = new ServiceAvailabilityQuery("personality");
             var result = await _workflowOrchestrator.ExecuteServiceAvailabilityWorkflowAsync(query);
             
-            if (!result.Success)
+            if (!result.success)
             {
-                return StatusCode(500, new { error = result.ErrorMessage });
+                return StatusCode(500, new { error = result.errorMessage });
             }
 
             return Ok(new
             {
-                success = result.Success,
-                personalityLoaded = result.AdditionalData?["personalityLoaded"],
-                personalityName = result.AdditionalData?["personalityName"],
-                traitCount = result.AdditionalData?["traitCount"],
-                basicPromptGenerated = result.AdditionalData?["basicPromptGenerated"],
-                enhancedPromptGenerated = result.AdditionalData?["enhancedPromptGenerated"],
-                basicPromptPreview = result.AdditionalData?["basicPromptPreview"],
-                enhancedPromptPreview = result.AdditionalData?["enhancedPromptPreview"]
+                success = result.success,
+                personalityLoaded = result.additionalData?["personalityLoaded"],
+                personalityName = result.additionalData?["personalityName"],
+                traitCount = result.additionalData?["traitCount"],
+                basicPromptGenerated = result.additionalData?["basicPromptGenerated"],
+                enhancedPromptGenerated = result.additionalData?["enhancedPromptGenerated"],
+                basicPromptPreview = result.additionalData?["basicPromptPreview"],
+                enhancedPromptPreview = result.additionalData?["enhancedPromptPreview"]
             });
         }
         catch (Exception ex)
@@ -291,14 +291,14 @@ public class IvanLevelController : ControllerBase
 
             return Ok(new
             {
-                overallSuccess = result.OverallSuccess,
-                timestamp = result.Timestamp,
-                testResults = result.TestResults,
+                overallSuccess = result.overallSuccess,
+                timestamp = result.timestamp,
+                testResults = result.testResults,
                 summary = new
                 {
-                    totalTests = result.Summary.TotalTests,
-                    passedTests = result.Summary.PassedTests,
-                    failedTests = result.Summary.FailedTests
+                    totalTests = result.summary.totalTests,
+                    passedTests = result.summary.passedTests,
+                    failedTests = result.summary.failedTests
                 }
             });
         }
@@ -331,40 +331,40 @@ public class IvanLevelController : ControllerBase
 
             return Ok(new
             {
-                overallSuccess = result.OverallSuccess,
-                timestamp = result.Timestamp,
+                overallSuccess = result.overallSuccess,
+                timestamp = result.timestamp,
                 webNavigationStep = new
                 {
-                    success = result.WebNavigationStep.Success,
-                    message = result.WebNavigationStep.Message,
-                    contentExtracted = result.WebNavigationStep.ContentExtracted != null ? result.WebNavigationStep.ContentExtracted.Substring(0, Math.Min(200, result.WebNavigationStep.ContentExtracted.Length)) + "..." : null,
-                    errorMessage = result.WebNavigationStep.ErrorMessage
+                    success = result.webNavigationStep.success,
+                    message = result.webNavigationStep.message,
+                    contentExtracted = result.webNavigationStep.contentExtracted != null ? result.webNavigationStep.contentExtracted.Substring(0, Math.Min(200, result.webNavigationStep.contentExtracted.Length)) + "..." : null,
+                    errorMessage = result.webNavigationStep.errorMessage
                 },
                 captchaStep = new
                 {
-                    success = result.CaptchaStep.Success,
-                    message = result.CaptchaStep.Message,
-                    captchaDetected = result.CaptchaStep.CaptchaDetected,
-                    captchaSolved = result.CaptchaStep.CaptchaSolved,
-                    errorMessage = result.CaptchaStep.ErrorMessage
+                    success = result.captchaStep.success,
+                    message = result.captchaStep.message,
+                    captchaDetected = result.captchaStep.captchaDetected,
+                    captchaSolved = result.captchaStep.captchaSolved,
+                    errorMessage = result.captchaStep.errorMessage
                 },
                 fileProcessingStep = new
                 {
-                    success = result.FileProcessingStep.Success,
-                    message = result.FileProcessingStep.Message,
-                    filePath = result.FileProcessingStep.FilePath,
-                    extractedTextPreview = result.FileProcessingStep.ExtractedText != null ? result.FileProcessingStep.ExtractedText.Substring(0, Math.Min(100, result.FileProcessingStep.ExtractedText.Length)) + "..." : null,
-                    errorMessage = result.FileProcessingStep.ErrorMessage
+                    success = result.fileProcessingStep.success,
+                    message = result.fileProcessingStep.message,
+                    filePath = result.fileProcessingStep.filePath,
+                    extractedTextPreview = result.fileProcessingStep.extractedText != null ? result.fileProcessingStep.extractedText.Substring(0, Math.Min(100, result.fileProcessingStep.extractedText.Length)) + "..." : null,
+                    errorMessage = result.fileProcessingStep.errorMessage
                 },
                 voiceStep = new
                 {
-                    success = result.VoiceStep.Success,
-                    message = result.VoiceStep.Message,
-                    audioFilePath = result.VoiceStep.AudioFilePath,
-                    audioDurationSeconds = result.VoiceStep.AudioDurationSeconds,
-                    errorMessage = result.VoiceStep.ErrorMessage
+                    success = result.voiceStep.success,
+                    message = result.voiceStep.message,
+                    audioFilePath = result.voiceStep.audioFilePath,
+                    audioDurationSeconds = result.voiceStep.audioDurationSeconds,
+                    errorMessage = result.voiceStep.errorMessage
                 },
-                errorMessage = result.ErrorMessage
+                errorMessage = result.errorMessage
             });
         }
         catch (Exception ex)
@@ -395,39 +395,39 @@ public class IvanLevelController : ControllerBase
 
             return Ok(new
             {
-                overallSuccess = result.OverallSuccess,
-                timestamp = result.Timestamp,
+                overallSuccess = result.overallSuccess,
+                timestamp = result.timestamp,
                 registrationStep = new
                 {
-                    success = result.RegistrationStep.Success,
-                    message = result.RegistrationStep.Message,
-                    userRegistered = result.RegistrationStep.UserRegistered,
-                    errorMessage = result.RegistrationStep.ErrorMessage
+                    success = result.registrationStep.success,
+                    message = result.registrationStep.message,
+                    userRegistered = result.registrationStep.userRegistered,
+                    errorMessage = result.registrationStep.errorMessage
                 },
                 formFillingStep = new
                 {
-                    success = result.FormFillingStep.Success,
-                    message = result.FormFillingStep.Message,
-                    fieldsFilled = result.FormFillingStep.FieldsFilled,
-                    errorMessage = result.FormFillingStep.ErrorMessage
+                    success = result.formFillingStep.success,
+                    message = result.formFillingStep.message,
+                    fieldsFilled = result.formFillingStep.fieldsFilled,
+                    errorMessage = result.formFillingStep.errorMessage
                 },
                 documentStep = new
                 {
-                    success = result.DocumentStep.Success,
-                    message = result.DocumentStep.Message,
-                    downloadedFilePath = result.DocumentStep.DownloadedFilePath,
-                    fileSizeBytes = result.DocumentStep.FileSizeBytes,
-                    errorMessage = result.DocumentStep.ErrorMessage
+                    success = result.documentStep.success,
+                    message = result.documentStep.message,
+                    downloadedFilePath = result.documentStep.downloadedFilePath,
+                    fileSizeBytes = result.documentStep.fileSizeBytes,
+                    errorMessage = result.documentStep.errorMessage
                 },
                 pdfConversionStep = new
                 {
-                    success = result.PdfConversionStep.Success,
-                    message = result.PdfConversionStep.Message,
-                    pdfFilePath = result.PdfConversionStep.PdfFilePath,
-                    pageCount = result.PdfConversionStep.PageCount,
-                    errorMessage = result.PdfConversionStep.ErrorMessage
+                    success = result.pdfConversionStep.success,
+                    message = result.pdfConversionStep.message,
+                    pdfFilePath = result.pdfConversionStep.pdfFilePath,
+                    pageCount = result.pdfConversionStep.pageCount,
+                    errorMessage = result.pdfConversionStep.errorMessage
                 },
-                errorMessage = result.ErrorMessage
+                errorMessage = result.errorMessage
             });
         }
         catch (Exception ex)

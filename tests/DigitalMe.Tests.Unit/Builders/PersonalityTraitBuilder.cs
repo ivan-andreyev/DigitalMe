@@ -1,6 +1,6 @@
-using DigitalMe.Data.Entities;
-
 namespace DigitalMe.Tests.Unit.Builders;
+
+using DigitalMe.Data.Entities;
 
 public class PersonalityTraitBuilder
 {
@@ -11,7 +11,7 @@ public class PersonalityTraitBuilder
         this._trait = new PersonalityTrait();
     }
 
-    public static PersonalityTraitBuilder Create() => new();
+    public static PersonalityTraitBuilder Create() => new ();
 
     public PersonalityTraitBuilder WithId(Guid id)
     {

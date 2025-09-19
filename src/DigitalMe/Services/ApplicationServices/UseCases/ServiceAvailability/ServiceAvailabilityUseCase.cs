@@ -33,18 +33,18 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
     {
         return await ResultExtensions.TryAsync(async () =>
         {
-            return query.ServiceName.ToLowerInvariant() switch
+            return query.serviceName.ToLowerInvariant() switch
             {
                 "captcha-solving" => await CheckCaptchaSolvingAvailabilityAsync(),
                 "voice" => await CheckVoiceServiceAvailabilityAsync(),
                 "personality" => await CheckPersonalityServiceAvailabilityAsync(),
                 _ => new ServiceAvailabilityResult(
-                    Success: false,
-                    ServiceName: query.ServiceName,
-                    ServiceAvailable: false,
-                    ErrorMessage: "Unknown service")
+                    success: false,
+                    serviceName: query.serviceName,
+                    serviceAvailable: false,
+                    errorMessage: "Unknown service")
             };
-        }, $"Service availability workflow failed for {query.ServiceName}");
+        }, $"Service availability workflow failed for {query.serviceName}");
     }
 
     private async Task<ServiceAvailabilityResult> CheckCaptchaSolvingAvailabilityAsync()
@@ -63,11 +63,11 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
         };
 
         return new ServiceAvailabilityResult(
-            Success: true,
-            ServiceName: "CaptchaSolving",
-            ServiceAvailable: isAvailable,
-            AdditionalData: new Dictionary<string, object> { ["supportedTypes"] = supportedTypes },
-            Message: isAvailable ? "CAPTCHA service is available" : "CAPTCHA service is not available (check API key)");
+            success: true,
+            serviceName: "CaptchaSolving",
+            serviceAvailable: isAvailable,
+            additionalData: new Dictionary<string, object> { ["supportedTypes"] = supportedTypes },
+            message: isAvailable ? "CAPTCHA service is available" : "CAPTCHA service is not available (check API key)");
     }
 
     private async Task<ServiceAvailabilityResult> CheckVoiceServiceAvailabilityAsync()
@@ -82,17 +82,17 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
         var formats = new[] { "mp3", "opus", "aac", "flac", "wav" };
 
         return new ServiceAvailabilityResult(
-            Success: true,
-            ServiceName: "Voice",
-            ServiceAvailable: isAvailable,
-            AdditionalData: new Dictionary<string, object>
+            success: true,
+            serviceName: "Voice",
+            serviceAvailable: isAvailable,
+            additionalData: new Dictionary<string, object>
             {
                 ["availableVoices"] = voices,
                 ["supportedFormats"] = formats,
                 ["voiceCount"] = voices.Length,
                 ["formatCount"] = formats.Length
             },
-            Message: isAvailable ? "Voice service is fully functional" : "Voice service is not available (check API key)");
+            message: isAvailable ? "Voice service is fully functional" : "Voice service is not available (check API key)");
     }
 
     private async Task<ServiceAvailabilityResult> CheckPersonalityServiceAvailabilityAsync()
@@ -100,8 +100,8 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
         _logger.LogInformation("Testing Ivan personality service availability");
 
         var personalityResult = await _ivanPersonalityService.GetPersonalityAsync();
-        var basicPromptResult = personalityResult.IsSuccess
-            ? _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value!)
+        var basicPromptResult = personalityResult.IsSuccess && personalityResult.Value != null
+            ? _ivanPersonalityService.GenerateSystemPrompt(personalityResult.Value)
             : Result<string>.Failure("Personality not loaded");
         var enhancedPromptResult = await _ivanPersonalityService.GenerateEnhancedSystemPromptAsync();
 
@@ -114,14 +114,14 @@ public class ServiceAvailabilityUseCase : IServiceAvailabilityUseCase
                                       enhancedPromptResult.Value.Contains("Ivan");
 
         return new ServiceAvailabilityResult(
-            Success: true,
-            ServiceName: "IvanPersonality",
-            ServiceAvailable: personalityLoaded && basicPromptGenerated && enhancedPromptGenerated,
-            AdditionalData: new Dictionary<string, object>
+            success: true,
+            serviceName: "IvanPersonality",
+            serviceAvailable: personalityLoaded && basicPromptGenerated && enhancedPromptGenerated,
+            additionalData: new Dictionary<string, object>
             {
                 ["personalityLoaded"] = personalityLoaded,
-                ["personalityName"] = personalityResult.IsSuccess ? personalityResult.Value!.Name : "Unknown",
-                ["traitCount"] = personalityResult.IsSuccess ? personalityResult.Value!.Traits?.Count ?? 0 : 0,
+                ["personalityName"] = personalityResult.IsSuccess && personalityResult.Value != null ? personalityResult.Value.Name : "Unknown",
+                ["traitCount"] = personalityResult.IsSuccess && personalityResult.Value != null ? personalityResult.Value.Traits?.Count ?? 0 : 0,
                 ["basicPromptGenerated"] = basicPromptGenerated,
                 ["enhancedPromptGenerated"] = enhancedPromptGenerated,
                 ["basicPromptPreview"] = basicPromptResult.IsSuccess && basicPromptResult.Value?.Length > 150

@@ -97,9 +97,12 @@ public class SecurityValidationMiddleware
                 }
 
                 // Add claims to context
-                foreach (var claim in tokenValidation.Value.Claims)
+                if (tokenValidation.Value != null && tokenValidation.Value.Claims != null)
                 {
-                    context.Items[$"claim:{claim.Key}"] = claim.Value;
+                    foreach (var claim in tokenValidation.Value.Claims)
+                    {
+                        context.Items[$"claim:{claim.Key}"] = claim.Value;
+                    }
                 }
             }
 

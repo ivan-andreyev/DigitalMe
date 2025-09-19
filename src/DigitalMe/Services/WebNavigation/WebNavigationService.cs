@@ -146,7 +146,7 @@ public class WebNavigationService : IWebNavigationService, IAsyncDisposable, IDi
 
             if (options.Position != null)
             {
-                clickOptions.Position = new Microsoft.Playwright.Position { X = (float)options.Position.X, Y = (float)options.Position.Y };
+                clickOptions.Position = new Microsoft.Playwright.Position { X = (float)options.Position.x, Y = (float)options.Position.y };
             }
 
             if (options.Modifiers != KeyModifiers.None)

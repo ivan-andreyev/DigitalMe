@@ -71,6 +71,9 @@ public static class CleanArchitectureServiceCollectionExtensions
         // Performance Optimization Services - Interface Segregation Principle Applied
         services.AddSingleton<DigitalMe.Services.Performance.ICacheService,
                            DigitalMe.Services.Performance.CacheService>();
+        // Add ICachingService registration for Ivan Response Styling services compatibility
+        services.AddSingleton<DigitalMe.Services.Performance.ICachingService,
+                           DigitalMe.Services.Performance.CachingService>();
         services.AddSingleton<DigitalMe.Services.Performance.IRateLimitService,
                            DigitalMe.Services.Performance.RateLimitService>();
         services.AddSingleton<DigitalMe.Services.Performance.IBatchProcessingService,
