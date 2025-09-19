@@ -35,7 +35,7 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
                 ["Anthropic:ApiKey"] = "test-api-key",
                 ["OpenAI:ApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 ["TwoCaptcha:ApiKey"] = "0123456789abcdef0123456789abcdef",
-                ["IvanProfile:DataFilePath"] = "C:\\Sources\\DigitalMe\\data\\profile\\IVAN_PROFILE_DATA.md",
+                ["IvanProfile:DataFilePath"] = "data/profile/IVAN_PROFILE_DATA.md",
                 ["Voice:OpenAiApiKey"] = "sk-test1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 ["Voice:DefaultTimeout"] = "30000",
                 ["Voice:EnableDetailedLogging"] = "true",
