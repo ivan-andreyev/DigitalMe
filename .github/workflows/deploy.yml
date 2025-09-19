@@ -38,10 +38,14 @@ jobs:
     
     - name: Run Unit Tests
       run: dotnet test tests/DigitalMe.Tests.Unit --no-build --configuration Release --verbosity normal
-    
+      env:
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
+        ASPNETCORE_ENVIRONMENT: Testing
+
     - name: Run Integration Tests
       run: dotnet test tests/DigitalMe.Tests.Integration --no-build --configuration Release --verbosity normal
       env:
+        JWT_KEY: "test-jwt-key-1234567890123456789012345678901234567890"
         ASPNETCORE_ENVIRONMENT: Testing
 
   deploy:
