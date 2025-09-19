@@ -125,7 +125,9 @@ Respond as Ivan would - rationally, structured, friendly but direct, with occasi
                     ? "data/profile/IVAN_PROFILE_DATA.md"
                     : configPath;
 
-                var fullPath = Path.Combine(_environment.ContentRootPath, profileDataPath);
+                // Normalize path for cross-platform compatibility
+                var normalizedProfilePath = profileDataPath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+                var fullPath = Path.Combine(_environment.ContentRootPath, normalizedProfilePath);
                 _cachedProfileData = await _profileDataParser.ParseProfileDataAsync(fullPath);
 
                 _logger.LogInformation("Loaded enhanced profile data from {ProfilePath}", profileDataPath);

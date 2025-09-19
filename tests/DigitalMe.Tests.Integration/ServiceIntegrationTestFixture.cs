@@ -63,7 +63,9 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
         services.AddScoped<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(provider =>
         {
             var mockEnvironment = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-            mockEnvironment.Setup(x => x.ContentRootPath).Returns(System.IO.Directory.GetCurrentDirectory());
+            // Find project root by looking for .sln file
+            var projectRoot = FindProjectRoot(System.IO.Directory.GetCurrentDirectory());
+            mockEnvironment.Setup(x => x.ContentRootPath).Returns(projectRoot);
             return mockEnvironment.Object;
         });
 
@@ -100,5 +102,30 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
             disposableProvider.Dispose();
         }
         GC.SuppressFinalize(this);
+    }
+
+    private static string FindProjectRoot(string startPath)
+    {
+        var currentDir = new DirectoryInfo(startPath);
+
+        while (currentDir != null)
+        {
+            // Look for solution file
+            if (currentDir.GetFiles("*.sln").Any())
+            {
+                return currentDir.FullName;
+            }
+
+            // Look for data directory (fallback)
+            if (currentDir.GetDirectories("data").Any())
+            {
+                return currentDir.FullName;
+            }
+
+            currentDir = currentDir.Parent;
+        }
+
+        // Fallback to current directory
+        return startPath;
     }
 }
