@@ -61,15 +61,23 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration - FULLY OPEN for now to avoid connection issues
+// CORS configuration - Wide open with specific origins for Cloud Run compatibility
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowEverything", builder =>
     {
         builder
-            .AllowAnyOrigin()
+            .WithOrigins(
+                "https://digitalme-web-llig7ks2ca-uc.a.run.app",
+                "http://localhost:3000",
+                "http://localhost:5000",
+                "http://localhost:5001",
+                "https://localhost:7000",
+                "https://localhost:7001"
+            )
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
