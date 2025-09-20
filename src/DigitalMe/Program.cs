@@ -573,6 +573,27 @@ app.UseStaticFiles();
 // CORS - FULLY OPEN (проходной двор)
 app.UseCors("AllowEverything");
 
+// BACKUP CORS: Manual CORS headers for all requests
+app.Use(async (context, next) =>
+{
+    var origin = context.Request.Headers["Origin"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(origin))
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, Origin, X-Requested-With");
+        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+    }
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        return;
+    }
+
+    await next();
+});
+
 // HTTPS Redirection - Skip for Cloud Run (handled by Google Load Balancer)
 if (!app.Environment.IsProduction())
 {
