@@ -576,36 +576,36 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Default route for home page (needed for integration tests)
-app.MapGet("/", () => Results.Content("<h1>DigitalMe</h1><p>Digital Ivan Assistant API</p>", "text/html"));
+app.MapGet("/", () => Results.Content("<h1>DigitalMe</h1><p>Digital Ivan Assistant API</p>", "text/html")).RequireCors("AllowEverything");
 
 // Chat page route (needed for integration tests)
-app.MapGet("/chat", () => Results.Content("<h1>Чат с Иваном</h1><p>Digital Ivan Chat Interface</p>", "text/html"));
+app.MapGet("/chat", () => Results.Content("<h1>Чат с Иваном</h1><p>Digital Ivan Chat Interface</p>", "text/html")).RequireCors("AllowEverything");
 
 // Personality page route (needed for integration tests)
-app.MapGet("/personality", () => Results.Content("<h1>Ivan's Personality</h1><p>Personality Configuration</p>", "text/html"));
+app.MapGet("/personality", () => Results.Content("<h1>Ivan's Personality</h1><p>Personality Configuration</p>", "text/html")).RequireCors("AllowEverything");
 
-// SignalR Hub mapping
-app.MapHub<DigitalMe.Hubs.ChatHub>("/chathub");
+// SignalR Hub mapping with CORS
+app.MapHub<DigitalMe.Hubs.ChatHub>("/chathub").RequireCors("AllowEverything");
 
 // Standard ASP.NET Core Health Check Endpoints as required by MVP Phase 6 plan
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").RequireCors("AllowEverything");
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")
-});
+}).RequireCors("AllowEverything");
 
 // Enhanced Health Check Endpoints (preserving existing advanced monitoring)
 app.MapGet("/health/enhanced", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
     var healthStatus = await healthCheckService.GetSystemHealthAsync();
     return Results.Ok(healthStatus);
-});
+}).RequireCors("AllowEverything");
 
 // Simple Health Check for Integration Tests (fallback)
 app.MapGet("/health/simple", () =>
 {
     return Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow });
-});
+}).RequireCors("AllowEverything");
 
 app.MapGet("/health/enhanced/ready", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
@@ -658,7 +658,7 @@ app.MapGet("/info", () => new
         WorkingSet = Environment.WorkingSet,
         TotalPhysicalMemory = GC.GetTotalMemory(false)
     }
-});
+}).RequireCors("AllowEverything");
 
 // Secrets Validation Endpoint - Security monitoring (development/staging only)
 app.MapGet("/security/secrets-validation", (DigitalMe.Services.Configuration.ISecretsManagementService secretsService, IWebHostEnvironment environment) =>
