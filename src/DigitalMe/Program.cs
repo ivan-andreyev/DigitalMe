@@ -549,7 +549,13 @@ if (app.Environment.IsProduction())
 }
 
 app.UseStaticFiles();
-app.UseHttpsRedirection();
+
+// HTTPS Redirection - Skip for Cloud Run (handled by Google Load Balancer)
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
