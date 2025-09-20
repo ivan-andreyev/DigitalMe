@@ -61,6 +61,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS configuration for SignalR and Web App
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWebApp", builder =>
+    {
+        builder
+            .WithOrigins("https://digitalme-web-llig7ks2ca-uc.a.run.app")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials(); // Required for SignalR
+    });
+});
+
 // SignalR for real-time chat
 builder.Services.AddSignalR();
 
@@ -549,6 +562,9 @@ if (app.Environment.IsProduction())
 }
 
 app.UseStaticFiles();
+
+// CORS - Must be before authentication and authorization
+app.UseCors("AllowWebApp");
 
 // HTTPS Redirection - Skip for Cloud Run (handled by Google Load Balancer)
 if (!app.Environment.IsProduction())

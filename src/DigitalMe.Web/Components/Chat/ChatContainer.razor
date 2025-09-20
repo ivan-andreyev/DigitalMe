@@ -237,7 +237,8 @@
 
         try
         {
-            var response = await httpClient.PostAsJsonAsync("https://localhost:7064/api/chat/send", request);
+            var apiBaseUrl = "https://digitalme-api-llig7ks2ca-uc.a.run.app";
+            var response = await httpClient.PostAsJsonAsync($"{apiBaseUrl}/api/chat/send", request);
             
             if (response.IsSuccessStatusCode)
             {

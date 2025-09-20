@@ -33,7 +33,7 @@
     </div>
     
     <div class="input-hints">
-        <span class="hint">Ctrl+Enter для отправки • Поддержка кода в ```блоках```</span>
+        <span class="hint">Enter для отправки • Shift+Enter для новой строки • Поддержка кода в ```блоках```</span>
         @if (!string.IsNullOrEmpty(_currentMessage))
         {
             <span class="char-count">@_currentMessage.Length</span>
@@ -171,15 +171,13 @@
     {
         if (e.Key == "Enter")
         {
-            if (e.CtrlKey)
+            if (e.CtrlKey || !e.ShiftKey)
             {
+                // Send on Enter or Ctrl+Enter
+                e.PreventDefault();
                 await SendMessage();
             }
-            else if (!e.ShiftKey)
-            {
-                // Single Enter - add new line, don't send
-                // This is handled by browser by default
-            }
+            // Shift+Enter adds new line (browser default)
         }
     }
 
