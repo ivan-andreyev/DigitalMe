@@ -11,16 +11,16 @@ WORKDIR /src
 
 # Copy only project files for better layer caching
 COPY ["DigitalMe.sln", "."]
-COPY ["DigitalMe/DigitalMe.csproj", "DigitalMe/"]
+COPY ["src/DigitalMe/DigitalMe.csproj", "src/DigitalMe/"]
 
 # Restore with specific optimizations
-RUN dotnet restore "DigitalMe/DigitalMe.csproj" \
+RUN dotnet restore "src/DigitalMe/DigitalMe.csproj" \
     --runtime linux-musl-x64 \
     --locked-mode
 
 # Copy source and build with optimizations
 COPY . .
-WORKDIR "/src/DigitalMe"
+WORKDIR "/src/src/DigitalMe"
 RUN dotnet build "./DigitalMe.csproj" -c Release -o /app/build --runtime linux-musl-x64 --self-contained false --no-restore
 
 # Publish with ReadyToRun and trimming

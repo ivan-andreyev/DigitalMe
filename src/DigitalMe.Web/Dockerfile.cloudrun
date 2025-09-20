@@ -11,7 +11,7 @@ WORKDIR /src
 
 # Copy only project files for better layer caching  
 COPY ["src/DigitalMe.Web/DigitalMe.Web.csproj", "src/DigitalMe.Web/"]
-COPY ["DigitalMe/DigitalMe.csproj", "DigitalMe/"]
+COPY ["src/DigitalMe/DigitalMe.csproj", "src/DigitalMe/"]
 
 # Restore with specific optimizations
 RUN dotnet restore "src/DigitalMe.Web/DigitalMe.Web.csproj" \
