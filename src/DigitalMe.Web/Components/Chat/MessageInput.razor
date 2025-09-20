@@ -174,7 +174,6 @@
             if (e.CtrlKey || !e.ShiftKey)
             {
                 // Send on Enter or Ctrl+Enter
-                e.PreventDefault();
                 await SendMessage();
             }
             // Shift+Enter adds new line (browser default)
