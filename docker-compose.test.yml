@@ -1,0 +1,96 @@
+version: '3.8'
+
+# Test environment - Fast setup for TDD with PostgreSQL
+# Usage: docker-compose -f docker-compose.test.yml up -d
+
+services:
+  # PostgreSQL database for testing
+  postgres-test:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=digitalme_test
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - digitalme-test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d digitalme_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API (Test mode)
+  digitalme-api-test:
+    build:
+      context: .
+      dockerfile: src/DigitalMe/Dockerfile
+    ports:
+      - "5001:8080"  # Different port for test API
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ASPNETCORE_URLS=http://+:8080
+      # PostgreSQL connection
+      - ConnectionStrings__DefaultConnection=Host=postgres-test;Port=5432;Database=digitalme_test;Username=test_user;Password=test_password;
+      # Test JWT settings
+      - JWT__Key=test-super-secret-key-12345678901234567890123456789012
+      - JWT__Issuer=DigitalMe.Test
+      - JWT__Audience=DigitalMe.Test
+      - JWT__ExpireHours=1
+      # External APIs (test values)
+      - Anthropic__ApiKey=test-api-key
+      - GitHub__PersonalAccessToken=test-github-token
+      - Google__ClientId=test-google-client
+      - Google__ClientSecret=test-google-secret
+      - Telegram__BotToken=test-telegram-token
+    volumes:
+      - digitalme-test-logs:/app/logs
+    networks:
+      - digitalme-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/simple"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # Blazor Web App (Test mode)
+  digitalme-web-test:
+    build:
+      context: .
+      dockerfile: src/DigitalMe.Web/Dockerfile
+    ports:
+      - "8081:8080"  # Different port for test Web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ASPNETCORE_URLS=http://+:8080
+      - DigitalMe__ApiBaseUrl=http://digitalme-api-test:8080
+      - DigitalMe__SignalRUrl=http://digitalme-api-test:8080/chatHub
+      - DigitalMe__Features__UseRealAuthentication=true
+    depends_on:
+      digitalme-api-test:
+        condition: service_healthy
+    networks:
+      - digitalme-test
+    restart: unless-stopped
+
+volumes:
+  postgres-test-data:
+    driver: local
+  digitalme-test-logs:
+    driver: local
+
+networks:
+  digitalme-test:
+    driver: bridge
+    name: digitalme-test-network

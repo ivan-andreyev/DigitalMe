@@ -89,6 +89,50 @@ jobs:
     - name: Show deployment URLs
       run: |
         echo "🚀 Deployment completed successfully!"
-        echo "API URL: https://digitalme-api-llig7ks2ca-uc.a.run.app"  
+        echo "API URL: https://digitalme-api-llig7ks2ca-uc.a.run.app"
         echo "Web URL: https://digitalme-web-llig7ks2ca-uc.a.run.app"
         echo "Commit: ${GITHUB_SHA}"
+
+  e2e-tests:
+    name: E2E Tests (Production)
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore E2E test dependencies
+      run: dotnet restore tests/DigitalMe.Tests.E2E/DigitalMe.Tests.E2E.csproj
+
+    - name: Build E2E tests
+      run: dotnet build tests/DigitalMe.Tests.E2E/DigitalMe.Tests.E2E.csproj --no-restore --configuration Release
+
+    - name: Wait for deployment to be ready
+      run: |
+        echo "Waiting 30 seconds for Cloud Run to be fully ready..."
+        sleep 30
+
+    - name: Run E2E Tests against Production
+      run: |
+        dotnet test tests/DigitalMe.Tests.E2E \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --filter "Category=E2E" \
+          --logger "console;verbosity=detailed"
+      env:
+        TEST_ENV: production
+      timeout-minutes: 10
+
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-test-results
+        path: tests/DigitalMe.Tests.E2E/TestResults/
