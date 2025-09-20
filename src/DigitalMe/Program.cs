@@ -61,25 +61,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration - Wide open with specific origins for Cloud Run compatibility
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowEverything", builder =>
-    {
-        builder
-            .WithOrigins(
-                "https://digitalme-web-llig7ks2ca-uc.a.run.app",
-                "http://localhost:3000",
-                "http://localhost:5000",
-                "http://localhost:5001",
-                "https://localhost:7000",
-                "https://localhost:7001"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
-});
+// NO CORS - completely disable CORS restrictions
 
 // SignalR for real-time chat
 builder.Services.AddSignalR();
@@ -547,6 +529,9 @@ catch (Exception secretsEx)
 }
 
 // Configure the HTTP request pipeline
+
+// NO CORS middleware - completely open API
+
 app.UseMiddleware<DigitalMe.Middleware.RequestLoggingMiddleware>();
 app.UseMiddleware<DigitalMe.Middleware.GlobalExceptionHandlingMiddleware>();
 
@@ -570,29 +555,7 @@ if (app.Environment.IsProduction())
 
 app.UseStaticFiles();
 
-// CORS - FULLY OPEN (проходной двор)
-app.UseCors("AllowEverything");
-
-// BACKUP CORS: Manual CORS headers for all requests
-app.Use(async (context, next) =>
-{
-    var origin = context.Request.Headers["Origin"].FirstOrDefault();
-    if (!string.IsNullOrEmpty(origin))
-    {
-        context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
-        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, Origin, X-Requested-With");
-        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-    }
-
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        return;
-    }
-
-    await next();
-});
+// NO CORS middleware - API completely open
 
 // HTTPS Redirection - Skip for Cloud Run (handled by Google Load Balancer)
 if (!app.Environment.IsProduction())
@@ -605,36 +568,36 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Default route for home page (needed for integration tests)
-app.MapGet("/", () => Results.Content("<h1>DigitalMe</h1><p>Digital Ivan Assistant API</p>", "text/html")).RequireCors("AllowEverything");
+app.MapGet("/", () => Results.Content("<h1>DigitalMe</h1><p>Digital Ivan Assistant API</p>", "text/html"));
 
 // Chat page route (needed for integration tests)
-app.MapGet("/chat", () => Results.Content("<h1>Чат с Иваном</h1><p>Digital Ivan Chat Interface</p>", "text/html")).RequireCors("AllowEverything");
+app.MapGet("/chat", () => Results.Content("<h1>Чат с Иваном</h1><p>Digital Ivan Chat Interface</p>", "text/html"));
 
 // Personality page route (needed for integration tests)
-app.MapGet("/personality", () => Results.Content("<h1>Ivan's Personality</h1><p>Personality Configuration</p>", "text/html")).RequireCors("AllowEverything");
+app.MapGet("/personality", () => Results.Content("<h1>Ivan's Personality</h1><p>Personality Configuration</p>", "text/html"));
 
 // SignalR Hub mapping with CORS
-app.MapHub<DigitalMe.Hubs.ChatHub>("/chathub").RequireCors("AllowEverything");
+app.MapHub<DigitalMe.Hubs.ChatHub>("/chathub");
 
 // Standard ASP.NET Core Health Check Endpoints as required by MVP Phase 6 plan
-app.MapHealthChecks("/health").RequireCors("AllowEverything");
+app.MapHealthChecks("/health");
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")
-}).RequireCors("AllowEverything");
+});
 
 // Enhanced Health Check Endpoints (preserving existing advanced monitoring)
 app.MapGet("/health/enhanced", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
     var healthStatus = await healthCheckService.GetSystemHealthAsync();
     return Results.Ok(healthStatus);
-}).RequireCors("AllowEverything");
+});
 
 // Simple Health Check for Integration Tests (fallback)
 app.MapGet("/health/simple", () =>
 {
     return Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow });
-}).RequireCors("AllowEverything");
+});
 
 app.MapGet("/health/enhanced/ready", async (DigitalMe.Services.Monitoring.IHealthCheckService healthCheckService) =>
 {
@@ -687,7 +650,7 @@ app.MapGet("/info", () => new
         WorkingSet = Environment.WorkingSet,
         TotalPhysicalMemory = GC.GetTotalMemory(false)
     }
-}).RequireCors("AllowEverything");
+});
 
 // Secrets Validation Endpoint - Security monitoring (development/staging only)
 app.MapGet("/security/secrets-validation", (DigitalMe.Services.Configuration.ISecretsManagementService secretsService, IWebHostEnvironment environment) =>
