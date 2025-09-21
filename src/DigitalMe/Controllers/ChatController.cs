@@ -33,12 +33,19 @@ public class ChatController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("🚀 ChatController.SendMessage started");
+            // 🔥 NUCLEAR LOGGING - print to both ILogger AND Console directly
+            var startMsg = "🚀🔥 PRODUCTION DEBUG: ChatController.SendMessage started";
+            _logger.LogError(startMsg); // Use ERROR level to guarantee it shows in Cloud Run
+            Console.WriteLine(startMsg);
+            Console.Out.Flush();
 
             // Validate input
             if (request == null)
             {
-                _logger.LogWarning("❌ Request is null");
+                var errorMsg = "❌🔥 PRODUCTION DEBUG: Request is null";
+                _logger.LogError(errorMsg);
+                Console.WriteLine(errorMsg);
+                Console.Out.Flush();
                 return BadRequest("Request cannot be null");
             }
 
@@ -50,11 +57,17 @@ public class ChatController : ControllerBase
                 _logger.LogInformation("📝 Received empty message, using default greeting");
             }
 
-            _logger.LogInformation("💬 Processing message: '{Message}' from Platform: {Platform}, UserId: {UserId}",
-                userMessage, request.Platform, request.UserId);
+            var msgInfo = $"💬🔥 PRODUCTION DEBUG: Processing message: '{userMessage}' from Platform: {request.Platform}, UserId: {request.UserId}";
+            _logger.LogError(msgInfo);
+            Console.WriteLine(msgInfo);
+            Console.Out.Flush();
 
             // Check if Ivan's personality is available
-            _logger.LogInformation("👤 Getting Ivan's personality profile...");
+            var personalityMsg = "👤🔥 PRODUCTION DEBUG: Getting Ivan's personality profile...";
+            _logger.LogError(personalityMsg);
+            Console.WriteLine(personalityMsg);
+            Console.Out.Flush();
+
             var ivanProfile = await _personalityService.GetIvanProfileAsync();
             if (ivanProfile == null)
             {
@@ -116,7 +129,20 @@ public class ChatController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing chat message: {Error}", ex.Message);
+            // 🔥 NUCLEAR ERROR LOGGING - capture EVERYTHING
+            var errorMsg = $"💥🔥 PRODUCTION CRASH: {ex.GetType().Name}: {ex.Message}";
+            var stackMsg = $"🔥 STACK TRACE: {ex.StackTrace}";
+            var innerMsg = ex.InnerException != null ? $"🔥 INNER: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}" : "🔥 NO INNER EXCEPTION";
+
+            _logger.LogError(ex, errorMsg);
+            _logger.LogError(stackMsg);
+            _logger.LogError(innerMsg);
+
+            Console.WriteLine(errorMsg);
+            Console.WriteLine(stackMsg);
+            Console.WriteLine(innerMsg);
+            Console.Out.Flush();
+
             return StatusCode(500, "An error occurred while processing your message");
         }
     }
