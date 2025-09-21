@@ -45,12 +45,19 @@ public class ClaudeApiService : IClaudeApiService
         _configuration = configuration;
         _logger = logger;
 
-        // Initialize Anthropic client
+        // Initialize Anthropic client with fallback support
         var apiKey = _configuration["Anthropic:ApiKey"]
-            ?? Environment.GetEnvironmentVariable(_configuration["Anthropic:ApiKeyEnvironmentVariable"] ?? "ANTHROPIC_API_KEY")
-            ?? throw new ArgumentException("Claude API key not configured");
+            ?? Environment.GetEnvironmentVariable(_configuration["Anthropic:ApiKeyEnvironmentVariable"] ?? "ANTHROPIC_API_KEY");
 
-        _anthropicClient = new AnthropicClient(apiKey);
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            _logger.LogWarning("⚠️ Claude API key not configured. Service will run in fallback mode.");
+            _anthropicClient = null!; // Will use fallback responses
+        }
+        else
+        {
+            _anthropicClient = new AnthropicClient(apiKey);
+        }
 
         // Setup rate limiting
         _rateLimitSemaphore = new SemaphoreSlim(MaxConcurrentRequests, MaxConcurrentRequests);

@@ -96,9 +96,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // }
 // else
 // {
-// Force SQLite for all environments until CloudSQL is properly configured
+// CLOUD RUN FIX: Use in-memory SQLite to avoid file system issues
 builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-    options.UseSqlite("Data Source=digitalme.db"));
+    options.UseSqlite("Data Source=:memory:"));
 // }
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
