@@ -33,9 +33,12 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("🚀 ChatController.SendMessage started");
+
             // Validate input
             if (request == null)
             {
+                _logger.LogWarning("❌ Request is null");
                 return BadRequest("Request cannot be null");
             }
 
@@ -44,28 +47,40 @@ public class ChatController : ControllerBase
             if (string.IsNullOrWhiteSpace(userMessage))
             {
                 userMessage = "Hello";
-                _logger.LogInformation("Received empty message, using default greeting");
+                _logger.LogInformation("📝 Received empty message, using default greeting");
             }
 
+            _logger.LogInformation("💬 Processing message: '{Message}' from Platform: {Platform}, UserId: {UserId}",
+                userMessage, request.Platform, request.UserId);
+
             // Check if Ivan's personality is available
+            _logger.LogInformation("👤 Getting Ivan's personality profile...");
             var ivanProfile = await _personalityService.GetIvanProfileAsync();
             if (ivanProfile == null)
             {
+                _logger.LogError("❌ Ivan's personality profile not found!");
                 return BadRequest("Ivan's personality profile not found. Please create it first.");
             }
+            _logger.LogInformation("✅ Ivan's profile loaded with {TraitCount} traits", ivanProfile.Traits?.Count ?? 0);
 
             // Get or create active conversation for this user+platform
+            _logger.LogInformation("💼 Getting/creating conversation...");
             var conversation = await _conversationService.GetActiveConversationAsync(request.Platform, request.UserId);
             if (conversation == null)
             {
+                _logger.LogInformation("🆕 Creating new conversation");
                 conversation = await _conversationService.StartConversationAsync(request.Platform, request.UserId, "Chat Session");
             }
+            _logger.LogInformation("💼 Using conversation ID: {ConversationId}", conversation.Id);
 
             // Add user message to conversation
+            _logger.LogInformation("💾 Saving user message to conversation...");
             await _conversationService.AddMessageAsync(conversation.Id, "user", userMessage);
 
             // Process message through MVP pipeline
+            _logger.LogInformation("🤖 Processing message through MVP pipeline...");
             var response = await _messageProcessor.ProcessMessageAsync(userMessage);
+            _logger.LogInformation("✅ Got response: '{Response}'", response);
 
             // Analyze mood and confidence for conversation pipeline completion
             var mood = AnalyzeMood(userMessage, response);
