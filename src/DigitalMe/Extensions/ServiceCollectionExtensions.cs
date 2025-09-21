@@ -37,8 +37,8 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
-        // CLOUD RUN HOTFIX: Use stub PersonalityService to bypass database issues
-        services.AddScoped<IMvpPersonalityService, StubMvpPersonalityService>();
+        // Use real PersonalityService with database
+        services.AddScoped<IMvpPersonalityService, MvpPersonalityService>();
         // Keep IPersonalityService registration for compatibility
         services.AddScoped<IPersonalityService, MvpPersonalityService>();
         services.AddScoped<IConversationService, ConversationService>();

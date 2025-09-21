@@ -6,7 +6,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:console.cloud.google.com)",
       "WebFetch(domain:digitalme-api-llig7ks2ca-uc.a.run.app)",
-      "WebFetch(domain:digitalme-web-llig7ks2ca-uc.a.run.app)"
+      "WebFetch(domain:digitalme-web-llig7ks2ca-uc.a.run.app)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": [],
     "ask": []
