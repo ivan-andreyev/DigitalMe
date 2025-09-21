@@ -37,11 +37,10 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
-        // MVP: Use simplified PersonalityService without repository pattern
-        // Register both interfaces for ISP compliance
-        services.AddScoped<MvpPersonalityService>();
-        services.AddScoped<IPersonalityService>(provider => provider.GetRequiredService<MvpPersonalityService>());
-        services.AddScoped<IMvpPersonalityService>(provider => provider.GetRequiredService<MvpPersonalityService>());
+        // CLOUD RUN HOTFIX: Use stub PersonalityService to bypass database issues
+        services.AddScoped<IMvpPersonalityService, StubMvpPersonalityService>();
+        // Keep IPersonalityService registration for compatibility
+        services.AddScoped<IPersonalityService, MvpPersonalityService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IProfileDataParser, ProfileDataParser>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();

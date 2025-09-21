@@ -96,11 +96,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // }
 // else
 // {
-// CLOUD RUN FIX: Use temp directory for SQLite file (writable in Cloud Run)
-var dbPath = Path.Combine(Path.GetTempPath(), "digitalme.db");
-var connectionString = $"Data Source={dbPath}";
+// Force SQLite for all environments until CloudSQL is properly configured
 builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite("Data Source=digitalme.db"));
 // }
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
