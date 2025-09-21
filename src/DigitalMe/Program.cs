@@ -69,37 +69,42 @@ builder.Services.AddSignalR();
 // Database Context - Force SQLite for development/testing
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// TEMPORARY FIX: Force SQLite to fix Telegram bot integration issues
-// Comment out CloudSQL logic to prevent mismatched database connections
-// if (!string.IsNullOrEmpty(connectionString) && connectionString.Contains("/cloudsql/"))
-// {
-//     // Cloud SQL PostgreSQL with optimizations
-//     builder.Services.AddDbContext<DigitalMeDbContext>(options => 
-//     {
-//         options.UseNpgsql(connectionString, npgsqlOptions =>
-//         {
-//             npgsqlOptions.CommandTimeout(30);
-//             npgsqlOptions.EnableRetryOnFailure(
-//                 maxRetryCount: 3,
-//                 maxRetryDelay: TimeSpan.FromSeconds(5),
-//                 errorCodesToAdd: null);
-//         });
-//         
-//         // Production optimizations
-//         if (builder.Environment.IsProduction())
-//         {
-//             options.EnableSensitiveDataLogging(false);
-//             options.EnableDetailedErrors(false);
-//             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-//         }
-//     });
-// }
-// else
-// {
-// Force SQLite for all environments until CloudSQL is properly configured
-builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-    options.UseSqlite("Data Source=digitalme.db"));
-// }
+// Database Context - Intelligent provider selection based on connection string
+if (!string.IsNullOrEmpty(connectionString) && (connectionString.Contains("/cloudsql/") || connectionString.Contains("Host=") || connectionString.Contains("Server=")))
+{
+    // PostgreSQL - Cloud SQL or other PostgreSQL instance
+    builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.CommandTimeout(30);
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null);
+        });
+
+        // Production optimizations
+        if (builder.Environment.IsProduction())
+        {
+            options.EnableSensitiveDataLogging(false);
+            options.EnableDetailedErrors(false);
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+        else
+        {
+            // Development debugging
+            options.EnableSensitiveDataLogging(true);
+            options.EnableDetailedErrors(true);
+        }
+    });
+}
+else
+{
+    // SQLite for development and fallback
+    builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+        options.UseSqlite(connectionString ?? "Data Source=digitalme.db"));
+}
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
