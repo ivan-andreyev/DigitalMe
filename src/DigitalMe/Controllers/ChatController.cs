@@ -68,7 +68,35 @@ public class ChatController : ControllerBase
             Console.WriteLine(personalityMsg);
             Console.Out.Flush();
 
-            var ivanProfile = await _personalityService.GetIvanProfileAsync();
+            PersonalityProfile? ivanProfile = null;
+            try
+            {
+                ivanProfile = await _personalityService.GetIvanProfileAsync();
+            }
+            catch (Exception dbEx)
+            {
+                var dbErrorMsg = $"💥🔥 DATABASE ERROR in GetIvanProfileAsync: {dbEx.GetType().Name}: {dbEx.Message}";
+                _logger.LogError(dbEx, dbErrorMsg);
+                Console.WriteLine(dbErrorMsg);
+                Console.Out.Flush();
+
+                // FALLBACK: Return hardcoded response when DB fails
+                return Ok(new MessageDto
+                {
+                    Id = Guid.NewGuid(),
+                    ConversationId = Guid.NewGuid(),
+                    Role = "assistant",
+                    Content = "🔧 System is temporarily unavailable. Database connection issue detected. Ivan will be back online shortly.",
+                    Timestamp = DateTime.UtcNow,
+                    Metadata = new Dictionary<string, object>
+                    {
+                        ["platform"] = request.Platform,
+                        ["userId"] = request.UserId,
+                        ["error"] = "database_unavailable",
+                        ["fallback_mode"] = true
+                    }
+                });
+            }
             if (ivanProfile == null)
             {
                 _logger.LogError("❌ Ivan's personality profile not found!");
@@ -77,8 +105,26 @@ public class ChatController : ControllerBase
             _logger.LogInformation("✅ Ivan's profile loaded with {TraitCount} traits", ivanProfile.Traits?.Count ?? 0);
 
             // Get or create active conversation for this user+platform
-            _logger.LogInformation("💼 Getting/creating conversation...");
-            var conversation = await _conversationService.GetActiveConversationAsync(request.Platform, request.UserId);
+            var conversationMsg = "💼🔥 PRODUCTION DEBUG: Getting/creating conversation...";
+            _logger.LogError(conversationMsg);
+            Console.WriteLine(conversationMsg);
+            Console.Out.Flush();
+
+            Conversation? conversation = null;
+            try
+            {
+                conversation = await _conversationService.GetActiveConversationAsync(request.Platform, request.UserId);
+            }
+            catch (Exception convEx)
+            {
+                var convErrorMsg = $"💥🔥 CONVERSATION ERROR in GetActiveConversationAsync: {convEx.GetType().Name}: {convEx.Message}";
+                _logger.LogError(convEx, convErrorMsg);
+                Console.WriteLine(convErrorMsg);
+                Console.Out.Flush();
+
+                // Continue without conversation - we'll skip adding messages to DB
+                conversation = null;
+            }
             if (conversation == null)
             {
                 _logger.LogInformation("🆕 Creating new conversation");
@@ -91,9 +137,30 @@ public class ChatController : ControllerBase
             await _conversationService.AddMessageAsync(conversation.Id, "user", userMessage);
 
             // Process message through MVP pipeline
-            _logger.LogInformation("🤖 Processing message through MVP pipeline...");
-            var response = await _messageProcessor.ProcessMessageAsync(userMessage);
-            _logger.LogInformation("✅ Got response: '{Response}'", response);
+            var processingMsg = "🤖🔥 PRODUCTION DEBUG: Processing message through MVP pipeline...";
+            _logger.LogError(processingMsg);
+            Console.WriteLine(processingMsg);
+            Console.Out.Flush();
+
+            string response;
+            try
+            {
+                response = await _messageProcessor.ProcessMessageAsync(userMessage);
+                var responseMsg = $"✅🔥 PRODUCTION DEBUG: Got response: '{response}'";
+                _logger.LogError(responseMsg);
+                Console.WriteLine(responseMsg);
+                Console.Out.Flush();
+            }
+            catch (Exception procEx)
+            {
+                var procErrorMsg = $"💥🔥 MESSAGE PROCESSOR ERROR: {procEx.GetType().Name}: {procEx.Message}";
+                _logger.LogError(procEx, procErrorMsg);
+                Console.WriteLine(procErrorMsg);
+                Console.Out.Flush();
+
+                // FALLBACK: Generate simple response
+                response = $"Hi! I'm Ivan. I received your message: '{userMessage}'. The AI processing is temporarily unavailable, but I'm working on getting back online.";
+            }
 
             // Analyze mood and confidence for conversation pipeline completion
             var mood = AnalyzeMood(userMessage, response);
