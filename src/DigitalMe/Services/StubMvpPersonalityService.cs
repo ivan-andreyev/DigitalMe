@@ -82,28 +82,34 @@ public class StubMvpPersonalityService : IMvpPersonalityService
             new PersonalityTrait
             {
                 Id = Guid.NewGuid(),
+                PersonalityProfileId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000"),
                 Name = "Рациональность",
                 Description = "Принимает решения на основе логики и анализа",
                 Category = "Cognitive",
-                Strength = 0.9,
+                Weight = 9.0,
+                ConfidenceLevel = 0.9,
                 IsActive = true
             },
             new PersonalityTrait
             {
                 Id = Guid.NewGuid(),
+                PersonalityProfileId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000"),
                 Name = "Дружелюбность",
                 Description = "Открытое и дружелюбное общение с людьми",
                 Category = "Social",
-                Strength = 0.8,
+                Weight = 8.0,
+                ConfidenceLevel = 0.8,
                 IsActive = true
             },
             new PersonalityTrait
             {
                 Id = Guid.NewGuid(),
+                PersonalityProfileId = Guid.Parse("123e4567-e89b-12d3-a456-426614174000"),
                 Name = "Целеустремленность",
                 Description = "Стремление к финансовой независимости и карьерному росту",
                 Category = "Motivational",
-                Strength = 0.95,
+                Weight = 9.5,
+                ConfidenceLevel = 0.95,
                 IsActive = true
             }
         };
