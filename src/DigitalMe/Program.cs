@@ -96,9 +96,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // }
 // else
 // {
-// CLOUD RUN FIX: Use in-memory SQLite to avoid file system issues
+// CLOUD RUN FIX: Use shared in-memory SQLite with singleton connection
+var connectionString = "Data Source=InMemoryDigitalMe;Mode=Memory;Cache=Shared";
 builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-    options.UseSqlite("Data Source=:memory:"));
+    options.UseSqlite(connectionString), ServiceLifetime.Scoped);
 // }
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
