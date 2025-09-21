@@ -28,9 +28,13 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost("send")]
-    [EnableRateLimiting("chat")]
+    // [EnableRateLimiting("chat")] // TEMPORARILY DISABLED FOR DEBUGGING
     public async Task<ActionResult<MessageDto>> SendMessage([FromBody] ChatRequestDto request)
     {
+        // 🔥🔥🔥 ULTRA NUCLEAR DEBUG - FIRST LINE OF METHOD 🔥🔥🔥
+        Console.WriteLine("🔥🔥🔥 ULTRA: ChatController.SendMessage METHOD ENTRY");
+        System.Diagnostics.Debug.WriteLine("🔥🔥🔥 ULTRA: ChatController.SendMessage METHOD ENTRY");
+
         try
         {
             // 🔥 NUCLEAR LOGGING - print to both ILogger AND Console directly
