@@ -288,12 +288,36 @@ public class DatabaseMigrationService : IDatabaseMigrationService
     /// </summary>
     private async Task AttemptRecoveryAsync(DigitalMeDbContext context, Exception originalException)
     {
-        _logger.LogWarning("🔄 Attempting SQLite recovery from migration failure...");
+        _logger.LogWarning("🔄 Attempting database recovery from migration failure...");
 
-        // In development, we can be more aggressive with recovery
-        if (_environment.IsDevelopment())
+        // CRITICAL: NEVER delete PostgreSQL databases - they contain production data!
+        var isPostgreSQL = context.Database.ProviderName?.Contains("Npgsql") == true;
+        if (isPostgreSQL)
         {
-            _logger.LogWarning("⚠️ Development environment detected - attempting database recreation");
+            _logger.LogError("🚫 POSTGRESQL DATABASE DETECTED - Recovery via deletion is FORBIDDEN to protect production data");
+            _logger.LogError("🔧 For PostgreSQL issues, use migrations or manual intervention, never EnsureDeleted()");
+
+            try
+            {
+                // Only try migrations for PostgreSQL, never delete
+                await context.Database.MigrateAsync();
+                _logger.LogInformation("✅ PostgreSQL migration recovery successful");
+                return;
+            }
+            catch (Exception pgRecoveryEx)
+            {
+                _logger.LogError("❌ PostgreSQL migration recovery failed: {ErrorMessage}", pgRecoveryEx.Message);
+                throw new InvalidOperationException("PostgreSQL migration failed - manual intervention required to preserve data", originalException);
+            }
+        }
+
+        // For non-PostgreSQL databases (SQLite, InMemory), allow controlled recreation
+        var allowForcedRecreation = Environment.GetEnvironmentVariable("DIGITALME_ALLOW_DB_RECREATION")?.ToLowerInvariant() == "true";
+
+        // In development with non-PostgreSQL databases, be more conservative with database recreation
+        if (_environment.IsDevelopment() && allowForcedRecreation)
+        {
+            _logger.LogWarning("⚠️ Development environment + DIGITALME_ALLOW_DB_RECREATION=true - attempting database recreation");
             try
             {
                 await context.Database.EnsureDeletedAsync();
@@ -304,6 +328,23 @@ public class DatabaseMigrationService : IDatabaseMigrationService
             catch (Exception recoveryEx)
             {
                 _logger.LogError(recoveryEx, "❌ Database recreation failed: {ErrorMessage}", recoveryEx.Message);
+            }
+        }
+        else if (_environment.IsDevelopment())
+        {
+            _logger.LogInformation("🛡️ Database preservation mode - set DIGITALME_ALLOW_DB_RECREATION=true to enable forced recreation");
+            _logger.LogInformation("🔧 Attempting gentle recovery instead of database recreation...");
+
+            try
+            {
+                // Try to run migrations without recreation
+                await context.Database.MigrateAsync();
+                _logger.LogInformation("✅ Gentle migration recovery successful");
+                return;
+            }
+            catch (Exception gentleRecoveryEx)
+            {
+                _logger.LogWarning("⚠️ Gentle recovery failed: {ErrorMessage}", gentleRecoveryEx.Message);
             }
         }
 
