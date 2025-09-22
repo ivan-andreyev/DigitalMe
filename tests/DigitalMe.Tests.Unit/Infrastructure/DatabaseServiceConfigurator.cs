@@ -45,7 +45,7 @@ public class DatabaseServiceConfigurator : ITestServiceConfigurator
         {
             options.UseInMemoryDatabase(databaseName: this._databaseName);
             options.EnableSensitiveDataLogging();
-            options.EnableServiceProviderCaching(false);
+            options.EnableServiceProviderCaching(true);
         });
     }
 }
