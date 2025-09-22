@@ -9,6 +9,24 @@ ARG DOTNET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
 
+# Install PowerShell Core and system dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+    powershell \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2 \
+    libatspi2.0-0 \
+    libgtk-3-0 \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy solution and project files (excluding MAUI for Docker compatibility)
 COPY DigitalMe.sln .
 COPY src/DigitalMe/DigitalMe.csproj ./src/DigitalMe/
@@ -30,8 +48,20 @@ RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-res
     dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore && \
     dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Release --no-restore
 
-# Run tests
-RUN dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
+# Install Playwright browsers with dependencies for headless mode
+# Critical fix: Install browsers AFTER build is complete using PowerShell Core
+RUN cd tests/DigitalMe.Tests.Unit && \
+    pwsh bin/Release/net8.0/playwright.ps1 install chromium --with-deps && \
+    echo "Playwright browsers installed successfully"
+
+# Set environment for headless browser operation
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV DISPLAY=:99
+
+# Run tests with headless browser support (start Xvfb for display)
+RUN Xvfb :99 -screen 0 1920x1080x24 & \
+    sleep 2 && \
+    dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
     --configuration Release --no-build --verbosity normal
 
 # Publish application
