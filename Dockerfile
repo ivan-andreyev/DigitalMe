@@ -27,7 +27,8 @@ COPY . .
 
 # Build application (excluding MAUI for Docker compatibility)
 RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-restore && \
-    dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore
+    dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore && \
+    dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Release --no-restore
 
 # Run tests
 RUN dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
