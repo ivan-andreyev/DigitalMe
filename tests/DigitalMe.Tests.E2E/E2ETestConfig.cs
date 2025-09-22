@@ -10,7 +10,7 @@ public static class E2ETestConfig
     {
         "production" => "https://digitalme-api-llig7ks2ca-uc.a.run.app",
         "staging" => "https://digitalme-api-staging-llig7ks2ca-uc.a.run.app", // Future
-        "local" => "http://localhost:5001",
+        "local" => "http://localhost:5003",
         _ => throw new InvalidEnumArgumentException($"Unknown environment: {Environment}")
     };
 

@@ -9,15 +9,18 @@ public class ConversationService : IConversationService
 {
     private readonly IConversationRepository _conversationRepository;
     private readonly IMessageRepository _messageRepository;
+    private readonly IMvpPersonalityService _personalityService;
     private readonly ILogger<ConversationService> _logger;
 
     public ConversationService(
         IConversationRepository conversationRepository,
         IMessageRepository messageRepository,
+        IMvpPersonalityService personalityService,
         ILogger<ConversationService> logger)
     {
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
+        _personalityService = personalityService;
         _logger = logger;
     }
 
@@ -29,11 +32,20 @@ public class ConversationService : IConversationService
             return existingConversation;
         }
 
+        // Get Ivan's personality profile for the conversation
+        var ivanProfile = await _personalityService.GetIvanProfileAsync();
+        if (ivanProfile == null)
+        {
+            _logger.LogError("❌ Cannot create conversation: Ivan's personality profile not found");
+            throw new InvalidOperationException("Ivan's personality profile not found. Cannot create conversation.");
+        }
+
         var conversation = new Conversation
         {
             Platform = platform,
             UserId = userId,
-            Title = string.IsNullOrEmpty(title) ? $"Conversation {DateTime.UtcNow:yyyy-MM-dd HH:mm}" : title
+            Title = string.IsNullOrEmpty(title) ? $"Conversation {DateTime.UtcNow:yyyy-MM-dd HH:mm}" : title,
+            PersonalityProfileId = ivanProfile.Id // 🔧 FIX: Set required PersonalityProfileId
         };
 
         return await _conversationRepository.CreateConversationAsync(conversation);

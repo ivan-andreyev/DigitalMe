@@ -12,7 +12,7 @@ using Xunit;
 
 namespace DigitalMe.Tests.Unit.Services;
 
-public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
+public class PersonalityServiceTests : BaseTestWithDatabase
 {
     private readonly Mock<ILogger<PersonalityService>> _mockLogger;
     private readonly Mock<IProfileDataParser> _mockProfileDataParser;
@@ -31,16 +31,6 @@ public class PersonalityServiceTests : BaseTestWithDatabase, IAsyncLifetime
         this._personalityService = new PersonalityService(this._mockLogger.Object, this._mockProfileDataParser.Object, this._mockConfiguration.Object, this._mockEnvironment.Object);
     }
 
-    public async Task InitializeAsync()
-    {
-        this.CleanupDatabase();
-        await Task.CompletedTask;
-    }
-
-    public async Task DisposeAsync()
-    {
-        await Task.CompletedTask;
-    }
 
     /// <summary>
     /// Helper method to create a test personality

@@ -47,6 +47,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMvpMessageProcessor, MvpMessageProcessor>();
         services.AddScoped<IHealthChecker, HealthChecker>();
         services.AddScoped<IPersonalLevelHealthCheckService, PersonalLevelHealthCheckService>();
+        // Add IIvanLevelHealthCheckService registration for backward compatibility
+        services.AddScoped<IIvanLevelHealthCheckService, PersonalLevelHealthCheckService>();
+
+        // Add DigitalMe.Services.Optimization.IPerformanceOptimizationService registration
+        services.AddScoped<DigitalMe.Services.Optimization.IPerformanceOptimizationService, DigitalMe.Services.Optimization.PerformanceOptimizationService>();
 
         // Resilience services
         services.AddSingleton<IResiliencePolicyService, ResiliencePolicyService>();

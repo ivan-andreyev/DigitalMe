@@ -13,16 +13,31 @@ namespace DigitalMe.Tests.Unit.Services;
 public class ConversationServiceTests : BaseTestWithDatabase
 {
     private readonly Mock<ILogger<ConversationService>> _mockLogger;
+    private readonly Mock<IMvpPersonalityService> _mockPersonalityService;
     private readonly ConversationService _service;
+    private readonly Guid _testPersonalityProfileId;
 
     public ConversationServiceTests()
     {
         this._mockLogger = new Mock<ILogger<ConversationService>>();
+        this._mockPersonalityService = new Mock<IMvpPersonalityService>();
+
+        // Set up the mock to return a valid personality profile
+        this._testPersonalityProfileId = Guid.NewGuid();
+        var testPersonalityProfile = new PersonalityProfile
+        {
+            Id = this._testPersonalityProfileId,
+            Name = "Ivan",
+            Profession = "Test Developer"
+        };
+        this._mockPersonalityService
+            .Setup(x => x.GetIvanProfileAsync())
+            .ReturnsAsync(testPersonalityProfile);
 
         var conversationRepository = new ConversationRepository(this.Context);
         var messageRepository = new MessageRepository(this.Context);
 
-        this._service = new ConversationService(conversationRepository, messageRepository, this._mockLogger.Object);
+        this._service = new ConversationService(conversationRepository, messageRepository, this._mockPersonalityService.Object, this._mockLogger.Object);
     }
 
     [Fact]
@@ -64,7 +79,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             UserId = userId,
             Title = "Existing Conversation",
             IsActive = true,
-            StartedAt = DateTime.UtcNow.AddHours(-1)
+            StartedAt = DateTime.UtcNow.AddHours(-1),
+            PersonalityProfileId = this._testPersonalityProfileId
         };
 
         this.Context.Conversations.Add(existingConversation);
@@ -94,7 +110,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Platform = "Web",
             UserId = "test-user",
             Title = "Test Chat",
-            IsActive = true
+            IsActive = true,
+            PersonalityProfileId = this._testPersonalityProfileId
         };
         this.Context.Conversations.Add(conversation);
         await this.Context.SaveChangesAsync();
@@ -145,7 +162,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Platform = "Web",
             UserId = "history-user",
             Title = "History Test",
-            IsActive = true
+            IsActive = true,
+            PersonalityProfileId = this._testPersonalityProfileId
         };
         this.Context.Conversations.Add(conversation);
         await this.Context.SaveChangesAsync();
@@ -181,7 +199,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             Platform = "Web",
             UserId = "limit-user",
             Title = "Limit Test",
-            IsActive = true
+            IsActive = true,
+            PersonalityProfileId = this._testPersonalityProfileId
         };
         this.Context.Conversations.Add(conversation);
         await this.Context.SaveChangesAsync();
@@ -218,10 +237,10 @@ public class ConversationServiceTests : BaseTestWithDatabase
 
         var conversations = new[]
         {
-            new Conversation { Platform = platform, UserId = targetUserId, Title = "User Conv 1", IsActive = true },
-            new Conversation { Platform = platform, UserId = targetUserId, Title = "User Conv 2", IsActive = false },
-            new Conversation { Platform = platform, UserId = otherUserId, Title = "Other Conv", IsActive = true },
-            new Conversation { Platform = "Mobile", UserId = targetUserId, Title = "Wrong Platform", IsActive = true }
+            new Conversation { Platform = platform, UserId = targetUserId, Title = "User Conv 1", IsActive = true, PersonalityProfileId = this._testPersonalityProfileId },
+            new Conversation { Platform = platform, UserId = targetUserId, Title = "User Conv 2", IsActive = false, PersonalityProfileId = this._testPersonalityProfileId },
+            new Conversation { Platform = platform, UserId = otherUserId, Title = "Other Conv", IsActive = true, PersonalityProfileId = this._testPersonalityProfileId },
+            new Conversation { Platform = "Mobile", UserId = targetUserId, Title = "Wrong Platform", IsActive = true, PersonalityProfileId = this._testPersonalityProfileId }
         };
 
         this.Context.Conversations.AddRange(conversations);
@@ -247,7 +266,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
             UserId = "end-user",
             Title = "End Test",
             IsActive = true,
-            StartedAt = DateTime.UtcNow.AddHours(-1)
+            StartedAt = DateTime.UtcNow.AddHours(-1),
+            PersonalityProfileId = this._testPersonalityProfileId
         };
         this.Context.Conversations.Add(conversation);
         await this.Context.SaveChangesAsync();
