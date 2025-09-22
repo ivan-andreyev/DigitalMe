@@ -9,21 +9,25 @@ ARG DOTNET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
 
-# Copy solution and project files
+# Copy solution and project files (excluding MAUI for Docker compatibility)
 COPY DigitalMe.sln .
 COPY src/DigitalMe/DigitalMe.csproj ./src/DigitalMe/
 COPY src/DigitalMe.Web/DigitalMe.Web.csproj ./src/DigitalMe.Web/
 COPY tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj ./tests/DigitalMe.Tests.Unit/
 COPY tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj ./tests/DigitalMe.Tests.Integration/
 
-# Restore dependencies
-RUN dotnet restore DigitalMe.sln
+# Restore dependencies (excluding MAUI for Docker compatibility)
+RUN dotnet restore src/DigitalMe/DigitalMe.csproj && \
+    dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj && \
+    dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj && \
+    dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
 
 # Copy source code
 COPY . .
 
-# Build application
-RUN dotnet build DigitalMe.sln --configuration Release --no-restore
+# Build application (excluding MAUI for Docker compatibility)
+RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-restore && \
+    dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore
 
 # Run tests
 RUN dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
