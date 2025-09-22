@@ -16,6 +16,11 @@ on:
       - '.gitignore'
       - 'LICENSE'
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 env:
   DOTNET_VERSION: '8.0'
   SOLUTION_PATH: 'DigitalMe.sln'
