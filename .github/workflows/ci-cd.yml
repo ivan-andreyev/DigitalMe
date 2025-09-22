@@ -176,11 +176,11 @@ jobs:
     - name: 🚀 Checkout Code
       uses: actions/checkout@v4
 
-    - name: 🔒 Run Security Scan
-      uses: securecodewarrior/github-action-add-sarif@v1
-      if: false # Enable when you have SARIF results
-      with:
-        sarif-file: 'security-results.sarif'
+    # Security scanning disabled until proper SARIF setup
+    # - name: 🔒 Run Security Scan
+    #   uses: securecodewarrior/github-action-add-sarif@v1
+    #   with:
+    #     sarif-file: 'security-results.sarif'
 
   build-docker:
     name: Build Docker Images
