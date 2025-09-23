@@ -321,12 +321,12 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Register health checks for application monitoring (excluding data-consistency to avoid duplication)
+    /// Register health checks for application monitoring (base registration only - specific checks added in Program.cs)
     /// </summary>
     public static IServiceCollection AddApplicationHealthChecks(this IServiceCollection services)
     {
-        services.AddHealthChecks()
-            .AddDbContextCheck<DigitalMeDbContext>("database");
+        // AddHealthChecks() is already called in Program.cs with specific checks
+        // This method is kept for future extension if needed
 
         return services;
     }
