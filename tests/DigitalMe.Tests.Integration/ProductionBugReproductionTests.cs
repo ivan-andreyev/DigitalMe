@@ -120,6 +120,40 @@ public class ProductionBugReproductionTests : IClassFixture<ProductionBugReprodu
         // Arrange - Initialize database with migrations
         await _factory.InitializeDatabaseAsync();
 
+        // Seed Ivan personality profile - required for chat to work
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+
+            // Create Ivan personality profile for the chat service
+            var ivanProfile = new PersonalityProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Ivan", // MvpPersonalityService looks for this exact name
+                Description = "Digital clone of Ivan - Head of R&D",
+                Traits = new List<PersonalityTrait>
+                {
+                    new()
+                    {
+                        Category = "Communication",
+                        Name = "Direct",
+                        Description = "Direct and clear communication style",
+                        Weight = 0.9
+                    },
+                    new()
+                    {
+                        Category = "Technical",
+                        Name = "Pragmatic",
+                        Description = "Practical problem-solving approach",
+                        Weight = 0.8
+                    }
+                }
+            };
+
+            context.PersonalityProfiles.Add(ivanProfile);
+            await context.SaveChangesAsync();
+        }
+
         // Step 1: Register user
         var registerRequest = new
         {
