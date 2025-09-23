@@ -9,9 +9,10 @@ ARG DOTNET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
 
-# Install PowerShell Core and system dependencies for Playwright
+# Install system dependencies for Playwright (PowerShell will be installed separately)
 RUN apt-get update && apt-get install -y \
-    powershell \
+    wget \
+    ca-certificates \
     libnss3 \
     libatk-bridge2.0-0 \
     libdrm2 \
@@ -25,6 +26,14 @@ RUN apt-get update && apt-get install -y \
     libatspi2.0-0 \
     libgtk-3-0 \
     xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PowerShell Core 7 from Microsoft repository
+RUN wget -q https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && rm packages-microsoft-prod.deb \
+    && apt-get update \
+    && apt-get install -y powershell \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy solution and project files (excluding MAUI for Docker compatibility)
