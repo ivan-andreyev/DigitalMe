@@ -9,60 +9,28 @@ ARG DOTNET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
 
-# Install system dependencies for Playwright browsers
-RUN apt-get update && apt-get install -y \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libxss1 \
-    libasound2 \
-    libatspi2.0-0 \
-    libgtk-3-0 \
-    xvfb \
-    && rm -rf /var/lib/apt/lists/*
+# No additional system dependencies needed for production build
+# Tests run in CI/CD pipeline with their own environment
 
 # Copy solution and project files (excluding MAUI for Docker compatibility)
 COPY DigitalMe.sln .
 COPY src/DigitalMe/DigitalMe.csproj ./src/DigitalMe/
 COPY src/DigitalMe.Web/DigitalMe.Web.csproj ./src/DigitalMe.Web/
-COPY tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj ./tests/DigitalMe.Tests.Unit/
-COPY tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj ./tests/DigitalMe.Tests.Integration/
+# Test projects not needed for production Docker image
 
 # Restore dependencies (excluding MAUI for Docker compatibility)
 RUN dotnet restore src/DigitalMe/DigitalMe.csproj && \
-    dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj && \
-    dotnet restore tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj && \
-    dotnet restore tests/DigitalMe.Tests.Integration/DigitalMe.Tests.Integration.csproj
+    dotnet restore src/DigitalMe.Web/DigitalMe.Web.csproj
 
 # Copy source code
 COPY . .
 
 # Build application (excluding MAUI for Docker compatibility)
 RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-restore && \
-    dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore && \
-    dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Release --no-restore
+    dotnet build src/DigitalMe.Web/DigitalMe.Web.csproj --configuration Release --no-restore
 
-# Install Playwright browsers with dependencies for headless mode
-# Using dotnet tool instead of PowerShell to avoid installation issues
-RUN dotnet tool install --global Microsoft.Playwright.CLI && \
-    export PATH="$PATH:/root/.dotnet/tools" && \
-    playwright install chromium --with-deps && \
-    echo "Playwright browsers installed successfully"
-
-# Set environment for headless browser operation
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-ENV DISPLAY=:99
-
-# Run tests with headless browser support (start Xvfb for display)
-RUN Xvfb :99 -screen 0 1920x1080x24 & \
-    sleep 2 && \
-    dotnet test tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj \
-    --configuration Release --no-build --verbosity normal
+# Tests are run in CI/CD pipeline, not in Docker build
+# This reduces build time and complexity
 
 # Publish application
 RUN dotnet publish src/DigitalMe/DigitalMe.csproj \
