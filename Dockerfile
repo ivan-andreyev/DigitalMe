@@ -9,10 +9,8 @@ ARG DOTNET_VERSION=8.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
 WORKDIR /src
 
-# Install system dependencies for Playwright (PowerShell will be installed separately)
+# Install system dependencies for Playwright browsers
 RUN apt-get update && apt-get install -y \
-    wget \
-    ca-certificates \
     libnss3 \
     libatk-bridge2.0-0 \
     libdrm2 \
@@ -26,14 +24,6 @@ RUN apt-get update && apt-get install -y \
     libatspi2.0-0 \
     libgtk-3-0 \
     xvfb \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install PowerShell Core 7 from Microsoft repository
-RUN wget -q https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb \
-    && dpkg -i packages-microsoft-prod.deb \
-    && rm packages-microsoft-prod.deb \
-    && apt-get update \
-    && apt-get install -y powershell \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy solution and project files (excluding MAUI for Docker compatibility)
@@ -58,9 +48,10 @@ RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-res
     dotnet build tests/DigitalMe.Tests.Unit/DigitalMe.Tests.Unit.csproj --configuration Release --no-restore
 
 # Install Playwright browsers with dependencies for headless mode
-# Critical fix: Install browsers AFTER build is complete using PowerShell Core
-RUN cd tests/DigitalMe.Tests.Unit && \
-    pwsh bin/Release/net8.0/playwright.ps1 install chromium --with-deps && \
+# Using dotnet tool instead of PowerShell to avoid installation issues
+RUN dotnet tool install --global Microsoft.Playwright.CLI && \
+    export PATH="$PATH:/root/.dotnet/tools" && \
+    playwright install chromium --with-deps && \
     echo "Playwright browsers installed successfully"
 
 # Set environment for headless browser operation
