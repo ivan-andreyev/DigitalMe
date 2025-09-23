@@ -37,7 +37,8 @@ public class ConversationServiceTests : BaseTestWithDatabase
         var conversationRepository = new ConversationRepository(this.Context);
         var messageRepository = new MessageRepository(this.Context);
 
-        this._service = new ConversationService(conversationRepository, messageRepository, this._mockPersonalityService.Object, this._mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        this._service = new ConversationService(conversationRepository, messageRepository, this._mockPersonalityService.Object, this._mockLogger.Object, mockServiceProvider.Object);
     }
 
     [Fact]
