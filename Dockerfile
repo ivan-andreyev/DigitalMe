@@ -35,7 +35,6 @@ RUN dotnet build src/DigitalMe/DigitalMe.csproj --configuration Release --no-res
 # Publish application
 RUN dotnet publish src/DigitalMe/DigitalMe.csproj \
     --configuration Release \
-    --no-build \
     --output /app/publish \
     --runtime linux-x64 \
     --self-contained false
