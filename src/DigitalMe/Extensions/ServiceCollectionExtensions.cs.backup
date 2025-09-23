@@ -166,6 +166,7 @@ public static class ServiceCollectionExtensions
             configuration.GetSection("Integrations"));
 
         // Telegram integration
+        services.AddScoped<ITelegramService, TelegramService>();
 
         // Google services
         services.AddScoped<ICalendarService, CalendarService>();
@@ -209,6 +210,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddHttpClients(this IServiceCollection services)
     {
+        // Create service provider to get resilience policy service
+        var serviceProvider = services.BuildServiceProvider();
+        var resiliencePolicyService = serviceProvider.GetService<IResiliencePolicyService>();
 
         // Telegram HTTP client with resilience policies and pooling optimization
         services.AddHttpClient<ITelegramService, TelegramService>(client =>
@@ -321,17 +325,6 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Register health checks for application monitoring (excluding data-consistency to avoid duplication)
-    /// </summary>
-    public static IServiceCollection AddApplicationHealthChecks(this IServiceCollection services)
-    {
-        services.AddHealthChecks()
-            .AddDbContextCheck<DigitalMeDbContext>("database");
-
-        return services;
-    }
-
-    /// <summary>
     /// One-stop registration for all DigitalMe services
     /// </summary>
     public static IServiceCollection AddDigitalMeServices(this IServiceCollection services, IConfiguration configuration)
@@ -341,7 +334,6 @@ public static class ServiceCollectionExtensions
             .AddBusinessServices()
             .AddExternalIntegrations(configuration)
             .AddNewIntegrations(configuration)
-            .AddHttpClients()
-            .AddApplicationHealthChecks();
+            .AddHttpClients();
     }
 }

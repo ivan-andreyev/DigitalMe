@@ -204,7 +204,6 @@ builder.Services.Configure<DigitalMe.Configuration.JwtSettings>(
 // Health Checks - Standard ASP.NET Core as required by MVP Phase 6 plan
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<DigitalMeDbContext>()
-    .AddCheck<DigitalMe.Services.HealthChecks.DataConsistencyHealthCheck>("data-consistency")
     .AddCheck("claude-api", () =>
     {
         var apiKey = builder.Configuration["Anthropic:ApiKey"];
@@ -249,6 +248,7 @@ builder.Services.Configure<DigitalMe.Integrations.External.GitHub.GitHubConfigur
     builder.Configuration.GetSection("GitHub"));
 builder.Services.AddScoped<DigitalMe.Integrations.External.GitHub.IGitHubService, DigitalMe.Integrations.External.GitHub.GitHubService>();
 
+builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
 
 // Slack Services - Complete DI registration
 builder.Services.AddScoped<DigitalMe.Integrations.External.Slack.Services.ISlackApiClient, DigitalMe.Integrations.External.Slack.Services.SlackApiClient>();
