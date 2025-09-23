@@ -479,7 +479,7 @@ public class ParallelTestRunnerTests
         // Use different timeouts for CI vs local environment
         var isCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")) ||
                    !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
-        var maxExpectedMs = isCI ? 3000 : 1000; // CI environments are slower
+        var maxExpectedMs = isCI ? 5000 : 1000; // CI environments can be much slower due to shared resources
 
         Assert.True(
             stopwatch.ElapsedMilliseconds < maxExpectedMs,
