@@ -254,7 +254,7 @@ jobs:
 
     - name: 🚀 Deploy to Cloud Run
       run: |
-        echo "🚀 Deploying DigitalMe API to Cloud Run..."
+        echo "🚀 Deploying DigitalMe API to Cloud Run with PostgreSQL configuration..."
         gcloud run deploy digitalme-api \
           --image "gcr.io/digitalme-470613/digitalme-api:master" \
           --region us-central1 \
@@ -265,6 +265,9 @@ jobs:
           --cpu 1 \
           --max-instances 10 \
           --set-env-vars "ASPNETCORE_ENVIRONMENT=Production" \
+          --set-env-vars "DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }}" \
+          --set-env-vars "JWT_KEY=${{ secrets.JWT_KEY }}" \
+          --set-env-vars "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" \
           --quiet
 
   notify:
