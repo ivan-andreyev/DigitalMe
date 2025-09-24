@@ -26,6 +26,24 @@ public class DataConsistencyHealthCheck : IHealthCheck
             var issues = new List<string>();
             var warnings = new List<string>();
 
+            // Pre-check: Verify database connection is available
+            try
+            {
+                await _context.Database.CanConnectAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cannot connect to database in DataConsistencyHealthCheck");
+                return HealthCheckResult.Unhealthy(
+                    $"Database connection failed: {ex.Message}",
+                    ex,
+                    data: new Dictionary<string, object>
+                    {
+                        { "exception", ex.GetType().Name },
+                        { "connectionIssue", true }
+                    });
+            }
+
             // Check 1: Verify PersonalityProfiles exist
             var personalityProfileCount = await _context.PersonalityProfiles.CountAsync(cancellationToken);
             if (personalityProfileCount == 0)
