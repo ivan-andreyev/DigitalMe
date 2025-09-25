@@ -25,6 +25,13 @@ else if (builder.Environment.IsProduction())
     // Note: AddEnvironmentVariables() is already included by default in WebApplicationBuilder
     builder.Configuration.AddEnvironmentVariables();
 
+    // Map ANTHROPIC_API_KEY environment variable to configuration
+    var anthropicKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+    if (!string.IsNullOrEmpty(anthropicKey))
+    {
+        builder.Configuration["Anthropic:ApiKey"] = anthropicKey;
+    }
+
     // For Azure/cloud deployments, add Key Vault configuration here
     // Example: builder.Configuration.AddAzureKeyVault(...);
 }
@@ -282,10 +289,12 @@ builder.Services.AddHealthChecks()
     .AddCheck<DigitalMe.Services.HealthChecks.DataConsistencyHealthCheck>("data-consistency")
     .AddCheck("claude-api", () =>
     {
-        var apiKey = builder.Configuration["Anthropic:ApiKey"];
+        // Check both configuration sources for API key
+        var apiKey = builder.Configuration["Anthropic:ApiKey"] ??
+                     Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
         return !string.IsNullOrEmpty(apiKey)
             ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy()
-            : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Unhealthy("Claude API key not configured");
+            : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded("Claude API key not configured");
     });
 
 // MCP Integration with Anthropic

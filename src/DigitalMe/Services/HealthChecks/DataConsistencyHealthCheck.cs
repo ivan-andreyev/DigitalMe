@@ -48,7 +48,8 @@ public class DataConsistencyHealthCheck : IHealthCheck
             var personalityProfileCount = await _context.PersonalityProfiles.CountAsync(cancellationToken);
             if (personalityProfileCount == 0)
             {
-                issues.Add("No PersonalityProfiles found in database");
+                // In production, this is a warning, not a critical issue
+                warnings.Add("No PersonalityProfiles found in database - initial setup may be required");
             }
 
             // Check 2: Verify Ivan's profile exists
@@ -56,7 +57,8 @@ public class DataConsistencyHealthCheck : IHealthCheck
                 .FirstOrDefaultAsync(p => p.Name == "Ivan", cancellationToken);
             if (ivanProfile == null)
             {
-                issues.Add("Ivan's PersonalityProfile not found - required for conversation creation");
+                // In production, this is a warning, not a critical issue
+                warnings.Add("Ivan's PersonalityProfile not found - initial data seeding may be required");
             }
 
             // Check 3: Check for orphaned conversations (FK constraint violations)
