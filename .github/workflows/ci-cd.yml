@@ -255,8 +255,11 @@ jobs:
     - name: 🚀 Deploy to Cloud Run
       run: |
         echo "🚀 Deploying DigitalMe API to Cloud Run with PostgreSQL configuration..."
+        echo "📦 Using image: gcr.io/digitalme-470613/digitalme-api:${{ github.sha }}"
+
+        # Deploy with unique SHA tag to force new revision
         gcloud run deploy digitalme-api \
-          --image "gcr.io/digitalme-470613/digitalme-api:master" \
+          --image "gcr.io/digitalme-470613/digitalme-api:${{ github.sha }}" \
           --region us-central1 \
           --platform managed \
           --allow-unauthenticated \
@@ -264,10 +267,14 @@ jobs:
           --memory 1Gi \
           --cpu 1 \
           --max-instances 10 \
+          --min-instances 0 \
           --set-env-vars "ASPNETCORE_ENVIRONMENT=Production" \
           --set-env-vars "DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }}" \
           --set-env-vars "JWT_KEY=${{ secrets.JWT_KEY }}" \
+          --revision-suffix "${{ github.run_number }}" \
           --quiet
+
+        echo "✅ Deployment completed with revision suffix: ${{ github.run_number }}"
 
   notify:
     name: Notify Team
