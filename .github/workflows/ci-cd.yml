@@ -209,21 +209,29 @@ jobs:
       run: |
         gcloud auth configure-docker gcr.io
 
-    - name: 📝 Set Docker Tags
-      id: meta
-      run: |
-        echo "tags=gcr.io/digitalme-470613/digitalme-api:master,gcr.io/digitalme-470613/digitalme-api:latest,gcr.io/digitalme-470613/digitalme-api:${{ github.sha }}" >> $GITHUB_OUTPUT
-
     - name: 🔨 Build and Push Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        platforms: linux/amd64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: |
+        IMAGE_BASE="gcr.io/digitalme-470613/digitalme-api"
+        SHA_TAG="${IMAGE_BASE}:${{ github.sha }}"
+        LATEST_TAG="${IMAGE_BASE}:latest"
+        MASTER_TAG="${IMAGE_BASE}:master"
+
+        echo "🔨 Building Docker image..."
+        docker build -t "${SHA_TAG}" --platform linux/amd64 .
+
+        echo "🏷️ Tagging image with multiple tags..."
+        docker tag "${SHA_TAG}" "${LATEST_TAG}"
+        docker tag "${SHA_TAG}" "${MASTER_TAG}"
+
+        echo "📤 Pushing all tags to GCR..."
+        docker push "${SHA_TAG}"
+        docker push "${LATEST_TAG}"
+        docker push "${MASTER_TAG}"
+
+        echo "✅ Successfully pushed:"
+        echo "  - ${SHA_TAG}"
+        echo "  - ${LATEST_TAG}"
+        echo "  - ${MASTER_TAG}"
 
   deploy-production:
     name: Deploy to Production
