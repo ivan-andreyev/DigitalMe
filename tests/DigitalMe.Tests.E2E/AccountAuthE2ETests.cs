@@ -72,13 +72,13 @@ public class AccountAuthE2ETests : IDisposable
             var authResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
             authResponse.Should().NotBeNull();
 
-            string token = authResponse?.token;
+            string? token = authResponse?.token;
             token.Should().NotBeNullOrEmpty("JWT token should be returned");
 
             // JWT structure check (header.payload.signature)
-            token.Split('.').Should().HaveCount(3, "JWT should have 3 parts");
+            token!.Split('.').Should().HaveCount(3, "JWT should have 3 parts");
 
-            string userEmail = authResponse?.user?.email;
+            string? userEmail = authResponse?.user?.email;
             userEmail.Should().Be("demo@digitalme.ai");
         }
     }
@@ -145,10 +145,10 @@ public class AccountAuthE2ETests : IDisposable
             responseContent.Should().NotBeEmpty();
 
             var authResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            string token = authResponse?.token;
+            string? token = authResponse?.token;
             token.Should().NotBeNullOrEmpty("JWT token should be returned for new user");
 
-            string userEmail = authResponse?.user?.email;
+            string? userEmail = authResponse?.user?.email;
             userEmail.Should().Be(uniqueEmail);
         }
     }

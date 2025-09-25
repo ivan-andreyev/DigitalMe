@@ -87,7 +87,7 @@ public class AuthE2ETestRunner : IDisposable
         // Test 4: JWT Token Validation
         if (!string.IsNullOrEmpty(validToken))
         {
-            await RunTest(testResults, "JWT Token Structure", () =>
+            RunTest(testResults, "JWT Token Structure", () =>
             {
                 var parts = validToken.Split('.');
                 parts.Should().HaveCount(3, "JWT should have header.payload.signature");
