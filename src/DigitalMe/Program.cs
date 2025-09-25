@@ -600,6 +600,11 @@ await Task.Run(async () =>
                     logger.LogInformation("🌱 STEP 16: Seeding Ivan's personality data...");
                     DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
                     logger.LogInformation("✅ STEP 17: Ivan's personality data seeded successfully!");
+
+                    // Seed demo Identity users for authentication
+                    logger.LogInformation("🔐 STEP 18: Seeding demo Identity users...");
+                    await DigitalMe.Data.Seeders.IdentityDataSeeder.SeedDemoIdentityUsersAsync(scope.ServiceProvider);
+                    logger.LogInformation("✅ STEP 19: Demo Identity users seeded successfully!");
                 }
                 else
                 {
