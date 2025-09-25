@@ -1,89 +1,126 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace DigitalMe.Data.Seeders
+namespace DigitalMe.Data.Seeders;
+
+/// <summary>
+/// Seeds demo IdentityUser accounts for authentication testing
+/// </summary>
+public static class IdentityDataSeeder
 {
-    public class IdentityDataSeeder
+    /// <summary>
+    /// Seeds demo Identity users for production auth testing
+    /// </summary>
+    public static async Task SeedDemoIdentityUsersAsync(IServiceProvider serviceProvider)
     {
-        public static async Task SeedAsync(IServiceProvider serviceProvider)
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("🔐 Starting Identity users seeding...");
+
+        try
         {
-            using var scope = serviceProvider.CreateScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var logger = scope.ServiceProvider.GetService<ILogger<IdentityDataSeeder>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            try
+            // Create basic roles if they don't exist
+            await CreateRoleIfNotExistsAsync(roleManager, "Admin", logger);
+            await CreateRoleIfNotExistsAsync(roleManager, "User", logger);
+
+            // Seed demo@digitalme.ai user
+            await CreateUserIfNotExistsAsync(
+                userManager,
+                logger,
+                email: "demo@digitalme.ai",
+                password: "Ivan2024!",
+                roles: new[] { "Admin", "User" });
+
+            // Seed mr.red.404@gmail.com user (main user)
+            await CreateUserIfNotExistsAsync(
+                userManager,
+                logger,
+                email: "mr.red.404@gmail.com",
+                password: "Ivan2024!",
+                roles: new[] { "Admin", "User" });
+
+            logger.LogInformation("✅ Identity users seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "❌ Error during Identity users seeding");
+            throw;
+        }
+    }
+
+    private static async Task CreateRoleIfNotExistsAsync(RoleManager<IdentityRole> roleManager, string roleName, ILogger logger)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            var role = new IdentityRole(roleName);
+            var result = await roleManager.CreateAsync(role);
+
+            if (result.Succeeded)
             {
-                // Create roles
-                string[] roles = { "Admin", "User" };
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                        logger?.LogInformation($"Created role: {role}");
-                    }
-                }
-
-                // Create demo user
-                var demoEmail = "demo@digitalme.ai";
-                var demoUser = await userManager.FindByEmailAsync(demoEmail);
-                if (demoUser == null)
-                {
-                    demoUser = new IdentityUser
-                    {
-                        UserName = demoEmail,
-                        Email = demoEmail,
-                        EmailConfirmed = true
-                    };
-
-                    var result = await userManager.CreateAsync(demoUser, "Ivan2024!");
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(demoUser, "Admin");
-                        await userManager.AddToRoleAsync(demoUser, "User");
-                        logger?.LogInformation($"Created demo user: {demoEmail}");
-                    }
-                    else
-                    {
-                        logger?.LogError($"Failed to create demo user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                    }
-                }
-
-                // Create mr.red.404@gmail.com user
-                var mainEmail = "mr.red.404@gmail.com";
-                var mainUser = await userManager.FindByEmailAsync(mainEmail);
-                if (mainUser == null)
-                {
-                    mainUser = new IdentityUser
-                    {
-                        UserName = mainEmail,
-                        Email = mainEmail,
-                        EmailConfirmed = true
-                    };
-
-                    var result = await userManager.CreateAsync(mainUser, "Ivan2024!");
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(mainUser, "Admin");
-                        await userManager.AddToRoleAsync(mainUser, "User");
-                        logger?.LogInformation($"Created main user: {mainEmail}");
-                    }
-                    else
-                    {
-                        logger?.LogError($"Failed to create main user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                    }
-                }
-
-                logger?.LogInformation("Identity data seeding completed successfully");
+                logger.LogInformation("✅ Created role: {RoleName}", roleName);
             }
-            catch (Exception ex)
+            else
             {
-                logger?.LogError(ex, "Error seeding identity data");
-                throw;
+                logger.LogError("❌ Failed to create role {RoleName}: {Errors}", roleName,
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
             }
+        }
+        else
+        {
+            logger.LogInformation("ℹ️ Role {RoleName} already exists", roleName);
+        }
+    }
+
+    private static async Task CreateUserIfNotExistsAsync(
+        UserManager<IdentityUser> userManager,
+        ILogger logger,
+        string email,
+        string password,
+        string[]? roles = null)
+    {
+        var existingUser = await userManager.FindByEmailAsync(email);
+        if (existingUser != null)
+        {
+            logger.LogInformation("ℹ️ User {Email} already exists", email);
+            return;
+        }
+
+        var user = new IdentityUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true // Skip email confirmation for demo users
+        };
+
+        var result = await userManager.CreateAsync(user, password);
+
+        if (result.Succeeded)
+        {
+            logger.LogInformation("✅ Created user: {Email}", email);
+
+            // Add roles if specified
+            if (roles != null && roles.Length > 0)
+            {
+                var roleResult = await userManager.AddToRolesAsync(user, roles);
+                if (roleResult.Succeeded)
+                {
+                    logger.LogInformation("✅ Added roles {Roles} to user {Email}",
+                        string.Join(", ", roles), email);
+                }
+                else
+                {
+                    logger.LogWarning("⚠️ Failed to add roles to user {Email}: {Errors}", email,
+                        string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                }
+            }
+        }
+        else
+        {
+            logger.LogError("❌ Failed to create user {Email}: {Errors}", email,
+                string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
 }
