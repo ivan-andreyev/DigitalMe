@@ -76,52 +76,137 @@ builder.Services.AddSignalR();
 // Database Context - Improved provider selection with production safety
 var tempLogger = builder.Services.BuildServiceProvider().GetService<ILogger<Program>>();
 
+// Helper function to convert DATABASE_URL to Npgsql format (must be defined before use)
+string ConvertDatabaseUrlToNpgsql(string databaseUrl)
+{
+    try
+    {
+        tempLogger?.LogInformation("📊 Parsing DATABASE_URL format: {UrlPrefix}",
+            databaseUrl.Length > 20 ? databaseUrl.Substring(0, 20) + "..." : databaseUrl);
+
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        // Handle optional SSL mode - parse query string manually to avoid System.Web dependency
+        var sslMode = "Require"; // default SSL mode
+        if (!string.IsNullOrEmpty(uri.Query))
+        {
+            var queryParams = uri.Query.TrimStart('?').Split('&');
+            foreach (var param in queryParams)
+            {
+                var parts = param.Split('=');
+                if (parts.Length == 2 && parts[0].Equals("sslmode", StringComparison.OrdinalIgnoreCase))
+                {
+                    sslMode = Uri.UnescapeDataString(parts[1]);
+                    break;
+                }
+            }
+        }
+
+        var npgsqlConnStr = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode={sslMode}";
+        tempLogger?.LogInformation("✅ Converted DATABASE_URL to Npgsql format successfully");
+        return npgsqlConnStr;
+    }
+    catch (Exception ex)
+    {
+        tempLogger?.LogError(ex, "Failed to parse DATABASE_URL");
+        throw new InvalidOperationException($"Invalid DATABASE_URL format: {ex.Message}");
+    }
+}
+
 // Priority 1: Check for DATABASE_URL (common in cloud environments like Heroku, Cloud Run)
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 string? connectionString = null;
 bool usePostgreSQL = false;
 
+tempLogger?.LogInformation("🔍 Checking DATABASE_URL environment variable...");
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    tempLogger?.LogInformation("🔍 DATABASE_URL detected, converting to PostgreSQL connection string");
+    tempLogger?.LogInformation("✅ DATABASE_URL detected, converting to PostgreSQL connection string");
     connectionString = ConvertDatabaseUrlToNpgsql(databaseUrl);
     usePostgreSQL = true;
 }
 else
 {
-    // Priority 2: Standard connection string from configuration
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    tempLogger?.LogInformation("⚠️ DATABASE_URL not found in environment variables");
 
-    if (!string.IsNullOrEmpty(connectionString))
+    // Priority 2: Check for ConnectionStrings__DefaultConnection environment variable
+    var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+    if (!string.IsNullOrEmpty(envConnectionString))
     {
+        tempLogger?.LogInformation("🔍 ConnectionStrings__DefaultConnection environment variable detected");
+        connectionString = envConnectionString;
         // Detect PostgreSQL patterns
-        if (connectionString.Contains("/cloudsql/") ||
-            connectionString.Contains("Host=") ||
-            connectionString.Contains("Server=") ||
-            connectionString.Contains("postgres", StringComparison.OrdinalIgnoreCase))
+        if (envConnectionString.Contains("Host=") ||
+            envConnectionString.Contains("Server=") ||
+            envConnectionString.Contains("postgres", StringComparison.OrdinalIgnoreCase))
         {
-            tempLogger?.LogInformation("🐘 PostgreSQL connection string detected");
+            tempLogger?.LogInformation("🐘 PostgreSQL connection string detected from environment");
             usePostgreSQL = true;
+        }
+    }
+    else
+    {
+        // Priority 3: Standard connection string from configuration
+        tempLogger?.LogInformation("🔍 Checking configuration for DefaultConnection...");
+        connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            tempLogger?.LogInformation("✅ Found connection string in configuration");
+            // Detect PostgreSQL patterns
+            if (connectionString.Contains("/cloudsql/") ||
+                connectionString.Contains("Host=") ||
+                connectionString.Contains("Server=") ||
+                connectionString.Contains("postgres", StringComparison.OrdinalIgnoreCase))
+            {
+                tempLogger?.LogInformation("🐘 PostgreSQL connection string detected from configuration");
+                usePostgreSQL = true;
+            }
+            else
+            {
+                tempLogger?.LogInformation("📦 SQLite connection string pattern detected");
+            }
+        }
+        else
+        {
+            tempLogger?.LogInformation("⚠️ No connection string found in configuration");
         }
     }
 }
 
-// Priority 3: Check for POSTGRES_CONNECTION_STRING environment variable
+// Priority 4: Check for POSTGRES_CONNECTION_STRING environment variable
 if (string.IsNullOrEmpty(connectionString))
 {
+    tempLogger?.LogInformation("🔍 Checking POSTGRES_CONNECTION_STRING environment variable...");
     var postgresConnStr = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
     if (!string.IsNullOrEmpty(postgresConnStr))
     {
-        tempLogger?.LogInformation("🔍 POSTGRES_CONNECTION_STRING environment variable detected");
+        tempLogger?.LogInformation("✅ POSTGRES_CONNECTION_STRING environment variable detected");
         connectionString = postgresConnStr;
         usePostgreSQL = true;
     }
+    else
+    {
+        tempLogger?.LogInformation("⚠️ POSTGRES_CONNECTION_STRING not found");
+    }
 }
+
+// Log final database provider decision
+tempLogger?.LogInformation("📊 Database Provider Decision:");
+tempLogger?.LogInformation("   - Environment: {Environment}", builder.Environment.EnvironmentName);
+tempLogger?.LogInformation("   - Use PostgreSQL: {UsePostgreSQL}", usePostgreSQL);
+tempLogger?.LogInformation("   - Has Connection String: {HasConnString}", !string.IsNullOrEmpty(connectionString));
 
 // Configure database provider based on detection
 if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
 {
-    tempLogger?.LogInformation("✅ Configuring PostgreSQL database provider");
+    tempLogger?.LogInformation("✅ Configuring PostgreSQL database provider with connection string");
     builder.Services.AddDbContext<DigitalMeDbContext>(options =>
     {
         options.UseNpgsql(connectionString, npgsqlOptions =>
@@ -151,9 +236,15 @@ if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
 else if (builder.Environment.IsProduction())
 {
     // PRODUCTION MUST HAVE PostgreSQL - fail fast
-    var errorMessage = "❌ CRITICAL: PostgreSQL connection string is required in production! " +
-                      "Set one of the following environment variables: " +
-                      "DATABASE_URL, POSTGRES_CONNECTION_STRING, or ConnectionStrings__DefaultConnection";
+    var errorMessage = "❌ CRITICAL: PostgreSQL connection string is required in production!\n" +
+                      "Set one of the following environment variables:\n" +
+                      "  1. DATABASE_URL (preferred for Cloud Run)\n" +
+                      "  2. ConnectionStrings__DefaultConnection\n" +
+                      "  3. POSTGRES_CONNECTION_STRING\n" +
+                      "\nCurrent environment check:\n" +
+                      $"  - DATABASE_URL: {(Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET")}\n" +
+                      $"  - ConnectionStrings__DefaultConnection: {(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") != null ? "SET" : "NOT SET")}\n" +
+                      $"  - POSTGRES_CONNECTION_STRING: {(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") != null ? "SET" : "NOT SET")}";
     tempLogger?.LogCritical(errorMessage);
     throw new InvalidOperationException(errorMessage);
 }
@@ -166,27 +257,7 @@ else
         options.UseSqlite(connectionString ?? "Data Source=digitalme.db"));
 }
 
-// Helper function to convert DATABASE_URL to Npgsql format
-string ConvertDatabaseUrlToNpgsql(string databaseUrl)
-{
-    try
-    {
-        var uri = new Uri(databaseUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        var username = userInfo[0];
-        var password = userInfo.Length > 1 ? userInfo[1] : "";
-        var host = uri.Host;
-        var port = uri.Port > 0 ? uri.Port : 5432;
-        var database = uri.AbsolutePath.TrimStart('/');
-
-        return $"Host={host};Port={port};Database={database};Username={username};Password={password}";
-    }
-    catch (Exception ex)
-    {
-        tempLogger?.LogError(ex, "Failed to parse DATABASE_URL");
-        throw new InvalidOperationException($"Invalid DATABASE_URL format: {ex.Message}");
-    }
-}
+// Note: ConvertDatabaseUrlToNpgsql function moved to top of database configuration section
 
 // Identity - Using standard IdentityUser since it's already configured in the database schema
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
