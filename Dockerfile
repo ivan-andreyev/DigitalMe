@@ -67,7 +67,6 @@ USER digitalme
 
 # Expose ports
 EXPOSE 8080
-EXPOSE 8081
 
 # Health check - use dotnet --info instead of curl for reliability
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
@@ -75,9 +74,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production \
-    ASPNETCORE_URLS="http://+:8080;https://+:8081" \
+    ASPNETCORE_URLS="http://+:8080" \
     ASPNETCORE_HTTP_PORTS=8080 \
-    ASPNETCORE_HTTPS_PORTS=8081 \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
     TZ=UTC
