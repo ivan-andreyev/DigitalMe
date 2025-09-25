@@ -438,6 +438,9 @@ builder.Services.AddScoped<DigitalMe.Services.Configuration.ITelegramConfigurati
 // Webhook Security Service - for webhook security validation
 builder.Services.AddScoped<DigitalMe.Services.Security.IWebhookSecurityService, DigitalMe.Services.Security.WebhookSecurityService>();
 
+// Telegram Integration Service - core Telegram Bot API integration
+builder.Services.AddScoped<DigitalMe.Integrations.External.Telegram.ITelegramService, DigitalMe.Integrations.External.Telegram.TelegramService>();
+
 // Telegram Webhook Services - refactored for SOLID compliance
 builder.Services.AddScoped<DigitalMe.Services.Telegram.ITelegramWebhookService, DigitalMe.Services.Telegram.TelegramWebhookService>();
 
