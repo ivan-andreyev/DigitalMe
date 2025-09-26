@@ -59,6 +59,14 @@ builder.Services.AddDbContext<DigitalMeDbContext>(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+// Configure Antiforgery with proper cookie settings for Cloud Run
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.HttpOnly = true;
+});
+
 // Add HTTP Client with production optimizations
 builder.Services.AddHttpClient("DigitalMeApi", client =>
 {
@@ -143,6 +151,14 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Configure cookie policy for antiforgery
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax,
+    Secure = CookieSecurePolicy.SameAsRequest,
+    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always
+});
 
 app.UseRouting();
 app.UseCors("AllowAll");
