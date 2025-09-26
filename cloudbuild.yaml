@@ -78,7 +78,8 @@ steps:
       - '--max-instances=50'
       - '--cpu-throttling'
       - '--concurrency=80'
-      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app,DigitalMe__Features__UseRealAuthentication=true'
+      - '--add-cloudsql-instances=digitalme-470613:us-central1:digitalme-db'
+      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app,DigitalMe__Features__UseRealAuthentication=true,DATABASE_URL=postgresql://digitalme:digitalme123@localhost/digitalme?host=/cloudsql/digitalme-470613:us-central1:digitalme-db,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=digitalme;Password=digitalme123;'
     id: 'deploy-web'
 
 images:
