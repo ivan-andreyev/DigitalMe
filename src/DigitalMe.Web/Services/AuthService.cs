@@ -237,7 +237,12 @@ public class AuthService : IAuthService
                 Password = password
             };
 
-            var json = JsonSerializer.Serialize(loginRequest);
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+            var json = JsonSerializer.Serialize(loginRequest, jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/login", content);
@@ -333,7 +338,12 @@ public class AuthService : IAuthService
                 ConfirmPassword = confirmPassword
             };
 
-            var json = JsonSerializer.Serialize(registerRequest);
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+            var json = JsonSerializer.Serialize(registerRequest, jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/register", content);
