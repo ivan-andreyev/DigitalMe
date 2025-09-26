@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using System.Collections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -338,6 +340,22 @@ app.MapGet("/api/demo/backup/response/{scenario}", async (IBackupDemoScenariosSe
     {
         return Results.Json(new { error = ex.Message, status = "error" }, statusCode: 500);
     }
+});
+
+// Add configuration debug endpoint
+app.MapGet("/debug/config", (IConfiguration config, IOptions<DigitalMeConfiguration> digitalMeConfig) =>
+{
+    var digitalMe = digitalMeConfig.Value;
+    return Results.Ok(new
+    {
+        UseRealAuthentication = digitalMe.Features.UseRealAuthentication,
+        ApiBaseUrl = digitalMe.ApiBaseUrl,
+        Environment = config["ASPNETCORE_ENVIRONMENT"],
+        AllEnvVars = Environment.GetEnvironmentVariables()
+            .Cast<DictionaryEntry>()
+            .Where(kv => kv.Key.ToString()!.Contains("DigitalMe"))
+            .ToDictionary(kv => kv.Key.ToString()!, kv => kv.Value?.ToString())
+    });
 });
 
 // Add query performance monitoring endpoints
