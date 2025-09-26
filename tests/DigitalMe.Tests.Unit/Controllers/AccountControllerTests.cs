@@ -32,7 +32,6 @@ public class AccountControllerTests
 
     [Theory]
     [InlineData("demo@digitalme.ai", "Ivan2024!")]
-    [InlineData("mr.red.404@gmail.com", "Ivan2024!")]
     public void Login_ValidCredentials_ReturnsOkWithToken(string email, string password)
     {
         // Arrange
@@ -144,7 +143,6 @@ public class AccountControllerTests
 
     [Theory]
     [InlineData("demo@digitalme.ai")]
-    [InlineData("mr.red.404@gmail.com")]
     public void Register_ReservedEmail_ReturnsConflict(string email)
     {
         // Arrange

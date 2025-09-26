@@ -44,8 +44,7 @@ public class AccountController : ControllerBase
             // HARDCODED demo users - NO DATABASE ACCESS
             var validUsers = new Dictionary<string, (string password, string[] roles)>
             {
-                { "demo@digitalme.ai", ("Ivan2024!", new[] { "Admin", "User" }) },
-                { "mr.red.404@gmail.com", ("Ivan2024!", new[] { "Admin", "User" }) }
+                { "demo@digitalme.ai", ("Ivan2024!", new[] { "Admin", "User" }) }
             };
 
             var normalizedEmail = model.Email.ToLower().Trim();
@@ -129,7 +128,7 @@ public class AccountController : ControllerBase
             _logger.LogInformation("🔑 TEMP HARDCODED Register attempt for user: {Email}", model.Email);
 
             // Block registration of demo users
-            var reservedEmails = new[] { "demo@digitalme.ai", "mr.red.404@gmail.com" };
+            var reservedEmails = new[] { "demo@digitalme.ai" };
             if (reservedEmails.Contains(model.Email.ToLower().Trim()))
             {
                 return Conflict(new { message = "User with this email already exists" });
