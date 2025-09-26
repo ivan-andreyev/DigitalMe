@@ -172,7 +172,11 @@ public class AuthService : IAuthService
 
             if (DateTime.TryParse(expiryString, out var expiry))
             {
-                if (DateTime.Now >= expiry.AddMinutes(-5)) // 5-minute buffer
+                var now = DateTime.UtcNow;
+                var bufferTime = TimeSpan.FromMinutes(5);
+
+                // Безопасная проверка без overflow
+                if (expiry <= now || expiry <= now.Add(bufferTime))
                 {
                     _logger.LogInformation("Token expired, logging out");
                     await LogoutAsync();

@@ -54,7 +54,7 @@ steps:
       - '--cpu=1'
       - '--max-instances=10'
       - '--add-cloudsql-instances=digitalme-470613:us-central1:digitalme-db'
-      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=digitalme;Password=digitalme123;,JWT_KEY=digitalme-super-secret-key-12345678901234567890,JWT:Key=digitalme-super-secret-key-12345678901234567890,JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24'
+      - '--set-env-vars=DATABASE_URL=postgresql://digitalme:digitalme123@/digitalme?host=/cloudsql/digitalme-470613:us-central1:digitalme-db,ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=digitalme;Password=digitalme123;,JWT_KEY=digitalme-super-secret-key-12345678901234567890,JWT:Key=digitalme-super-secret-key-12345678901234567890,JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24'
       - '--set-secrets=ANTHROPIC_API_KEY=anthropic-api-key:latest,GITHUB_TOKEN=github-token:latest,TELEGRAM_BOT_TOKEN=telegram-bot-token:latest'
       - '--no-cpu-throttling'
       - '--timeout=600'
