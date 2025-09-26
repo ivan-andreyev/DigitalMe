@@ -249,18 +249,21 @@ if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
 }
 else if (builder.Environment.IsProduction())
 {
-    // PRODUCTION MUST HAVE PostgreSQL - fail fast
-    var errorMessage = "❌ CRITICAL: PostgreSQL connection string is required in production!\n" +
-                      "Set one of the following environment variables:\n" +
-                      "  1. DATABASE_URL (preferred for Cloud Run)\n" +
-                      "  2. ConnectionStrings__DefaultConnection\n" +
-                      "  3. POSTGRES_CONNECTION_STRING\n" +
-                      "\nCurrent environment check:\n" +
-                      $"  - DATABASE_URL: {(Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET")}\n" +
-                      $"  - ConnectionStrings__DefaultConnection: {(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") != null ? "SET" : "NOT SET")}\n" +
-                      $"  - POSTGRES_CONNECTION_STRING: {(Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") != null ? "SET" : "NOT SET")}";
-    tempLogger?.LogCritical(errorMessage);
-    throw new InvalidOperationException(errorMessage);
+    // PRODUCTION: Try PostgreSQL first, fallback to SQLite if no connection string
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        tempLogger?.LogWarning("⚠️ No PostgreSQL connection string found in production. Using SQLite as fallback.");
+        tempLogger?.LogInformation("🔍 Environment check:");
+        tempLogger?.LogInformation("  - DATABASE_URL: {DatabaseUrl}", Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET");
+        tempLogger?.LogInformation("  - ConnectionStrings__DefaultConnection: {ConnString}", Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") != null ? "SET" : "NOT SET");
+        tempLogger?.LogInformation("  - POSTGRES_CONNECTION_STRING: {PostgresString}", Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") != null ? "SET" : "NOT SET");
+
+        // Fallback to SQLite in production (temporary for deployment)
+        connectionString = "Data Source=digitalme_production.db";
+    }
+
+    builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+        options.UseSqlite(connectionString));
 }
 else
 {
