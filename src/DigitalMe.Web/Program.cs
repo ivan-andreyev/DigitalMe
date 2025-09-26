@@ -83,6 +83,21 @@ builder.Services.AddHttpClient("DigitalMeApi", client =>
 // Add SignalR
 builder.Services.AddSignalR();
 
+// Add Authentication services
+builder.Services.AddAuthentication()
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    });
+
+builder.Services.AddAuthorization();
+
 // Add Auth Service
 builder.Services.AddAuthService();
 
@@ -162,6 +177,10 @@ app.UseCookiePolicy(new CookiePolicyOptions
 
 app.UseRouting();
 app.UseCors("AllowAll");
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
