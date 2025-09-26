@@ -2,7 +2,7 @@ namespace DigitalMe.MAUI.Models;
 
 public class MauiConfiguration
 {
-    public string ApiBaseUrl { get; set; } = "https://localhost:7064";
+    public string ApiBaseUrl { get; set; } = "http://localhost:5003";
     public string SignalRHub { get; set; } = "/chathub";
     public AuthenticationConfiguration Authentication { get; set; } = new();
     public FeatureConfiguration Features { get; set; } = new();

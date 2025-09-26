@@ -94,6 +94,7 @@ public class AccountController : ControllerBase
 
             return Ok(new
             {
+                success = true,
                 token = tokenString,
                 expiresAt = tokenDescriptor.Expires?.ToString("o"), // ISO 8601 format
                 user = new
@@ -166,6 +167,7 @@ public class AccountController : ControllerBase
 
             return Ok(new
             {
+                success = true,
                 token = tokenString,
                 expiresAt = tokenDescriptor.Expires?.ToString("o"), // ISO 8601 format
                 user = new

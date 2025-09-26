@@ -70,7 +70,7 @@ public class AccountAuthE2ETests : IDisposable
 
             // Parse JWT response
             var authResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            ((object)authResponse).Should().NotBeNull();
+            authResponse.Should().NotBeNull();
 
             string? token = authResponse?.token;
             token.Should().NotBeNullOrEmpty("JWT token should be returned");

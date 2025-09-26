@@ -80,7 +80,7 @@ public class AuthenticationFlowTests : IClassFixture<AuthenticationFlowTests.Cus
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _client.PostAsync("/api/auth/register", content);
+        var response = await _client.PostAsync("/api/account/register", content);
 
         // Assert - Should return 200 OK with JWT token
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -101,7 +101,7 @@ public class AuthenticationFlowTests : IClassFixture<AuthenticationFlowTests.Cus
     public async Task AuthValidate_WithoutToken_Returns401NotRedirect()
     {
         // Act
-        var response = await _client.GetAsync("/api/auth/validate");
+        var response = await _client.GetAsync("/api/account/validate");
 
         // Assert - Should return 401, NOT 302 redirect
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -121,7 +121,7 @@ public class AuthenticationFlowTests : IClassFixture<AuthenticationFlowTests.Cus
 
         var json = JsonSerializer.Serialize(registerRequest);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var registerResponse = await _client.PostAsync("/api/auth/register", content);
+        var registerResponse = await _client.PostAsync("/api/account/register", content);
 
         Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
         
@@ -135,7 +135,7 @@ public class AuthenticationFlowTests : IClassFixture<AuthenticationFlowTests.Cus
         _client.DefaultRequestHeaders.Authorization = 
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse!.Token);
         
-        var validateResponse = await _client.GetAsync("/api/auth/validate");
+        var validateResponse = await _client.GetAsync("/api/account/validate");
 
         // Assert - Should return 200 OK
         Assert.Equal(HttpStatusCode.OK, validateResponse.StatusCode);
