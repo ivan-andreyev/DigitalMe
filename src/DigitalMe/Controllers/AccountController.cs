@@ -44,8 +44,8 @@ public class AccountController : ControllerBase
             // HARDCODED demo users - NO DATABASE ACCESS
             var validUsers = new Dictionary<string, (string password, string[] roles)>
             {
-                { "demo@digitalme.ai", ("Ivan2024", new[] { "Admin", "User" }) },
-                { "mr.red.404@gmail.com", ("Ivan2024", new[] { "Admin", "User" }) }
+                { "demo@digitalme.ai", ("Ivan2024!", new[] { "Admin", "User" }) },
+                { "mr.red.404@gmail.com", ("Ivan2024!", new[] { "Admin", "User" }) }
             };
 
             var normalizedEmail = model.Email.ToLower().Trim();

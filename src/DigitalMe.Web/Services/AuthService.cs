@@ -205,9 +205,9 @@ public class AuthService : IAuthService
                 {
                     var demoToken = "demo-jwt-token-" + DateTime.UtcNow.Ticks;
                     var demoExpiry = DateTime.UtcNow.AddHours(8);
-                    
+
                     await SetAuthenticationAsync(demoToken, "Demo User", demoExpiry);
-                    
+
                     return new AuthResult
                     {
                         Success = true,

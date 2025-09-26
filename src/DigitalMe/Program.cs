@@ -1,5 +1,6 @@
 using System.Runtime;
 using System.Text;
+using System.Text.Json;
 using DigitalMe.Data;
 using DigitalMe.Extensions;
 using DigitalMe.Repositories;
@@ -64,7 +65,20 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Configure JSON serialization to handle special characters properly
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.WriteIndented = false;
+
+        // Ensure proper handling of Unicode characters and special symbols
+        options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+
+        // Don't escape special characters like !, @, #, etc. unnecessarily
+        options.JsonSerializerOptions.AllowTrailingCommas = false;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
