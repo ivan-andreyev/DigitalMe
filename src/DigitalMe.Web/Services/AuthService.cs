@@ -198,7 +198,11 @@ public class AuthService : IAuthService
     {
         try
         {
-            if (!_configuration.Features.UseRealAuthentication)
+            // FORCED PRODUCTION MODE - always use real authentication in production
+            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+            var useRealAuth = _configuration.Features.UseRealAuthentication || isProduction;
+
+            if (!useRealAuth)
             {
                 // Demo mode - accept demo credentials
                 if (email == "demo@digitalme.ai" && password == "Ivan2024!")
@@ -309,7 +313,11 @@ public class AuthService : IAuthService
                 };
             }
 
-            if (!_configuration.Features.UseRealAuthentication)
+            // FORCED PRODUCTION MODE - always use real authentication in production
+            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+            var useRealAuth = _configuration.Features.UseRealAuthentication || isProduction;
+
+            if (!useRealAuth)
             {
                 return new AuthResult
                 {
@@ -392,7 +400,11 @@ public class AuthService : IAuthService
     {
         try
         {
-            if (!_configuration.Features.UseRealAuthentication)
+            // FORCED PRODUCTION MODE - always use real authentication in production
+            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+            var useRealAuth = _configuration.Features.UseRealAuthentication || isProduction;
+
+            if (!useRealAuth)
             {
                 // Demo mode - always return true for demo tokens
                 return token.StartsWith("demo-jwt-token-");
