@@ -294,7 +294,16 @@ jobs:
           --cpu 1 \
           --max-instances 10 \
           --min-instances 0 \
-          --set-env-vars "ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }},ConnectionStrings__DefaultConnection=${{ secrets.POSTGRES_CONNECTION_STRING }},POSTGRES_CONNECTION_STRING=${{ secrets.POSTGRES_CONNECTION_STRING }},JWT_KEY=${{ secrets.JWT_KEY }},JWT:Key=${{ secrets.JWT_KEY }},JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24" \
+          --set-env-vars ASPNETCORE_ENVIRONMENT=Production \
+          --set-env-vars ASPNETCORE_URLS=http://+:8080 \
+          --set-env-vars DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }} \
+          --set-env-vars ConnectionStrings__DefaultConnection=${{ secrets.POSTGRES_CONNECTION_STRING }} \
+          --set-env-vars POSTGRES_CONNECTION_STRING=${{ secrets.POSTGRES_CONNECTION_STRING }} \
+          --set-env-vars JWT_KEY=${{ secrets.JWT_KEY }} \
+          --set-env-vars JWT:Key=${{ secrets.JWT_KEY }} \
+          --set-env-vars JWT__Issuer=DigitalMe \
+          --set-env-vars JWT__Audience=DigitalMe \
+          --set-env-vars JWT__ExpireHours=24 \
           --revision-suffix "${{ github.run_number }}" \
           --quiet
 
@@ -316,7 +325,13 @@ jobs:
           --min-instances 1 \
           --cpu-throttling \
           --concurrency 80 \
-          --set-env-vars "ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }},ConnectionStrings__DefaultConnection=${{ secrets.POSTGRES_CONNECTION_STRING }},POSTGRES_CONNECTION_STRING=${{ secrets.POSTGRES_CONNECTION_STRING }},DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app,DigitalMe__Features__UseRealAuthentication=true" \
+          --set-env-vars ASPNETCORE_ENVIRONMENT=Production \
+          --set-env-vars ASPNETCORE_URLS=http://+:8080 \
+          --set-env-vars DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }} \
+          --set-env-vars ConnectionStrings__DefaultConnection=${{ secrets.POSTGRES_CONNECTION_STRING }} \
+          --set-env-vars POSTGRES_CONNECTION_STRING=${{ secrets.POSTGRES_CONNECTION_STRING }} \
+          --set-env-vars DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app \
+          --set-env-vars DigitalMe__Features__UseRealAuthentication=true \
           --revision-suffix "${{ github.run_number }}" \
           --quiet
 
