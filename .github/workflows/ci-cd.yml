@@ -316,7 +316,7 @@ jobs:
           --min-instances 1 \
           --cpu-throttling \
           --concurrency 80 \
-          --set-env-vars "ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app,DigitalMe__Features__UseRealAuthentication=false" \
+          --set-env-vars "ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,DigitalMe__ApiBaseUrl=https://digitalme-api-llig7ks2ca-uc.a.run.app,DigitalMe__Features__UseRealAuthentication=true" \
           --revision-suffix "${{ github.run_number }}" \
           --quiet
 
