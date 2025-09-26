@@ -182,6 +182,47 @@ public class AccountController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    /// <summary>
+    /// TEMPORARY HARDCODED token validation - checks JWT structure
+    /// </summary>
+    [HttpGet("validate")]
+    public IActionResult Validate()
+    {
+        try
+        {
+            var authHeader = Request.Headers.Authorization.FirstOrDefault();
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { message = "Missing or invalid authorization header" });
+            }
+
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            // Basic JWT format validation
+            if (!tokenHandler.CanReadToken(token))
+            {
+                return Unauthorized(new { message = "Invalid token format" });
+            }
+
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+
+            // Check if token is expired
+            if (jwtToken.ValidTo < DateTime.UtcNow)
+            {
+                return Unauthorized(new { message = "Token expired" });
+            }
+
+            // Token is valid
+            return Ok(new { valid = true, message = "Token is valid" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ TEMP Error during token validation");
+            return Unauthorized(new { message = "Invalid token" });
+        }
+    }
 }
 
 public class LoginModel

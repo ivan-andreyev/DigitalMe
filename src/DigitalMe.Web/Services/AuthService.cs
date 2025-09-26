@@ -232,7 +232,7 @@ public class AuthService : IAuthService
             var json = JsonSerializer.Serialize(loginRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/auth/login", content);
+            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/login", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -319,7 +319,7 @@ public class AuthService : IAuthService
             var json = JsonSerializer.Serialize(registerRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/auth/register", content);
+            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/register", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -388,7 +388,7 @@ public class AuthService : IAuthService
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _httpClient.GetAsync($"{_configuration.ApiBaseUrl}/api/auth/validate");
+            var response = await _httpClient.GetAsync($"{_configuration.ApiBaseUrl}/api/account/validate");
             
             if (response.IsSuccessStatusCode)
             {
