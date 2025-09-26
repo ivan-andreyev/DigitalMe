@@ -248,14 +248,19 @@ public class AuthService : IAuthService
 
                 if (loginResponse != null)
                 {
-                    await SetAuthenticationAsync(loginResponse.Token, loginResponse.UserName, loginResponse.ExpiresAt);
+                    // Fallback if API doesn't provide ExpiresAt
+                    var expiresAt = loginResponse.ExpiresAt != default(DateTime)
+                        ? loginResponse.ExpiresAt
+                        : DateTime.UtcNow.AddHours(8);
+
+                    await SetAuthenticationAsync(loginResponse.Token, loginResponse.UserName, expiresAt);
 
                     return new AuthResult
                     {
                         Success = true,
                         Token = loginResponse.Token,
                         UserName = loginResponse.UserName,
-                        ExpiresAt = loginResponse.ExpiresAt
+                        ExpiresAt = expiresAt
                     };
                 }
             }
@@ -335,14 +340,19 @@ public class AuthService : IAuthService
 
                 if (registerResponse != null)
                 {
-                    await SetAuthenticationAsync(registerResponse.Token, registerResponse.UserName, registerResponse.ExpiresAt);
+                    // Fallback if API doesn't provide ExpiresAt
+                    var expiresAt = registerResponse.ExpiresAt != default(DateTime)
+                        ? registerResponse.ExpiresAt
+                        : DateTime.UtcNow.AddHours(8);
+
+                    await SetAuthenticationAsync(registerResponse.Token, registerResponse.UserName, expiresAt);
 
                     return new AuthResult
                     {
                         Success = true,
                         Token = registerResponse.Token,
                         UserName = registerResponse.UserName,
-                        ExpiresAt = registerResponse.ExpiresAt
+                        ExpiresAt = expiresAt
                     };
                 }
             }
