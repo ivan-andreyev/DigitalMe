@@ -1,5 +1,5 @@
-# Ignore API project config files to prevent conflicts in Web builds
-src/DigitalMe/appsettings*.json
+# Ignore Web project config files to prevent conflicts in API builds
+src/DigitalMe.Web/appsettings*.json
 src/DigitalMe/web.config
 src/DigitalMe/Dockerfile*
 

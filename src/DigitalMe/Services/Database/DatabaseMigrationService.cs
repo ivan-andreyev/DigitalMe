@@ -118,6 +118,34 @@ public class DatabaseMigrationService : IDatabaseMigrationService
         _logger.LogInformation("🔍 Checking migration history consistency...");
         try
         {
+            // Check if migrations history table exists - if not, skip migration checks
+            var historyTableExists = false;
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync("SELECT 1 FROM __EFMigrationsHistory LIMIT 1");
+                historyTableExists = true;
+            }
+            catch
+            {
+                _logger.LogInformation("🔍 No migration history table found - fresh database detected");
+            }
+
+            if (!historyTableExists)
+            {
+                _logger.LogInformation("🔍 Fresh database with no migration history - applying all migrations");
+                try
+                {
+                    await context.Database.MigrateAsync();
+                    _logger.LogInformation("✅ Successfully applied all migrations to fresh database");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ Failed to apply migrations to fresh database: {ErrorMessage}", ex.Message);
+                    throw;
+                }
+            }
+
             var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
             var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
@@ -299,7 +327,21 @@ public class DatabaseMigrationService : IDatabaseMigrationService
 
             try
             {
-                // Only try migrations for PostgreSQL, never delete
+                // For fresh PostgreSQL databases, try EnsureCreated instead of migrations
+                var canConnect = await context.Database.CanConnectAsync();
+                if (canConnect)
+                {
+                    var tableExists = await context.Database.ExecuteSqlRawAsync("SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory' LIMIT 1") > 0;
+                    if (!tableExists)
+                    {
+                        _logger.LogInformation("🔧 Fresh PostgreSQL database detected - using EnsureCreated");
+                        await context.Database.EnsureCreatedAsync();
+                        _logger.LogInformation("✅ PostgreSQL database created successfully");
+                        return;
+                    }
+                }
+
+                // Only try migrations for PostgreSQL with existing schema
                 await context.Database.MigrateAsync();
                 _logger.LogInformation("✅ PostgreSQL migration recovery successful");
                 return;
