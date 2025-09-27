@@ -604,63 +604,64 @@ catch (Exception ex)
 var migrationLogger = app.Services.GetService<ILogger<Program>>();
 migrationLogger?.LogInformation("🚀 APPLICATION BUILD COMPLETED - Starting migration check");
 
-// Auto-apply migrations on startup for Cloud SQL
-await Task.Run(async () =>
+// Auto-apply migrations on startup for Cloud SQL - Fixed to handle exceptions and prevent app crash
+try
 {
-    try
+    migrationLogger?.LogInformation("🔍 STEP 1: Creating service scope for migrations");
+    using (var scope = app.Services.CreateScope())
     {
-        migrationLogger?.LogInformation("🔍 STEP 1: Creating service scope for migrations");
-        using (var scope = app.Services.CreateScope())
+        migrationLogger?.LogInformation("🔍 STEP 2: Service scope created successfully");
+
+        migrationLogger?.LogInformation("🔍 STEP 3: Getting DigitalMeDbContext from services");
+        var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
+        migrationLogger?.LogInformation("🔍 STEP 4: DbContext retrieved successfully");
+
+        migrationLogger?.LogInformation("🔍 STEP 5: Getting logger from services");
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        migrationLogger?.LogInformation("🔍 STEP 6: Logger retrieved successfully");
+
+        try
         {
-            migrationLogger?.LogInformation("🔍 STEP 2: Service scope created successfully");
+            // Use DatabaseMigrationService for better separation of concerns
+            var migrationService = scope.ServiceProvider.GetRequiredService<DigitalMe.Services.Database.IDatabaseMigrationService>();
+            await migrationService.ApplyMigrationsAsync(context);
 
-            migrationLogger?.LogInformation("🔍 STEP 3: Getting DigitalMeDbContext from services");
-            var context = scope.ServiceProvider.GetRequiredService<DigitalMeDbContext>();
-            migrationLogger?.LogInformation("🔍 STEP 4: DbContext retrieved successfully");
-
-            migrationLogger?.LogInformation("🔍 STEP 5: Getting logger from services");
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-            migrationLogger?.LogInformation("🔍 STEP 6: Logger retrieved successfully");
-
-            try
+            // Seed Ivan's personality data for MVP (skip in Test environment for test isolation)
+            if (app.Environment.EnvironmentName != "Testing")
             {
-                // Use DatabaseMigrationService for better separation of concerns
-                var migrationService = scope.ServiceProvider.GetRequiredService<DigitalMe.Services.Database.IDatabaseMigrationService>();
-                await migrationService.ApplyMigrationsAsync(context);
+                logger.LogInformation("🌱 STEP 16: Seeding Ivan's personality data...");
+                DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
+                logger.LogInformation("✅ STEP 17: Ivan's personality data seeded successfully!");
 
-                // Seed Ivan's personality data for MVP (skip in Test environment for test isolation)
-                if (app.Environment.EnvironmentName != "Testing")
-                {
-                    logger.LogInformation("🌱 STEP 16: Seeding Ivan's personality data...");
-                    DigitalMe.Data.Seeders.IvanDataSeeder.SeedBasicIvanProfile(context);
-                    logger.LogInformation("✅ STEP 17: Ivan's personality data seeded successfully!");
-
-                    // Seed demo Identity users for authentication
-                    logger.LogInformation("🔐 STEP 18: Seeding demo Identity users...");
-                    await DigitalMe.Data.Seeders.IdentityDataSeeder.SeedDemoIdentityUsersAsync(scope.ServiceProvider);
-                    logger.LogInformation("✅ STEP 19: Demo Identity users seeded successfully!");
-                }
-                else
-                {
-                    logger.LogInformation("🧪 STEP 16: Skipping Ivan's personality seeding in Test environment for test isolation");
-                }
+                // Seed demo Identity users for authentication
+                logger.LogInformation("🔐 STEP 18: Seeding demo Identity users...");
+                await DigitalMe.Data.Seeders.IdentityDataSeeder.SeedDemoIdentityUsersAsync(scope.ServiceProvider);
+                logger.LogInformation("✅ STEP 19: Demo Identity users seeded successfully!");
             }
-            catch (Exception ex)
+            else
             {
-                logger.LogError(ex, "❌ MIGRATION ERROR - Failed to apply database migrations. Error: {ErrorMessage}. Inner: {InnerException}. StackTrace: {StackTrace}",
-                    ex.Message, ex.InnerException?.Message, ex.StackTrace);
-                // Throw exception to prevent app startup with broken database
-                throw new InvalidOperationException("Database migration failed - application cannot start", ex);
+                logger.LogInformation("🧪 STEP 16: Skipping Ivan's personality seeding in Test environment for test isolation");
             }
         }
-        migrationLogger?.LogInformation("✅ MIGRATION SCOPE DISPOSED - Migration check completed");
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "❌ MIGRATION ERROR - Failed to apply database migrations. Error: {ErrorMessage}. Inner: {InnerException}. StackTrace: {StackTrace}",
+                ex.Message, ex.InnerException?.Message, ex.StackTrace);
+
+            // Log error but don't crash the app - let it start up in degraded mode
+            logger.LogWarning("⚠️ MIGRATION FAILED - Application will start in degraded mode without migrations");
+        }
     }
-    catch (Exception scopeEx)
-    {
-        migrationLogger?.LogError(scopeEx, "❌ CRITICAL ERROR - Failed to create service scope for migrations. Error: {ErrorMessage}", scopeEx.Message);
-        migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
-    }
-});
+    migrationLogger?.LogInformation("✅ MIGRATION SCOPE DISPOSED - Migration check completed");
+}
+catch (Exception scopeEx)
+{
+    migrationLogger?.LogError(scopeEx, "❌ CRITICAL ERROR - Failed to create service scope for migrations. Error: {ErrorMessage}", scopeEx.Message);
+    migrationLogger?.LogError("🔍 SCOPE EXCEPTION DETAILS - Type: {ExceptionType}, StackTrace: {StackTrace}", scopeEx.GetType().Name, scopeEx.StackTrace);
+
+    // Log error but don't crash the app - let it start up
+    migrationLogger?.LogWarning("⚠️ SCOPE CREATION FAILED - Application will start without running migrations");
+}
 
 migrationLogger?.LogInformation("✅ MIGRATION SECTION COMPLETED - Proceeding to secrets validation and middleware");
 
