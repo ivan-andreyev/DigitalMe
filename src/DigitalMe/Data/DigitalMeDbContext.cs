@@ -78,7 +78,7 @@ public class DigitalMeDbContext : IdentityDbContext
             .Property(e => e.Timestamp)
             .HasColumnType("timestamptz");
 
-        // Fix PersonalityProfile DateTime fields  
+        // Fix PersonalityProfile DateTime fields
         modelBuilder.Entity<PersonalityProfile>()
             .Property(e => e.CreatedAt)
             .HasColumnType("timestamptz");
@@ -86,6 +86,11 @@ public class DigitalMeDbContext : IdentityDbContext
         modelBuilder.Entity<PersonalityProfile>()
             .Property(e => e.UpdatedAt)
             .HasColumnType("timestamptz");
+
+        // Fix PostgreSQL boolean field type for PersonalityProfile
+        modelBuilder.Entity<PersonalityProfile>()
+            .Property(e => e.IsActive)
+            .HasColumnType("boolean");
 
         // Fix PersonalityTrait DateTime fields
         modelBuilder.Entity<PersonalityTrait>()

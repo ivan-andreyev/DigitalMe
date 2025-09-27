@@ -67,7 +67,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("StartTime", "EndTime");
 
-                    b.ToTable("CalendarEvents");
+                    b.ToTable("CalendarEvents", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.Conversation", b =>
@@ -134,7 +134,7 @@ namespace DigitalMe.Migrations
                         .HasDatabaseName("IX_Conversations_UserId_IsActive_StartedAt")
                         .HasFilter("IsActive = true");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.Message", b =>
@@ -196,7 +196,7 @@ namespace DigitalMe.Migrations
                         .IsDescending(false, true)
                         .HasDatabaseName("IX_Messages_ConversationId_Timestamp_Desc");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.PersonalityProfile", b =>
@@ -264,7 +264,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.ToTable("PersonalityProfiles");
+                    b.ToTable("PersonalityProfiles", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.PersonalityTrait", b =>
@@ -339,7 +339,7 @@ namespace DigitalMe.Migrations
                     b.HasIndex("PersonalityProfileId", "Category", "Weight")
                         .HasDatabaseName("IX_PersonalityTraits_ProfileId_Category_Weight");
 
-                    b.ToTable("PersonalityTraits");
+                    b.ToTable("PersonalityTraits", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.TelegramMessage", b =>
@@ -382,7 +382,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("ChatId", "MessageDate");
 
-                    b.ToTable("TelegramMessages");
+                    b.ToTable("TelegramMessages", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.TemporalBehaviorPattern", b =>
@@ -435,7 +435,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("PersonalityProfileId");
 
-                    b.ToTable("TemporalBehaviorPatterns");
+                    b.ToTable("TemporalBehaviorPatterns", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.ErrorPattern", b =>
@@ -514,7 +514,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("Category", "Subcategory");
 
-                    b.ToTable("ErrorPatterns");
+                    b.ToTable("ErrorPatterns", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.LearningHistoryEntry", b =>
@@ -584,7 +584,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("IsAnalyzed", "ContributedToPattern");
 
-                    b.ToTable("LearningHistoryEntries");
+                    b.ToTable("LearningHistoryEntries", (string)null);
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.OptimizationSuggestion", b =>
@@ -664,7 +664,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("IsReviewed", "Status");
 
-                    b.ToTable("OptimizationSuggestions");
+                    b.ToTable("OptimizationSuggestions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
