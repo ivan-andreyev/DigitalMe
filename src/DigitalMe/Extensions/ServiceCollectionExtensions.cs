@@ -143,12 +143,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.IHealthCheckUseCase, DigitalMe.Services.ApplicationServices.UseCases.HealthCheck.HealthCheckUseCase>();
         services.AddScoped<DigitalMe.Services.ApplicationServices.UseCases.Email.IEmailUseCase, DigitalMe.Services.ApplicationServices.UseCases.Email.EmailUseCase>();
 
-        // Backup Services - Refactored following SRP (Single Responsibility Principle)
-        services.AddScoped<DigitalMe.Services.Backup.IBackupExecutor, DigitalMe.Services.Backup.BackupExecutor>();
-        services.AddScoped<DigitalMe.Services.Backup.IBackupValidator, DigitalMe.Services.Backup.BackupValidator>();
-        services.AddScoped<DigitalMe.Services.Backup.IBackupCleanup, DigitalMe.Services.Backup.BackupCleanup>();
-        services.AddScoped<DigitalMe.Services.Backup.IDatabaseBackupService, DigitalMe.Services.Backup.BackupOrchestrator>();
-        services.AddScoped<DigitalMe.Services.Backup.BackupSchedulerService>();
 
         // Learning Services - Moved to CleanArchitectureServiceCollectionExtensions for proper layering
         // Registrations are now in AddLearningInfrastructureServices() method

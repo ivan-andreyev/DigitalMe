@@ -245,7 +245,7 @@ public class AuthService : IAuthService
             var json = JsonSerializer.Serialize(loginRequest, jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/login", content);
+            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/auth/login", content);
             
             if (response.IsSuccessStatusCode)
             {
@@ -346,7 +346,10 @@ public class AuthService : IAuthService
             var json = JsonSerializer.Serialize(registerRequest, jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/account/register", content);
+            var response = await _httpClient.PostAsync($"{_configuration.ApiBaseUrl}/api/auth/register", content);
+
+            _logger.LogInformation("Registration API response: StatusCode={StatusCode}, IsSuccessStatusCode={IsSuccessStatusCode}",
+                response.StatusCode, response.IsSuccessStatusCode);
 
             if (response.IsSuccessStatusCode)
             {
@@ -378,13 +381,18 @@ public class AuthService : IAuthService
             var errorContent = await response.Content.ReadAsStringAsync();
             _logger.LogWarning("Registration failed with status {StatusCode}: {Error}", response.StatusCode, errorContent);
 
-            return new AuthResult
+            var authResult = new AuthResult
             {
                 Success = false,
                 ErrorMessage = response.StatusCode == System.Net.HttpStatusCode.BadRequest
                     ? "Проблема с данными регистрации. Проверьте email и пароль."
                     : "Ошибка регистрации. Попробуйте позже."
             };
+
+            _logger.LogInformation("Returning AuthResult: Success={Success}, ErrorMessage={ErrorMessage}",
+                authResult.Success, authResult.ErrorMessage);
+
+            return authResult;
         }
         catch (HttpRequestException ex)
         {
@@ -424,7 +432,7 @@ public class AuthService : IAuthService
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _httpClient.GetAsync($"{_configuration.ApiBaseUrl}/api/account/validate");
+            var response = await _httpClient.GetAsync($"{_configuration.ApiBaseUrl}/api/auth/validate");
             
             if (response.IsSuccessStatusCode)
             {

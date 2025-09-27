@@ -379,8 +379,14 @@
 
         try
         {
+            // Clear any existing auth state before registration attempt
+            await AuthService.LogoutAsync();
+
             var result = await AuthService.RegisterAsync(_registerRequest.Email, _registerRequest.Password, _registerRequest.ConfirmPassword);
-            
+
+            Logger.LogInformation("RegisterAsync returned: Success={Success}, ErrorMessage={ErrorMessage}, Token={Token}",
+                result.Success, result.ErrorMessage, result.Token?.Substring(0, Math.Min(10, result.Token?.Length ?? 0)));
+
             if (result.Success)
             {
                 Logger.LogInformation("Registration successful for user: {Email}", _registerRequest.Email);

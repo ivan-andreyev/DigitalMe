@@ -54,7 +54,7 @@ public class AccountAuthE2ETests : IDisposable
 
         // Act
         var response = await _retryPolicy.ExecuteAsync(async () =>
-            await _httpClient.PostAsync("/api/account/login", content));
+            await _httpClient.PostAsync("/api/auth/login", content));
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -100,7 +100,7 @@ public class AccountAuthE2ETests : IDisposable
 
         // Act
         var response = await _retryPolicy.ExecuteAsync(async () =>
-            await _httpClient.PostAsync("/api/account/login", content));
+            await _httpClient.PostAsync("/api/auth/login", content));
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -129,7 +129,7 @@ public class AccountAuthE2ETests : IDisposable
 
         // Act
         var response = await _retryPolicy.ExecuteAsync(async () =>
-            await _httpClient.PostAsync("/api/account/register", content));
+            await _httpClient.PostAsync("/api/auth/register", content));
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -171,7 +171,7 @@ public class AccountAuthE2ETests : IDisposable
 
         // Act
         var response = await _retryPolicy.ExecuteAsync(async () =>
-            await _httpClient.PostAsync("/api/account/register", content));
+            await _httpClient.PostAsync("/api/auth/register", content));
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -193,7 +193,7 @@ public class AccountAuthE2ETests : IDisposable
 
         // Act
         var response = await _retryPolicy.ExecuteAsync(async () =>
-            await _httpClient.PostAsync("/api/account/login", content));
+            await _httpClient.PostAsync("/api/auth/login", content));
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -210,8 +210,8 @@ public class AccountAuthE2ETests : IDisposable
     {
         var testEndpoints = new[]
         {
-            "/api/account/login",
-            "/api/account/register"
+            "/api/auth/login",
+            "/api/auth/register"
         };
 
         foreach (var endpoint in testEndpoints)
@@ -267,7 +267,7 @@ public class AccountAuthE2ETests : IDisposable
                 var json = JsonConvert.SerializeObject(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/api/account/login", content);
+                var response = await _httpClient.PostAsync("/api/auth/login", content);
                 // Should NOT return 404 - endpoint should exist
                 response.StatusCode.Should().NotBe(HttpStatusCode.NotFound,
                     "AccountController should be deployed in production");
@@ -279,7 +279,7 @@ public class AccountAuthE2ETests : IDisposable
                 var json = JsonConvert.SerializeObject(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/api/account/login", content);
+                var response = await _httpClient.PostAsync("/api/auth/login", content);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {

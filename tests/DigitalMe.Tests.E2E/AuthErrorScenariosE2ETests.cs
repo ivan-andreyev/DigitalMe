@@ -49,7 +49,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
 
             // Assert - Should handle gracefully without crashing
             response.StatusCode.Should().BeOneOf(
@@ -91,7 +91,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
 
             // Assert
             response.StatusCode.Should().BeOneOf(
@@ -141,7 +141,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
 
             // Assert - Should validate email format
             response.StatusCode.Should().BeOneOf(
@@ -183,7 +183,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _httpClient.PostAsync("/api/account/register", content);
+            var response = await _httpClient.PostAsync("/api/auth/register", content);
 
             // Assert - Should reject weak passwords
             response.StatusCode.Should().BeOneOf(
@@ -215,7 +215,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync("/api/account/register", content);
+        var response = await _httpClient.PostAsync("/api/auth/register", content);
 
         // Assert
         response.StatusCode.Should().BeOneOf(
@@ -248,7 +248,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
 
         // Act
         var startTime = DateTime.UtcNow;
-        var response = await _httpClient.PostAsync("/api/account/login", content);
+        var response = await _httpClient.PostAsync("/api/auth/login", content);
         var duration = DateTime.UtcNow - startTime;
 
         // Assert - Should handle within reasonable time
@@ -282,7 +282,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
         content.Headers.Remove("Content-Type");
 
         // Act
-        var response = await _httpClient.PostAsync("/api/account/login", content);
+        var response = await _httpClient.PostAsync("/api/auth/login", content);
 
         // Assert - Should handle gracefully
         response.StatusCode.Should().BeOneOf(
@@ -302,12 +302,12 @@ public class AuthErrorScenariosE2ETests : IDisposable
         // Test endpoints with wrong HTTP methods
         var testCases = new[]
         {
-            ("/api/account/login", HttpMethod.Get),
-            ("/api/account/login", HttpMethod.Put),
-            ("/api/account/login", HttpMethod.Delete),
-            ("/api/account/register", HttpMethod.Get),
-            ("/api/account/register", HttpMethod.Put),
-            ("/api/account/register", HttpMethod.Delete)
+            ("/api/auth/login", HttpMethod.Get),
+            ("/api/auth/login", HttpMethod.Put),
+            ("/api/auth/login", HttpMethod.Delete),
+            ("/api/auth/register", HttpMethod.Get),
+            ("/api/auth/register", HttpMethod.Put),
+            ("/api/auth/register", HttpMethod.Delete)
         };
 
         foreach (var (endpoint, method) in testCases)
@@ -350,7 +350,7 @@ public class AuthErrorScenariosE2ETests : IDisposable
                 var json = JsonConvert.SerializeObject(loginData);
                 var content = new StringContent(json, encoding, "application/json");
 
-                var response = await _httpClient.PostAsync("/api/account/login", content);
+                var response = await _httpClient.PostAsync("/api/auth/login", content);
 
                 // Should handle different encodings gracefully
                 response.StatusCode.Should().BeOneOf(

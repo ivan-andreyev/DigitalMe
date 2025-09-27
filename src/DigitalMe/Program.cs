@@ -249,29 +249,46 @@ if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
 }
 else if (builder.Environment.IsProduction())
 {
-    // PRODUCTION: Try PostgreSQL first, fallback to SQLite if no connection string
+    // PRODUCTION: PostgreSQL is required
     if (string.IsNullOrEmpty(connectionString))
     {
-        tempLogger?.LogWarning("⚠️ No PostgreSQL connection string found in production. Using SQLite as fallback.");
+        tempLogger?.LogError("❌ FATAL: No PostgreSQL connection string found in production!");
         tempLogger?.LogInformation("🔍 Environment check:");
         tempLogger?.LogInformation("  - DATABASE_URL: {DatabaseUrl}", Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET");
         tempLogger?.LogInformation("  - ConnectionStrings__DefaultConnection: {ConnString}", Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") != null ? "SET" : "NOT SET");
         tempLogger?.LogInformation("  - POSTGRES_CONNECTION_STRING: {PostgresString}", Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") != null ? "SET" : "NOT SET");
 
-        // Fallback to SQLite in production (temporary for deployment)
-        connectionString = "Data Source=digitalme_production.db";
+        throw new InvalidOperationException("PostgreSQL connection string is required in production. SQLite is not supported in production mode.");
     }
 
+    tempLogger?.LogInformation("✅ Using PostgreSQL in production");
     builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-        options.UseSqlite(connectionString));
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null);
+        }));
 }
 else
 {
-    // Development/Testing fallback to SQLite
-    tempLogger?.LogInformation("⚠️ Using SQLite for development/testing (connection string: {HasConnection})",
-        !string.IsNullOrEmpty(connectionString));
+    // Development/Testing - Default to PostgreSQL with local connection
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        tempLogger?.LogWarning("⚠️ No connection string found for development. Using default local PostgreSQL.");
+        connectionString = "Host=localhost;Database=digitalme_dev;Username=postgres;Password=postgres";
+    }
+
+    tempLogger?.LogInformation("🔧 Using PostgreSQL for development/testing");
     builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-        options.UseSqlite(connectionString ?? "Data Source=digitalme.db"));
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null);
+        }));
 }
 
 // Note: ConvertDatabaseUrlToNpgsql function moved to top of database configuration section
@@ -632,7 +649,8 @@ await Task.Run(async () =>
             {
                 logger.LogError(ex, "❌ MIGRATION ERROR - Failed to apply database migrations. Error: {ErrorMessage}. Inner: {InnerException}. StackTrace: {StackTrace}",
                     ex.Message, ex.InnerException?.Message, ex.StackTrace);
-                // Don't throw - let app start to see migration errors in logs
+                // Throw exception to prevent app startup with broken database
+                throw new InvalidOperationException("Database migration failed - application cannot start", ex);
             }
         }
         migrationLogger?.LogInformation("✅ MIGRATION SCOPE DISPOSED - Migration check completed");

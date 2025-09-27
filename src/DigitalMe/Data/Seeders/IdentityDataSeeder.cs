@@ -34,13 +34,6 @@ public static class IdentityDataSeeder
                 password: "Ivan2024!",
                 roles: new[] { "Admin", "User" });
 
-            // Seed mr.red.404@gmail.com user (main user)
-            await CreateUserIfNotExistsAsync(
-                userManager,
-                logger,
-                email: "mr.red.404@gmail.com",
-                password: "Ivan2024!",
-                roles: new[] { "Admin", "User" });
 
             logger.LogInformation("✅ Identity users seeding completed successfully");
         }

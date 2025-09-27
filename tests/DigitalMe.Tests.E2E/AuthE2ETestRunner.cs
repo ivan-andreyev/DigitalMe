@@ -47,10 +47,10 @@ public class AuthE2ETestRunner : IDisposable
             var json = JsonConvert.SerializeObject(testData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
             response.StatusCode.Should().NotBe(HttpStatusCode.NotFound,
                 "AccountController should be deployed");
-            return "✅ /api/account endpoints exist";
+            return "✅ /api/auth endpoints exist";
         });
 
         // Test 3: Demo User Login
@@ -66,7 +66,7 @@ public class AuthE2ETestRunner : IDisposable
             var json = JsonConvert.SerializeObject(loginData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -132,7 +132,7 @@ public class AuthE2ETestRunner : IDisposable
             var json = JsonConvert.SerializeObject(loginData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
             response.StatusCode.Should().BeOneOf(
                 HttpStatusCode.BadRequest,
                 HttpStatusCode.Unauthorized,
@@ -148,7 +148,7 @@ public class AuthE2ETestRunner : IDisposable
             var invalidJson = "{ malformed json }";
             var content = new StringContent(invalidJson, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             return "✅ Malformed JSON handled gracefully";
@@ -180,7 +180,7 @@ public class AuthE2ETestRunner : IDisposable
         {
             ("Endpoints Exist", async () =>
             {
-                var response = await _httpClient.PostAsync("/api/account/login",
+                var response = await _httpClient.PostAsync("/api/auth/login",
                     new StringContent("{}", Encoding.UTF8, "application/json"));
                 return response.StatusCode != HttpStatusCode.NotFound;
             }, "Account endpoints should be deployed"),
@@ -194,7 +194,7 @@ public class AuthE2ETestRunner : IDisposable
                 };
                 var json = JsonConvert.SerializeObject(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("/api/account/login", content);
+                var response = await _httpClient.PostAsync("/api/auth/login", content);
                 return response.StatusCode == HttpStatusCode.OK;
             }, "Demo user should be seeded and accessible"),
 
@@ -208,7 +208,7 @@ public class AuthE2ETestRunner : IDisposable
                 };
                 var json = JsonConvert.SerializeObject(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("/api/account/login", content);
+                var response = await _httpClient.PostAsync("/api/auth/login", content);
 
                 if (response.StatusCode != HttpStatusCode.OK) return false;
 
@@ -224,7 +224,7 @@ public class AuthE2ETestRunner : IDisposable
 
             ("Error Handling", async () =>
             {
-                var response = await _httpClient.PostAsync("/api/account/login",
+                var response = await _httpClient.PostAsync("/api/auth/login",
                     new StringContent("invalid json", Encoding.UTF8, "application/json"));
                 return response.StatusCode == HttpStatusCode.BadRequest;
             }, "API should handle errors gracefully")

@@ -111,11 +111,14 @@ else
     {
         try
         {
-            Logger.LogInformation("Registration success received");
-            
+            Logger.LogInformation("HandleRegisterSuccess called with token: {Token}", token?.Substring(0, Math.Min(10, token?.Length ?? 0)));
+
+            var currentToken = await AuthService.GetTokenAsync();
             _isAuthenticated = await AuthService.IsAuthenticatedAsync();
             _showRegister = false;
-            
+
+            Logger.LogInformation("Auth state after registration: IsAuthenticated={IsAuthenticated}, CurrentToken={CurrentToken}",
+                _isAuthenticated, currentToken?.Substring(0, Math.Min(10, currentToken?.Length ?? 0)));
             StateHasChanged();
         }
         catch (Exception ex)

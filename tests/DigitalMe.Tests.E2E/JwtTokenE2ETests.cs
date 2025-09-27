@@ -264,7 +264,7 @@ public class JwtTokenE2ETests : IDisposable
             var json = JsonConvert.SerializeObject(loginData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/account/login", content);
+            var response = await _httpClient.PostAsync("/api/auth/login", content);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {

@@ -12,8 +12,8 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DigitalMeD
     {
         var optionsBuilder = new DbContextOptionsBuilder<DigitalMeDbContext>();
 
-        // Default to SQLite for development migrations
-        var connectionString = "Data Source=digitalme.db";
+        // Default to PostgreSQL for development migrations
+        var connectionString = "Host=localhost;Database=digitalme_dev;Username=postgres;Password=postgres";
 
         // Check for PostgreSQL connection string in arguments
         if (args.Length > 0 && args[0].StartsWith("--connection"))
@@ -21,17 +21,8 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DigitalMeD
             connectionString = args[0].Substring("--connection=".Length);
         }
 
-        // Auto-detect provider based on connection string
-        if (connectionString.Contains("Host=") || connectionString.Contains("/cloudsql/") || connectionString.Contains("Server="))
-        {
-            // PostgreSQL
-            optionsBuilder.UseNpgsql(connectionString);
-        }
-        else
-        {
-            // SQLite
-            optionsBuilder.UseSqlite(connectionString);
-        }
+        // Always use PostgreSQL
+        optionsBuilder.UseNpgsql(connectionString);
 
         return new DigitalMeDbContext(optionsBuilder.Options);
     }
