@@ -53,7 +53,7 @@ steps:
       - '--memory=512Mi'
       - '--cpu=1'
       - '--max-instances=10'
-      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=postgres;Password=postgres_secure_2024;SSL Mode=Disable,JWT__Key=digitalme-super-secret-key-12345678901234567890,JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24'
+      - '--set-env-vars=ASPNETCORE_ENVIRONMENT=Production,ASPNETCORE_URLS=http://+:8080,ConnectionStrings__DefaultConnection=Host=/cloudsql/digitalme-470613:us-central1:digitalme-db;Database=digitalme;Username=root;Password=postgres_secure_2024;SSL Mode=Disable,JWT__Key=digitalme-super-secret-key-12345678901234567890,JWT__Issuer=DigitalMe,JWT__Audience=DigitalMe,JWT__ExpireHours=24'
       - '--set-secrets=ANTHROPIC_API_KEY=anthropic-api-key:latest,GITHUB_TOKEN=github-token:latest,TELEGRAM_BOT_TOKEN=telegram-bot-token:latest'
       - '--add-cloudsql-instances=digitalme-470613:us-central1:digitalme-db'
       - '--no-cpu-throttling'
