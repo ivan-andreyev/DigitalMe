@@ -54,6 +54,7 @@ public class DigitalMeDbContext : IdentityDbContext
         // Fix PostgreSQL boolean field type
         modelBuilder.Entity<Conversation>()
             .Property(e => e.IsActive)
+            .HasColumnName("IsActive")
             .HasColumnType("boolean");
 
         // Fix PostgreSQL DateTime field types
