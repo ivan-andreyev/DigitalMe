@@ -90,6 +90,7 @@ public class DigitalMeDbContext : IdentityDbContext
         // Fix PostgreSQL boolean field type for PersonalityProfile
         modelBuilder.Entity<PersonalityProfile>()
             .Property(e => e.IsActive)
+            .HasColumnName("IsActive")
             .HasColumnType("boolean");
 
         // Fix PersonalityTrait DateTime fields
