@@ -579,9 +579,14 @@ if (builder.Environment.IsProduction())
 
 var app = builder.Build();
 
+// DEBUG: Critical checkpoint
+var debugLogger = app.Services.GetService<ILogger<Program>>();
+debugLogger?.LogInformation("🔍 CHECKPOINT 1: App built successfully, about to initialize Tool Registry");
+
 // Initialize Tool Registry with all available strategies
 try
 {
+    debugLogger?.LogInformation("🔍 CHECKPOINT 2: Entering Tool Registry try block");
     using var toolScope = app.Services.CreateScope();
     var toolRegistry = toolScope.ServiceProvider.GetRequiredService<DigitalMe.Services.Tools.IToolRegistry>();
     var toolStrategies = toolScope.ServiceProvider.GetServices<DigitalMe.Services.Tools.IToolStrategy>();
