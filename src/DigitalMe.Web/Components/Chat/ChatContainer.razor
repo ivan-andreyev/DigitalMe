@@ -49,10 +49,12 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: calc(100vh - 16px);
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 8px auto;
     background: #fafafa;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -171,37 +173,49 @@
         _isLoading = true;
         StateHasChanged();
 
+        // Generate unique message ID to prevent duplicates
+        var messageId = Guid.NewGuid().ToString();
+
         try
         {
             // Add user message immediately (optimistic UI)
             var userMessage = new ChatMessage
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = messageId,
                 Content = messageContent,
                 Role = MessageRole.User,
                 Timestamp = DateTime.Now,
                 ConversationId = _currentConversationId
             };
-            
+
             _messages.Add(userMessage);
             StateHasChanged();
             await ScrollToBottom();
 
-            // Send via SignalR
+            // Send via SignalR only - remove HTTP fallback to prevent duplication
             if (SignalRChatService.ConnectionState == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
             {
                 await SignalRChatService.SendMessageAsync(messageContent, _currentUserId, _currentConversationId);
             }
             else
             {
-                // Fallback to HTTP if SignalR is not available
-                await SendMessageViaHttp(messageContent);
+                // Show connection error instead of HTTP fallback
+                var errorMessage = new ChatMessage
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Content = "❌ Не удалось отправить сообщение. SignalR не подключен. Попробуйте обновить страницу.",
+                    Role = MessageRole.System,
+                    Timestamp = DateTime.Now,
+                    ConversationId = _currentConversationId
+                };
+                _messages.Add(errorMessage);
+                StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to send message");
-            
+
             // Show error message to user
             var errorMessage = new ChatMessage
             {
@@ -274,9 +288,18 @@
     {
         InvokeAsync(async () =>
         {
+            var messageId = e.Message.Id.ToString();
+
+            // Check for duplicate messages to prevent duplicates
+            if (_messages.Any(m => m.Id == messageId))
+            {
+                Logger.LogDebug("Duplicate message received: {MessageId}", messageId);
+                return;
+            }
+
             var message = new ChatMessage
             {
-                Id = e.Message.Id.ToString(),
+                Id = messageId,
                 Content = e.Message.Content,
                 Role = e.Message.Role == "user" ? MessageRole.User : MessageRole.Assistant,
                 Timestamp = e.Message.Timestamp,
