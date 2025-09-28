@@ -51,14 +51,17 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
             _output.WriteLine($"🔍 Checking table existence: {tableName}");
 
             // This query uses the exact table name as it appears in the database
-            var tableExists = await _context.Database.ExecuteSqlRawAsync(
-                $"SELECT 1 FROM information_schema.tables WHERE table_name = '{tableName}' LIMIT 1") >= 0;
+            // Check if table exists with correct case-sensitive name
+            var tableExistsResult = await _context.Database
+                .SqlQuery<int>($"SELECT 1 as value FROM information_schema.tables WHERE table_name = '{tableName}' AND table_schema = 'public' LIMIT 1")
+                .FirstOrDefaultAsync();
+            
+            var tableExists = tableExistsResult > 0;
 
             Assert.True(tableExists, $"Table '{tableName}' should exist with exact case-sensitive name");
             _output.WriteLine($"✅ Table '{tableName}' exists");
         }
     }
-
     /// <summary>
     /// Test that validates filtered indexes work with quoted column names
     /// Prevents: "column 'isactive' does not exist" in migration filters
@@ -155,7 +158,7 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
         // Test 1: Quoted table names (should work)
         _output.WriteLine("🔍 Testing quoted table names");
         var quotedQuery = await _context.Database
-            .SqlQuery<int>($@"SELECT COUNT(*) as Value FROM ""Conversations""")
+            .SqlQuery<int>($@"SELECT COUNT(*) as value FROM ""Conversations""")
             .FirstOrDefaultAsync();
 
         Assert.True(quotedQuery >= 0, "Quoted table name query should work");
@@ -164,7 +167,7 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
         // Test 2: Quoted column names (should work)
         _output.WriteLine("🔍 Testing quoted column names");
         var quotedColumnQuery = await _context.Database
-            .SqlQuery<int>($@"SELECT COUNT(*) as Value FROM ""Conversations"" WHERE ""IsActive"" = true")
+            .SqlQuery<int>($@"SELECT COUNT(*) as value FROM ""Conversations"" WHERE ""IsActive"" = true")
             .FirstOrDefaultAsync();
 
         Assert.True(quotedColumnQuery >= 0, "Quoted column name query should work");
@@ -175,7 +178,7 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
         try
         {
             var unquotedQuery = await _context.Database
-                .SqlQuery<int>($@"SELECT COUNT(*) as Value FROM Conversations WHERE IsActive = true")
+                .SqlQuery<int>($@"SELECT COUNT(*) as value FROM Conversations WHERE IsActive = true")
                 .FirstOrDefaultAsync();
 
             _output.WriteLine($"⚠️ Unquoted query unexpectedly succeeded: {unquotedQuery}");

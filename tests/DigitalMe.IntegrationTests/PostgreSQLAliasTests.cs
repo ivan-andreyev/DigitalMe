@@ -43,7 +43,7 @@ public class PostgreSQLAliasTests : IClassFixture<WebApplicationFactory<Program>
         var exception = await Assert.ThrowsAsync<Exception>(async () =>
         {
             await _context.Database
-                .SqlQuery<int>($@"SELECT COUNT(*) as Value FROM ""Conversations""")
+                .SqlQuery<int>($@"SELECT COUNT(*) as value FROM ""Conversations""")
                 .FirstOrDefaultAsync();
         });
 
@@ -113,7 +113,7 @@ public class PostgreSQLAliasTests : IClassFixture<WebApplicationFactory<Program>
         {
             await _context.Database
                 .SqlQuery<int>($@"
-                    SELECT COUNT(*) as Value
+                    SELECT COUNT(*) as value
                     FROM ""Conversations"" c
                     LEFT JOIN ""PersonalityProfiles"" pp ON c.""PersonalityProfileId"" = pp.""Id""
                     WHERE pp.""Id"" IS NULL")
