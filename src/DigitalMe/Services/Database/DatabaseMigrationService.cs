@@ -334,9 +334,10 @@ public class DatabaseMigrationService : IDatabaseMigrationService
                     var tableExists = await context.Database.ExecuteSqlRawAsync("SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory' LIMIT 1") > 0;
                     if (!tableExists)
                     {
-                        _logger.LogInformation("🔧 Fresh PostgreSQL database detected - using EnsureCreated");
-                        await context.Database.EnsureCreatedAsync();
-                        _logger.LogInformation("✅ PostgreSQL database created successfully");
+                        _logger.LogInformation("🔧 Fresh PostgreSQL database detected - FORCING MIGRATIONS instead of EnsureCreated");
+                        _logger.LogInformation("🔧 CRITICAL FIX: EnsureCreated ignores HasColumnName mappings, causing isactive vs IsActive issues");
+                        await context.Database.MigrateAsync();
+                        _logger.LogInformation("✅ PostgreSQL database migrated successfully with correct column names");
                         return;
                     }
                 }

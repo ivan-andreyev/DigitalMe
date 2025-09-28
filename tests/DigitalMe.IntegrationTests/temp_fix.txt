@@ -1,0 +1,6 @@
+            // Check if table exists with correct case-sensitive name
+            var tableExistsResult = await _context.Database
+                .SqlQuery<int>($"SELECT 1 as Value FROM information_schema.tables WHERE table_name = '{tableName}' AND table_schema = 'public' LIMIT 1")
+                .FirstOrDefaultAsync();
+            
+            var tableExists = tableExistsResult > 0;

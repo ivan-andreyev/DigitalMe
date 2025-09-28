@@ -1,6 +1,6 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=5433;Database=digitalme_test;User Id=test_user;Password=test_password;"
+    "DefaultConnection": "Data Source=digitalme.db"
   },
   "Anthropic": {
     "ApiKey": "dev-test-key-stub-for-local-development"

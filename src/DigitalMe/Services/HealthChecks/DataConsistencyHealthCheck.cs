@@ -93,14 +93,18 @@ public class DataConsistencyHealthCheck : IHealthCheck
             // Check 5: Verify database constraints are enabled
             try
             {
-                // This is SQLite specific - adapt for other databases
-                var foreignKeyStatus = await _context.Database
-                    .SqlQuery<int>($"PRAGMA foreign_keys")
+                // PostgreSQL: Check if foreign key constraints are generally enabled
+                // In PostgreSQL, FK constraints are typically always enabled unless explicitly disabled
+                var constraintCount = await _context.Database
+                    .SqlQuery<int>($@"
+                        SELECT COUNT(*) as value
+                        FROM information_schema.table_constraints
+                        WHERE constraint_type = 'FOREIGN KEY'")
                     .FirstOrDefaultAsync(cancellationToken);
 
-                if (foreignKeyStatus == 0)
+                if (constraintCount == 0)
                 {
-                    warnings.Add("Foreign key constraints are disabled");
+                    warnings.Add("No foreign key constraints found in database schema");
                 }
             }
             catch (Exception ex)

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+# TEMPORARILY DISABLED FOR DEPLOYMENT - E2E tests require local server
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe", "src\DigitalMe\DigitalMe.csproj", "{846EB05A-BB86-483C-BF42-1941425B409C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{27C22BEA-CB91-454A-81A5-C3209C0F540E}"
@@ -20,9 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.Web", "src\Digita
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.MAUI", "src\DigitalMe.MAUI\DigitalMe.MAUI.csproj", "{DD783952-A136-4B84-BC91-FC4E906B36FD}"
 EndProject
-# TEMPORARILY DISABLED FOR DEPLOYMENT - E2E tests require local server
-# Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.Tests.E2E", "tests\DigitalMe.Tests.E2E\DigitalMe.Tests.E2E.csproj", "{2A8F5B3C-1D4E-4F9A-8B2C-3E5D7F8A9B1C}"
-# EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMe.IntegrationTests", "tests\DigitalMe.IntegrationTests\DigitalMe.IntegrationTests.csproj", "{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +52,10 @@ Global
 		# {2A8F5B3C-1D4E-4F9A-8B2C-3E5D7F8A9B1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		# {2A8F5B3C-1D4E-4F9A-8B2C-3E5D7F8A9B1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		# {2A8F5B3C-1D4E-4F9A-8B2C-3E5D7F8A9B1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{846EB05A-BB86-483C-BF42-1941425B409C} = {C11D01C5-E254-4F9A-9DF4-07912760E4AE}
@@ -61,5 +64,6 @@ Global
 		{080F2043-9509-463E-9B75-70F39620DA9A} = {C11D01C5-E254-4F9A-9DF4-07912760E4AE}
 		{DD783952-A136-4B84-BC91-FC4E906B36FD} = {C11D01C5-E254-4F9A-9DF4-07912760E4AE}
 		# {2A8F5B3C-1D4E-4F9A-8B2C-3E5D7F8A9B1C} = {8840FDF0-5E8C-4B02-8749-66B6EC4CF45B}
+		{883053AF-CD31-4E9C-A933-DEFEFFF6A3AB} = {8840FDF0-5E8C-4B02-8749-66B6EC4CF45B}
 	EndGlobalSection
 EndGlobal
