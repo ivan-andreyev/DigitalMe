@@ -67,7 +67,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("StartTime", "EndTime");
 
-                    b.ToTable("CalendarEvents", (string)null);
+                    b.ToTable("CalendarEvents");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.Conversation", b =>
@@ -90,7 +90,8 @@ namespace DigitalMe.Migrations
                         .HasColumnType("timestamptz");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
 
                     b.Property<DateTime>("LastMessageAt")
                         .HasColumnType("timestamp with time zone");
@@ -134,7 +135,7 @@ namespace DigitalMe.Migrations
                         .HasDatabaseName("IX_Conversations_UserId_IsActive_StartedAt")
                         .HasFilter("IsActive = true");
 
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.Message", b =>
@@ -196,7 +197,7 @@ namespace DigitalMe.Migrations
                         .IsDescending(false, true)
                         .HasDatabaseName("IX_Messages_ConversationId_Timestamp_Desc");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.PersonalityProfile", b =>
@@ -231,7 +232,8 @@ namespace DigitalMe.Migrations
                         .HasColumnType("character varying(5000)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
 
                     b.Property<DateTime>("LastProfileUpdate")
                         .HasColumnType("timestamp with time zone");
@@ -264,7 +266,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.ToTable("PersonalityProfiles", (string)null);
+                    b.ToTable("PersonalityProfiles");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.PersonalityTrait", b =>
@@ -339,7 +341,7 @@ namespace DigitalMe.Migrations
                     b.HasIndex("PersonalityProfileId", "Category", "Weight")
                         .HasDatabaseName("IX_PersonalityTraits_ProfileId_Category_Weight");
 
-                    b.ToTable("PersonalityTraits", (string)null);
+                    b.ToTable("PersonalityTraits");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.TelegramMessage", b =>
@@ -382,7 +384,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("ChatId", "MessageDate");
 
-                    b.ToTable("TelegramMessages", (string)null);
+                    b.ToTable("TelegramMessages");
                 });
 
             modelBuilder.Entity("DigitalMe.Data.Entities.TemporalBehaviorPattern", b =>
@@ -435,7 +437,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("PersonalityProfileId");
 
-                    b.ToTable("TemporalBehaviorPatterns", (string)null);
+                    b.ToTable("TemporalBehaviorPatterns");
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.ErrorPattern", b =>
@@ -514,7 +516,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("Category", "Subcategory");
 
-                    b.ToTable("ErrorPatterns", (string)null);
+                    b.ToTable("ErrorPatterns");
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.LearningHistoryEntry", b =>
@@ -584,7 +586,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("IsAnalyzed", "ContributedToPattern");
 
-                    b.ToTable("LearningHistoryEntries", (string)null);
+                    b.ToTable("LearningHistoryEntries");
                 });
 
             modelBuilder.Entity("DigitalMe.Services.Learning.ErrorLearning.Models.OptimizationSuggestion", b =>
@@ -664,7 +666,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("IsReviewed", "Status");
 
-                    b.ToTable("OptimizationSuggestions", (string)null);
+                    b.ToTable("OptimizationSuggestions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

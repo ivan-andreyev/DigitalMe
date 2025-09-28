@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DigitalMe.Migrations
 {
     [DbContext(typeof(DigitalMeDbContext))]
-    [Migration("20250927191402_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250928094944_InitialCreate_Clean")]
+    partial class InitialCreate_Clean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,7 +93,8 @@ namespace DigitalMe.Migrations
                         .HasColumnType("timestamptz");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
 
                     b.Property<DateTime>("LastMessageAt")
                         .HasColumnType("timestamp with time zone");
@@ -234,7 +235,8 @@ namespace DigitalMe.Migrations
                         .HasColumnType("character varying(5000)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
 
                     b.Property<DateTime>("LastProfileUpdate")
                         .HasColumnType("timestamp with time zone");
