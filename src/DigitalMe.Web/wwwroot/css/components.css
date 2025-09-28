@@ -37,10 +37,12 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: calc(100vh - 16px);
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 8px auto;
     background: #fafafa;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .chat-header {
