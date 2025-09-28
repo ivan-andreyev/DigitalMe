@@ -65,9 +65,9 @@ public class DataConsistencyHealthCheck : IHealthCheck
             var orphanedConversations = await _context.Database
                 .SqlQuery<int>($@"
                     SELECT COUNT(*) as Value
-                    FROM Conversations c
-                    LEFT JOIN PersonalityProfiles pp ON c.PersonalityProfileId = pp.Id
-                    WHERE pp.Id IS NULL")
+                    FROM ""Conversations"" c
+                    LEFT JOIN ""PersonalityProfiles"" pp ON c.""PersonalityProfileId"" = pp.""Id""
+                    WHERE pp.""Id"" IS NULL")
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (orphanedConversations > 0)
