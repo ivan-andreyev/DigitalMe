@@ -1,4 +1,5 @@
 using DigitalMe.Data;
+using DigitalMe.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -62,13 +63,15 @@ public class DataConsistencyHealthCheck : IHealthCheck
             }
 
             // Check 3: Check for orphaned conversations (FK constraint violations)
-            var orphanedConversations = await _context.Database
-                .SqlQuery<int>($@"
+            var orphanedConversationsResult = await _context.Database
+                .SqlQuery<QueryResult>($@"
                     SELECT COUNT(*) as value
                     FROM ""Conversations"" c
                     LEFT JOIN ""PersonalityProfiles"" pp ON c.""PersonalityProfileId"" = pp.""Id""
                     WHERE pp.""Id"" IS NULL")
                 .FirstOrDefaultAsync(cancellationToken);
+
+            var orphanedConversations = orphanedConversationsResult?.value ?? 0;
 
             if (orphanedConversations > 0)
             {
@@ -95,12 +98,14 @@ public class DataConsistencyHealthCheck : IHealthCheck
             {
                 // PostgreSQL: Check if foreign key constraints are generally enabled
                 // In PostgreSQL, FK constraints are typically always enabled unless explicitly disabled
-                var constraintCount = await _context.Database
-                    .SqlQuery<int>($@"
+                var constraintCountResult = await _context.Database
+                    .SqlQuery<QueryResult>($@"
                         SELECT COUNT(*) as value
                         FROM information_schema.table_constraints
                         WHERE constraint_type = 'FOREIGN KEY'")
                     .FirstOrDefaultAsync(cancellationToken);
+
+                var constraintCount = constraintCountResult?.value ?? 0;
 
                 if (constraintCount == 0)
                 {

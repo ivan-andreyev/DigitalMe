@@ -1,6 +1,7 @@
 using DigitalMe.Data;
 using DigitalMe.Data.Entities;
 using DigitalMe.Models;
+using DigitalMe.Models.Database;
 using DigitalMe.Services.HealthChecks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -52,11 +53,11 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
 
             // This query uses the exact table name as it appears in the database
             // Check if table exists with correct case-sensitive name
-            var tableExistsResult = await _context.Database
-                .SqlQuery<int>($"SELECT 1 as value FROM information_schema.tables WHERE table_name = '{tableName}' AND table_schema = 'public' LIMIT 1")
+            var tableExistsQueryResult = await _context.Database
+                .SqlQuery<QueryResult>($"SELECT 1 as value FROM information_schema.tables WHERE table_name = '{tableName}' AND table_schema = 'public' LIMIT 1")
                 .FirstOrDefaultAsync();
-            
-            var tableExists = tableExistsResult > 0;
+
+            var tableExists = (tableExistsQueryResult?.value ?? 0) > 0;
 
             Assert.True(tableExists, $"Table '{tableName}' should exist with exact case-sensitive name");
             _output.WriteLine($"✅ Table '{tableName}' exists");
@@ -157,18 +158,20 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
 
         // Test 1: Quoted table names (should work)
         _output.WriteLine("🔍 Testing quoted table names");
-        var quotedQuery = await _context.Database
-            .SqlQuery<int>($@"SELECT COUNT(*) as value FROM ""Conversations""")
+        var quotedQueryResult = await _context.Database
+            .SqlQuery<QueryResult>($@"SELECT COUNT(*) as value FROM ""Conversations""")
             .FirstOrDefaultAsync();
+        var quotedQuery = quotedQueryResult?.value ?? 0;
 
         Assert.True(quotedQuery >= 0, "Quoted table name query should work");
         _output.WriteLine($"✅ Quoted table query returned: {quotedQuery}");
 
         // Test 2: Quoted column names (should work)
         _output.WriteLine("🔍 Testing quoted column names");
-        var quotedColumnQuery = await _context.Database
-            .SqlQuery<int>($@"SELECT COUNT(*) as value FROM ""Conversations"" WHERE ""IsActive"" = true")
+        var quotedColumnQueryResult = await _context.Database
+            .SqlQuery<QueryResult>($@"SELECT COUNT(*) as value FROM ""Conversations"" WHERE ""IsActive"" = true")
             .FirstOrDefaultAsync();
+        var quotedColumnQuery = quotedColumnQueryResult?.value ?? 0;
 
         Assert.True(quotedColumnQuery >= 0, "Quoted column name query should work");
         _output.WriteLine($"✅ Quoted column query returned: {quotedColumnQuery}");
@@ -177,9 +180,10 @@ public class PostgreSQLCaseSensitivityTests : IClassFixture<WebApplicationFactor
         _output.WriteLine("🔍 Testing unquoted mixed case (should handle gracefully)");
         try
         {
-            var unquotedQuery = await _context.Database
-                .SqlQuery<int>($@"SELECT COUNT(*) as value FROM Conversations WHERE IsActive = true")
+            var unquotedQueryResult = await _context.Database
+                .SqlQuery<QueryResult>($@"SELECT COUNT(*) as value FROM Conversations WHERE IsActive = true")
                 .FirstOrDefaultAsync();
+            var unquotedQuery = unquotedQueryResult?.value ?? 0;
 
             _output.WriteLine($"⚠️ Unquoted query unexpectedly succeeded: {unquotedQuery}");
         }
