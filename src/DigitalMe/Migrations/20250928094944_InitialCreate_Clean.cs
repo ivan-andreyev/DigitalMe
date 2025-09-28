@@ -486,7 +486,7 @@ namespace DigitalMe.Migrations
                 name: "IX_Conversations_UserId_IsActive_StartedAt",
                 table: "Conversations",
                 columns: new[] { "UserId", "IsActive", "StartedAt" },
-                filter: "IsActive = true");
+                filter: "\"IsActive\" = true");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ErrorPatterns_ApiEndpoint",

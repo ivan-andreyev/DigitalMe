@@ -133,7 +133,7 @@ namespace DigitalMe.Migrations
 
                     b.HasIndex("UserId", "IsActive", "StartedAt")
                         .HasDatabaseName("IX_Conversations_UserId_IsActive_StartedAt")
-                        .HasFilter("IsActive = true");
+                        .HasFilter("\"IsActive\" = true");
 
                     b.ToTable("Conversations");
                 });
