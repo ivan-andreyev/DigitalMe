@@ -9,10 +9,29 @@ public static class IvanDataSeeder
 {
     public static void SeedBasicIvanProfile(DigitalMeDbContext context)
     {
-        // Check if Ivan's profile already exists
-        if (context.PersonalityProfiles.Any(p => p.Name == "Ivan"))
+        try
         {
-            Console.WriteLine("Ivan's profile already exists. Skipping seeding.");
+            // Check if the PersonalityProfiles table exists before attempting seeding
+            context.Database.ExecuteSqlRaw("SELECT 1 FROM \"PersonalityProfiles\" LIMIT 1");
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("PersonalityProfiles table does not exist. Skipping Ivan seeding.");
+            return;
+        }
+
+        try
+        {
+            // Check if Ivan's profile already exists
+            if (context.PersonalityProfiles.Any(p => p.Name == "Ivan"))
+            {
+                Console.WriteLine("Ivan's profile already exists. Skipping seeding.");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to check existing Ivan profile: {ex.Message}. Skipping seeding.");
             return;
         }
 
