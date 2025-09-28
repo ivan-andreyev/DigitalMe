@@ -64,7 +64,7 @@ public class DataConsistencyHealthCheck : IHealthCheck
             // Check 3: Check for orphaned conversations (FK constraint violations)
             var orphanedConversations = await _context.Database
                 .SqlQuery<int>($@"
-                    SELECT COUNT(*) as Value
+                    SELECT COUNT(*) as value
                     FROM ""Conversations"" c
                     LEFT JOIN ""PersonalityProfiles"" pp ON c.""PersonalityProfileId"" = pp.""Id""
                     WHERE pp.""Id"" IS NULL")
