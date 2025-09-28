@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.Text.Json;
 using DigitalMe.Common;
 using DigitalMe.Integrations.MCP.Models;
 using DigitalMe.Models;
 using DigitalMe.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalMe.Integrations.MCP;
@@ -13,26 +15,47 @@ public class McpServiceProper : IMcpService
     private readonly IAnthropicService _anthropicService; // Fallback
     private readonly ILogger<McpServiceProper> _logger;
     private readonly IPersonalityService _personalityService;
+    private readonly IConfiguration _configuration;
+    private readonly bool _mcpEnabled;
 
     public McpServiceProper(
         IMcpClient mcpClient,
         IAnthropicService anthropicService,
         ILogger<McpServiceProper> logger,
-        IPersonalityService personalityService)
+        IPersonalityService personalityService,
+        IConfiguration configuration)
     {
         _mcpClient = mcpClient;
         _anthropicService = anthropicService;
         _logger = logger;
         _personalityService = personalityService;
+        _configuration = configuration;
+        _mcpEnabled = _configuration.GetValue<bool>("MCP:Enabled", false);
+
+        _logger.LogInformation("🚀 McpServiceProper initialized with MCP Enabled: {McpEnabled}", _mcpEnabled);
     }
 
     public async Task<Result<bool>> InitializeAsync()
     {
         return await ResultExtensions.TryAsync(async () =>
         {
-            _logger.LogInformation("🚀 Initializing MCP Service (proper implementation)");
+            _logger.LogInformation("🚀 Initializing MCP Service (proper implementation) - MCP Enabled: {McpEnabled}", _mcpEnabled);
 
-            // Try MCP first
+            // If MCP is disabled, skip straight to Anthropic fallback
+            if (!_mcpEnabled)
+            {
+                _logger.LogInformation("⚡ MCP disabled in configuration, using direct Anthropic");
+                var anthropicResult = await _anthropicService.IsConnectedAsync();
+                if (anthropicResult.IsSuccess && anthropicResult.Value)
+                {
+                    _logger.LogInformation("✅ Direct Anthropic connection established (MCP bypassed)");
+                    return true;
+                }
+                _logger.LogError("❌ Anthropic unavailable and MCP disabled");
+                return false;
+            }
+
+            // Try MCP first only if enabled
             var mcpConnected = await _mcpClient.InitializeAsync();
             if (mcpConnected)
             {
@@ -59,33 +82,93 @@ public class McpServiceProper : IMcpService
     {
         return await ResultExtensions.TryAsync(async () =>
         {
-            _logger.LogInformation("🔍 SendMessageAsync called with message: '{Message}', MCP IsConnected: {IsConnected}", message, _mcpClient.IsConnected);
+            var stopwatch = Stopwatch.StartNew();
+            var messagePreview = message.Substring(0, Math.Min(50, message.Length));
 
-            // Try to initialize if not connected
-            if (!_mcpClient.IsConnected)
-            {
-                _logger.LogInformation("🔗 MCP not connected, attempting initialization...");
-                var initialized = await _mcpClient.InitializeAsync();
-                _logger.LogInformation("🔗 MCP initialization result: {Result}", initialized);
-            }
+            _logger.LogInformation("🔍 SendMessageAsync called with message: '{Message}', MCP Enabled: {McpEnabled}, MCP IsConnected: {IsConnected}",
+                messagePreview, _mcpEnabled, _mcpClient.IsConnected);
 
-            if (_mcpClient.IsConnected)
+            try
             {
-                return await SendMessageViaMcpAsync(message, context);
-            }
-            else
-            {
-                _logger.LogInformation("📞 Using Anthropic fallback (MCP unavailable)");
-                var anthropicResult = await _anthropicService.SendMessageAsync(message, context.Profile);
-                if (anthropicResult.IsSuccess)
+                string result;
+                string path;
+
+                // If MCP is disabled, skip straight to Anthropic for instant response
+                if (!_mcpEnabled)
                 {
-                    return anthropicResult.Value;
+                    _logger.LogInformation("⚡ MCP disabled - using direct Anthropic (instant fallback)");
+                    var anthropicStopwatch = Stopwatch.StartNew();
+                    var anthropicResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+                    anthropicStopwatch.Stop();
+
+                    if (anthropicResult.IsSuccess)
+                    {
+                        result = anthropicResult.Value;
+                        path = "DirectAnthropic";
+                        _logger.LogInformation("⚡ Direct Anthropic response time: {AnthropicTime}ms", anthropicStopwatch.ElapsedMilliseconds);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Direct Anthropic failed: {Error}", anthropicResult.Error);
+                        result = await GenerateFallbackResponseAsync(message, context);
+                        path = "StaticFallback";
+                    }
                 }
                 else
                 {
-                    _logger.LogWarning("Anthropic fallback failed: {Error}", anthropicResult.Error);
-                    return await GenerateFallbackResponseAsync(message, context);
+                    // MCP is enabled - try MCP first
+                    // Try to initialize if not connected
+                    if (!_mcpClient.IsConnected)
+                    {
+                        _logger.LogInformation("🔗 MCP not connected, attempting initialization...");
+                        var initStopwatch = Stopwatch.StartNew();
+                        var initialized = await _mcpClient.InitializeAsync();
+                        initStopwatch.Stop();
+                        _logger.LogInformation("🔗 MCP initialization result: {Result} (took {InitTime}ms)", initialized, initStopwatch.ElapsedMilliseconds);
+                    }
+
+                    if (_mcpClient.IsConnected)
+                    {
+                        var mcpStopwatch = Stopwatch.StartNew();
+                        result = await SendMessageViaMcpAsync(message, context);
+                        mcpStopwatch.Stop();
+                        path = "MCP";
+                        _logger.LogInformation("🔗 MCP response time: {McpTime}ms", mcpStopwatch.ElapsedMilliseconds);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("📞 Using Anthropic fallback (MCP unavailable)");
+                        var fallbackStopwatch = Stopwatch.StartNew();
+                        var anthropicResult = await _anthropicService.SendMessageAsync(message, context.Profile);
+                        fallbackStopwatch.Stop();
+
+                        if (anthropicResult.IsSuccess)
+                        {
+                            result = anthropicResult.Value;
+                            path = "AnthropicFallback";
+                            _logger.LogInformation("📞 Anthropic fallback response time: {FallbackTime}ms", fallbackStopwatch.ElapsedMilliseconds);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Anthropic fallback failed: {Error}", anthropicResult.Error);
+                            result = await GenerateFallbackResponseAsync(message, context);
+                            path = "StaticFallback";
+                        }
+                    }
                 }
+
+                stopwatch.Stop();
+                _logger.LogInformation("🎯 PERFORMANCE: Total response time: {TotalTime}ms via {Path} for message: '{Message}'",
+                    stopwatch.ElapsedMilliseconds, path, messagePreview);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+                _logger.LogError(ex, "💥 PERFORMANCE: Request failed after {TotalTime}ms for message: '{Message}'",
+                    stopwatch.ElapsedMilliseconds, messagePreview);
+                throw;
             }
         }, $"Failed to send message via MCP: {message.Substring(0, Math.Min(50, message.Length))}");
     }
@@ -191,14 +274,22 @@ public class McpServiceProper : IMcpService
     {
         return await ResultExtensions.TryAsync(async () =>
         {
+            // If MCP is disabled, consider the service "connected" via Anthropic fallback
+            if (!_mcpEnabled)
+            {
+                var anthropicResult = await _anthropicService.IsConnectedAsync();
+                return anthropicResult.IsSuccess && anthropicResult.Value;
+            }
+
+            // MCP is enabled - check MCP connection first
             if (_mcpClient.IsConnected)
             {
                 return true;
             }
 
             // Check fallback Anthropic connection
-            var anthropicResult = await _anthropicService.IsConnectedAsync();
-            return anthropicResult.IsSuccess && anthropicResult.Value;
+            var anthropicFallbackResult = await _anthropicService.IsConnectedAsync();
+            return anthropicFallbackResult.IsSuccess && anthropicFallbackResult.Value;
         }, "Failed to check MCP service connection status");
     }
 

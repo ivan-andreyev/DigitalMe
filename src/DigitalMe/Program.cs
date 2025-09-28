@@ -410,8 +410,13 @@ builder.Services.AddScoped<DigitalMe.Integrations.MCP.IAnthropicService, Digital
 builder.Services.AddScoped<DigitalMe.Integrations.MCP.Tools.ToolExecutor>();
 builder.Services.AddSingleton<DigitalMe.Integrations.MCP.Tools.ToolRegistry>();
 
-// MCP Client and Proper Service
-builder.Services.AddHttpClient<DigitalMe.Integrations.MCP.McpClient>();
+// MCP Client and Proper Service - Fast timeout for production fail-fast
+builder.Services.AddHttpClient<DigitalMe.Integrations.MCP.McpClient>()
+    .ConfigureHttpClient(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(5); // Fast fail instead of 100s default
+        client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+    });
 builder.Services.AddScoped<DigitalMe.Integrations.MCP.IMcpClient, DigitalMe.Integrations.MCP.McpClient>(provider =>
 {
     var httpClient = provider.GetRequiredService<HttpClient>();
