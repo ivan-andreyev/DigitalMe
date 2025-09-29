@@ -1,7 +1,9 @@
 using DigitalMe.Data.Entities;
 using DigitalMe.Repositories;
 using DigitalMe.Services;
+using DigitalMe.Services.Security;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -15,14 +17,32 @@ namespace DigitalMe.Tests.Unit.Services;
 public class ApiConfigurationServiceTests : BaseTestWithDatabase
 {
     private readonly Mock<ILogger<ApiConfigurationService>> _mockLogger;
+    private readonly Mock<IKeyEncryptionService> _mockEncryptionService;
+    private readonly IConfiguration _configuration;
     private readonly ApiConfigurationService _service;
     private readonly IApiConfigurationRepository _repository;
 
     public ApiConfigurationServiceTests()
     {
         _mockLogger = new Mock<ILogger<ApiConfigurationService>>();
+        _mockEncryptionService = new Mock<IKeyEncryptionService>();
         _repository = new ApiConfigurationRepository(Context);
-        _service = new ApiConfigurationService(_repository, _mockLogger.Object);
+
+        // Setup minimal configuration for tests
+        var configData = new Dictionary<string, string>
+        {
+            ["ApiKeys:Anthropic"] = "sk-ant-system-key",
+            ["ApiKeys:OpenAI"] = "sk-openai-system-key"
+        };
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(configData!)
+            .Build();
+
+        _service = new ApiConfigurationService(
+            _repository,
+            _mockEncryptionService.Object,
+            _configuration,
+            _mockLogger.Object);
     }
 
     private ApiConfiguration CreateTestConfiguration(
@@ -38,6 +58,7 @@ public class ApiConfigurationServiceTests : BaseTestWithDatabase
             EncryptedApiKey = "encrypted_key_data_12345",
             EncryptionIV = "iv_data_12345",
             EncryptionSalt = "salt_data_12345",
+            AuthenticationTag = "tag_data_12345",
             KeyFingerprint = "fingerprint_12345",
             IsActive = isActive,
             ValidationStatus = ApiConfigurationStatus.Unknown

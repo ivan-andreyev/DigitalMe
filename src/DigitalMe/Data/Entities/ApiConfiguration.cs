@@ -51,6 +51,13 @@ public class ApiConfiguration : BaseEntity
     public string EncryptionSalt { get; set; } = string.Empty;
 
     /// <summary>
+    /// Authentication tag from AES-GCM encryption for tamper detection (Base64-encoded).
+    /// </summary>
+    [Required]
+    [MaxLength(100)]
+    public string AuthenticationTag { get; set; } = string.Empty;
+
+    /// <summary>
     /// SHA-256 fingerprint of the plaintext API key for verification.
     /// </summary>
     [Required]

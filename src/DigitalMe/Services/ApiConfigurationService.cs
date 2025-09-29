@@ -1,29 +1,42 @@
 using DigitalMe.Common;
 using DigitalMe.Data.Entities;
+using DigitalMe.Models.Security;
 using DigitalMe.Repositories;
+using DigitalMe.Services.Security;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
 namespace DigitalMe.Services;
 
 /// <summary>
 /// Service implementation for managing API configuration business logic and orchestration.
 /// Handles API key lifecycle, validation, usage tracking, and configuration management.
+/// Integrates encryption services for secure key storage and resolution.
 /// </summary>
 public class ApiConfigurationService : IApiConfigurationService
 {
     private readonly IApiConfigurationRepository _repository;
+    private readonly IKeyEncryptionService _encryptionService;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<ApiConfigurationService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the ApiConfigurationService.
     /// </summary>
     /// <param name="repository">The repository for data access operations.</param>
+    /// <param name="encryptionService">The encryption service for key security.</param>
+    /// <param name="configuration">The configuration for system-wide settings.</param>
     /// <param name="logger">The logger for diagnostic information.</param>
     public ApiConfigurationService(
         IApiConfigurationRepository repository,
+        IKeyEncryptionService encryptionService,
+        IConfiguration configuration,
         ILogger<ApiConfigurationService> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _encryptionService = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -205,5 +218,125 @@ public class ApiConfigurationService : IApiConfigurationService
         _logger.LogDebug("Getting all configurations for user {UserId}", userId);
 
         return await _repository.GetAllByUserAsync(userId);
+    }
+
+    /// <inheritdoc />
+    public async Task<string> GetApiKeyAsync(string provider, string userId)
+    {
+        ValidationHelper.ValidateProvider(provider, nameof(provider));
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+
+        _logger.LogDebug("Resolving API key for provider {Provider}, user {UserId}", provider, userId);
+
+        // Try to get user's personal configuration
+        var userConfig = await _repository.GetByUserAndProviderAsync(userId, provider);
+
+        // If user has active configuration, try to decrypt their personal key
+        if (userConfig != null && userConfig.IsActive)
+        {
+            try
+            {
+                _logger.LogDebug("Found active user configuration {ConfigurationId}, attempting decryption", userConfig.Id);
+
+                var encryptedInfo = new EncryptedKeyInfo(
+                    userConfig.EncryptedApiKey,
+                    userConfig.EncryptionIV,
+                    userConfig.EncryptionSalt,
+                    userConfig.AuthenticationTag,
+                    userConfig.KeyFingerprint);
+
+                var decryptedKey = await _encryptionService.DecryptApiKeyAsync(encryptedInfo, userId);
+
+                _logger.LogInformation("Successfully resolved user API key for provider {Provider}, user {UserId}", provider, userId);
+                return decryptedKey;
+            }
+            catch (CryptographicException ex)
+            {
+                _logger.LogWarning(ex, "Failed to decrypt user API key for provider {Provider}, user {UserId}, falling back to system key",
+                    provider, userId);
+                // Fall through to system key fallback
+            }
+        }
+
+        // Fallback to system-wide key from configuration
+        var systemKey = _configuration[$"ApiKeys:{provider}"];
+        if (string.IsNullOrWhiteSpace(systemKey))
+        {
+            _logger.LogError("No API key available for provider {Provider}, user {UserId}", provider, userId);
+            throw new InvalidOperationException($"No API key configured for provider '{provider}'");
+        }
+
+        _logger.LogInformation("Using system API key for provider {Provider}, user {UserId}", provider, userId);
+        return systemKey;
+    }
+
+    /// <inheritdoc />
+    public async Task SetUserApiKeyAsync(string provider, string userId, string plainApiKey)
+    {
+        ValidationHelper.ValidateProvider(provider, nameof(provider));
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+
+        if (string.IsNullOrWhiteSpace(plainApiKey))
+        {
+            throw new ArgumentException("API key cannot be null or whitespace.", nameof(plainApiKey));
+        }
+
+        _logger.LogInformation("Setting user API key for provider {Provider}, user {UserId}", provider, userId);
+
+        // Encrypt the API key
+        var encryptedInfo = await _encryptionService.EncryptApiKeyAsync(plainApiKey, userId);
+
+        // Check if configuration already exists
+        var existingConfig = await _repository.GetByUserAndProviderAsync(userId, provider);
+
+        if (existingConfig != null)
+        {
+            _logger.LogDebug("Updating existing configuration {ConfigurationId}", existingConfig.Id);
+
+            // Update existing configuration
+            UpdateConfigurationWithEncryptedKey(existingConfig, encryptedInfo);
+
+            await _repository.UpdateAsync(existingConfig);
+
+            _logger.LogInformation("Updated API key for configuration {ConfigurationId}, provider {Provider}, user {UserId}",
+                existingConfig.Id, provider, userId);
+        }
+        else
+        {
+            _logger.LogDebug("Creating new configuration for provider {Provider}, user {UserId}", provider, userId);
+
+            // Create new configuration
+            var newConfig = new ApiConfiguration
+            {
+                UserId = userId,
+                Provider = provider
+            };
+
+            UpdateConfigurationWithEncryptedKey(newConfig, encryptedInfo);
+
+            var created = await _repository.CreateAsync(newConfig);
+
+            _logger.LogInformation("Created new API configuration {ConfigurationId} for provider {Provider}, user {UserId}",
+                created.Id, provider, userId);
+        }
+    }
+
+    /// <summary>
+    /// Updates a configuration entity with encrypted key information.
+    /// </summary>
+    /// <param name="configuration">The configuration to update.</param>
+    /// <param name="encryptedInfo">The encrypted key information.</param>
+    private static void UpdateConfigurationWithEncryptedKey(
+        ApiConfiguration configuration,
+        EncryptedKeyInfo encryptedInfo)
+    {
+        configuration.EncryptedApiKey = encryptedInfo.EncryptedData;
+        configuration.EncryptionIV = encryptedInfo.IV;
+        configuration.EncryptionSalt = encryptedInfo.Salt;
+        configuration.AuthenticationTag = encryptedInfo.Tag;
+        configuration.KeyFingerprint = encryptedInfo.KeyFingerprint;
+        configuration.IsActive = true;
+        configuration.ValidationStatus = ApiConfigurationStatus.Unknown;
+        configuration.LastValidatedAt = null;
     }
 }

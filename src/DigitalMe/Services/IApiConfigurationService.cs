@@ -83,4 +83,30 @@ public interface IApiConfigurationService
     /// <returns>A list of all configurations belonging to the user.</returns>
     /// <exception cref="ArgumentException">Thrown when userId is invalid.</exception>
     Task<List<ApiConfiguration>> GetUserConfigurationsAsync(string userId);
+
+    /// <summary>
+    /// Resolves and retrieves the API key for a given provider and user.
+    /// First attempts to use the user's personal encrypted key if configured.
+    /// Falls back to the system-wide key from configuration if:
+    /// - No user configuration exists
+    /// - User configuration is inactive
+    /// - Decryption fails
+    /// </summary>
+    /// <param name="provider">The AI provider name (e.g., "Anthropic", "OpenAI").</param>
+    /// <param name="userId">The user identifier.</param>
+    /// <returns>The resolved API key (decrypted user key or system key).</returns>
+    /// <exception cref="ArgumentException">Thrown when provider or userId is invalid.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no API key is available for the provider.</exception>
+    Task<string> GetApiKeyAsync(string provider, string userId);
+
+    /// <summary>
+    /// Stores an encrypted user API key for the specified provider.
+    /// If a configuration already exists, it will be updated.
+    /// If no configuration exists, a new one will be created.
+    /// </summary>
+    /// <param name="provider">The AI provider name (e.g., "Anthropic", "OpenAI").</param>
+    /// <param name="userId">The user identifier.</param>
+    /// <param name="plainApiKey">The plain-text API key to encrypt and store.</param>
+    /// <exception cref="ArgumentException">Thrown when any parameter is invalid.</exception>
+    Task SetUserApiKeyAsync(string provider, string userId, string plainApiKey);
 }
