@@ -110,7 +110,10 @@ public static class CleanArchitectureServiceCollectionExtensions
         
         // Learning Infrastructure Services - Phase 1.1 refactored architecture
         services.AddLearningInfrastructureServices();
-        
+
+        // Dynamic API Configuration System - Phase 5 integration
+        services.AddDynamicApiConfigurationServices();
+
         return services;
     }
 
@@ -148,6 +151,49 @@ public static class CleanArchitectureServiceCollectionExtensions
 
         // Error Learning System - Phase 3 (T3.1-T3.3)
         services.AddErrorLearningSystem();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers Dynamic API Configuration System services following Clean Architecture principles.
+    /// Provides dynamic API key management, encryption, usage tracking, and quota management.
+    /// </summary>
+    public static IServiceCollection AddDynamicApiConfigurationServices(this IServiceCollection services)
+    {
+        // Phase 1-2: Core Configuration and Security
+        services.AddScoped<DigitalMe.Repositories.IApiConfigurationRepository,
+                          DigitalMe.Repositories.ApiConfigurationRepository>();
+        services.AddScoped<DigitalMe.Services.Security.IKeyEncryptionService,
+                          DigitalMe.Services.Security.KeyEncryptionService>();
+        services.AddScoped<DigitalMe.Services.IApiConfigurationService,
+                          DigitalMe.Services.ApiConfigurationService>();
+
+        // Phase 3: API Key Validation
+        services.AddScoped<DigitalMe.Services.Security.IApiKeyValidator,
+                          DigitalMe.Services.Security.ApiKeyValidator>();
+
+        // Phase 4: Usage Tracking and Quota Management
+        services.AddScoped<DigitalMe.Repositories.IApiUsageRepository,
+                          DigitalMe.Repositories.ApiUsageRepository>();
+        services.AddScoped<DigitalMe.Services.Usage.IApiUsageTracker,
+                          DigitalMe.Services.Usage.ApiUsageTracker>();
+        services.AddScoped<DigitalMe.Services.Usage.IQuotaManager,
+                          DigitalMe.Services.Usage.QuotaManager>();
+        services.AddScoped<DigitalMe.Services.Notifications.INotificationService,
+                          DigitalMe.Services.Notifications.NotificationService>();
+
+        // Phase 5: Service Integration - AnthropicServiceV2 with dynamic configuration
+        services.AddScoped<DigitalMe.Services.Integrations.IAnthropicServiceV2,
+                          DigitalMe.Services.Integrations.AnthropicServiceV2>();
+
+        // HTTP Client Factory for Anthropic API
+        services.AddHttpClient("Anthropic", client =>
+        {
+            client.BaseAddress = new Uri("https://api.anthropic.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "DigitalMe/1.0");
+        });
 
         return services;
     }
