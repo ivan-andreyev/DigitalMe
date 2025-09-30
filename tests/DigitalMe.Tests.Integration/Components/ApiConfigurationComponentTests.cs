@@ -28,13 +28,11 @@ public class ApiConfigurationComponentTests : TestContext
             .Setup(q => q.GetQuotaStatusAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(new DigitalMe.Models.Usage.QuotaStatus
             {
-                UserId = "test-user-123",
-                Provider = "Anthropic",
-                TokensUsed = 1000,
-                TokensLimit = 10000,
-                UsagePercentage = 10.0m,
-                IsOverQuota = false,
-                DailyResetTime = DateTime.UtcNow.AddHours(12)
+                DailyLimit = 10000,
+                Used = 1000,
+                Remaining = 9000,
+                PercentUsed = 10.0m,
+                ResetsAt = DateTime.UtcNow.AddHours(12)
             });
 
         _mockQuotaManager
