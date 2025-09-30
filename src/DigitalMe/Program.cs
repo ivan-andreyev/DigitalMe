@@ -267,11 +267,21 @@ else if (builder.Environment.IsProduction())
 }
 else
 {
-    // Development/Testing - use InMemory for fast startup and test isolation
-    tempLogger?.LogInformation("⚠️ Using InMemory database for development/testing (connection string: {HasConnection})",
+    // Development/Testing - WebApplicationFactory will override with InMemory for test isolation
+    tempLogger?.LogInformation("⚠️ Development/Testing environment detected (connection string: {HasConnection})",
         !string.IsNullOrEmpty(connectionString));
-    builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-        options.UseInMemoryDatabase(connectionString ?? "DigitalMe"));
+
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        // Use provided connection string for development
+        builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+            options.UseSqlite(connectionString));
+    }
+    else
+    {
+        // Testing environment - DbContext will be configured by WebApplicationFactory
+        tempLogger?.LogInformation("⚠️ No connection string for Testing - DbContext will be configured by test infrastructure");
+    }
 }
 
 // Note: ConvertDatabaseUrlToNpgsql function moved to top of database configuration section
