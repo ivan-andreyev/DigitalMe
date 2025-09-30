@@ -53,4 +53,20 @@ public interface IApiUsageRepository
     /// <returns>Созданная запись с присвоенным Id.</returns>
     /// <exception cref="ArgumentNullException">Если dailyUsage равен null.</exception>
     Task<DailyUsage> CreateDailyUsageAsync(DailyUsage dailyUsage);
+
+    /// <summary>
+    /// Получает квоту пользователя для провайдера.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="provider">Название провайдера API (или null для общей квоты).</param>
+    /// <returns>Квота пользователя или null, если не найдена.</returns>
+    Task<UserQuota?> GetUserQuotaAsync(string userId, string? provider = null);
+
+    /// <summary>
+    /// Создает или обновляет квоту пользователя.
+    /// </summary>
+    /// <param name="quota">Квота для сохранения.</param>
+    /// <returns>Сохраненная квота.</returns>
+    /// <exception cref="ArgumentNullException">Если quota равна null.</exception>
+    Task<UserQuota> SaveUserQuotaAsync(UserQuota quota);
 }
