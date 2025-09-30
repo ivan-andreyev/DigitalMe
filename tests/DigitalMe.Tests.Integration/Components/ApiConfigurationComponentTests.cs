@@ -17,11 +17,13 @@ public class ApiConfigurationComponentTests : TestContext
 {
     private readonly Mock<IApiConfigurationService> _mockConfigService;
     private readonly Mock<DigitalMe.Services.Usage.IQuotaManager> _mockQuotaManager;
+    private readonly Mock<DigitalMe.Services.Usage.IApiUsageTracker> _mockUsageTracker;
 
     public ApiConfigurationComponentTests()
     {
         _mockConfigService = new Mock<IApiConfigurationService>();
         _mockQuotaManager = new Mock<DigitalMe.Services.Usage.IQuotaManager>();
+        _mockUsageTracker = new Mock<DigitalMe.Services.Usage.IApiUsageTracker>();
 
         // Setup default quota manager behaviors
         _mockQuotaManager
@@ -39,9 +41,38 @@ public class ApiConfigurationComponentTests : TestContext
             .Setup(q => q.CanUseTokensAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(true);
 
+        // Setup default usage tracker behaviors
+        _mockUsageTracker
+            .Setup(t => t.RecordUsageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DigitalMe.Models.Usage.UsageDetails>()))
+            .Returns(Task.CompletedTask);
+
+        _mockUsageTracker
+            .Setup(t => t.CalculateCost(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns(0.01m);
+
+        _mockUsageTracker
+            .Setup(t => t.GetUsageStatsAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new DigitalMe.Models.Usage.UsageStats
+            {
+                TotalTokens = 1000,
+                TotalCost = 0.10m,
+                RequestCount = 10,
+                SuccessRate = 100.0m,
+                AverageResponseTime = 250.0
+            });
+
+        _mockUsageTracker
+            .Setup(t => t.GetUsageTrendsAsync(It.IsAny<string>(), It.IsAny<int>()))
+            .ReturnsAsync(new List<DigitalMe.Models.Usage.UsageTrend>());
+
+        _mockUsageTracker
+            .Setup(t => t.GetProviderDistributionAsync(It.IsAny<string>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new Dictionary<string, decimal>());
+
         // Register services
         Services.AddScoped(_ => _mockConfigService.Object);
         Services.AddScoped(_ => _mockQuotaManager.Object);
+        Services.AddScoped(_ => _mockUsageTracker.Object);
 
         // Mock authentication state
         var authState = Task.FromResult(new AuthenticationState(

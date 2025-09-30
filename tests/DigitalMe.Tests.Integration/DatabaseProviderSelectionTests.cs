@@ -92,7 +92,8 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
         // Arrange - Production without any database configuration
         using var factory = new TestWebApplicationFactory()
             .WithEnvironment("Production")
-            .WithConnectionString(null);
+            .WithConnectionString(null)
+            .WithSkipTestingCheck();
 
         // Act & Assert
         var exception = Assert.Throws<InvalidOperationException>(() =>
@@ -112,7 +113,8 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
         // Arrange - Development environment without connection string
         using var factory = new TestWebApplicationFactory()
             .WithEnvironment("Development")
-            .WithConnectionString(null);
+            .WithConnectionString(null)
+            .WithSkipTestingCheck();
 
         // Act
         using var scope = factory.Services.CreateScope();
@@ -166,6 +168,12 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
         public TestWebApplicationFactory WithEnvironmentVariable(string key, string value)
         {
             _environmentVariables[key] = value;
+            return this;
+        }
+
+        public TestWebApplicationFactory WithSkipTestingCheck()
+        {
+            _environmentVariables["SKIP_TESTING_CHECK"] = "true";
             return this;
         }
 

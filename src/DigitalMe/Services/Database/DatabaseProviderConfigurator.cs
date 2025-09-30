@@ -142,12 +142,18 @@ public class DatabaseProviderConfigurator
         string? connectionString,
         bool usePostgreSQL)
     {
-        // Testing environment - DbContext will be configured by WebApplicationFactory
-        // MUST CHECK FIRST before any provider registration!
-        if (environment.EnvironmentName == "Testing")
+        // Allow overriding Testing check for DatabaseProviderSelectionTests
+        // This enables testing Production/Development provider selection logic
+        var skipTestingCheck = Environment.GetEnvironmentVariable("SKIP_TESTING_CHECK");
+        if (skipTestingCheck != "true" && environment.EnvironmentName == "Testing")
         {
             _logger?.LogInformation("⚠️ Testing environment - DbContext registration skipped (will be configured by test infrastructure)");
             return;
+        }
+
+        if (skipTestingCheck == "true")
+        {
+            _logger?.LogInformation("🔓 SKIP_TESTING_CHECK enabled - Testing environment check bypassed for provider selection tests");
         }
 
         // PostgreSQL provider
