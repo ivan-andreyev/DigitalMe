@@ -261,88 +261,17 @@ public class SecretsManagementService : ISecretsManagementService
     {
         try
         {
-            _logger.LogInformation("🔧 BLOCKER #2 FIX: Attempting to get environment variable '{VarName}'", variableName);
-
-            // Try standard .NET environment variable access first
+            // ⚡ OPTIMIZATION: Use only .NET Environment.GetEnvironmentVariable()
+            // Removed Process.Start (powershell/cmd) - caused 5-10 sec blocking per variable
             var envValue = Environment.GetEnvironmentVariable(variableName);
-            _logger.LogInformation("🔧 .NET Environment.GetEnvironmentVariable('{VarName}') = '{Value}'",
-                variableName, envValue ?? "null");
 
             if (!string.IsNullOrWhiteSpace(envValue))
             {
-                _logger.LogInformation("🔧 BLOCKER #2 FIX: Found via standard .NET - '{VarName}' = {Length} chars",
-                    variableName, envValue.Length);
+                _logger.LogDebug("Environment variable '{VarName}' found: {Length} chars", variableName, envValue.Length);
                 return envValue;
             }
 
-            // On Windows with Git Bash/WSL, try alternative approaches
-            if (OperatingSystem.IsWindows())
-            {
-                try
-                {
-                    // Try PowerShell environment variable access
-                    var processInfo = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-Command \"$env:{variableName}\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    };
-
-                    using var process = System.Diagnostics.Process.Start(processInfo);
-                    if (process != null)
-                    {
-                        var output = process.StandardOutput.ReadToEnd().Trim();
-                        process.WaitForExit();
-
-                        if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
-                        {
-                            _logger.LogDebug("Environment variable '{VarName}' found via PowerShell: {ValueLength} chars",
-                                variableName, output.Length);
-                            return output;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug(ex, "PowerShell environment variable access failed for '{VarName}'", variableName);
-                }
-
-                try
-                {
-                    // Try cmd environment variable access
-                    var cmdInfo = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/c echo %{variableName}%",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    };
-
-                    using var cmdProcess = System.Diagnostics.Process.Start(cmdInfo);
-                    if (cmdProcess != null)
-                    {
-                        var cmdOutput = cmdProcess.StandardOutput.ReadToEnd().Trim();
-                        cmdProcess.WaitForExit();
-
-                        if (cmdProcess.ExitCode == 0 && !string.IsNullOrWhiteSpace(cmdOutput) &&
-                            !cmdOutput.Equals($"%{variableName}%", StringComparison.OrdinalIgnoreCase))
-                        {
-                            _logger.LogDebug("Environment variable '{VarName}' found via cmd: {ValueLength} chars",
-                                variableName, cmdOutput.Length);
-                            return cmdOutput;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug(ex, "CMD environment variable access failed for '{VarName}'", variableName);
-                }
-            }
-
-            _logger.LogDebug("Environment variable '{VarName}' not found in any context", variableName);
+            _logger.LogDebug("Environment variable '{VarName}' not found", variableName);
             return null;
         }
         catch (Exception ex)
