@@ -181,7 +181,7 @@ public class DatabaseProviderConfigurator
         {
             if (string.IsNullOrEmpty(connectionString))
             {
-                _logger?.LogWarning("⚠️ No PostgreSQL connection string found in production. Using SQLite as fallback.");
+                _logger?.LogError("❌ PostgreSQL connection string is required in production");
                 _logger?.LogInformation("🔍 Environment check:");
                 _logger?.LogInformation("  - DATABASE_URL: {DatabaseUrl}",
                     Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET");
@@ -190,28 +190,61 @@ public class DatabaseProviderConfigurator
                 _logger?.LogInformation("  - POSTGRES_CONNECTION_STRING: {PostgresString}",
                     Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") != null ? "SET" : "NOT SET");
 
-                // Fallback to SQLite in production (temporary for deployment)
-                connectionString = "Data Source=digitalme_production.db";
+                throw new InvalidOperationException(
+                    "PostgreSQL connection string is required in production environment. " +
+                    "Please set DATABASE_URL, ConnectionStrings:DefaultConnection, or POSTGRES_CONNECTION_STRING.");
             }
 
-            _logger?.LogInformation("📦 Configuring SQLite database provider (production fallback)");
-            services.AddDbContext<DigitalMeDbContext>(options => options.UseSqlite(connectionString));
+            _logger?.LogInformation("🐘 Configuring PostgreSQL database provider for production");
+            services.AddDbContext<DigitalMeDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.CommandTimeout(30);
+                    npgsqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorCodesToAdd: null);
+                });
+
+                ConfigureDbContextOptions(options, environment);
+            });
             return;
         }
 
         // Development environment
         _logger?.LogInformation("⚠️ Development environment detected: {EnvName}", environment.EnvironmentName);
 
-        // Development environment with connection string
+        // Development environment with PostgreSQL connection string
+        if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
+        {
+            _logger?.LogInformation("🐘 Development environment - using PostgreSQL");
+            services.AddDbContext<DigitalMeDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.CommandTimeout(30);
+                    npgsqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorCodesToAdd: null);
+                });
+
+                ConfigureDbContextOptions(options, environment);
+            });
+            return;
+        }
+
+        // Development environment with SQLite connection string
         if (!string.IsNullOrEmpty(connectionString))
         {
-            _logger?.LogInformation("⚠️ Development environment - using SQLite with connection: {ConnectionString}", connectionString);
+            _logger?.LogInformation("📦 Development environment - using SQLite with connection: {ConnectionString}", connectionString);
             services.AddDbContext<DigitalMeDbContext>(options => options.UseSqlite(connectionString));
             return;
         }
 
         // Development without connection string - default SQLite
-        _logger?.LogInformation("⚠️ Development environment - using default SQLite database");
+        _logger?.LogInformation("📦 Development environment - using default SQLite database");
         services.AddDbContext<DigitalMeDbContext>(options => options.UseSqlite("Data Source=digitalme.db"));
     }
 

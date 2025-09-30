@@ -152,6 +152,7 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
         private string? _environment = "Testing";
         private string? _connectionString;
         private readonly Dictionary<string, string?> _environmentVariables = new();
+        private readonly List<string> _setEnvironmentVariables = new();
 
         public TestWebApplicationFactory WithEnvironment(string environment)
         {
@@ -181,6 +182,23 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
         {
             builder.UseEnvironment(_environment);
 
+            // Clean up any environment variables from previous tests FIRST
+            Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", null);
+            Environment.SetEnvironmentVariable("DATABASE_URL", null);
+            Environment.SetEnvironmentVariable("POSTGRES_CONNECTION_STRING", null);
+            Environment.SetEnvironmentVariable("SKIP_TESTING_CHECK", null);
+
+            // Set actual environment variables (DatabaseProviderConfigurator checks these FIRST)
+            // Always set to clear any previous test's value (null clears it)
+            Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", _connectionString);
+            _setEnvironmentVariables.Add("ConnectionStrings__DefaultConnection");
+
+            foreach (var kvp in _environmentVariables)
+            {
+                Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                _setEnvironmentVariables.Add(kvp.Key);
+            }
+
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 var configValues = new Dictionary<string, string?>
@@ -193,22 +211,26 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
                     ["ANTHROPIC_API_KEY"] = "test-api-key"
                 };
 
-                if (_connectionString != null)
-                {
-                    configValues["ConnectionStrings:DefaultConnection"] = _connectionString;
-                }
-
-                foreach (var kvp in _environmentVariables)
-                {
-                    configValues[kvp.Key] = kvp.Value;
-                }
-
                 config.AddInMemoryCollection(configValues);
             });
 
             // NO ConfigureServices override!
             // Program.cs DatabaseProviderConfigurator will handle database provider selection
             // based on environment and configuration we set above
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // Clean up environment variables to avoid test pollution
+                foreach (var varName in _setEnvironmentVariables)
+                {
+                    Environment.SetEnvironmentVariable(varName, null);
+                }
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
