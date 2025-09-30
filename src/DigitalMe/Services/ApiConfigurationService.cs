@@ -321,6 +321,71 @@ public class ApiConfigurationService : IApiConfigurationService
         }
     }
 
+    /// <inheritdoc />
+    public async Task RotateUserApiKeyAsync(string provider, string userId, string newPlainApiKey)
+    {
+        ValidationHelper.ValidateProvider(provider, nameof(provider));
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+
+        if (string.IsNullOrWhiteSpace(newPlainApiKey))
+        {
+            throw new ArgumentException("New API key cannot be null or whitespace.", nameof(newPlainApiKey));
+        }
+
+        _logger.LogInformation("Rotating API key for provider {Provider}, user {UserId}", provider, userId);
+
+        // Find existing active configuration
+        var existingConfig = await _repository.GetByUserAndProviderAsync(userId, provider);
+
+        // If existing configuration exists, deactivate it to preserve history
+        if (existingConfig != null)
+        {
+            _logger.LogDebug("Deactivating existing configuration {ConfigurationId} before rotation", existingConfig.Id);
+            existingConfig.IsActive = false;
+            await _repository.UpdateAsync(existingConfig);
+        }
+
+        // Encrypt the new API key
+        var encryptedInfo = await _encryptionService.EncryptApiKeyAsync(newPlainApiKey, userId);
+
+        // Create new configuration with the rotated key
+        var newConfig = new ApiConfiguration
+        {
+            UserId = userId,
+            Provider = provider
+        };
+
+        UpdateConfigurationWithEncryptedKey(newConfig, encryptedInfo);
+
+        var created = await _repository.CreateAsync(newConfig);
+
+        _logger.LogInformation("Successfully rotated API key for provider {Provider}, user {UserId}, new configuration {ConfigurationId}",
+            provider, userId, created.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<ApiConfiguration>> GetKeyHistoryAsync(string userId, string provider)
+    {
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+        ValidationHelper.ValidateProvider(provider, nameof(provider));
+
+        _logger.LogDebug("Retrieving key history for user {UserId}, provider {Provider}", userId, provider);
+
+        // Get all configurations for user
+        var allConfigs = await _repository.GetAllByUserAsync(userId);
+
+        // Filter by provider and sort by creation date descending (newest first)
+        var history = allConfigs
+            .Where(c => c.Provider == provider)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToList();
+
+        _logger.LogDebug("Found {Count} historical configurations for user {UserId}, provider {Provider}",
+            history.Count, userId, provider);
+
+        return history;
+    }
+
     /// <summary>
     /// Updates a configuration entity with encrypted key information.
     /// </summary>

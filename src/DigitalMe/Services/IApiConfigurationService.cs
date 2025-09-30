@@ -109,4 +109,25 @@ public interface IApiConfigurationService
     /// <param name="plainApiKey">The plain-text API key to encrypt and store.</param>
     /// <exception cref="ArgumentException">Thrown when any parameter is invalid.</exception>
     Task SetUserApiKeyAsync(string provider, string userId, string plainApiKey);
+
+    /// <summary>
+    /// Rotates an existing API key for a user and provider.
+    /// Encrypts the new key and updates the existing configuration.
+    /// If no configuration exists, creates a new one.
+    /// </summary>
+    /// <param name="provider">The AI provider name (e.g., "Anthropic", "OpenAI").</param>
+    /// <param name="userId">The user identifier.</param>
+    /// <param name="newPlainApiKey">The new plain-text API key to encrypt and store.</param>
+    /// <exception cref="ArgumentException">Thrown when any parameter is invalid.</exception>
+    Task RotateUserApiKeyAsync(string provider, string userId, string newPlainApiKey);
+
+    /// <summary>
+    /// Retrieves the complete history of API key configurations for a user and provider.
+    /// Returns all configurations (active and inactive) sorted by creation date descending.
+    /// </summary>
+    /// <param name="userId">The user identifier.</param>
+    /// <param name="provider">The AI provider name (e.g., "Anthropic", "OpenAI").</param>
+    /// <returns>A list of all configurations including historical (inactive) entries.</returns>
+    /// <exception cref="ArgumentException">Thrown when userId or provider is invalid.</exception>
+    Task<List<ApiConfiguration>> GetKeyHistoryAsync(string userId, string provider);
 }
