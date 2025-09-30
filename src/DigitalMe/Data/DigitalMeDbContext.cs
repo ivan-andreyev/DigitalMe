@@ -7,28 +7,90 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DigitalMe.Data;
 
+/// <summary>
+/// Application database context for DigitalMe, handling personal profile data, conversations, and API configurations.
+/// Extends IdentityDbContext to provide ASP.NET Core Identity integration with custom entities.
+/// </summary>
 public class DigitalMeDbContext : IdentityDbContext
 {
+    /// <summary>
+    /// Initializes a new instance of the DigitalMeDbContext with specified options.
+    /// </summary>
+    /// <param name="options">Database context configuration options.</param>
     public DigitalMeDbContext(DbContextOptions<DigitalMeDbContext> options) : base(options)
     {
     }
 
+    /// <summary>
+    /// Gets or sets the personality profiles collection.
+    /// </summary>
     public DbSet<PersonalityProfile> PersonalityProfiles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the personality traits collection.
+    /// </summary>
     public DbSet<PersonalityTrait> PersonalityTraits { get; set; }
+
+    /// <summary>
+    /// Gets or sets the temporal behavior patterns collection.
+    /// </summary>
     public DbSet<TemporalBehaviorPattern> TemporalBehaviorPatterns { get; set; }
+
+    /// <summary>
+    /// Gets or sets the conversations collection.
+    /// </summary>
     public DbSet<Conversation> Conversations { get; set; }
+
+    /// <summary>
+    /// Gets or sets the messages collection.
+    /// </summary>
     public DbSet<Message> Messages { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Telegram messages collection.
+    /// </summary>
     public DbSet<TelegramMessage> TelegramMessages { get; set; }
+
+    /// <summary>
+    /// Gets or sets the calendar events collection.
+    /// </summary>
     public DbSet<CalendarEvent> CalendarEvents { get; set; }
-    
-    // Error Learning System entities
+
+    /// <summary>
+    /// Gets or sets the error patterns collection for the Error Learning System.
+    /// </summary>
     public DbSet<ErrorPattern> ErrorPatterns { get; set; }
+
+    /// <summary>
+    /// Gets or sets the learning history entries collection for the Error Learning System.
+    /// </summary>
     public DbSet<LearningHistoryEntry> LearningHistoryEntries { get; set; }
+
+    /// <summary>
+    /// Gets or sets the optimization suggestions collection for the Error Learning System.
+    /// </summary>
     public DbSet<OptimizationSuggestion> OptimizationSuggestions { get; set; }
 
+    /// <summary>
+    /// Gets or sets the API configurations collection for secure API key management.
+    /// </summary>
+    public DbSet<ApiConfiguration> ApiConfigurations { get; set; }
+
+    /// <summary>
+    /// Gets or sets the API usage records collection for analytics and monitoring.
+    /// </summary>
+    public DbSet<ApiUsageRecord> ApiUsageRecords { get; set; }
+
+    /// <summary>
+    /// Configures the database model and applies entity configurations including PostgreSQL-specific optimizations.
+    /// </summary>
+    /// <param name="modelBuilder">The model builder used to configure entities.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Apply all IEntityTypeConfiguration implementations from this assembly
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DigitalMeDbContext).Assembly);
 
         // PostgreSQL GUID column configurations
         modelBuilder.Entity<PersonalityProfile>()
@@ -108,7 +170,7 @@ public class DigitalMeDbContext : IdentityDbContext
             .Property(e => e.MessageDate)
             .HasColumnType("timestamptz");
 
-        // Fix CalendarEvent DateTime fields  
+        // Fix CalendarEvent DateTime fields
         modelBuilder.Entity<CalendarEvent>()
             .Property(e => e.CreatedAt)
             .HasColumnType("timestamptz");
@@ -164,7 +226,7 @@ public class DigitalMeDbContext : IdentityDbContext
         // Note: PersonalityProfile.Traits is a navigation property (ICollection<PersonalityTrait>), not a JSON string
         // It's configured through relationships, not as a direct property
 
-        // Message.Metadata is already string - just set column type for PostgreSQL  
+        // Message.Metadata is already string - just set column type for PostgreSQL
         modelBuilder.Entity<Message>()
             .Property(e => e.Metadata)
             .HasColumnType("jsonb");
@@ -178,7 +240,7 @@ public class DigitalMeDbContext : IdentityDbContext
 
         // Enhanced indexing strategy for performance optimization
         ConfigurePerformanceIndexes(modelBuilder);
-        
+
         // Error Learning System configuration
         ConfigureErrorLearningSystem(modelBuilder);
     }
@@ -256,7 +318,9 @@ public class DigitalMeDbContext : IdentityDbContext
     }
 
     /// <summary>
-    /// Automatically updates audit fields (UpdatedAt, UpdatedBy) before saving.
+    /// Automatically updates audit fields (UpdatedAt, UpdatedBy, CreatedBy) before saving.
+    /// Note: Currently uses "system" as the default user. User context tracking will be implemented
+    /// when IHttpContextAccessor is integrated into the audit infrastructure.
     /// </summary>
     private void UpdateAuditFields()
     {
@@ -266,20 +330,22 @@ public class DigitalMeDbContext : IdentityDbContext
 
         foreach (var entry in entries)
         {
-            if (entry.Entity is IEntity entity)
-            {
-                entity.UpdatedAt = DateTime.UtcNow;
-            }
+            // Update timestamp for all entities
+            if (entry.Entity is not IEntity entity)
+                continue;
 
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            // Set CreatedBy for new auditable entities
             if (entry.Entity is IAuditableEntity auditableEntity && entry.State == EntityState.Added)
             {
-                // TODO: Get current user from IHttpContextAccessor
                 auditableEntity.CreatedBy ??= "system";
+                continue;
             }
 
+            // Set UpdatedBy for modified auditable entities
             if (entry.Entity is IAuditableEntity auditableEntityUpdate && entry.State == EntityState.Modified)
             {
-                // TODO: Get current user from IHttpContextAccessor  
                 auditableEntityUpdate.UpdatedBy = "system";
             }
         }

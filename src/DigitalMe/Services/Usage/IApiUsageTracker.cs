@@ -1,0 +1,54 @@
+using DigitalMe.Models.Usage;
+
+namespace DigitalMe.Services.Usage;
+
+/// <summary>
+/// Интерфейс сервиса для отслеживания использования API.
+/// Записывает метрики запросов, рассчитывает стоимость и предоставляет аналитику.
+/// </summary>
+public interface IApiUsageTracker
+{
+    /// <summary>
+    /// Записывает информацию об использовании API.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="provider">Название провайдера API.</param>
+    /// <param name="details">Детали использования (токены, время отклика, успешность).</param>
+    /// <returns>Task для асинхронной операции.</returns>
+    Task RecordUsageAsync(string userId, string provider, UsageDetails details);
+
+    /// <summary>
+    /// Рассчитывает стоимость использования для указанного провайдера.
+    /// </summary>
+    /// <param name="provider">Название провайдера API.</param>
+    /// <param name="tokens">Количество использованных токенов.</param>
+    /// <returns>Расчетная стоимость в долларах США.</returns>
+    decimal CalculateCost(string provider, int tokens);
+
+    /// <summary>
+    /// Получает агрегированную статистику использования за период.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="startDate">Начало периода (включительно).</param>
+    /// <param name="endDate">Конец периода (включительно).</param>
+    /// <returns>Агрегированная статистика использования.</returns>
+    Task<UsageStats> GetUsageStatsAsync(string userId, DateTime startDate, DateTime endDate);
+
+    /// <summary>
+    /// Получает тренды использования по дням за указанный период.
+    /// Для каждого дня возвращает агрегированные метрики (токены, стоимость, запросы).
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="days">Количество дней для анализа (от сегодня назад).</param>
+    /// <returns>Список трендов, отсортированный по дате в возрастающем порядке.</returns>
+    Task<List<UsageTrend>> GetUsageTrendsAsync(string userId, int days);
+
+    /// <summary>
+    /// Получает распределение использования по провайдерам в процентах.
+    /// Сумма всех значений равна 100%.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="startDate">Начальная дата периода для анализа.</param>
+    /// <returns>Словарь "провайдер -&gt; процент использования".</returns>
+    Task<Dictionary<string, decimal>> GetProviderDistributionAsync(string userId, DateTime startDate);
+}

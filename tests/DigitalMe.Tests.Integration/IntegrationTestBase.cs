@@ -35,8 +35,8 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
                     options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
                 });
 
-                // Add Clean Architecture services that were missing
-                services.AddCleanArchitectureServices();
+                // ⚡ OPTIMIZATION: Removed AddCleanArchitectureServices()
+                // Services already registered in Program.cs - double registration caused slow startup
 
                 // Reduce logging noise during tests
                 services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Warning));

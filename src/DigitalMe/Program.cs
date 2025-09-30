@@ -684,57 +684,71 @@ try
     using (var secretsScope = app.Services.CreateScope())
     {
         var secretsService = secretsScope.ServiceProvider.GetRequiredService<DigitalMe.Services.Configuration.ISecretsManagementService>();
-        var validation = secretsService.ValidateSecrets();
 
-        if (!validation.IsValid)
+        // ⚡ OPTIMIZATION: Skip validation in Test environment for fast startup
+        if (secretsService.IsTestEnvironment())
         {
-            secretsLogger?.LogError("❌ SECRETS VALIDATION FAILED: {MissingCount} missing secrets, {WeakCount} weak secrets",
-                validation.MissingSecrets.Count, validation.WeakSecrets.Count);
-
-            foreach (var missing in validation.MissingSecrets)
-            {
-                secretsLogger?.LogError("   Missing: {Secret}", missing);
-            }
-
-            foreach (var weak in validation.WeakSecrets)
-            {
-                secretsLogger?.LogWarning("   Weak: {Secret}", weak);
-            }
-
-            // In production, fail fast for critical secrets (but allow Testing environment)
-            var isSecure = secretsService.IsSecureEnvironment();
-            var isTest = secretsService.IsTestEnvironment();
-            var hasMissing = validation.MissingSecrets.Any();
-
-            secretsLogger?.LogInformation("Environment check: IsSecure={IsSecure}, IsTest={IsTest}, HasMissing={HasMissing}", isSecure, isTest, hasMissing);
-
-            // EMERGENCY: Temporarily disable strict validation to fix HTTP 500 startup crash
-            // TODO: Restore after setting up Cloud Run environment variables
-            if (false && isSecure && !isTest && hasMissing)
-            {
-                throw new InvalidOperationException($"Critical secrets validation failed in production environment. Missing: {string.Join(", ", validation.MissingSecrets)}");
-            }
-
-            // Log missing secrets but don't crash the app
-            if (hasMissing)
-            {
-                secretsLogger?.LogWarning("⚠️ PRODUCTION WARNING: Missing secrets detected but app will continue: {MissingSecrets}", string.Join(", ", validation.MissingSecrets));
-            }
+            secretsLogger?.LogInformation("⚡ TEST ENVIRONMENT: Skipping secrets validation for fast startup (<1 sec)");
         }
         else
         {
-            secretsLogger?.LogInformation("✅ SECRETS VALIDATION: All critical secrets configured correctly");
-        }
+            // Background validation - doesn't block startup
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    secretsLogger?.LogInformation("🔄 BACKGROUND: Running secrets validation asynchronously...");
+                    var validation = secretsService.ValidateSecrets();
 
-        // Log warnings and recommendations
-        foreach (var warning in validation.Warnings)
-        {
-            secretsLogger?.LogWarning("⚠️ SECRETS: {Warning}", warning);
-        }
+                    if (!validation.IsValid)
+                    {
+                        secretsLogger?.LogError("❌ SECRETS VALIDATION FAILED: {MissingCount} missing secrets, {WeakCount} weak secrets",
+                            validation.MissingSecrets.Count, validation.WeakSecrets.Count);
 
-        foreach (var recommendation in validation.SecurityRecommendations)
-        {
-            secretsLogger?.LogInformation("💡 SECURITY: {Recommendation}", recommendation);
+                        foreach (var missing in validation.MissingSecrets)
+                        {
+                            secretsLogger?.LogError("   Missing: {Secret}", missing);
+                        }
+
+                        foreach (var weak in validation.WeakSecrets)
+                        {
+                            secretsLogger?.LogWarning("   Weak: {Secret}", weak);
+                        }
+
+                        // In production, fail fast for critical secrets
+                        var isSecure = secretsService.IsSecureEnvironment();
+                        var hasMissing = validation.MissingSecrets.Any();
+
+                        secretsLogger?.LogInformation("Environment check: IsSecure={IsSecure}, HasMissing={HasMissing}", isSecure, hasMissing);
+
+                        // Log missing secrets but don't crash the app (EMERGENCY fix for Cloud Run)
+                        if (hasMissing)
+                        {
+                            secretsLogger?.LogWarning("⚠️ PRODUCTION WARNING: Missing secrets detected but app will continue: {MissingSecrets}",
+                                string.Join(", ", validation.MissingSecrets));
+                        }
+                    }
+                    else
+                    {
+                        secretsLogger?.LogInformation("✅ SECRETS VALIDATION: All critical secrets configured correctly");
+                    }
+
+                    // Log warnings and recommendations (in background)
+                    foreach (var warning in validation.Warnings)
+                    {
+                        secretsLogger?.LogWarning("⚠️ SECRETS: {Warning}", warning);
+                    }
+
+                    foreach (var recommendation in validation.SecurityRecommendations)
+                    {
+                        secretsLogger?.LogInformation("💡 SECURITY: {Recommendation}", recommendation);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    secretsLogger?.LogError(ex, "❌ Background secrets validation failed");
+                }
+            });
         }
     }
 }

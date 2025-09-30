@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPersonalityRepository, PersonalityRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IApiConfigurationRepository, ApiConfigurationRepository>();
 
         return services;
     }
@@ -42,6 +43,7 @@ public static class ServiceCollectionExtensions
         // Keep IPersonalityService registration for compatibility
         services.AddScoped<IPersonalityService, MvpPersonalityService>();
         services.AddScoped<IConversationService, ConversationService>();
+        services.AddScoped<IApiConfigurationService, ApiConfigurationService>();
         services.AddScoped<IProfileDataParser, ProfileDataParser>();
         services.AddScoped<IMessageProcessor, MessageProcessor>();
         services.AddScoped<IMvpMessageProcessor, MvpMessageProcessor>();
