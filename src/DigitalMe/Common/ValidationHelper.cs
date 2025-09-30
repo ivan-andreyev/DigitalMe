@@ -63,4 +63,71 @@ public static class ValidationHelper
             throw new ArgumentNullException(paramName);
         }
     }
+
+    /// <summary>
+    /// SQL injection patterns to detect in user input.
+    /// </summary>
+    private static readonly string[] SqlInjectionPatterns =
+    {
+        "'", "\"", "--", ";", "/*", "*/",
+        "xp_", "sp_", "exec", "execute", "drop", "create",
+        "alter", "insert", "update", "delete", "union", "select"
+    };
+
+    /// <summary>
+    /// Validates that a string does not contain SQL injection patterns.
+    /// </summary>
+    /// <param name="value">The value to validate.</param>
+    /// <param name="paramName">The parameter name for the exception message.</param>
+    /// <exception cref="ArgumentException">Thrown when value contains SQL injection patterns.</exception>
+    public static void ValidateNoSqlInjection(string value, string paramName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        foreach (var pattern in SqlInjectionPatterns)
+        {
+            if (value.Contains(pattern, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException(
+                    $"Value contains potentially malicious SQL pattern: {pattern}",
+                    paramName);
+            }
+        }
+    }
+
+    /// <summary>
+    /// XSS (Cross-Site Scripting) patterns to detect in user input.
+    /// </summary>
+    private static readonly string[] XssPatterns =
+    {
+        "<script", "</script>", "javascript:", "onerror=", "onload=",
+        "<img", "<iframe", "<object", "<embed", "vbscript:"
+    };
+
+    /// <summary>
+    /// Validates that a string does not contain XSS (Cross-Site Scripting) patterns.
+    /// </summary>
+    /// <param name="value">The value to validate.</param>
+    /// <param name="paramName">The parameter name for the exception message.</param>
+    /// <exception cref="ArgumentException">Thrown when value contains XSS patterns.</exception>
+    public static void ValidateNoXss(string value, string paramName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        foreach (var pattern in XssPatterns)
+        {
+            if (value.Contains(pattern, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException(
+                    $"Value contains potentially malicious XSS pattern: {pattern}",
+                    paramName);
+            }
+        }
+    }
 }

@@ -225,6 +225,8 @@ public class ApiConfigurationService : IApiConfigurationService
     {
         ValidationHelper.ValidateProvider(provider, nameof(provider));
         ValidationHelper.ValidateUserId(userId, nameof(userId));
+        ValidationHelper.ValidateNoSqlInjection(provider, nameof(provider));
+        ValidationHelper.ValidateNoSqlInjection(userId, nameof(userId));
 
         _logger.LogDebug("Resolving API key for provider {Provider}, user {UserId}", provider, userId);
 
@@ -275,6 +277,9 @@ public class ApiConfigurationService : IApiConfigurationService
     {
         ValidationHelper.ValidateProvider(provider, nameof(provider));
         ValidationHelper.ValidateUserId(userId, nameof(userId));
+        ValidationHelper.ValidateNoSqlInjection(provider, nameof(provider));
+        ValidationHelper.ValidateNoSqlInjection(userId, nameof(userId));
+        ValidationHelper.ValidateNoXss(provider, nameof(provider));
 
         if (string.IsNullOrWhiteSpace(plainApiKey))
         {
