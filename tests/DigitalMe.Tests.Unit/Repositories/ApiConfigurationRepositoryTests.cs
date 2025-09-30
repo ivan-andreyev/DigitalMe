@@ -4,7 +4,6 @@ using DigitalMe.Data;
 using DigitalMe.Data.Entities;
 using DigitalMe.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 
 namespace DigitalMe.Tests.Unit.Repositories;
 
@@ -14,17 +13,16 @@ namespace DigitalMe.Tests.Unit.Repositories;
 /// </summary>
 public class ApiConfigurationRepositoryTests : IDisposable
 {
-    private readonly SqliteConnection _connection;
     private readonly DbContextOptions<DigitalMeDbContext> _contextOptions;
+    private readonly string _databaseName;
 
     public ApiConfigurationRepositoryTests()
     {
-        // Create and open a connection - this makes SQLite work in-memory without closing between tests
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
+        // Use InMemory database with unique name for test isolation
+        _databaseName = $"TestDb_{Guid.NewGuid():N}";
         _contextOptions = new DbContextOptionsBuilder<DigitalMeDbContext>()
-            .UseSqlite(_connection)
+            .UseInMemoryDatabase(_databaseName)
+            .EnableSensitiveDataLogging()
             .Options;
 
         // Create the schema
@@ -34,7 +32,9 @@ public class ApiConfigurationRepositoryTests : IDisposable
 
     public void Dispose()
     {
-        _connection.Dispose();
+        // Clean up InMemory database
+        using var context = new DigitalMeDbContext(_contextOptions);
+        context.Database.EnsureDeleted();
     }
 
     private DigitalMeDbContext CreateContext() => new DigitalMeDbContext(_contextOptions);

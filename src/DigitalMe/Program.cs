@@ -267,11 +267,11 @@ else if (builder.Environment.IsProduction())
 }
 else
 {
-    // Development/Testing fallback to SQLite
-    tempLogger?.LogInformation("⚠️ Using SQLite for development/testing (connection string: {HasConnection})",
+    // Development/Testing - use InMemory for fast startup and test isolation
+    tempLogger?.LogInformation("⚠️ Using InMemory database for development/testing (connection string: {HasConnection})",
         !string.IsNullOrEmpty(connectionString));
     builder.Services.AddDbContext<DigitalMeDbContext>(options =>
-        options.UseSqlite(connectionString ?? "Data Source=digitalme.db"));
+        options.UseInMemoryDatabase(connectionString ?? "DigitalMe"));
 }
 
 // Note: ConvertDatabaseUrlToNpgsql function moved to top of database configuration section
