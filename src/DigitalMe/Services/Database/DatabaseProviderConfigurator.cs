@@ -142,6 +142,14 @@ public class DatabaseProviderConfigurator
         string? connectionString,
         bool usePostgreSQL)
     {
+        // Testing environment - DbContext will be configured by WebApplicationFactory
+        // MUST CHECK FIRST before any provider registration!
+        if (environment.EnvironmentName == "Testing")
+        {
+            _logger?.LogInformation("⚠️ Testing environment - DbContext registration skipped (will be configured by test infrastructure)");
+            return;
+        }
+
         // PostgreSQL provider
         if (usePostgreSQL && !string.IsNullOrEmpty(connectionString))
         {
@@ -185,16 +193,8 @@ public class DatabaseProviderConfigurator
             return;
         }
 
-        // Development/Testing environment
-        _logger?.LogInformation("⚠️ Development/Testing environment detected: {EnvName}", environment.EnvironmentName);
-
-        if (environment.EnvironmentName == "Testing")
-        {
-            // Testing environment - DbContext will be configured by WebApplicationFactory
-            // DO NOT register DbContext here to avoid provider conflicts!
-            _logger?.LogInformation("⚠️ Testing environment - DbContext registration skipped (will be configured by test infrastructure)");
-            return;
-        }
+        // Development environment
+        _logger?.LogInformation("⚠️ Development environment detected: {EnvName}", environment.EnvironmentName);
 
         // Development environment with connection string
         if (!string.IsNullOrEmpty(connectionString))
