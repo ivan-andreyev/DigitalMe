@@ -1,0 +1,247 @@
+@using DigitalMe.Services.Usage
+@using DigitalMe.Models.Usage
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IApiUsageTracker UsageTracker
+@inject IQuotaManager QuotaManager
+@inject AuthenticationStateProvider AuthStateProvider
+@implements IDisposable
+
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-graph-up me-2"></i>API Usage Statistics
+            </h5>
+            @if (!_isLoading)
+            {
+                <small class="text-muted">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    Last updated: @_lastUpdate.ToString("HH:mm:ss")
+                </small>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        @if (_isLoading)
+        {
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading usage statistics...</p>
+            </div>
+        }
+        else if (_usageStats != null)
+        {
+            <!-- Overall Statistics -->
+            <div class="row mb-4 text-center">
+                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                    <div class="usage-stat">
+                        <i class="bi bi-bar-chart-line fs-3 text-primary"></i>
+                        <h6 class="text-muted small mb-1">Total Requests</h6>
+                        <h4 class="mb-0">@_usageStats.RequestCount</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                    <div class="usage-stat">
+                        <i class="bi bi-coin fs-3 text-success"></i>
+                        <h6 class="text-muted small mb-1">Total Tokens</h6>
+                        <h4 class="mb-0">@_usageStats.TotalTokens.ToString("N0")</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="usage-stat">
+                        <i class="bi bi-currency-dollar fs-3 text-warning"></i>
+                        <h6 class="text-muted small mb-1">Total Cost</h6>
+                        <h4 class="mb-0">$@_usageStats.TotalCost.ToString("F2")</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="usage-stat">
+                        <i class="bi bi-check-circle fs-3 text-info"></i>
+                        <h6 class="text-muted small mb-1">Success Rate</h6>
+                        <h4 class="mb-0">@_usageStats.SuccessRate.ToString("F1")%</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quota Progress Bars -->
+            @if (_quotaStatuses.Any())
+            {
+                <hr />
+                <h6 class="text-muted mb-3">Daily Quotas</h6>
+                @foreach (var (provider, quota) in _quotaStatuses)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="fw-semibold mb-0">
+                                <i class="@GetProviderIcon(provider) me-2"></i>@provider
+                            </label>
+                            <small class="text-muted">
+                                @quota.Used.ToString("N0") / @quota.DailyLimit.ToString("N0") tokens
+                            </small>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar @GetProgressBarClass(quota.PercentUsed)"
+                                 style="width: @Math.Min(quota.PercentUsed, 100)%"
+                                 role="progressbar"
+                                 aria-valuenow="@quota.Used"
+                                 aria-valuemin="0"
+                                 aria-valuemax="@quota.DailyLimit">
+                                @quota.PercentUsed.ToString("F0")%
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Resets at @quota.ResetsAt.ToString("HH:mm")
+                        </small>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No quota information available. Configure your API keys to see usage limits.
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning mb-0">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Failed to load usage statistics. Please try again later.
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? UserId { get; set; }
+
+    private UsageStats? _usageStats;
+    private Dictionary<string, QuotaStatus> _quotaStatuses = new();
+    private bool _isLoading = true;
+    private Timer? _refreshTimer;
+    private DateTime _lastUpdate = DateTime.Now;
+    private string _currentUserId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Determine user ID
+            if (string.IsNullOrEmpty(UserId))
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                _currentUserId = authState.User.Identity?.Name ?? "anonymous";
+            }
+            else
+            {
+                _currentUserId = UserId;
+            }
+
+            await LoadData();
+
+            // Refresh every 30 seconds
+            _refreshTimer = new Timer(async _ =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadData();
+                    StateHasChanged();
+                });
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error initializing UsageDisplay: {ex.Message}");
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Get usage stats for today
+            _usageStats = await UsageTracker.GetUsageStatsAsync(
+                _currentUserId,
+                DateTime.UtcNow.Date,
+                DateTime.UtcNow);
+
+            // Get quota status for providers with usage
+            var providers = _usageStats?.ByProvider.Keys.ToList() ?? new List<string>();
+            if (!providers.Any())
+            {
+                // Default providers if no usage yet
+                providers = new List<string> { "Anthropic", "OpenAI" };
+            }
+
+            _quotaStatuses.Clear();
+            foreach (var provider in providers)
+            {
+                try
+                {
+                    var quota = await QuotaManager.GetQuotaStatusAsync(_currentUserId, provider);
+                    if (quota != null)
+                    {
+                        _quotaStatuses[provider] = quota;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error loading quota for {provider}: {ex.Message}");
+                }
+            }
+
+            _lastUpdate = DateTime.Now;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading usage data: {ex.Message}");
+            _usageStats = null;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetProgressBarClass(decimal percentUsed) => percentUsed switch
+    {
+        >= 90 => "bg-danger",
+        >= 75 => "bg-warning",
+        >= 50 => "bg-info",
+        _ => "bg-success"
+    };
+
+    private string GetProviderIcon(string provider) => provider switch
+    {
+        "Anthropic" => "bi bi-robot",
+        "OpenAI" => "bi bi-cpu",
+        "Slack" => "bi bi-slack",
+        "GitHub" => "bi bi-github",
+        _ => "bi bi-key"
+    };
+
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+    }
+}
+
+<style>
+    .usage-stat {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .usage-stat:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        transition: background-color 0.2s;
+    }
+</style>

@@ -1,0 +1,338 @@
+@page "/settings/api-configuration"
+@using DigitalMe.Services
+@using DigitalMe.Data.Entities
+@using DigitalMe.Web.Components.Settings
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IApiConfigurationService ConfigService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>API Configuration</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h3>
+                <i class="bi bi-key-fill me-2"></i>API Configuration
+            </h3>
+            <p class="text-muted">Manage your API keys for different providers</p>
+        </div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading configurations...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var provider in Providers)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card provider-card h-100 @(IsConfigured(provider) ? "border-success" : "")">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="@GetProviderIcon(provider) me-2"></i>@provider
+                                </h5>
+                                @if (IsConfigured(provider))
+                                {
+                                    <span class="badge bg-success">Configured</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @if (!_editingProviders.Contains(provider) && IsConfigured(provider))
+                            {
+                                <!-- Display mode -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Current Key</label>
+                                    <div class="input-group">
+                                        <input type="password"
+                                               class="form-control"
+                                               value="@GetMaskedKey(provider)"
+                                               readonly />
+                                        <button class="btn btn-outline-secondary"
+                                                @onclick="() => StartEdit(provider)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-danger"
+                                            @onclick="() => RemoveKey(provider)">
+                                        <i class="bi bi-trash me-2"></i>Remove Key
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Edit mode -->
+                                <div class="mb-3">
+                                    <label class="form-label">API Key</label>
+                                    <div class="input-group">
+                                        <input type="@(_showKey.Contains(provider) ? "text" : "password")"
+                                               class="form-control"
+                                               value="@GetApiKeyValue(provider)"
+                                               @oninput="@(e => SetApiKeyValue(provider, e.Value?.ToString() ?? ""))"
+                                               placeholder="@GetPlaceholder(provider)" />
+                                        <button class="btn btn-outline-secondary"
+                                                @onclick="() => ToggleKeyVisibility(provider)">
+                                            <i class="bi bi-eye@(_showKey.Contains(provider) ? "-slash" : "")"></i>
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        @GetKeyFormatHint(provider)
+                                    </small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary"
+                                            @onclick="() => SaveKey(provider)"
+                                            disabled="@(!IsValidKey(provider))">
+                                        <i class="bi bi-save me-2"></i>Save
+                                    </button>
+                                    @if (IsConfigured(provider))
+                                    {
+                                        <button class="btn btn-outline-secondary"
+                                                @onclick="() => CancelEdit(provider)">
+                                            Cancel
+                                        </button>
+                                    }
+                                </div>
+                            }
+
+                            @if (_errorMessages.ContainsKey(provider))
+                            {
+                                <div class="alert alert-danger mt-3 mb-0" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessages[provider]
+                                </div>
+                            }
+
+                            @if (_successMessages.ContainsKey(provider))
+                            {
+                                <div class="alert alert-success mt-3 mb-0" role="alert">
+                                    <i class="bi bi-check-circle me-2"></i>@_successMessages[provider]
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Usage Statistics Display -->
+        <div class="row mt-4">
+            <div class="col">
+                <UsageDisplay UserId="@_currentUserId" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<string> Providers = new() { "Anthropic", "OpenAI", "Slack", "GitHub" };
+    private Dictionary<string, DigitalMe.Data.Entities.ApiConfiguration?> _configurations = new();
+    private Dictionary<string, string> _apiKeys = new();
+    private HashSet<string> _editingProviders = new();
+    private HashSet<string> _showKey = new();
+    private Dictionary<string, string> _errorMessages = new();
+    private Dictionary<string, string> _successMessages = new();
+    private bool _isLoading = true;
+    private string _currentUserId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            _currentUserId = authState.User.Identity?.Name ?? "test-user-123";
+
+            await LoadConfigurations();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error initializing ApiConfiguration: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadConfigurations()
+    {
+        foreach (var provider in Providers)
+        {
+            try
+            {
+                var config = await ConfigService.GetActiveConfigurationAsync(_currentUserId, provider);
+                _configurations[provider] = config;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error loading configuration for {provider}: {ex.Message}");
+                _configurations[provider] = null;
+            }
+        }
+    }
+
+    private bool IsConfigured(string provider)
+    {
+        return _configurations.ContainsKey(provider) && _configurations[provider] != null;
+    }
+
+    private string GetMaskedKey(string provider)
+    {
+        if (!IsConfigured(provider)) return "";
+        var config = _configurations[provider];
+        return $"****{config!.KeyFingerprint ?? "****"}";
+    }
+
+    private string GetApiKeyValue(string provider)
+    {
+        return _apiKeys.TryGetValue(provider, out var value) ? value : "";
+    }
+
+    private void SetApiKeyValue(string provider, string value)
+    {
+        _apiKeys[provider] = value;
+    }
+
+    private void StartEdit(string provider)
+    {
+        _editingProviders.Add(provider);
+        _errorMessages.Remove(provider);
+        _successMessages.Remove(provider);
+    }
+
+    private void CancelEdit(string provider)
+    {
+        _editingProviders.Remove(provider);
+        _apiKeys.Remove(provider);
+        _showKey.Remove(provider);
+        _errorMessages.Remove(provider);
+    }
+
+    private void ToggleKeyVisibility(string provider)
+    {
+        if (_showKey.Contains(provider))
+        {
+            _showKey.Remove(provider);
+        }
+        else
+        {
+            _showKey.Add(provider);
+        }
+    }
+
+    private async Task SaveKey(string provider)
+    {
+        if (!_apiKeys.ContainsKey(provider) || string.IsNullOrWhiteSpace(_apiKeys[provider]))
+        {
+            _errorMessages[provider] = "API key cannot be empty";
+            return;
+        }
+
+        try
+        {
+            _errorMessages.Remove(provider);
+            _successMessages.Remove(provider);
+
+            await ConfigService.SetUserApiKeyAsync(provider, _currentUserId, _apiKeys[provider]);
+
+            _successMessages[provider] = "API key saved successfully!";
+            _editingProviders.Remove(provider);
+            _apiKeys.Remove(provider);
+            _showKey.Remove(provider);
+
+            // Reload configuration
+            await LoadConfigurations();
+
+            // Clear success message after 3 seconds
+            _ = Task.Delay(3000).ContinueWith(_ =>
+            {
+                _successMessages.Remove(provider);
+                InvokeAsync(StateHasChanged);
+            });
+        }
+        catch (Exception ex)
+        {
+            _errorMessages[provider] = $"Failed to save API key: {ex.Message}";
+        }
+    }
+
+    private async Task RemoveKey(string provider)
+    {
+        if (!IsConfigured(provider)) return;
+
+        try
+        {
+            var config = _configurations[provider];
+            if (config != null)
+            {
+                await ConfigService.DeactivateConfigurationAsync(config.Id);
+                _successMessages[provider] = "API key removed successfully";
+                await LoadConfigurations();
+
+                // Clear success message after 3 seconds
+                _ = Task.Delay(3000).ContinueWith(_ =>
+                {
+                    _successMessages.Remove(provider);
+                    InvokeAsync(StateHasChanged);
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessages[provider] = $"Failed to remove API key: {ex.Message}";
+        }
+    }
+
+    private bool IsValidKey(string provider)
+    {
+        if (!_apiKeys.ContainsKey(provider) || string.IsNullOrWhiteSpace(_apiKeys[provider]))
+            return false;
+
+        var key = _apiKeys[provider];
+
+        return provider switch
+        {
+            "Anthropic" => key.StartsWith("sk-ant-"),
+            "OpenAI" => key.StartsWith("sk-"),
+            _ => key.Length > 10
+        };
+    }
+
+    private string GetPlaceholder(string provider) => provider switch
+    {
+        "Anthropic" => "sk-ant-...",
+        "OpenAI" => "sk-...",
+        "Slack" => "xoxb-...",
+        "GitHub" => "ghp_...",
+        _ => "Enter API key"
+    };
+
+    private string GetKeyFormatHint(string provider) => provider switch
+    {
+        "Anthropic" => "Anthropic keys start with 'sk-ant-'",
+        "OpenAI" => "OpenAI keys start with 'sk-'",
+        "Slack" => "Slack bot tokens start with 'xoxb-'",
+        "GitHub" => "GitHub tokens start with 'ghp_'",
+        _ => "Enter your API key for this service"
+    };
+
+    private string GetProviderIcon(string provider) => provider switch
+    {
+        "Anthropic" => "bi bi-robot",
+        "OpenAI" => "bi bi-cpu",
+        "Slack" => "bi bi-slack",
+        "GitHub" => "bi bi-github",
+        _ => "bi bi-key"
+    };
+}
