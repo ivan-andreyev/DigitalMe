@@ -33,4 +33,22 @@ public interface IApiUsageTracker
     /// <param name="endDate">Конец периода (включительно).</param>
     /// <returns>Агрегированная статистика использования.</returns>
     Task<UsageStats> GetUsageStatsAsync(string userId, DateTime startDate, DateTime endDate);
+
+    /// <summary>
+    /// Получает тренды использования по дням за указанный период.
+    /// Для каждого дня возвращает агрегированные метрики (токены, стоимость, запросы).
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="days">Количество дней для анализа (от сегодня назад).</param>
+    /// <returns>Список трендов, отсортированный по дате в возрастающем порядке.</returns>
+    Task<List<UsageTrend>> GetUsageTrendsAsync(string userId, int days);
+
+    /// <summary>
+    /// Получает распределение использования по провайдерам в процентах.
+    /// Сумма всех значений равна 100%.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя.</param>
+    /// <param name="startDate">Начальная дата периода для анализа.</param>
+    /// <returns>Словарь "провайдер -&gt; процент использования".</returns>
+    Task<Dictionary<string, decimal>> GetProviderDistributionAsync(string userId, DateTime startDate);
 }

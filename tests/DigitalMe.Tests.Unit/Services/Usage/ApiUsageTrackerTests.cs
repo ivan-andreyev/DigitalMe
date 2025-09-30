@@ -473,4 +473,212 @@ public class ApiUsageTrackerTests
     }
 
     #endregion
+
+    #region GetUsageTrendsAsync Tests
+
+    [Fact]
+    public async Task GetUsageTrendsAsync_Should_Return_Trends_For_Specified_Days()
+    {
+        // Arrange
+        const string userId = "user123";
+        const int days = 30;
+        var startDate = DateTime.Today.AddDays(-days + 1);
+        var endDate = DateTime.Today;
+
+        var records = new List<ApiUsageRecord>
+        {
+            new() { UserId = userId, RequestTimestamp = DateTime.Today.AddDays(-2), TokensUsed = 1000, CostEstimate = 0.015m, Success = true },
+            new() { UserId = userId, RequestTimestamp = DateTime.Today.AddDays(-2), TokensUsed = 500, CostEstimate = 0.0075m, Success = false },
+            new() { UserId = userId, RequestTimestamp = DateTime.Today.AddDays(-1), TokensUsed = 2000, CostEstimate = 0.030m, Success = true },
+            new() { UserId = userId, RequestTimestamp = DateTime.Today, TokensUsed = 1500, CostEstimate = 0.0225m, Success = true }
+        };
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, endDate))
+            .ReturnsAsync(records);
+
+        // Act
+        var trends = await _tracker.GetUsageTrendsAsync(userId, days);
+
+        // Assert
+        trends.Should().HaveCount(30);
+        trends.Should().BeInAscendingOrder(t => t.Date);
+    }
+
+    [Fact]
+    public async Task GetUsageTrendsAsync_Should_Aggregate_Usage_By_Day()
+    {
+        // Arrange
+        const string userId = "user123";
+        const int days = 7;
+        var startDate = DateTime.Today.AddDays(-days + 1);
+        var endDate = DateTime.Today;
+
+        var records = new List<ApiUsageRecord>
+        {
+            new() { UserId = userId, RequestTimestamp = DateTime.Today, TokensUsed = 1000, CostEstimate = 0.015m, Success = true },
+            new() { UserId = userId, RequestTimestamp = DateTime.Today, TokensUsed = 500, CostEstimate = 0.0075m, Success = true },
+            new() { UserId = userId, RequestTimestamp = DateTime.Today, TokensUsed = 800, CostEstimate = 0.012m, Success = false }
+        };
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, endDate))
+            .ReturnsAsync(records);
+
+        // Act
+        var trends = await _tracker.GetUsageTrendsAsync(userId, days);
+
+        // Assert
+        var todayTrend = trends.First(t => t.Date == DateTime.Today);
+        todayTrend.TotalTokens.Should().Be(2300);
+        todayTrend.TotalCost.Should().Be(0.0345m);
+        todayTrend.RequestCount.Should().Be(3);
+        todayTrend.SuccessRate.Should().BeApproximately(66.67m, 0.01m); // 2/3 success
+    }
+
+    [Fact]
+    public async Task GetUsageTrendsAsync_Should_Include_Days_With_Zero_Usage()
+    {
+        // Arrange
+        const string userId = "user123";
+        const int days = 7;
+        var startDate = DateTime.Today.AddDays(-days + 1);
+        var endDate = DateTime.Today;
+
+        var records = new List<ApiUsageRecord>
+        {
+            new() { UserId = userId, RequestTimestamp = DateTime.Today, TokensUsed = 1000, CostEstimate = 0.015m, Success = true }
+        };
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, endDate))
+            .ReturnsAsync(records);
+
+        // Act
+        var trends = await _tracker.GetUsageTrendsAsync(userId, days);
+
+        // Assert
+        trends.Should().HaveCount(7);
+        var emptyDays = trends.Where(t => t.TotalTokens == 0).ToList();
+        emptyDays.Should().HaveCount(6); // 6 days with zero usage
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task GetUsageTrendsAsync_Should_Reject_Invalid_UserId(string userId)
+    {
+        // Arrange
+        const int days = 30;
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _tracker.GetUsageTrendsAsync(userId, days));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(-30)]
+    public async Task GetUsageTrendsAsync_Should_Reject_Invalid_Days(int days)
+    {
+        // Arrange
+        const string userId = "user123";
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _tracker.GetUsageTrendsAsync(userId, days));
+    }
+
+    #endregion
+
+    #region GetProviderDistributionAsync Tests
+
+    [Fact]
+    public async Task GetProviderDistributionAsync_Should_Calculate_Percentage_Distribution()
+    {
+        // Arrange
+        const string userId = "user123";
+        var startDate = DateTime.Today.AddDays(-7);
+
+        var records = new List<ApiUsageRecord>
+        {
+            new() { UserId = userId, Provider = "Anthropic", TokensUsed = 5000, RequestTimestamp = DateTime.Today },
+            new() { UserId = userId, Provider = "Anthropic", TokensUsed = 3000, RequestTimestamp = DateTime.Today },
+            new() { UserId = userId, Provider = "OpenAI", TokensUsed = 2000, RequestTimestamp = DateTime.Today }
+        };
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, DateTime.Today))
+            .ReturnsAsync(records);
+
+        // Act
+        var distribution = await _tracker.GetProviderDistributionAsync(userId, startDate);
+
+        // Assert
+        distribution.Should().ContainKey("Anthropic");
+        distribution.Should().ContainKey("OpenAI");
+        distribution["Anthropic"].Should().BeApproximately(80m, 0.01m); // 8000/10000 = 80%
+        distribution["OpenAI"].Should().BeApproximately(20m, 0.01m);    // 2000/10000 = 20%
+        distribution.Values.Sum().Should().BeApproximately(100m, 0.01m);
+    }
+
+    [Fact]
+    public async Task GetProviderDistributionAsync_Should_Return_Empty_When_No_Usage()
+    {
+        // Arrange
+        const string userId = "user123";
+        var startDate = DateTime.Today.AddDays(-7);
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, DateTime.Today))
+            .ReturnsAsync(new List<ApiUsageRecord>());
+
+        // Act
+        var distribution = await _tracker.GetProviderDistributionAsync(userId, startDate);
+
+        // Assert
+        distribution.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetProviderDistributionAsync_Should_Handle_Single_Provider()
+    {
+        // Arrange
+        const string userId = "user123";
+        var startDate = DateTime.Today.AddDays(-7);
+
+        var records = new List<ApiUsageRecord>
+        {
+            new() { UserId = userId, Provider = "Anthropic", TokensUsed = 5000, RequestTimestamp = DateTime.Today },
+            new() { UserId = userId, Provider = "Anthropic", TokensUsed = 3000, RequestTimestamp = DateTime.Today }
+        };
+
+        _mockRepo
+            .Setup(r => r.GetUsageRecordsAsync(userId, startDate, DateTime.Today))
+            .ReturnsAsync(records);
+
+        // Act
+        var distribution = await _tracker.GetProviderDistributionAsync(userId, startDate);
+
+        // Assert
+        distribution.Should().ContainKey("Anthropic");
+        distribution["Anthropic"].Should().Be(100m);
+        distribution.Values.Sum().Should().Be(100m);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task GetProviderDistributionAsync_Should_Reject_Invalid_UserId(string userId)
+    {
+        // Arrange
+        var startDate = DateTime.Today.AddDays(-7);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _tracker.GetProviderDistributionAsync(userId, startDate));
+    }
+
+    #endregion
 }

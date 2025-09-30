@@ -211,4 +211,109 @@ public class ApiUsageTracker : IApiUsageTracker
                 userId, provider, tokensUsed);
         }
     }
+
+    /// <inheritdoc />
+    public async Task<List<UsageTrend>> GetUsageTrendsAsync(string userId, int days)
+    {
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+
+        if (days <= 0)
+        {
+            throw new ArgumentException("Days must be greater than zero.", nameof(days));
+        }
+
+        _logger.LogDebug("Getting usage trends for user {UserId}, last {Days} days",
+            userId, days);
+
+        var startDate = DateTime.Today.AddDays(-days + 1);
+        var endDate = DateTime.Today;
+
+        var records = await _repository.GetUsageRecordsAsync(userId, startDate, endDate)
+            .ConfigureAwait(false);
+
+        // Group records by date and aggregate
+        var trendsByDate = records
+            .GroupBy(r => r.RequestTimestamp.Date)
+            .Select(g => new UsageTrend
+            {
+                Date = g.Key,
+                TotalTokens = g.Sum(r => r.TokensUsed),
+                TotalCost = g.Sum(r => r.CostEstimate),
+                RequestCount = g.Count(),
+                SuccessRate = g.Count() > 0
+                    ? (decimal)g.Count(r => r.Success) / g.Count() * 100
+                    : 0
+            })
+            .ToList();
+
+        // Create complete list with all days (including days with zero usage)
+        var trends = new List<UsageTrend>();
+        for (int i = 0; i < days; i++)
+        {
+            var date = startDate.AddDays(i);
+            var trend = trendsByDate.FirstOrDefault(t => t.Date == date);
+
+            if (trend != null)
+            {
+                trends.Add(trend);
+            }
+            else
+            {
+                // Add empty trend for days with no usage
+                trends.Add(new UsageTrend
+                {
+                    Date = date,
+                    TotalTokens = 0,
+                    TotalCost = 0,
+                    RequestCount = 0,
+                    SuccessRate = 0
+                });
+            }
+        }
+
+        _logger.LogDebug("Generated {Count} usage trends for user {UserId}",
+            trends.Count, userId);
+
+        return trends.OrderBy(t => t.Date).ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<Dictionary<string, decimal>> GetProviderDistributionAsync(
+        string userId,
+        DateTime startDate)
+    {
+        ValidationHelper.ValidateUserId(userId, nameof(userId));
+
+        _logger.LogDebug("Getting provider distribution for user {UserId} since {StartDate}",
+            userId, startDate);
+
+        var records = await _repository.GetUsageRecordsAsync(userId, startDate, DateTime.Today)
+            .ConfigureAwait(false);
+
+        if (!records.Any())
+        {
+            _logger.LogDebug("No usage records found for user {UserId}", userId);
+            return new Dictionary<string, decimal>();
+        }
+
+        var totalTokens = records.Sum(r => r.TokensUsed);
+
+        if (totalTokens == 0)
+        {
+            _logger.LogWarning("Total tokens is zero for user {UserId}, returning empty distribution", userId);
+            return new Dictionary<string, decimal>();
+        }
+
+        // Calculate percentage distribution by provider
+        var distribution = records
+            .GroupBy(r => r.Provider)
+            .ToDictionary(
+                g => g.Key,
+                g => (decimal)g.Sum(r => r.TokensUsed) / totalTokens * 100);
+
+        _logger.LogDebug("Generated provider distribution for user {UserId}: {Count} providers",
+            userId, distribution.Count);
+
+        return distribution;
+    }
 }
