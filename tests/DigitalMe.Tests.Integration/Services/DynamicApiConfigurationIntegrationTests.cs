@@ -24,6 +24,7 @@ namespace DigitalMe.Tests.Integration.Services;
 /// Integration tests for Dynamic API Configuration System (Phase 5).
 /// Tests end-to-end flow: key storage → encryption → resolution → API call → usage tracking.
 /// </summary>
+[Collection("Integration Tests")]
 public class DynamicApiConfigurationIntegrationTests : IntegrationTestBase
 {
     public DynamicApiConfigurationIntegrationTests(WebApplicationFactory<Program> factory)
