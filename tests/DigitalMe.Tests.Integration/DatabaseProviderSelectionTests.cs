@@ -198,81 +198,9 @@ public class DatabaseProviderSelectionTests : IClassFixture<DatabaseProviderSele
                 config.AddInMemoryCollection(configValues);
             });
 
-            builder.ConfigureServices(services =>
-            {
-                // Remove existing DbContext registrations for clean test setup
-                var descriptors = services.Where(d =>
-                    d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>) ||
-                    d.ServiceType == typeof(DigitalMeDbContext) ||
-                    d.ImplementationType == typeof(DigitalMeDbContext)).ToList();
-
-                foreach (var descriptor in descriptors)
-                {
-                    services.Remove(descriptor);
-                }
-
-                // Re-register with test-specific configuration
-                // This will use the actual Program.cs logic once we fix it
-                // For now, we simulate the expected behavior
-                ConfigureDatabaseProvider(services, _connectionString, _environmentVariables, _environment);
-            });
-        }
-
-        private void ConfigureDatabaseProvider(IServiceCollection services, string? connectionString,
-            Dictionary<string, string?> envVars, string environment)
-        {
-            // This simulates the CORRECT behavior we want in Program.cs
-
-            // Priority 1: Check for DATABASE_URL (common in cloud environments)
-            if (envVars.TryGetValue("DATABASE_URL", out var databaseUrl) && !string.IsNullOrEmpty(databaseUrl))
-            {
-                var npgsqlConnectionString = ConvertDatabaseUrlToNpgsql(databaseUrl);
-                services.AddDbContext<DigitalMeDbContext>(options =>
-                    options.UseNpgsql(npgsqlConnectionString));
-                return;
-            }
-
-            // Priority 2: Check for standard connection string
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                // Detect PostgreSQL patterns
-                if (connectionString.Contains("Host=") ||
-                    connectionString.Contains("Server=") ||
-                    connectionString.Contains("/cloudsql/"))
-                {
-                    services.AddDbContext<DigitalMeDbContext>(options =>
-                        options.UseNpgsql(connectionString));
-                    return;
-                }
-            }
-
-            // Priority 3: Production MUST have PostgreSQL
-            if (environment == "Production")
-            {
-                throw new InvalidOperationException(
-                    "PostgreSQL connection string is required in production. " +
-                    "Set either DATABASE_URL or ConnectionStrings:DefaultConnection environment variable.");
-            }
-
-            // Priority 4: Development/Testing fallback to SQLite
-            services.AddDbContext<DigitalMeDbContext>(options =>
-                options.UseSqlite(connectionString ?? "Data Source=:memory:"));
-        }
-
-        private string ConvertDatabaseUrlToNpgsql(string databaseUrl)
-        {
-            // Convert DATABASE_URL format to Npgsql connection string
-            // postgresql://user:pass@host:port/database -> Host=host;Port=port;Database=database;Username=user;Password=pass
-
-            var uri = new Uri(databaseUrl);
-            var userInfo = uri.UserInfo.Split(':');
-            var username = userInfo[0];
-            var password = userInfo.Length > 1 ? userInfo[1] : "";
-            var host = uri.Host;
-            var port = uri.Port > 0 ? uri.Port : 5432;
-            var database = uri.AbsolutePath.TrimStart('/');
-
-            return $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+            // NO ConfigureServices override!
+            // Program.cs DatabaseProviderConfigurator will handle database provider selection
+            // based on environment and configuration we set above
         }
     }
 }

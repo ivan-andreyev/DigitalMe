@@ -16,13 +16,34 @@ namespace DigitalMe.Tests.Integration.Components;
 public class ApiConfigurationComponentTests : TestContext
 {
     private readonly Mock<IApiConfigurationService> _mockConfigService;
+    private readonly Mock<DigitalMe.Services.Usage.IQuotaManager> _mockQuotaManager;
 
     public ApiConfigurationComponentTests()
     {
         _mockConfigService = new Mock<IApiConfigurationService>();
+        _mockQuotaManager = new Mock<DigitalMe.Services.Usage.IQuotaManager>();
+
+        // Setup default quota manager behaviors
+        _mockQuotaManager
+            .Setup(q => q.GetQuotaStatusAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new DigitalMe.Models.Usage.QuotaStatus
+            {
+                UserId = "test-user-123",
+                Provider = "Anthropic",
+                TokensUsed = 1000,
+                TokensLimit = 10000,
+                UsagePercentage = 10.0m,
+                IsOverQuota = false,
+                DailyResetTime = DateTime.UtcNow.AddHours(12)
+            });
+
+        _mockQuotaManager
+            .Setup(q => q.CanUseTokensAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+            .ReturnsAsync(true);
 
         // Register services
         Services.AddScoped(_ => _mockConfigService.Object);
+        Services.AddScoped(_ => _mockQuotaManager.Object);
 
         // Mock authentication state
         var authState = Task.FromResult(new AuthenticationState(

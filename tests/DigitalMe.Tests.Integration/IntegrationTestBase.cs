@@ -22,17 +22,22 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
             
             builder.ConfigureServices(services =>
             {
-                // Remove the default DbContext registration
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>));
-                if (descriptor != null)
+                // Remove ALL DbContext-related registrations to prevent provider conflicts
+                var descriptors = services.Where(d =>
+                    d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>) ||
+                    d.ServiceType == typeof(DigitalMeDbContext) ||
+                    d.ImplementationType == typeof(DigitalMeDbContext)).ToList();
+
+                foreach (var descriptor in descriptors)
                 {
                     services.Remove(descriptor);
                 }
 
-                // Add InMemory database for testing
+                // Add InMemory database for testing (clean slate - no provider conflicts)
                 services.AddDbContext<DigitalMeDbContext>(options =>
                 {
                     options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
+                    options.EnableSensitiveDataLogging(true);
                 });
 
                 // ⚡ OPTIMIZATION: Removed AddCleanArchitectureServices()
