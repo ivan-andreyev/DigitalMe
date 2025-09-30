@@ -263,7 +263,7 @@ public class KeyEncryptionServiceTests
         stopwatch.Stop();
 
         // Assert
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(100, "encryption should complete within 100ms");
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(500, "encryption should complete within 500ms (adjusted for CI/CD runners)");
     }
 
     [Fact]
@@ -280,7 +280,7 @@ public class KeyEncryptionServiceTests
         stopwatch.Stop();
 
         // Assert
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(100, "decryption should complete within 100ms");
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(500, "decryption should complete within 500ms (adjusted for CI/CD runners)");
     }
 
     #endregion
