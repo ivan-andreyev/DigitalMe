@@ -268,19 +268,27 @@ else if (builder.Environment.IsProduction())
 else
 {
     // Development/Testing - WebApplicationFactory will override with InMemory for test isolation
-    tempLogger?.LogInformation("⚠️ Development/Testing environment detected (connection string: {HasConnection})",
-        !string.IsNullOrEmpty(connectionString));
+    tempLogger?.LogInformation("⚠️ Development/Testing environment detected: {EnvName}", builder.Environment.EnvironmentName);
 
-    if (!string.IsNullOrEmpty(connectionString))
+    if (builder.Environment.EnvironmentName == "Testing")
     {
-        // Use provided connection string for development
+        // Testing environment - DbContext will be configured by WebApplicationFactory
+        // DO NOT register DbContext here to avoid provider conflicts!
+        tempLogger?.LogInformation("⚠️ Testing environment - DbContext registration skipped (will be configured by test infrastructure)");
+    }
+    else if (!string.IsNullOrEmpty(connectionString))
+    {
+        // Development environment with connection string
+        tempLogger?.LogInformation("⚠️ Development environment - using SQLite with connection: {ConnectionString}", connectionString);
         builder.Services.AddDbContext<DigitalMeDbContext>(options =>
             options.UseSqlite(connectionString));
     }
     else
     {
-        // Testing environment - DbContext will be configured by WebApplicationFactory
-        tempLogger?.LogInformation("⚠️ No connection string for Testing - DbContext will be configured by test infrastructure");
+        // Development without connection string - default SQLite
+        tempLogger?.LogInformation("⚠️ Development environment - using default SQLite database");
+        builder.Services.AddDbContext<DigitalMeDbContext>(options =>
+            options.UseSqlite("Data Source=digitalme.db"));
     }
 }
 
