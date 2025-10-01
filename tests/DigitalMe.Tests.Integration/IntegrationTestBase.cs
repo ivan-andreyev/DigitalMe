@@ -23,12 +23,15 @@ public abstract class IntegrationTestBase : IClassFixture<WebApplicationFactory<
             builder.ConfigureServices(services =>
             {
                 // Remove ALL DbContext-related registrations to prevent provider conflicts
-                var descriptors = services.Where(d =>
+                // INCLUDING DbContextOptions<DigitalMeDbContext> which holds the provider configuration
+                var descriptorsToRemove = services.Where(d =>
                     d.ServiceType == typeof(DbContextOptions<DigitalMeDbContext>) ||
+                    d.ServiceType == typeof(DbContextOptions) ||
                     d.ServiceType == typeof(DigitalMeDbContext) ||
-                    d.ImplementationType == typeof(DigitalMeDbContext)).ToList();
+                    d.ImplementationType == typeof(DigitalMeDbContext) ||
+                    (d.ServiceType.IsGenericType && d.ServiceType.GetGenericTypeDefinition() == typeof(DbContextOptions<>))).ToList();
 
-                foreach (var descriptor in descriptors)
+                foreach (var descriptor in descriptorsToRemove)
                 {
                     services.Remove(descriptor);
                 }

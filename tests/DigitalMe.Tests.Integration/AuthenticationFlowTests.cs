@@ -108,34 +108,49 @@ public class AuthenticationFlowTests : IClassFixture<AuthenticationFlowTests.Cus
         Assert.NotEqual(HttpStatusCode.Found, response.StatusCode); // 302 Found = redirect
     }
 
-    [Fact(Skip = "TODO: Investigate token validation failure (returns 401 instead of 200). Not related to database provider changes.")]
+    [Fact(Skip = "Test isolation issue: Passes in isolation but fails when run with other tests. IClassFixture shares WebApplicationFactory/database state across tests. Fix: Convert to IAsyncLifetime or create factory per test.")]
     public async Task AuthValidate_WithValidToken_Returns200()
     {
-        // Arrange - First register and get token
+        // TODO: Test passes when run in isolation (dotnet test --filter AuthValidate_WithValidToken_Returns200)
+        // but fails when run with all integration tests (returns 401 instead of 200).
+        //
+        // Root cause: IClassFixture<CustomWebApplicationFactory> shares the factory and in-memory database
+        // across all tests in this class. This creates test interdependencies.
+        //
+        // Potential solutions:
+        // 1. Convert to IAsyncLifetime and create new factory per test
+        // 2. Use separate in-memory database per test (not per class)
+        // 3. Ensure proper cleanup between tests
+        // 4. Use xUnit Collection to isolate this test class
+
+        // Arrange - Create dedicated client for this test to avoid shared state pollution
+        using var testClient = _factory.CreateClient();
+
+        // Step 1: Register and get token
         var registerRequest = new
         {
-            email = "validate.test@example.com", 
+            email = "validate.test@example.com",
             password = "Test123@",
             confirmPassword = "Test123@"
         };
 
         var json = JsonSerializer.Serialize(registerRequest);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var registerResponse = await _client.PostAsync("/api/auth/register", content);
+        var registerResponse = await testClient.PostAsync("/api/auth/register", content);
 
         Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
-        
+
         var registerContent = await registerResponse.Content.ReadAsStringAsync();
         var authResponse = JsonSerializer.Deserialize<AuthResponse>(registerContent, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
 
-        // Act - Use token to validate
-        _client.DefaultRequestHeaders.Authorization = 
+        // Act - Use token to validate (set on dedicated client)
+        testClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse!.Token);
-        
-        var validateResponse = await _client.GetAsync("/api/auth/validate");
+
+        var validateResponse = await testClient.GetAsync("/api/auth/validate");
 
         // Assert - Should return 200 OK
         Assert.Equal(HttpStatusCode.OK, validateResponse.StatusCode);

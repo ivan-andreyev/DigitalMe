@@ -110,14 +110,8 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
 
         while (currentDir != null)
         {
-            // Look for solution file
+            // Look for solution file - primary indicator of project root
             if (currentDir.GetFiles("*.sln").Any())
-            {
-                return currentDir.FullName;
-            }
-
-            // Look for data directory (fallback)
-            if (currentDir.GetDirectories("data").Any())
             {
                 return currentDir.FullName;
             }
@@ -125,7 +119,18 @@ public class ServiceIntegrationTestFixture : IAsyncDisposable, IDisposable
             currentDir = currentDir.Parent;
         }
 
-        // Fallback to current directory
+        // Fallback: If no .sln found, traverse again looking for 'data' directory
+        currentDir = new DirectoryInfo(startPath);
+        while (currentDir != null)
+        {
+            if (currentDir.GetDirectories("data").Any())
+            {
+                return currentDir.FullName;
+            }
+            currentDir = currentDir.Parent;
+        }
+
+        // Last resort fallback to current directory
         return startPath;
     }
 }

@@ -181,8 +181,8 @@ public class DatabaseProviderConfigurator
         {
             if (string.IsNullOrEmpty(connectionString))
             {
-                _logger?.LogError("❌ PostgreSQL connection string is required in production");
-                _logger?.LogInformation("🔍 Environment check:");
+                _logger?.LogError("❌ CRITICAL: PostgreSQL connection string is required in production environment");
+                _logger?.LogInformation("🔍 Environment variables check:");
                 _logger?.LogInformation("  - DATABASE_URL: {DatabaseUrl}",
                     Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "SET" : "NOT SET");
                 _logger?.LogInformation("  - ConnectionStrings__DefaultConnection: {ConnString}",
@@ -192,10 +192,10 @@ public class DatabaseProviderConfigurator
 
                 throw new InvalidOperationException(
                     "PostgreSQL connection string is required in production environment. " +
-                    "Please set DATABASE_URL, ConnectionStrings:DefaultConnection, or POSTGRES_CONNECTION_STRING.");
+                    "Set DATABASE_URL, ConnectionStrings__DefaultConnection, or POSTGRES_CONNECTION_STRING environment variable.");
             }
 
-            _logger?.LogInformation("🐘 Configuring PostgreSQL database provider for production");
+            _logger?.LogInformation("✅ Configuring PostgreSQL database provider for production");
             services.AddDbContext<DigitalMeDbContext>(options =>
             {
                 options.UseNpgsql(connectionString, npgsqlOptions =>

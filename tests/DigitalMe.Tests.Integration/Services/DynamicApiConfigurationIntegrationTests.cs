@@ -226,7 +226,7 @@ public class DynamicApiConfigurationIntegrationTests : IntegrationTestBase
         {
             UserId = userId,
             Provider = provider,
-            Date = DateTime.UtcNow,
+            Date = DateTime.Today, // Use DateTime.Today to match QuotaManager logic
             TokensUsed = currentUsage,
             RequestCount = 19
         };
